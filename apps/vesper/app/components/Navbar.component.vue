@@ -38,11 +38,29 @@
         </li>
         <li>
           <NuxtLink
+              to="/map"
+              class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
+          >
+            <Icon name="solar:map-point-bold-duotone" class="w-5 h-5" />
+            <span class="truncate">Карта</span>
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink
               to="/download"
               class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
           >
             <Icon name="solar:download-bold-duotone" class="w-5 h-5" />
             <span class="truncate">Скачать</span>
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink
+              to="/gallery"
+              class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
+          >
+            <Icon name="solar:gallery-bold-duotone" class="w-5 h-5" />
+            <span class="truncate">Галерея</span>
           </NuxtLink>
         </li>
         <li v-if="!isStatesDisabled">
@@ -81,9 +99,9 @@
         <li v-else>
           <NuxtLink
               to="/login"
-              class="font-bold pr2p text-gray-200 hover:text-red-400 transition"
+              class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
           >
-            Войти
+            <span class="truncate">Войти</span>
           </NuxtLink>
         </li>
       </ul>
@@ -134,12 +152,31 @@
           </li>
           <li>
             <NuxtLink
+                to="/map"
+                class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
+            >
+              <Icon name="solar:map-point-bold-duotone" class="w-5 h-5" />
+              <span class="truncate">Карта</span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink
                 to="/download"
                 class="flex items-center gap-2 pr2p text-gray-200 hover:text-red-400 transition"
                 @click="closeMobileMenu"
             >
               <Icon name="solar:download-bold-duotone" class="w-5 h-5" />
               <span class="truncate">Скачать лаунчер</span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink
+                to="/gallery"
+                class="flex items-center gap-2 pr2p text-gray-200 hover:text-red-400 transition"
+                @click="closeMobileMenu"
+            >
+              <Icon name="solar:gallery-bold-duotone" class="w-5 h-5" />
+              <span class="truncate">Галерея</span>
             </NuxtLink>
           </li>
           <li v-if="!isStatesDisabled">

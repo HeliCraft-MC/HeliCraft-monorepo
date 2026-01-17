@@ -19,6 +19,12 @@
             Альянсы
           </NuxtLink>
           <NuxtLink
+              to="/admin/gallery"
+              class="block px-4 py-2 rounded hover:bg-gray-700 transition"
+          >
+            Галерея
+          </NuxtLink>
+          <NuxtLink
               to="/admin/players"
               class="block px-4 py-2 rounded hover:bg-gray-700 transition"
               disabled

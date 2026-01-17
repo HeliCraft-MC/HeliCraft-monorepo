@@ -8,9 +8,13 @@ type OSType = 'windows' | 'macos' | 'linux' | 'unknown'
 const detectedOS = ref<OSType>('unknown')
 const selectedOS = ref<OSType>('unknown')
 
-const osInfo = computed(() => {
+const selectedOsInfo = computed(() => {
   const os = selectedOS.value
-  switch (os) {
+  return getOsInfo(os);
+})
+
+function getOsInfo(osName: string) {
+  switch (osName) {
     case 'windows':
       return {
         name: 'Windows',
@@ -40,7 +44,7 @@ const osInfo = computed(() => {
         description: 'Не удалось определить операционную систему'
       }
   }
-})
+}
 
 function detectOS(): OSType {
   const userAgent = navigator.userAgent.toLowerCase()
@@ -53,12 +57,12 @@ function detectOS(): OSType {
 }
 
 function downloadLauncher() {
-  const url = osInfo.value.url
+  const url = selectedOsInfo.value.url
   if (url) {
     // Создаем скрытую ссылку и кликаем на неё
     const link = document.createElement('a')
     link.href = url
-    link.download = osInfo.value.file
+    link.download = selectedOsInfo.value.file
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -159,7 +163,7 @@ onMounted(() => {
           <!-- Информация об автоопределении -->
           <div v-if="detectedOS !== 'unknown'" class="text-center text-sm text-gray-400 flex items-center justify-center gap-2">
             <Icon name="solar:magnifer-bold-duotone" class="w-4 h-4 flex-shrink-0" />
-            Мы определили: <span class="text-gray-300 font-semibold">{{ osInfo.name }}</span>
+            Мы определили: <span class="text-gray-300 font-semibold">{{ getOsInfo(detectedOS).name }}</span>
           </div>
         </div>
 
@@ -177,13 +181,13 @@ onMounted(() => {
               "
               class="w-6 h-6"
             />
-            {{ osInfo.name }}
+            {{ selectedOsInfo.name }}
           </h2>
           <p class="text-gray-300">
-            {{ osInfo.description }}
+            {{ selectedOsInfo.description }}
           </p>
           <p class="text-sm text-gray-400">
-            <span class="font-semibold">Файл:</span> {{ osInfo.file }}
+            <span class="font-semibold">Файл:</span> {{ selectedOsInfo.file }}
           </p>
         </div>
 
@@ -198,8 +202,8 @@ onMounted(() => {
             Скачать лаунчер
           </button>
           <a
-              :href="osInfo.url"
-              v-if="osInfo.url"
+              :href="selectedOsInfo.url"
+              v-if="selectedOsInfo.url"
               class="flex-1 sm:flex-initial bg-gray-700 hover:bg-gray-600 transition-all px-8 py-4 rounded-lg font-semibold text-white text-center flex items-center justify-center gap-2"
               download
           >

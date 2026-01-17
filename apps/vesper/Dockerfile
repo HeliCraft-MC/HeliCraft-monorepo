@@ -1,60 +1,51 @@
-# Created with Gemini and ChatGPT
-# =====================================================================
-# СТАДИЯ 1 — BUILDER
-# =====================================================================
-FROM node:20-bookworm-slim AS builder
-
-# 1. Системные пакеты, нужные для node-gyp, Nuxt-сборки и tini
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential python3 git tini && \
-    rm -rf /var/lib/apt/lists/*
-
+# Use the official Bun image
+FROM oven/bun:1 AS build
 WORKDIR /app
 
-# 2. Устанавливаем все зависимости строго по lock-файлу
-COPY package*.json ./
-RUN npm install
+# Install dependencies
+# Copy package.json and bun.lock to cache dependencies
+COPY package.json bun.lock* ./
 
-# 3. Копируем исходники и собираем Nuxt
+# use ignore-scripts to avoid building node modules like better-sqlite3
+RUN bun install --frozen-lockfile --ignore-scripts
+
+# Copy the rest of the application code
 COPY . .
 
-ARG NODE_COMMIT=unknown
-ENV NODE_COMMIT=${NODE_COMMIT}
+# Build the application
+# We accept NUXT_PUBLIC_VESPER_COMMIT as a build argument to pass the git hash
+ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
+ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
 
-ARG ENVIR
-RUN echo "$ENVIR" > /app/.env
-
-RUN npm run build
-
-# 4. После сборки удаляем dev-пакеты, чтобы сузить node_modules
-RUN npm prune --omit=dev
-
-# =====================================================================
-# СТАДИЯ 2 — RUNNER
-# =====================================================================
-FROM node:20-bookworm-slim AS runner
-
-# 5. Лёгкий набор runtime-lib’ов:
-#    libvips42 — pre-built backend для sharp; tini — корректный PID 1
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libvips42 tini && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
 ENV NODE_ENV=production
 
-# 6. Production-зависимости и артефакты
-COPY --from=builder /app/node_modules   ./node_modules
-COPY --from=builder /app/.output        ./.output
-COPY --from=builder /app/public         ./public
-COPY ecosystem.config.cjs package*.json ./
+# api urls
+ARG NUXT_PUBLIC_BACKEND_URL="https://api.helicraft.ru"
+ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
 
-# 7. PM2-Runtime — рекомендованный способ работы PM2 в Docker
-RUN npm install -g pm2@latest
+ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
+ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
 
+# Run the build script
+# НЕ ИСПОЛЬЗОВАТЬ ФЛАГ --bun ИНАЧЕ БУДЕТ УТЕЧКА
+RUN bun run build
 
+# Use the same base image for production to ensure compatibility of native modules (glibc vs musl)
+# Switching from alpine to debian-based bun image avoids issues with sharp/better-sqlite3
+FROM oven/bun:1 AS production
+WORKDIR /app
+
+# Set environment variables
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=3000
+ENV NODE_ENV=production
+
+# Only `.output` folder is needed from the build stage
+COPY --from=build /app/.output /app
+
+# For bun
+ENV NODE_PATH=/app/server/node_modules
+
+# run the app
 EXPOSE 3000
-CMD ["pm2-runtime", "ecosystem.config.cjs"]
-
+ENTRYPOINT [ "bun", "--bun", "run", "server/index.mjs" ]

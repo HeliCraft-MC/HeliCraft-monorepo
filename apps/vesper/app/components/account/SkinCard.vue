@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useAuth } from '#imports'
 import * as skinview3d from 'skinview3d'
+import FileDropDown from "~/components/ui/FileDropDown.vue";
 
 const { data } = useAuth()
 const nickname = computed(() => data.value?.nickname ?? '')
@@ -40,25 +41,14 @@ const preview   = ref<string>('')      // blob-URL
 const showModal = ref(false)
 const uploading = ref(false)
 
-function onSelect (e: Event) {
-  const input = e.target as HTMLInputElement
-  const selectedFile = input.files?.[0] ?? null
+function onSelect (selectedFile: File, previewLink: string) {
+  file.value = selectedFile;
+  preview.value = previewLink;
+}
 
-  error.value = ''
-  preview.value = ''
-  file.value = null
-
-  if (!selectedFile) return
-
-  // Проверяем тип и расширение
-  const isValidType = selectedFile.type === 'image/png' || selectedFile.name.toLowerCase().endsWith('.png')
-  if (!isValidType) {
-    error.value = 'Файл должен быть в формате PNG.'
-    return
-  }
-
-  file.value = selectedFile
-  preview.value = URL.createObjectURL(selectedFile)
+function onRemove() {
+  file.value = null;
+  preview.value = '';
 }
 
 
@@ -68,7 +58,7 @@ async function confirmUpload() {
   showModal.value = false
 
   try {
-    const config = useRuntimeConfig()
+    //const config = useRuntimeConfig()
     const { token } = useAuth()
 
     const fd = new FormData()
@@ -98,29 +88,24 @@ async function confirmUpload() {
   <div class="bg-gray-900/60 backdrop-blur-lg rounded-lg p-8">
     <h2 class="pr2p text-2xl text-red-500 mb-6">Скин</h2>
 
-    <div class="flex flex-col sm:flex-row gap-6">
+    <div class="flex flex-col items-center sm:items-stretch sm:flex-row gap-6">
       <!-- 3-D skin -->
-        <canvas ref="canvasRef" class="rounded-md border border-gray-700"></canvas>
-
+      <canvas ref="canvasRef" class="rounded-md border border-gray-700 h-full"></canvas>
 
       <!-- инструменты -->
-      <div class="flex-1 space-y-4">
-        <input type="file" accept="image/png"
-               @change="onSelect"
-               class="file:bg-red-500 file:hover:bg-red-600 file:text-black
-                      file:px-4 file:py-2 file:rounded-md file:font-bold
-                      bg-gray-800/70 rounded-md w-full" />
+      <div class="flex-1 space-y-4 flex flex-col">
 
-        <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
-
-        <!-- предпросмотр -->
-        <NuxtImg v-if="preview" :src="preview"
-                 alt="Preview" class="w-40 h-40 rounded-md border border-gray-700 object-cover" />
+        <FileDropDown
+            class="grow"
+            :fileTypes="['image/png']"
+            @onSelect="onSelect"
+            @onRemove="onRemove"
+        />
 
         <button :disabled="!file || uploading"
                 @click="showModal = true"
                 class="bg-red-500 hover:bg-red-600 transition px-6 py-3 rounded-md
-                       text-black font-bold disabled:opacity-60">
+                       text-black font-bold disabled:opacity-60 shrink w-auto">
           {{ uploading ? 'Загружаю…' : 'Загрузить новый скин' }}
         </button>
       </div>

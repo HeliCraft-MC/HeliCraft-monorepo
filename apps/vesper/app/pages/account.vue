@@ -4,6 +4,7 @@ import PlayerCard from "~/components/account/PlayerCard.vue";
 import SkinCard from "~/components/account/SkinCard.vue";
 import StatsCard from "~/components/account/StatsCard.vue";
 import NationsCard from "~/components/account/NationsCard.vue";
+import GalleryCard from "~/components/account/GalleryCard.vue";
 
 definePageMeta({ auth: true })
 
@@ -27,6 +28,7 @@ const isStatesDisabled = useRuntimeConfig().public.statesDisabled
       <PlayerCard />
       <SkinCard />
       <StatsCard />
+      <GalleryCard />
       <NationsCard v-if="!isStatesDisabled" />
 
       <!-- Выход -->

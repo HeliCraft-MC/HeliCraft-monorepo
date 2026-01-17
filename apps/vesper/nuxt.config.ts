@@ -1,19 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-function removeStatesRoutes(pages: any) {
-  for (let i = pages.length - 1; i >= 0; i--) {
-    const page = pages[i]
-
-    if (page.children?.length) {
-      removeStatesRoutes(page.children)
-    }
-
-    if (page.path === '/states' || page.path.startsWith('/states/')) {
-      pages.splice(i, 1)
-    }
-  }
-}
-
 export default defineNuxtConfig({
 
     app: {
@@ -33,7 +19,7 @@ export default defineNuxtConfig({
         }
     },
 
-  compatibilityDate: '2025-05-15',
+  compatibilityDate: '2026-01-06',
   devtools: {
     enabled: true,
 
@@ -60,7 +46,7 @@ export default defineNuxtConfig({
       planApiURL: '/plan-api',
       statesDisabled: process.env.VESPER_DISABLE_STATE_LOGIC ? process.env.VESPER_DISABLE_STATE_LOGIC === 'true' : true,
       banlistEnabled: process.env.NUXT_PUBLIC_BANLIST_ENABLED !== 'false',
-      vesperCommit: process.env.NODE_COMMIT || 'unknown', //frontend software commit
+      vesperCommit: process.env.NUXT_PUBLIC_VESPER_COMMIT || 'unknown', //frontend software commit
     },
     turnstile: {
       // This can be overridden at runtime via the NUXT_TURNSTILE_SECRET_KEY
@@ -68,14 +54,10 @@ export default defineNuxtConfig({
       secretKey: process.env.NUXT_TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA',
     },
   },
+
   // DISABLE /states ROUTES
-  hooks: {
-    'pages:extend'(pages) {
-      if (process.env.VESPER_DISABLE_STATE_LOGIC ? process.env.VESPER_DISABLE_STATE_LOGIC === 'true' : true) {
-        removeStatesRoutes(pages)
-      }
-    },
-  },
+  // ^^^ moved to nitro middleware
+
   icon: {
     mode: 'css',
     cssLayer: 'base'
@@ -87,10 +69,42 @@ export default defineNuxtConfig({
     routeRules: {
       '/distant-api/**': { proxy: `${process.env.NUXT_PUBLIC_BACKEND_URL || 'https://api.helicraft.ru'}/**` },
       '/plan-api/**': { proxy: `${process.env.NUXT_PUBLIC_PLAN_API_URL || 'https://analytics.helicraft.ru'}/**` }
+    },
+    preset: "bun",
+    externals: {
+      inline: ['vue', 'vue-router', '@vue/server-renderer', 'sharp']
+    },
+
+    // TODO: убрать это после обновления на nuxt >4.2.2(4.2.3, и выше).
+    //  Фикс из: https://github.com/nuxt/nuxt/issues/33748
+    devProxy: {
+      '/sw.js': { target: '/sw.js' }
+    },
+    logLevel: 3,
+    debug: false
+  },
+  sourcemap: {
+    server: true,
+    client: false
+  },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('lodash')) return 'vendor-lodash';
+              if (id.includes('chart.js')) return 'vendor-charts';
+              return 'vendor';
+            }
+          }
+        }
+      },
+      minify: 'esbuild',
     }
   },
   turnstile: {
-    siteKey: process.env.NUXT_TURNSTILE_SITEKEY || '1x00000000000000000000AA',
+    siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
     addValidateEndpoint: true
   },
   auth: {

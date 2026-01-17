@@ -135,7 +135,7 @@ function goToCreate() {
     <section v-if="featured.length" class="max-w-full w-full space-y-6">
       <h2 class="text-2xl text-red-500 font-semibold pr2p text-center">Некоторые государства</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StateCard v-for="st in featured" :key="st.uuid" :state="st" :members="st.members" />
+        <StateCard v-for="st in featured" :key="st.uuid" :state="st" :members="st.members ?? 0" />
       </div>
     </section>
   </main>
