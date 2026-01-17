@@ -1,0 +1,41 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "NODE_COMMIT=$(git rev-parse HEAD) nuxt build",
+    "dev:build": "nuxt build",
+    "dev": "nuxt dev --port 3020",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@cafestube/minecraft-banner-renderer": "^1.0.4",
+    "@vueuse/nuxt": "13.3.0",
+    "better-sqlite3": "^12.2.0",
+    "nuxt": "^4.1.2",
+    "pathe": "^2.0.3",
+    "skinview3d": "^3.4.1",
+    "vue": "^3.5.14",
+    "vue-router": "^4.5.1"
+  },
+  "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee",
+  "devDependencies": {
+    "@nuxt/content": "^3.5.1",
+    "@nuxt/fonts": "^0.11.4",
+    "@nuxt/icon": "^1.13.0",
+    "@nuxt/image": "^1.10.0",
+    "@nuxtjs/i18n": "^9.5.5",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@nuxtjs/turnstile": "^1.0.0",
+    "@pinia/nuxt": "^0.11.0",
+    "@sidebase/nuxt-auth": "^1.0.0",
+    "sharp": "^0.34.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  }
+}
