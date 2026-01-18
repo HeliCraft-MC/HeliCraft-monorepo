@@ -25,6 +25,7 @@ ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
 
 ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
 ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
+ENV NITRO_PRESET=node_server
 
 # Run the build script
 RUN node ./node_modules/nuxt/bin/nuxt.mjs build
