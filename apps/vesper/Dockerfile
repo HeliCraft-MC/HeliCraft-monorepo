@@ -1,62 +1,65 @@
-# === ЭТАП 1: СБОРКА (На чистом Node.js, чтобы не вис Bun) ===
+# === STAGE 1: BUILD (Node.js) ===
 FROM node:20-slim AS build
 WORKDIR /app
 
-# 1. Устанавливаем Bun внутри Node-образа (чтобы поставить зависимости)
-# Node.js стабильнее для сборки тяжелых Nuxt проектов
+# Install Bun for dependency resolution
 RUN npm install -g bun
 
-# 2. Копируем файлы зависимостей
-COPY package.json bun.lock* ./
+# Copy package.json and specifically bun.lock
+COPY package.json bun.lock ./
 
-# 3. Устанавливаем зависимости
-# ВАЖНО: Убрали --ignore-scripts! Sharp должен собраться!
-# ВАЖНО: --frozen-lockfile чтобы не ломать версии
+# Install dependencies (Sharp works because of Node environment)
 RUN bun install --frozen-lockfile
 
-# Копируем код
+# Copy source code
 COPY . .
 
-# --- НАСТРОЙКИ NITRO ПРОТИВ ЗАВИСАНИЯ ---
+# --- BUILD OPTIMIZATIONS ---
 
-# 1. Отключаем минификацию сервера.
-# Это сэкономит 90% времени и памяти. Файл будет весить 2мб вместо 1мб
+# Disable server minification to prevent hanging
 ENV NITRO_MINIFY=false
 ENV NITRO_SOURCEMAP=false
 
-# 2. Выкидываем тяжелые либы из бандла.
-# Nitro не будет пытаться их анализировать, а просто оставит require('sharp')
+# Externalize heavy libs
 ENV NITRO_EXTERNALS_TRACE=false
 
-# 4. Явно говорим, что собираем под Bun
+# Set presets for Bun compatibility
 ENV NITRO_PRESET=bun
 ENV NUXT_PRESET=bun
 
-# Твои переменные
+# 1. Capture commit hash during BUILD phase
 ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
 ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
+
 ENV NODE_ENV=production
+
+# Define URLs for build time
 ARG NUXT_PUBLIC_BACKEND_URL="https://api.helicraft.ru"
 ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
 ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
 ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
 
-# ЗАПУСК СБОРКИ (Теперь это настоящий Node, он не зависнет)
+# Run build using Node.js to avoid memory issues
 RUN npm run build
 
-# === ЭТАП 2: ПРОДАКШЕН (На Bun) ===
+# === STAGE 2: PRODUCTION (Bun) ===
 FROM oven/bun:1 AS production
 WORKDIR /app
 
-# Настройки для рантайма
+# Runtime env vars
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3000
 ENV NODE_ENV=production
 
-# Копируем только то, что собрал Node
+# 2. IMPORTANT: Re-declare ARG and ENV for Runtime
+# Without this, the variable is lost after Stage 1
+ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
+ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
+
+# Copy build artifacts
 COPY --from=build /app/.output /app
 
 EXPOSE 3000
 
-# Запускаем через быстрый Bun
+# Start server
 ENTRYPOINT [ "bun", "run", "server/index.mjs" ]
