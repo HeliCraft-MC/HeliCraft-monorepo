@@ -26,13 +26,8 @@ ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
 ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
 ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
 
-ENV NITRO_MINIFY=false
-ENV NITRO_SOURCEMAP=false
-ENV NITRO_PRESET=node_server
-
 # Run the build script
-# НЕ ИСПОЛЬЗОВАТЬ ФЛАГ --bun ИНАЧЕ БУДЕТ УТЕЧКА
-RUN bun run build
+RUN node ./node_modules/nuxt/bin/nuxt.mjs build
 
 # Use the same base image for production to ensure compatibility of native modules (glibc vs musl)
 # Switching from alpine to debian-based bun image avoids issues with sharp/better-sqlite3
