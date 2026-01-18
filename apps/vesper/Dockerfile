@@ -1,8 +1,7 @@
-# Created with Gemini and ChatGPT
 # =====================================================================
 # СТАДИЯ 1 — BUILDER
 # =====================================================================
-FROM node:20-bookworm-slim AS builder
+FROM oven/bun:debian AS builder
 
 # 1. Системные пакеты, нужные для node-gyp, Nuxt-сборки и tini
 RUN apt-get update && \
@@ -14,7 +13,7 @@ WORKDIR /app
 
 # 2. Устанавливаем все зависимости строго по lock-файлу
 COPY package*.json ./
-RUN npm install
+RUN bun install
 
 # 3. Копируем исходники и собираем Nuxt
 COPY . .
@@ -23,33 +22,37 @@ ARG NODE_COMMIT=unknown
 ENV NODE_COMMIT=${NODE_COMMIT}
 
 ARG ENVIR
-RUN echo "$ENVIR" > /app/.env
+RUN echo "$ENV" > /app/.env
+# Build the application
+# We accept NUXT_PUBLIC_VESPER_COMMIT as a build argument to pass the git hash
+ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
+ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
 
-RUN npm run build
+ENV NODE_ENV=production
 
-# 4. После сборки удаляем dev-пакеты, чтобы сузить node_modules
-RUN npm prune --omit=dev
+# api urls
+ARG NUXT_PUBLIC_BACKEND_URL="https://api.helicraft.ru"
+ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
+
+ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
+ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
+
+RUN bun run build
 
 # =====================================================================
 # СТАДИЯ 2 — RUNNER
 # =====================================================================
-FROM node:20-bookworm-slim AS runner
-
-# 5. Лёгкий набор runtime-lib’ов:
-#    libvips42 — pre-built backend для sharp; tini — корректный PID 1
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libvips42 tini && \
-    rm -rf /var/lib/apt/lists/*
+FROM oven/bun:debian AS runner
 
 WORKDIR /app
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=3000
 ENV NODE_ENV=production
 
 # 6. Production-зависимости и артефакты
-COPY --from=builder /app/node_modules   ./node_modules
 COPY --from=builder /app/.output        ./.output
 COPY --from=builder /app/public         ./public
 
 
 EXPOSE 3000
-CMD ["node", "run", "server/index.mjs"]
+CMD ["bun", "run", "./output/server/index.mjs"]
