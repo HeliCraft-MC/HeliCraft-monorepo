@@ -1,57 +1,55 @@
-# Use the official Bun image
-FROM oven/bun:1 AS build
+# Created with Gemini and ChatGPT
+# =====================================================================
+# СТАДИЯ 1 — BUILDER
+# =====================================================================
+FROM node:20-bookworm-slim AS builder
+
+# 1. Системные пакеты, нужные для node-gyp, Nuxt-сборки и tini
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential python3 git tini && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-RUN apt update && apt install -y python-is-python3 build-essential
+# 2. Устанавливаем все зависимости строго по lock-файлу
+COPY package*.json ./
+RUN npm install
 
-# Install dependencies
-# Copy package.json and bun.lock to cache dependencies
-COPY package.json bun.lock* ./
-
-# use ignore-scripts to avoid building node modules like better-sqlite3
-RUN bun install --frozen-lockfile
-
-# Copy the rest of the application code
+# 3. Копируем исходники и собираем Nuxt
 COPY . .
 
-# Build the application
-# We accept NUXT_PUBLIC_VESPER_COMMIT as a build argument to pass the git hash
-ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
-ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
+ARG NODE_COMMIT=unknown
+ENV NODE_COMMIT=${NODE_COMMIT}
 
-ENV NUXT_TELEMETRY_DISABLED=1
-ENV NUXT_SOURCEMAP=false
+ARG ENVIR
+RUN echo "$ENVIR" > /app/.env
 
-ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN npm run build
 
-# api urls
-ARG NUXT_PUBLIC_BACKEND_URL="https://api.helicraft.ru"
-ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
+# 4. После сборки удаляем dev-пакеты, чтобы сузить node_modules
+RUN npm prune --omit=dev
 
-ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
-ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
+# =====================================================================
+# СТАДИЯ 2 — RUNNER
+# =====================================================================
+FROM node:20-bookworm-slim AS runner
 
-# Run the build script
-# НЕ ИСПОЛЬЗОВАТЬ ФЛАГ --bun ИНАЧЕ БУДЕТ УТЕЧКА
-RUN bun run build
+# 5. Лёгкий набор runtime-lib’ов:
+#    libvips42 — pre-built backend для sharp; tini — корректный PID 1
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libvips42 tini && \
+    rm -rf /var/lib/apt/lists/*
 
-# Use the same base image for production to ensure compatibility of native modules (glibc vs musl)
-# Switching from alpine to debian-based bun image avoids issues with sharp/better-sqlite3
-FROM oven/bun:1 AS production
 WORKDIR /app
-
-# Set environment variables
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=3000
 ENV NODE_ENV=production
 
-# Only `.output` folder is needed from the build stage
-COPY --from=build /app/.output /app
+# 6. Production-зависимости и артефакты
+COPY --from=builder /app/node_modules   ./node_modules
+COPY --from=builder /app/.output        ./.output
+COPY --from=builder /app/public         ./public
 
-# For bun
-ENV NODE_PATH=/app/server/node_modules
 
-# run the app
 EXPOSE 3000
-ENTRYPOINT [ "bun", "--bun", "run", "server/index.mjs" ]
+CMD ["node", "run", "server/index.mjs"]
