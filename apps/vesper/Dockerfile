@@ -7,7 +7,7 @@ WORKDIR /app
 RUN npm install -g bun
 
 # 2. Копируем файлы зависимостей
-COPY package.json bun.lockb* ./
+COPY package.json bun.lock* ./
 
 # 3. Устанавливаем зависимости
 # ВАЖНО: Убрали --ignore-scripts! Sharp должен собраться!
@@ -27,13 +27,10 @@ ENV NITRO_SOURCEMAP=false
 # 2. Выкидываем тяжелые либы из бандла.
 # Nitro не будет пытаться их анализировать, а просто оставит require('sharp')
 ENV NITRO_EXTERNALS_TRACE=false
-ENV NITRO_EXTERNALS="sharp,better-sqlite3"
-
-# 3. Отключаем пререндер (чтобы не стучался в API)
-ENV NITRO_PRERENDER=false
 
 # 4. Явно говорим, что собираем под Bun
 ENV NITRO_PRESET=bun
+ENV NUXT_PRESET=bun
 
 # Твои переменные
 ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
