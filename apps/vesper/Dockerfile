@@ -2,6 +2,8 @@
 FROM oven/bun:1 AS build
 WORKDIR /app
 
+RUN apt update && apt install -y python-is-python3 build-essential
+
 # Install dependencies
 # Copy package.json and bun.lock to cache dependencies
 COPY package.json bun.lock* ./
