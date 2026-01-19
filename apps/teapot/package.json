@@ -13,7 +13,8 @@
     "@types/bun": "latest",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^24.0.7"
+    "@types/node": "^24.0.7",
+    "vitest": "^4.0.17"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -23,12 +23,12 @@ class FileService implements IFileService {
     const normalizedPath = normalize(relativePath)
     const absPath = join(this.uploadDir, normalizedPath)
     const resolvedPath = resolve(absPath)
-    
+
     // Ensure the resolved path is within the upload directory
     if (!resolvedPath.startsWith(this.uploadDir)) {
       throw new Error('Invalid path: directory traversal attempt detected')
     }
-    
+
     return resolvedPath
   }
 
@@ -144,7 +144,10 @@ let fileServiceInstance: FileService | null = null
  */
 export function useFileService(): IFileService {
   if (!fileServiceInstance) {
-    const { uploadDir = './uploads' } = useRuntimeConfig()
+    const config = useRuntimeConfig()
+    // Explicitly check for config.uploads (as seen in nitro.config.ts) or fall back for safety
+    const uploadDir = config.uploads || './uploads'
+    console.log(`[FileService] Initializing with uploadDir: ${resolve(uploadDir)}`)
     fileServiceInstance = new FileService(uploadDir)
   }
   return fileServiceInstance
