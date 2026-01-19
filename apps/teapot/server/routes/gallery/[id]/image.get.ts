@@ -47,7 +47,15 @@ export default defineEventHandler(async (event) => {
   const buf = await fileService.readFile(image.path)
 
   if (!buf) {
-    throw createError({ statusCode: 404, statusMessage: 'Image file not found' })
+    // File missing - clean up orphaned DB record
+    console.log(`[Gallery] File missing for image ${id}, cleaning up DB record: ${image.path}`)
+    try {
+      const db = (await import('~/plugins/skinSqlite')).useSkinSQLite()
+      db.prepare('DELETE FROM gallery WHERE id = ?').run(id)
+    } catch (e) {
+      console.error('[Gallery] Failed to cleanup orphaned record:', e)
+    }
+    throw createError({ statusCode: 404, statusMessage: 'Image file not found', data: { cleaned: true } })
   }
 
   event.node.res.setHeader('Content-Length', buf.length.toString())

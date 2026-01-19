@@ -29,7 +29,7 @@ export default defineNitroConfig({
     runtimeConfig: {
         teapotCommit: process.env.NODE_COMMIT_TEAPOT || 'unknown',
         jwtSecret: 'supersecret',
-        uploads: 'public/uploads',
+        uploads: process.env.UPLOAD_DIR || 'public/uploads',
         sqliteSkinPath: 'data/sqlite.db',
         databaseDebug: false,
         telegramBotToken: '000000000:aaaaaaaaaaaaaaaaaaaaaaaa',
