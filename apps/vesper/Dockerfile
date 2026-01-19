@@ -1,51 +1,65 @@
-# Use the official Bun image
-FROM oven/bun:1 AS build
+# === STAGE 1: BUILD (Node.js) ===
+FROM node:20-slim AS build
 WORKDIR /app
 
-# Install dependencies
-# Copy package.json and bun.lock to cache dependencies
-COPY package.json bun.lock* ./
+# Install Bun for dependency resolution
+RUN npm install -g bun
 
-# use ignore-scripts to avoid building node modules like better-sqlite3
-RUN bun install --frozen-lockfile --ignore-scripts
+# Copy package.json and specifically bun.lock
+COPY package.json bun.lock ./
 
-# Copy the rest of the application code
+# Install dependencies (Sharp works because of Node environment)
+RUN bun install --frozen-lockfile
+
+# Copy source code
 COPY . .
 
-# Build the application
-# We accept NUXT_PUBLIC_VESPER_COMMIT as a build argument to pass the git hash
+# --- BUILD OPTIMIZATIONS ---
+
+# Disable server minification to prevent hanging
+ENV NITRO_MINIFY=false
+ENV NITRO_SOURCEMAP=false
+
+# Externalize heavy libs
+ENV NITRO_EXTERNALS_TRACE=false
+
+# Set presets for Bun compatibility
+ENV NITRO_PRESET=bun
+ENV NUXT_PRESET=bun
+
+# 1. Capture commit hash during BUILD phase
 ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
 ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
 
 ENV NODE_ENV=production
 
-# api urls
+# Define URLs for build time
 ARG NUXT_PUBLIC_BACKEND_URL="https://api.helicraft.ru"
 ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
-
 ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
 ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
 
-# Run the build script
-# НЕ ИСПОЛЬЗОВАТЬ ФЛАГ --bun ИНАЧЕ БУДЕТ УТЕЧКА
-RUN bun run build
+# Run build using Node.js to avoid memory issues
+RUN npm run build
 
-# Use the same base image for production to ensure compatibility of native modules (glibc vs musl)
-# Switching from alpine to debian-based bun image avoids issues with sharp/better-sqlite3
+# === STAGE 2: PRODUCTION (Bun) ===
 FROM oven/bun:1 AS production
 WORKDIR /app
 
-# Set environment variables
+# Runtime env vars
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3000
 ENV NODE_ENV=production
 
-# Only `.output` folder is needed from the build stage
+# 2. IMPORTANT: Re-declare ARG and ENV for Runtime
+# Without this, the variable is lost after Stage 1
+ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
+ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
+
+# Copy build artifacts
 COPY --from=build /app/.output /app
 
-# For bun
-ENV NODE_PATH=/app/server/node_modules
-
-# run the app
 EXPOSE 3000
-ENTRYPOINT [ "bun", "--bun", "run", "server/index.mjs" ]
+
+# Start server
+ENTRYPOINT [ "bun", "run", "server/index.mjs" ]
