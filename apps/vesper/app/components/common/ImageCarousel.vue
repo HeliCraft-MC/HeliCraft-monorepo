@@ -10,11 +10,13 @@ const props = withDefaults(defineProps<{
     interval?: number;
     showDots?: boolean;
     showArrows?: boolean;
+    captions?: string[];
 }>(), {
     autoPlay: false,
     interval: 5000,
     showDots: true,
-    showArrows: true
+    showArrows: true,
+    captions: () => []
 });
 
 const emit = defineEmits<{
@@ -118,7 +120,7 @@ const handleTouchEnd = (e: TouchEvent): void => {
         <!-- Images track -->
         <div 
             class="flex transition-transform duration-500 ease-out"
-            :style="{ transform: `translateX(-${Number(currentIndex.value) * 100}%)` }"
+            :style="{ transform: `translateX(-${Number(currentIndex) * 100}%)` }"
         >
             <div 
                 v-for="(img, idx) in images" 
@@ -132,6 +134,14 @@ const handleTouchEnd = (e: TouchEvent): void => {
                     class="w-full h-full object-cover"
                     loading="lazy"
                 />
+                <!-- Caption Overlay -->
+                <div 
+                    v-if="captions && captions[idx]" 
+                    class="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm p-3 text-center transition-opacity duration-300"
+                    :class="showDots ? 'pb-8' : ''"
+                >
+                    <p class="text-white text-sm md:text-base font-medium">{{ captions[idx] }}</p>
+                </div>
             </div>
         </div>
 

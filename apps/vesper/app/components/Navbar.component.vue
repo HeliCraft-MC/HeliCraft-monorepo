@@ -29,40 +29,53 @@
         </li>
         
         <!-- Dropdown: Сервер -->
-        <li class="relative group">
+        <li class="relative" @mouseenter="serverDropdownOpen = true" @mouseleave="serverDropdownOpen = false">
           <button
+            @click="serverDropdownOpen = !serverDropdownOpen"
             class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
           >
             <Icon name="solar:server-bold-duotone" class="w-5 h-5" />
             <span class="truncate">Сервер</span>
-            <Icon name="ph:caret-down" class="w-4 h-4 ml-1 transition group-hover:rotate-180" />
+            <Icon name="ph:caret-down" class="w-4 h-4 ml-1 transition" :class="serverDropdownOpen ? 'rotate-180' : ''" />
           </button>
-          <div class="absolute top-full left-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-            <div class="bg-black/95 border border-white/10 rounded-lg py-2 min-w-40 shadow-xl backdrop-blur-sm">
-              <NuxtLink
-                to="/rules"
-                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-white/5 transition"
-              >
-                <Icon name="solar:sledgehammer-bold-duotone" class="w-4 h-4" />
-                Правила
-              </NuxtLink>
-              <NuxtLink
-                to="/map"
-                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-white/5 transition"
-              >
-                <Icon name="solar:map-point-bold-duotone" class="w-4 h-4" />
-                Карта
-              </NuxtLink>
-              <NuxtLink
-                v-if="banlistEnabled"
-                to="/banlist"
-                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-white/5 transition"
-              >
-                <Icon name="solar:shield-warning-bold-duotone" class="w-4 h-4" />
-                Банлист
-              </NuxtLink>
+          <Transition
+            enter-from-class="opacity-0 -translate-y-2"
+            enter-active-class="transition-all duration-200"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-150"
+            leave-to-class="opacity-0 -translate-y-2"
+          >
+            <div v-show="serverDropdownOpen" class="absolute top-full left-0 pt-2 z-[60]">
+              <div class="bg-black/95 border border-white/10 rounded-lg py-2 min-w-40 shadow-xl backdrop-blur-sm">
+                <NuxtLink
+                  to="/rules"
+                  class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-white/5 transition"
+                  @click="serverDropdownOpen = false"
+                >
+                  <Icon name="solar:sledgehammer-bold-duotone" class="w-4 h-4" />
+                  Правила
+                </NuxtLink>
+                <NuxtLink
+                  to="/map"
+                  class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-white/5 transition"
+                  @click="serverDropdownOpen = false"
+                >
+                  <Icon name="solar:map-point-bold-duotone" class="w-4 h-4" />
+                  Карта
+                </NuxtLink>
+                <NuxtLink
+                  v-if="banlistEnabled"
+                  to="/banlist"
+                  class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-red-400 hover:bg-white/5 transition"
+                  @click="serverDropdownOpen = false"
+                >
+                  <Icon name="solar:shield-warning-bold-duotone" class="w-4 h-4" />
+                  Банлист
+                </NuxtLink>
+              </div>
             </div>
-          </div>
+          </Transition>
         </li>
 
         <li>
@@ -279,6 +292,7 @@ const config = useRuntimeConfig()
 const banlistEnabled = computed(() => config.public.banlistEnabled)
 
 const showMobileMenu = ref(false)
+const serverDropdownOpen = ref(false)
 const { status, data, signOut } = useAuth()
 const isLoggedIn = computed(() => status.value === 'authenticated')
 const nickname   = computed(() => data.value?.nickname || '')

@@ -5,33 +5,34 @@ import QuestionRenderer from "@/components/forms/QuestionRenderer.vue";
 definePageMeta({ auth: true })
 
 const route = useRoute();
+const { data: authData } = useAuth();
+const userNickname = computed(() => authData.value?.nickname || 'Гость');
+
 const form = ref<Form | null>(null);
 const questions = ref<Question[]>([]);
 const answers = reactive<Record<string, any>>({}); // Key: question_uuid
 const fetchError = ref<boolean>(false);
+const loading = ref(true);
 
 const isSubmitting = ref(false);
 const isSuccess = ref(false);
 const errors = reactive<Record<string, string>>({});
 
-// Fetch
-const fetchForm = async (): Promise<void> => {
-    const { data, error } = await useApiFetch<{ form: Form, questions: Question[] }>(`/forms/user/${route.params.hash}`);
-    if (error.value) {
-        fetchError.value = true;
-        return;
-    }
-    if (data.value) {
-        form.value = data.value.form;
-        questions.value = data.value.questions;
-        
-        // Init answers
-        questions.value.forEach((q: Question) => {
-            answers[q.uuid] = q.type === 'checkbox' ? [] : '';
-        });
-    }
+// Fetch - use useFetch for proper SSR handling
+const { data, error } = await useApiFetch<{ form: Form, questions: Question[] }>(`/forms/user/${route.params.hash}`);
+
+if (error.value) {
+    fetchError.value = true;
+} else if (data.value) {
+    form.value = data.value.form;
+    questions.value = data.value.questions;
+    
+    // Init answers
+    questions.value.forEach((q: Question) => {
+        answers[q.uuid] = q.type === 'checkbox' ? [] : '';
+    });
 }
-await fetchForm();
+loading.value = false;
 
 const validate = (): boolean => {
     let isValid = true;
@@ -81,7 +82,10 @@ const submit = async (): Promise<void> => {
 </script>
 
 <template>
-    <div v-if="form" class="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-black py-10 px-4">
+    <div v-if="loading" class="min-h-screen flex items-center justify-center">
+        <Icon name="svg-spinners:3-dots-fade" size="40" class="text-red-400" />
+    </div>
+    <div v-else-if="form" class="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-black py-10 px-4 pt-24">
         <div v-if="!isSuccess" class="max-w-3xl mx-auto space-y-6">
             <!-- Header -->
             <div class="rounded-xl border-t-8 border-red-500 bg-black/60 border border-white/5 p-8 backdrop-blur-md shadow-2xl">
@@ -92,7 +96,7 @@ const submit = async (): Promise<void> => {
                 <!-- User Info Warning to assure them logic is safe -->
                  <div class="mt-6 flex items-center gap-2 text-sm text-gray-500 bg-white/5 p-3 rounded-lg w-fit">
                     <Icon name="ph:info" />
-                    <span>Вы заполняете форму как <b>{{ useAuth().user.value?.nickname || 'Гость' }}</b></span>
+                    <span>Вы заполняете форму как <b>{{ userNickname }}</b></span>
                 </div>
             </div>
 
@@ -117,7 +121,7 @@ const submit = async (): Promise<void> => {
                     <Icon v-if="isSubmitting" name="svg-spinners:ring-resize" />
                     <span>{{ isSubmitting ? 'Отправка...' : 'Отправить' }}</span>
                 </button>
-                <button class="text-gray-500 hover:text-white text-sm" @click="answers = {}">Очистить форму</button>
+                <button class="text-gray-500 hover:text-white text-sm" @click="Object.keys(answers).forEach(k => answers[k] = '')">Очистить форму</button>
             </div>
         </div>
 
@@ -131,14 +135,11 @@ const submit = async (): Promise<void> => {
             <button @click="navigateTo('/')" class="text-red-400 hover:text-red-300 underline">Вернуться на главную</button>
         </div>
     </div>
-    <div v-else-if="fetchError" class="min-h-screen flex items-center justify-center text-center p-4">
+    <div v-else-if="fetchError" class="min-h-screen flex items-center justify-center text-center p-4 pt-24">
         <div>
             <h1 class="text-2xl text-red-500 font-bold mb-2">Форма не найдена</h1>
             <p class="text-gray-500">Возможно, она была удалена или ссылка неверна.</p>
         </div>
-    </div>
-    <div v-else class="min-h-screen flex items-center justify-center">
-        <Icon name="svg-spinners:3-dots-fade" size="40" class="text-red-400" />
     </div>
 </template>
 

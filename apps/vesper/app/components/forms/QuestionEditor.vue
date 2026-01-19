@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Question } from "@/types/forms";
+import type { IGalleryImagePublic } from "@/types/gallery.types";
+import GalleryPickerModal from "./GalleryPickerModal.vue";
 
 const props = defineProps<{
     question: Question;
@@ -18,7 +20,11 @@ interface QuestionOptions {
     choices?: string[];
     // Image block
     images?: string[];
-    displayMode?: 'grid' | 'carousel' | 'random';
+    galleryImageIds?: string[]; // IDs from gallery instead of URLs
+    useGalleryImages?: boolean;
+    displayMode?: 'grid' | 'carousel' | 'random' | 'vertical';
+    showCaptions?: boolean;
+    captions?: string[];
     // Text block
     content?: string;
     style?: 'normal' | 'info' | 'warning' | 'success';
@@ -29,6 +35,20 @@ const options = ref<QuestionOptions>(
     ? JSON.parse(props.question.options) 
     : (props.question.options || {})
 );
+
+// Transform backend URLs to proxy for auth
+const config = useRuntimeConfig();
+function proxyImageUrl(url: string): string {
+    if (!url) return '';
+    const backendUrl = config.public.backendURL as string;
+    if (url.startsWith(backendUrl)) {
+        return url.replace(backendUrl, '/distant-api');
+    }
+    if (url.startsWith('/upload')) {
+        return `/distant-api${url}`;
+    }
+    return url;
+}
 
 // Sync local state if prop changes from outside
 watch(() => props.question, (newVal: Question) => {
@@ -87,7 +107,7 @@ const handleImageUpload = async (e: Event): Promise<void> => {
             formData.append('file', file);
             formData.append('context', 'forms');
             
-            const { data } = await useApiFetch<{ url: string }>('/upload', {
+            const { data } = await useApiFetch<{ file: { url: string } }>('/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -108,8 +128,62 @@ const handleImageUpload = async (e: Event): Promise<void> => {
 const removeImage = (idx: number): void => {
     if (options.value.images) {
         options.value.images.splice(idx, 1);
+        // Also remove corresponding caption
+        if (options.value.captions) {
+            options.value.captions.splice(idx, 1);
+        }
         onChange();
     }
+};
+
+// Toggle captions and initialize array
+const onCaptionsToggle = (): void => {
+    if (options.value.showCaptions) {
+        // Initialize captions array if needed
+        if (!options.value.captions) {
+            options.value.captions = (options.value.images || []).map(() => '');
+        }
+        // Ensure captions array matches images length
+        while (options.value.captions.length < (options.value.images?.length || 0)) {
+            options.value.captions.push('');
+        }
+    }
+    // If switching to grid mode, disable vertical mode
+    if (options.value.displayMode === 'vertical' && !options.value.showCaptions) {
+        options.value.displayMode = 'carousel';
+    }
+    onChange();
+};
+
+// Gallery Picker Logic
+const showGalleryPicker = ref(false);
+
+const handleGallerySelection = (selected: IGalleryImagePublic[]) => {
+    if (!options.value.images) options.value.images = [];
+    if (!options.value.galleryImageIds) options.value.galleryImageIds = [];
+    
+    selected.forEach(img => {
+        const url = `${config.public.backendURL}/gallery/${img.id}/image`;
+        // Avoid duplicates
+        if (!options.value.galleryImageIds?.includes(img.id)) {
+            options.value.images!.push(url);
+            options.value.galleryImageIds!.push(img.id);
+            // Add empty caption if needed
+            if (options.value.showCaptions && options.value.captions) {
+                options.value.captions.push('');
+            }
+        }
+    });
+    
+    onChange();
+};
+
+const onUseGalleryToggle = () => {
+    // If switching modes, maybe clear images? Or just keep them.
+    // User might want to switch back and forth. 
+    // But mixed images might be confusing if one is uploaded and other is gallery.
+    // For now, let's keep it simple.
+    onChange();
 };
 
 // Question types configuration
@@ -185,6 +259,19 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                 <div v-if="localQuestion.type === 'image_block'" class="mt-4 space-y-4">
                     <p class="text-xs text-gray-500 font-mono uppercase">Изображения (до 10)</p>
                     
+                    <!-- Gallery Mode Toggle -->
+                    <div class="flex items-center gap-2 mb-2">
+                        <label class="flex items-center gap-2 cursor-pointer bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                            <input 
+                                type="checkbox" 
+                                v-model="options.useGalleryImages"
+                                @change="onUseGalleryToggle"
+                                class="accent-red-400"
+                            />
+                            <span class="text-xs text-gray-300">Из галереи сервера</span>
+                        </label>
+                    </div>
+
                     <!-- Image Grid -->
                     <div class="grid grid-cols-3 gap-2">
                         <div 
@@ -192,7 +279,7 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                             :key="idx"
                             class="relative aspect-video rounded-lg overflow-hidden bg-gray-800 group"
                         >
-                            <img :src="img" :alt="`Image ${Number(idx) + 1}`" class="w-full h-full object-cover" />
+                            <img :src="proxyImageUrl(img)" :alt="`Image ${Number(idx) + 1}`" class="w-full h-full object-cover" />
                             <button 
                                 @click="removeImage(idx)"
                                 class="absolute top-1 right-1 p-1 bg-red-500/80 rounded opacity-0 group-hover:opacity-100 transition-opacity"
@@ -204,12 +291,21 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                         <!-- Add Image Button -->
                         <button 
                             v-if="(options.images?.length || 0) < 10"
-                            @click="triggerImageUpload"
+                            @click="options.useGalleryImages ? (showGalleryPicker = true) : triggerImageUpload()"
                             :disabled="uploadingImage"
-                            class="aspect-video rounded-lg border-2 border-dashed border-white/10 hover:border-red-400/30 hover:bg-red-400/5 flex items-center justify-center transition-all"
+                            class="aspect-video rounded-lg border-2 border-dashed border-white/10 hover:border-red-400/30 hover:bg-red-400/5 flex items-center justify-center transition-all flex-col gap-2"
                         >
-                            <Icon v-if="uploadingImage" name="svg-spinners:ring-resize" size="24" class="text-gray-500" />
-                            <Icon v-else name="ph:plus-bold" size="24" class="text-gray-500" />
+                            <template v-if="uploadingImage">
+                                <Icon name="svg-spinners:ring-resize" size="24" class="text-gray-500" />
+                            </template>
+                            <template v-else-if="options.useGalleryImages">
+                                <Icon name="solar:gallery-add-bold-duotone" size="24" class="text-red-400" />
+                                <span class="text-xs text-red-400 font-bold">Выбрать</span>
+                            </template>
+                            <template v-else>
+                                <Icon name="ph:plus-bold" size="24" class="text-gray-500" />
+                                <span class="text-xs text-gray-500">Загрузить</span>
+                            </template>
                         </button>
                     </div>
                     
@@ -225,7 +321,7 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                     <!-- Display Mode Selector -->
                     <div class="flex items-center gap-4">
                         <span class="text-xs text-gray-500">Режим:</span>
-                        <label v-for="mode in ['grid', 'carousel', 'random']" :key="mode" class="flex items-center gap-1 cursor-pointer">
+                        <label v-for="mode in ['grid', 'carousel', 'random', 'vertical']" :key="mode" class="flex items-center gap-1 cursor-pointer">
                             <input 
                                 type="radio" 
                                 :value="mode" 
@@ -233,8 +329,37 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                                 @change="onChange"
                                 class="accent-red-400"
                             />
-                            <span class="text-sm text-gray-300 capitalize">{{ mode === 'grid' ? 'Плитка' : mode === 'carousel' ? 'Слайдер' : 'Случайная' }}</span>
+                            <span class="text-sm text-gray-300 capitalize">{{ mode === 'grid' ? 'Плитка' : mode === 'carousel' ? 'Слайдер' : mode === 'random' ? 'Случайная' : 'Вертикальный' }}</span>
                         </label>
+                    </div>
+                    
+                    <!-- Options: Captions -->
+                    <div class="flex items-center gap-4 pt-2 border-t border-white/5">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                v-model="options.showCaptions"
+                                @change="onCaptionsToggle"
+                                :disabled="options.displayMode === 'grid'"
+                                class="accent-red-400 w-4 h-4"
+                            />
+                            <span class="text-sm text-gray-300">Показывать подписи</span>
+                        </label>
+                        <span v-if="options.displayMode === 'grid'" class="text-xs text-gray-500">(недоступно для плитки)</span>
+                    </div>
+                    
+                    <!-- Captions Editor -->
+                    <div v-if="options.showCaptions && options.images?.length" class="space-y-2">
+                        <p class="text-xs text-gray-500 font-mono uppercase">Подписи к изображениям</p>
+                        <div v-for="(img, idx) in options.images" :key="'cap-'+idx" class="flex items-center gap-2">
+                            <img :src="proxyImageUrl(img)" class="w-12 h-8 object-cover rounded" />
+                            <input 
+                                v-model="options.captions![idx]"
+                                @change="onChange"
+                                class="flex-1 bg-white/5 border border-white/10 rounded px-2 py-1 text-sm text-gray-200 focus:outline-none focus:border-red-400"
+                                :placeholder="`Подпись ${idx + 1}`"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -303,4 +428,11 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
             </div>
         </div>
     </div>
+    <!-- Gallery Picker -->
+    <GalleryPickerModal 
+        :is-open="showGalleryPicker"
+        :max="10 - (options.images?.length || 0)"
+        @close="showGalleryPicker = false"
+        @select="handleGallerySelection"
+    />
 </template>

@@ -23,7 +23,9 @@ interface QuestionOptions {
     choices?: string[];
     // Image block
     images?: string[];
-    displayMode?: 'grid' | 'carousel' | 'random';
+    displayMode?: 'grid' | 'carousel' | 'random' | 'vertical';
+    showCaptions?: boolean;
+    captions?: string[];
     // Text block
     content?: string;
     style?: 'normal' | 'info' | 'warning' | 'success';
@@ -37,12 +39,41 @@ const options = computed<QuestionOptions>(() => {
     return props.question.options || {};
 });
 
+// Transform backend URLs to proxy for auth
+const config = useRuntimeConfig();
+function proxyImageUrl(url: string): string {
+    if (!url) return '';
+    // If URL points to backend, route through proxy
+    const backendUrl = config.public.backendURL as string;
+    if (url.startsWith(backendUrl)) {
+        return url.replace(backendUrl, '/distant-api');
+    }
+    // For relative URLs that start with /upload or similar
+    if (url.startsWith('/upload')) {
+        return `/distant-api${url}`;
+    }
+    return url;
+}
+
+// Get proxied images array
+const proxiedImages = computed(() => 
+    (options.value.images || []).map(proxyImageUrl)
+);
+
 // For image_block with random mode
 const randomImageIndex = ref(0);
 const randomImage = computed(() => {
-    const images = options.value.images || [];
-    if (images.length === 0) return '';
-    return images[randomImageIndex.value % images.length];
+    if (proxiedImages.value.length === 0) return '';
+    return proxiedImages.value[randomImageIndex.value % proxiedImages.value.length];
+});
+
+
+
+const randomCaption = computed(() => {
+    const list = options.value.captions || [];
+    if (list.length === 0) return '';
+    const idx = randomImageIndex.value % (options.value.images?.length || 1);
+    return list[idx] || '';
 });
 
 onMounted(() => {
@@ -85,15 +116,14 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
         class="rounded-xl border border-white/5 bg-black/20 p-6 backdrop-blur-sm transition-all"
         :class="{'border-red-500/50': error}"
     >
-        <!-- Header (only for question types and titled decorative blocks) -->
-        <div v-if="!isDecorativeBlock || question.title" class="mb-4">
-            <h4 v-if="!isDecorativeBlock" class="text-lg text-gray-100 font-bold mb-1 flex items-start gap-2">
-                <span class="pr2p text-sm mt-1 text-red-400/80">Q{{ question.order_index + 1 }}.</span>
-                {{ question.title }}
-                <span v-if="question.is_required" class="text-red-500 ml-1">*</span>
-            </h4>
-            <h4 v-else-if="question.title" class="text-lg text-gray-100 font-bold mb-2">
-                {{ question.title }}
+        <!-- Header (always show for all block types with appropriate prefix) -->
+        <div class="mb-4">
+            <h4 class="text-lg text-gray-100 font-bold mb-1 flex items-start gap-2">
+                <span v-if="question.type === 'image_block'" class="pr2p text-sm mt-1 text-blue-400/80">P{{ question.order_index + 1 }}.</span>
+                <span v-else-if="question.type === 'text_block'" class="pr2p text-sm mt-1 text-green-400/80">T{{ question.order_index + 1 }}.</span>
+                <span v-else class="pr2p text-sm mt-1 text-red-400/80">Q{{ question.order_index + 1 }}.</span>
+                {{ question.title || (question.type === 'image_block' ? 'Изображения' : question.type === 'text_block' ? 'Текстовый блок' : 'Новый вопрос') }}
+                <span v-if="question.is_required && !isDecorativeBlock" class="text-red-500 ml-1">*</span>
             </h4>
             <p v-if="question.description && !isDecorativeBlock" class="text-sm text-gray-400 ml-7">
                 {{ question.description }}
@@ -161,24 +191,35 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
             </div>
 
             <!-- Dropdown -->
-            <select
-                v-else-if="question.type === 'dropdown'"
-                v-model="internalValue"
-                :disabled="readonly"
-                class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-red-400 focus:outline-none transition-all appearance-none"
-            >
-                <option value="" disabled selected>Выберите вариант...</option>
-                <option v-for="(opt, idx) in options.choices || []" :key="idx" :value="opt">
-                    {{ opt }}
-                </option>
-            </select>
+            <div v-else-if="question.type === 'dropdown'" class="relative">
+                <select
+                    v-model="internalValue"
+                    :disabled="readonly"
+                    class="w-full bg-gray-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-red-400 focus:outline-none transition-all appearance-none cursor-pointer"
+                >
+                    <option value="" disabled selected class="bg-gray-900 text-gray-400">Выберите вариант...</option>
+                    <option 
+                        v-for="(opt, idx) in options.choices || []" 
+                        :key="idx" 
+                        :value="opt"
+                        class="bg-gray-900 text-white py-2"
+                    >
+                        {{ opt }}
+                    </option>
+                </select>
+                <!-- Custom dropdown arrow -->
+                <Icon 
+                    name="ph:caret-down" 
+                    class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" 
+                />
+            </div>
 
             <!-- Image Block -->
             <div v-else-if="question.type === 'image_block'" class="space-y-2">
                 <!-- Grid Mode -->
                 <div v-if="options.displayMode === 'grid'" class="grid grid-cols-2 md:grid-cols-3 gap-2">
                     <div 
-                        v-for="(img, idx) in options.images || []" 
+                        v-for="(img, idx) in proxiedImages" 
                         :key="idx"
                         class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
                         @click="openViewer(idx)"
@@ -190,24 +231,52 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
                 <!-- Carousel Mode -->
                 <ImageCarousel 
                     v-else-if="options.displayMode === 'carousel'" 
-                    :images="options.images || []"
+                    :images="proxiedImages"
                     :show-arrows="true"
                     :show-dots="true"
+                    :captions="options.showCaptions ? (options.captions || []) : []"
                     @click="openViewer"
                 />
                 
                 <!-- Random Mode -->
-                <div 
-                    v-else-if="options.displayMode === 'random'"
-                    class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
-                    @click="openViewer(randomImageIndex)"
-                >
-                    <img :src="randomImage" alt="Random image" class="w-full h-full object-cover" />
+                <div v-else-if="options.displayMode === 'random'" class="space-y-2">
+                    <div 
+                        class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity relative"
+                        @click="openViewer(randomImageIndex)"
+                    >
+                        <img :src="randomImage" alt="Random image" class="w-full h-full object-cover" />
+                        <!-- Caption Overlay for Random -->
+                        <div 
+                            v-if="options.showCaptions && randomCaption" 
+                            class="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm p-3 text-center"
+                        >
+                            <p class="text-white text-sm md:text-base font-medium">{{ randomCaption }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vertical Mode (Image Left, Caption Right) -->
+                <div v-else-if="options.displayMode === 'vertical'" class="space-y-4">
+                    <div 
+                        v-for="(img, idx) in proxiedImages" 
+                        :key="idx"
+                        class="flex flex-col md:flex-row gap-4 items-start"
+                    >
+                        <div 
+                            class="w-full md:w-2/5 aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
+                            @click="openViewer(idx)"
+                        >
+                             <img :src="img" :alt="`Image ${Number(idx) + 1}`" class="w-full h-full object-cover" />
+                        </div>
+                        <div class="w-full md:w-3/5 text-gray-200 whitespace-pre-wrap pt-1">
+                            {{ options.captions?.[idx] || '' }}
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Image Viewer Modal -->
                 <ImageViewer 
-                    :images="options.images || []" 
+                    :images="proxiedImages" 
                     :initial-index="viewerIndex"
                     :is-open="viewerOpen" 
                     @close="viewerOpen = false" 
