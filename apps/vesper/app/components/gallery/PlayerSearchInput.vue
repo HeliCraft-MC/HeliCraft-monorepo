@@ -27,16 +27,18 @@ async function searchPlayers() {
 
   isSearching.value = true
   try {
-    const response = await $fetch<IPlayerSearchResult[]>(`${config.public.backendURL}/user/search`, {
+    // API returns AuthUser[] with UUID and NICKNAME fields (uppercase)
+    const response = await $fetch<Array<{ UUID: string; NICKNAME: string }>>(`${config.public.backendURL}/user/search`, {
       query: {
         nickname: searchQuery.value,
         startAt: 0,
         limit: 5
       }
     })
-    searchResults.value = response.filter(
-      player => !props.modelValue.some(p => p.uuid === player.uuid)
-    )
+    // Map to IPlayerSearchResult format and filter out already selected players
+    searchResults.value = response
+      .map(user => ({ uuid: user.UUID, nickname: user.NICKNAME }))
+      .filter(player => !props.modelValue.some(p => p.uuid === player.uuid))
   } catch (e) {
     console.error('Error searching players:', e)
     searchResults.value = []

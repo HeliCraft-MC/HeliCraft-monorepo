@@ -17,8 +17,6 @@ const userUuid = computed(() => session.value?.uuid)
 
 /* ───── State ───── */
 const image = ref<IGalleryImagePublic | null>(null)
-const uploaderNickname = ref('')
-const involvedPlayers = ref<IPlayerSearchResult[]>([])
 const loading = ref(true)
 const error = ref('')
 const isAdmin = ref(false)
@@ -33,7 +31,7 @@ const processing = ref(false)
 
 /* ───── Check if current user owns the image ───── */
 const isOwner = computed(() => 
-  userUuid.value && image.value && userUuid.value === image.value.uploader_uuid
+  userUuid.value && image.value && userUuid.value === image.value.owner.uuid
 )
 
 /* ───── Can edit ───── */
@@ -46,7 +44,8 @@ const imageUrl = computed(() =>
 
 /* ───── Format date ───── */
 function formatDate(timestamp: number) {
-  return new Date(timestamp).toLocaleDateString('ru-RU', {
+  // Backend returns seconds, convert to ms
+  return new Date(timestamp * 1000).toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -81,35 +80,6 @@ async function loadImage() {
       `${config.public.backendURL}/gallery/${imageId.value}`
     )
     image.value = response
-    
-    // Load uploader nickname
-    try {
-      const uploaderRes = await $fetch<{ nickname: string }>(
-        `${config.public.backendURL}/user/${response.uploader_uuid}`
-      )
-      uploaderNickname.value = uploaderRes.nickname
-    } catch {
-      uploaderNickname.value = 'Неизвестный'
-    }
-    
-    // Load involved players
-    if (response.involved_players) {
-      const uuids = response.involved_players.split(',').filter(u => u.trim())
-      const players: IPlayerSearchResult[] = []
-      
-      for (const uuid of uuids) {
-        try {
-          const playerRes = await $fetch<{ uuid: string; nickname: string }>(
-            `${config.public.backendURL}/user/${uuid.trim()}`
-          )
-          players.push({ uuid: playerRes.uuid, nickname: playerRes.nickname })
-        } catch {
-          // Skip invalid UUIDs
-        }
-      }
-      
-      involvedPlayers.value = players
-    }
   } catch (e: any) {
     console.error('Error loading image:', e)
     if (e.status === 404) {
@@ -304,11 +274,11 @@ onMounted(() => {
             <h3 class="text-sm text-gray-400 mb-2">Автор</h3>
             <div class="flex items-center gap-3">
               <img
-                :src="`${config.public.backendURL}/user/${image.uploader_uuid}/skin/head.png`"
-                :alt="uploaderNickname"
+                :src="`${config.public.backendURL}/user/${image.owner.uuid}/skin/head.png`"
+                :alt="image.owner.nickname"
                 class="w-10 h-10 rounded"
               />
-              <span class="font-medium">{{ uploaderNickname }}</span>
+              <span class="font-medium">{{ image.owner.nickname }}</span>
             </div>
           </div>
 
@@ -345,11 +315,11 @@ onMounted(() => {
           </div>
 
           <!-- Involved players -->
-          <div v-if="involvedPlayers.length > 0">
+          <div v-if="image.involved_players && image.involved_players.length > 0">
             <h3 class="text-sm text-gray-400 mb-2">Участвующие игроки</h3>
             <div class="flex flex-wrap gap-2">
               <div
-                v-for="player in involvedPlayers"
+                v-for="player in image.involved_players"
                 :key="player.uuid"
                 class="flex items-center gap-2 bg-gray-800 rounded-md px-3 py-1"
               >

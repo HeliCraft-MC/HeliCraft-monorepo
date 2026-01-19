@@ -92,8 +92,8 @@ const handleImageUpload = async (e: Event): Promise<void> => {
                 body: formData
             });
             
-            if (data.value?.url) {
-                options.value.images.push(data.value.url);
+            if (data.value?.file?.url) {
+                options.value.images.push(data.value.file.url);
             }
         } catch (err) {
             console.error('Failed to upload image:', err);
@@ -296,7 +296,7 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                 <label v-if="!isDecorativeBlock" class="flex items-center justify-between cursor-pointer group">
                     <span class="text-sm text-gray-300 group-hover:text-white transition-colors">Обязательный</span>
                     <div class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" v-model="localQuestion.is_required" @input="onChange" class="sr-only peer">
+                        <input type="checkbox" v-model="localQuestion.is_required" @change="onChange" class="sr-only peer">
                         <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
                     </div>
                 </label>

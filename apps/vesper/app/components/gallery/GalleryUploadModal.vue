@@ -20,6 +20,7 @@ const previewUrl = ref<string | null>(null)
 const isUploading = ref(false)
 const error = ref('')
 const dragOver = ref(false)
+const showSuccess = ref(false)
 
 // Upload constraints
 const MAX_FILE_SIZE_MB = 10
@@ -96,8 +97,8 @@ async function upload() {
     
     if (response.ok) {
       emit('uploaded', response)
-      resetForm()
-      emit('close')
+      // Show success state instead of immediately closing
+      showSuccess.value = true
     } else {
       error.value = 'Не удалось загрузить изображение'
     }
@@ -122,11 +123,16 @@ function resetForm() {
   selectedFile.value = null
   previewUrl.value = null
   error.value = ''
+  showSuccess.value = false
 }
 
 function closeModal() {
   resetForm()
   emit('close')
+}
+
+function closeSuccess() {
+  closeModal()
 }
 </script>
 
@@ -149,8 +155,25 @@ function closeModal() {
           </button>
         </div>
 
-        <!-- Content -->
-        <div class="p-6 space-y-4">
+        <!-- Success state -->
+        <div v-if="showSuccess" class="p-6 text-center space-y-4">
+          <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+            <Icon name="solar:check-circle-bold" class="w-10 h-10 text-green-400" />
+          </div>
+          <h3 class="text-xl font-bold text-white">Успешно загружено!</h3>
+          <p class="text-gray-400">
+            Ваше изображение отправлено на модерацию. После одобрения администратором оно появится в галерее.
+          </p>
+          <button
+            @click="closeSuccess"
+            class="bg-red-500 hover:bg-red-600 transition px-8 py-3 rounded-md font-bold text-black"
+          >
+            Закрыть
+          </button>
+        </div>
+
+        <!-- Content (when not in success state) -->
+        <div v-else class="p-6 space-y-4">
           <!-- Error message -->
           <div
             v-if="error"
@@ -219,8 +242,8 @@ function closeModal() {
           </p>
         </div>
 
-        <!-- Footer -->
-        <div class="flex justify-end gap-4 p-6 border-t border-gray-700">
+        <!-- Footer (hide when in success state) -->
+        <div v-if="!showSuccess" class="flex justify-end gap-4 p-6 border-t border-gray-700">
           <button
             @click="closeModal"
             class="bg-gray-700 hover:bg-gray-600 transition px-6 py-2 rounded-md font-bold"

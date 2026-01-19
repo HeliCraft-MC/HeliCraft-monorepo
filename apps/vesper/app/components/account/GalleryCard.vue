@@ -53,10 +53,10 @@ onMounted(loadMyImages)
     <div class="flex items-center justify-between mb-6">
       <h2 class="pr2p text-2xl text-red-500">Мои скриншоты</h2>
       <NuxtLink
-        to="/gallery"
+        to="/account/gallery"
         class="text-gray-400 hover:text-red-400 transition text-sm flex items-center gap-1"
       >
-        <span>В галерею</span>
+        <span>Управлять</span>
         <Icon name="solar:alt-arrow-right-linear" class="w-4 h-4" />
       </NuxtLink>
     </div>

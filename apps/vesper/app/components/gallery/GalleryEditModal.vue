@@ -28,27 +28,6 @@ const involvedPlayers = ref<IPlayerSearchResult[]>([])
 const isSaving = ref(false)
 const error = ref('')
 
-// Parse involved players from comma-separated UUIDs
-async function parseInvolvedPlayers(uuids: string | null) {
-  if (!uuids) return []
-  
-  const uuidList = uuids.split(',').filter(u => u.trim())
-  const players: IPlayerSearchResult[] = []
-  
-  for (const uuid of uuidList) {
-    try {
-      const response = await $fetch<{ uuid: string; nickname: string }>(
-        `${config.public.backendURL}/user/${uuid.trim()}`
-      )
-      players.push({ uuid: response.uuid, nickname: response.nickname })
-    } catch {
-      // Skip invalid UUIDs
-    }
-  }
-  
-  return players
-}
-
 // Populate form when image changes
 watch(() => props.image, async (newImage) => {
   if (newImage) {
@@ -58,7 +37,8 @@ watch(() => props.image, async (newImage) => {
     coordX.value = newImage.coord_x
     coordY.value = newImage.coord_y
     coordZ.value = newImage.coord_z
-    involvedPlayers.value = await parseInvolvedPlayers(newImage.involved_players)
+    // involved_players is now an array from backend
+    involvedPlayers.value = newImage.involved_players || []
   }
 }, { immediate: true })
 

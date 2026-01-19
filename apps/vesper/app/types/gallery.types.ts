@@ -13,8 +13,11 @@ export enum GalleryImageStatus {
 export interface IGalleryImagePublic {
   /** Unique image ID */
   id: string
-  /** UUID of the user who uploaded the image */
-  uploader_uuid: string
+  /** Owner info */
+  owner: {
+    uuid: string
+    nickname: string
+  }
   /** Image description */
   description: string | null
   /** Image category */
@@ -27,13 +30,13 @@ export interface IGalleryImagePublic {
   coord_y: number | null
   /** Z coordinate in game */
   coord_z: number | null
-  /** Comma-separated UUIDs of involved players */
-  involved_players: string | null
+  /** Involved players with their info */
+  involved_players: IPlayerSearchResult[]
   /** Approval status */
   status: GalleryImageStatus
-  /** UNIX-time (ms) of creation */
+  /** UNIX-time (seconds) of creation */
   created_at: number
-  /** UNIX-time (ms) of last update */
+  /** UNIX-time (seconds) of last update */
   updated_at: number
 }
 

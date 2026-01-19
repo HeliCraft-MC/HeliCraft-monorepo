@@ -23,9 +23,6 @@ const currentPage = ref(1)
 const perPage = ref(20)
 const totalItems = ref(0)
 
-// Uploader nicknames cache
-const uploaderNicknames = ref<Map<string, string>>(new Map())
-
 // Edit modal
 const showEditModal = ref(false)
 const editingImage = ref<IGalleryImagePublic | null>(null)
@@ -42,27 +39,7 @@ const currentList = computed(() => {
     case 'rejected': return rejectedImages
   }
 })
-
 const totalPages = computed(() => Math.ceil(totalItems.value / perPage.value))
-
-/* ───── Fetch uploader nickname ───── */
-async function fetchUploaderNickname(uuid: string): Promise<string> {
-  if (uploaderNicknames.value.has(uuid)) {
-    return uploaderNicknames.value.get(uuid)!
-  }
-  
-  try {
-    const response = await $fetch<{ nickname: string }>(
-      `${config.public.backendURL}/user/${uuid}`
-    )
-    uploaderNicknames.value.set(uuid, response.nickname)
-    return response.nickname
-  } catch {
-    uploaderNicknames.value.set(uuid, 'Неизвестный')
-    return 'Неизвестный'
-  }
-}
-
 /* ───── Fetch data ───── */
 async function fetchCurrentTabData() {
   loading.value = true
@@ -93,10 +70,6 @@ async function fetchCurrentTabData() {
 
     currentList.value.value = response.items
     totalItems.value = response.total
-
-    // Fetch uploader nicknames
-    const uniqueUuids = [...new Set(response.items.map(img => img.uploader_uuid))]
-    await Promise.all(uniqueUuids.map(uuid => fetchUploaderNickname(uuid)))
   } catch (e: any) {
     console.error('Error fetching gallery:', e)
     error.value = e.data?.message || 'Не удалось загрузить данные'
@@ -199,7 +172,8 @@ function handleUpdated(updatedImage: IGalleryImagePublic) {
 
 /* ───── Format date ───── */
 function formatDate(timestamp: number) {
-  return new Date(timestamp).toLocaleDateString('ru-RU', {
+  // Backend returns seconds, convert to ms
+  return new Date(timestamp * 1000).toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -308,15 +282,13 @@ onMounted(fetchCurrentTabData)
             <p v-else class="text-gray-500 text-sm italic">Без описания</p>
 
             <!-- Uploader -->
-            <div class="flex items-center gap-2 text-sm">
+            <div class="flex items-center gap-2 text-sm min-w-0">
               <img
-                :src="`/distant-api/user/${image.uploader_uuid}/skin/head.png`"
-                :alt="uploaderNicknames.get(image.uploader_uuid) || 'User'"
-                class="w-6 h-6 rounded"
+                :src="`/distant-api/user/${image.owner.uuid}/skin/head.png`"
+                :alt="image.owner.nickname"
+                class="w-6 h-6 rounded flex-shrink-0"
               />
-              <span class="text-gray-400">
-                {{ uploaderNicknames.get(image.uploader_uuid) || 'Загрузка...' }}
-              </span>
+              <span class="text-gray-400 truncate">{{ image.owner.nickname }}</span>
             </div>
 
             <!-- Date -->
