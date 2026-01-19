@@ -3,8 +3,7 @@ import type { Form, Question } from "@/types/forms";
 import QuestionEditor from "@/components/forms/QuestionEditor.vue";
 
 definePageMeta({
-  layout: 'admin',
-  middleware: 'auth'
+  layout: 'admin'
 });
 
 const route = useRoute();

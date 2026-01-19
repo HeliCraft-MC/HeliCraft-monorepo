@@ -43,7 +43,7 @@ const exclude: ExcludeRule[] = [
 ]
 
 export default defineEventHandler(async (event) => {
-    const url    = event.path || event.node.req.url || '/'
+    const url = event.path || event.node.req.url || '/'
     const method = (event.method || event.node.req.method || 'GET').toUpperCase()
 
     //console.log(`[auth middleware] ${method} ${url}`)

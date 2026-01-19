@@ -3,8 +3,7 @@ import type { Form } from "@/types/forms";
 import FormCard from "@/components/forms/FormCard.vue";
 
 definePageMeta({
-  layout: 'admin',
-  middleware: 'auth'
+  layout: 'admin'
 });
 
 const forms = ref<Form[]>([]);

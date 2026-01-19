@@ -24,6 +24,42 @@ defineRouteMeta({
   }
 })
 
+/**
+ * Attempt to extract user UUID from request (soft auth - doesn't throw if no token)
+ */
+async function tryGetUserUuid(event: any): Promise<string | null> {
+  // Try Authorization header first
+  const authHeader = getHeader(event, 'authorization')
+  let accessToken: string | undefined
+
+  if (authHeader?.startsWith('Bearer ')) {
+    accessToken = authHeader.replace(/^Bearer\s+/, '')
+  }
+
+  // Try cookie fallback
+  if (!accessToken) {
+    const cookies = parseCookies(event)
+    accessToken = cookies['auth.token']
+  }
+
+  if (!accessToken) {
+    return null
+  }
+
+  try {
+    const payload = await verifyToken(accessToken) as { UUID?: string }
+    const uuid = payload?.UUID
+    if (!uuid) return null
+
+    // Verify auth is still valid
+    await checkAuth(uuid, accessToken)
+    return uuid
+  } catch {
+    // Invalid token - treat as unauthenticated
+    return null
+  }
+}
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   if (!id) {
@@ -31,9 +67,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const image = getGalleryImage(id)
-  
-  // Check view permissions
-  const userUuid = event.context.auth?.uuid || null
+
+  // Check view permissions with soft auth
+  const userUuid = await tryGetUserUuid(event)
   const admin = userUuid ? await isUserAdmin(userUuid) : false
 
   if (!canViewImage(image, userUuid, admin)) {
