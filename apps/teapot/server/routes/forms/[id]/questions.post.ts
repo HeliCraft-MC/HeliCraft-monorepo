@@ -1,17 +1,22 @@
-import { reorderQuestions, getFormById } from '~/utils/forms.utils'
+import { createQuestion, getFormById } from '~/utils/forms.utils'
 import { isUserAdmin } from '~/utils/user.utils'
+import type { CreateQuestionDto } from '~/interfaces/forms.types'
 
 defineRouteMeta({
     openAPI: {
         tags: ['forms'],
-        description: 'Reorder questions (Admin only)',
+        description: 'Add a question to a form (Admin only)',
         security: [{ bearerAuth: [] }],
         requestBody: {
             content: {
                 'application/json': {
                     schema: {
-                        type: 'array',
-                        items: { type: 'number' }
+                        type: 'object',
+                        required: ['type', 'title'],
+                        properties: {
+                            type: { type: 'string' },
+                            title: { type: 'string' }
+                        }
                     }
                 }
             }
@@ -26,13 +31,12 @@ export default defineEventHandler(async (event) => {
     const isAdmin = await isUserAdmin(user.uuid)
     if (!isAdmin) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
 
-    const formId = parseInt(event.context.params!.formId)
-    const questionIds = await readBody<number[]>(event)
+    const formId = parseInt(event.context.params!.id)
+    const body = await readBody<CreateQuestionDto>(event)
 
     const form = await getFormById(formId)
     if (!form) throw createError({ statusCode: 404, statusMessage: 'Form not found' })
 
-    await reorderQuestions(formId, questionIds)
-
-    return { ok: true }
+    const question = await createQuestion(formId, body)
+    return question
 })
