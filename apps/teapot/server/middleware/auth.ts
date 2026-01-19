@@ -63,6 +63,7 @@ async function tryExtractAuth(event: any): Promise<string | null> {
     // Сначала пробуем получить токен из заголовка авторизации
     const authHeader = getHeader(event, 'authorization')
     let accessToken: string | undefined
+    console.log(`[tryExtractAuth] Auth header: ${authHeader?.substring(0, 20)}...`)
 
     if (authHeader?.startsWith('Bearer ')) {
         accessToken = stripBearerPrefix(authHeader)
