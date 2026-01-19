@@ -145,6 +145,7 @@ export async function updateQuestion(id: number, dto: UpdateQuestionDto): Promis
     const updates: string[] = [];
     const params: any[] = [];
 
+    if (dto.type !== undefined) { updates.push('type = ?'); params.push(dto.type); }
     if (dto.title !== undefined) { updates.push('title = ?'); params.push(dto.title); }
     if (dto.description !== undefined) { updates.push('description = ?'); params.push(dto.description); }
     if (dto.is_required !== undefined) { updates.push('is_required = ?'); params.push(dto.is_required ? 1 : 0); }

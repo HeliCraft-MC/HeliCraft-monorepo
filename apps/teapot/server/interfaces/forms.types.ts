@@ -106,6 +106,7 @@ export interface CreateQuestionDto {
 }
 
 export interface UpdateQuestionDto {
+    type?: string;
     title?: string;
     description?: string;
     is_required?: boolean;

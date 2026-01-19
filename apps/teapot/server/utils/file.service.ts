@@ -76,9 +76,13 @@ class FileService implements IFileService {
 
   async readFile(relativePath: string): Promise<Buffer | null> {
     const absPath = this.validateAndResolvePath(relativePath)
+    console.log(`[FileService] readFile: relative="${relativePath}", absolute="${absPath}"`)
     try {
-      return await fsp.readFile(absPath)
+      const buf = await fsp.readFile(absPath)
+      console.log(`[FileService] readFile: success, size=${buf.length}`)
+      return buf
     } catch (err: any) {
+      console.log(`[FileService] readFile: failed, code=${err.code}`)
       if (err.code === 'ENOENT') return null
       throw err
     }

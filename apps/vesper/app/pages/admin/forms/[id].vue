@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Form, Question } from "@/types/forms";
 import QuestionEditor from "@/components/forms/QuestionEditor.vue";
+import ConfirmModal from "@/components/common/ConfirmModal.vue";
 
 definePageMeta({
   layout: 'admin'
@@ -12,6 +13,11 @@ const form = ref<Form | null>(null);
 const questions = ref<Question[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
+
+// Modal states
+const publishModalOpen = ref(false);
+const deleteQuestionModalOpen = ref(false);
+const questionToDelete = ref<number | null>(null);
 
 const publicUrl = computed<string | null>(() => {
     if (!form.value?.public_hash) return null;
@@ -74,17 +80,26 @@ const updateQuestion = async (q: Question): Promise<void> => {
     } catch (e: unknown) { console.error(e) }
 };
 
-const deleteQuestion = async (id: number): Promise<void> => {
-    if(!confirm('Удалить вопрос?')) return;
+const confirmDeleteQuestion = (id: number): void => {
+    questionToDelete.value = id;
+    deleteQuestionModalOpen.value = true;
+};
+
+const handleDeleteQuestionConfirm = async (): Promise<void> => {
+    deleteQuestionModalOpen.value = false;
+    if (!questionToDelete.value) return;
+    
     try {
-        await useApiFetch(`/forms/questions/${id}`, { method: 'DELETE' });
-        questions.value = questions.value.filter((q: Question) => q.id !== id);
+        await useApiFetch(`/forms/questions/${questionToDelete.value}`, { method: 'DELETE' });
+        questions.value = questions.value.filter((q: Question) => q.id !== questionToDelete.value);
+        questionToDelete.value = null;
     } catch (e: unknown) { console.error(e) }
 };
 
-const publish = async (): Promise<void> => {
+const handlePublishConfirm = async (): Promise<void> => {
+    publishModalOpen.value = false;
     if (!form.value) return;
-    if(!confirm('Опубликовать форму? Ссылка станет доступной.')) return;
+    
     try {
         const { data } = await useApiFetch<{ public_hash: string }>(`/forms/${form.value.id}/publish`, {
             method: 'POST'
@@ -136,7 +151,7 @@ onMounted(fetchData);
             <div class="flex items-center gap-3 w-full md:w-auto justify-end">
                  <button 
                     v-if="form.status !== 'published'"
-                    @click="publish"
+                    @click="publishModalOpen = true"
                     class="px-4 py-2 bg-green-600/20 text-green-400 border border-green-500/30 hover:bg-green-600/30 rounded-lg transition-colors flex items-center gap-2"
                 >
                     <Icon name="ph:paper-plane-right-bold" /> Опубликовать
@@ -171,7 +186,7 @@ onMounted(fetchData);
                     :key="q.id" 
                     :question="{...q, order_index: idx}"
                     @update="updateQuestion"
-                    @delete="deleteQuestion"
+                    @delete="confirmDeleteQuestion"
                     @move-up="reorder('up', $event)"
                     @move-down="reorder('down', $event)"
                 />
@@ -186,6 +201,26 @@ onMounted(fetchData);
                 <span>Добавить вопрос</span>
             </button>
         </div>
+        
+        <!-- Modals -->
+        <ConfirmModal 
+            :is-open="publishModalOpen"
+            title="Опубликовать форму?"
+            message="После публикации ссылка станет доступной. Пользователи смогут заполнять форму."
+            confirm-text="Опубликовать"
+            @confirm="handlePublishConfirm"
+            @cancel="publishModalOpen = false"
+        />
+        
+        <ConfirmModal 
+            :is-open="deleteQuestionModalOpen"
+            title="Удалить вопрос?"
+            message="Вопрос будет удален безвозвратно."
+            confirm-text="Удалить"
+            confirm-variant="danger"
+            @confirm="handleDeleteQuestionConfirm"
+            @cancel="deleteQuestionModalOpen = false"
+        />
     </div>
     <div v-else class="flex justify-center py-20">
         <Icon name="svg-spinners:3-dots-fade" size="40" class="text-red-400" />

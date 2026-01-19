@@ -275,15 +275,15 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
                         <select 
                             v-model="localQuestion.type" 
                             @change="onChange"
-                            class="w-full appearance-none bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-400"
+                            class="w-full appearance-none bg-gray-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-400"
                         >
-                            <optgroup label="Вопросы">
-                                <option v-for="t in types.filter((t: any) => t.category === 'input')" :key="t.value" :value="t.value">
+                            <optgroup label="Вопросы" class="bg-gray-900 text-white">
+                                <option v-for="t in types.filter((t: any) => t.category === 'input')" :key="t.value" :value="t.value" class="bg-gray-900 text-white">
                                     {{ t.label }}
                                 </option>
                             </optgroup>
-                            <optgroup label="Декоративные блоки">
-                                <option v-for="t in types.filter((t: any) => t.category === 'decorative')" :key="t.value" :value="t.value">
+                            <optgroup label="Декоративные блоки" class="bg-gray-900 text-white">
+                                <option v-for="t in types.filter((t: any) => t.category === 'decorative')" :key="t.value" :value="t.value" class="bg-gray-900 text-white">
                                     {{ t.label }}
                                 </option>
                             </optgroup>

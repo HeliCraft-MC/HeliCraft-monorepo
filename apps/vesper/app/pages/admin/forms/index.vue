@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Form } from "@/types/forms";
 import FormCard from "@/components/forms/FormCard.vue";
+import PromptModal from "@/components/common/PromptModal.vue";
+import ConfirmModal from "@/components/common/ConfirmModal.vue";
 
 definePageMeta({
   layout: 'admin'
@@ -9,6 +11,11 @@ definePageMeta({
 const forms = ref<Form[]>([]);
 const isLoading = ref(true);
 const searchQuery = ref('');
+
+// Modal states
+const createModalOpen = ref(false);
+const deleteModalOpen = ref(false);
+const formToDelete = ref<number | null>(null);
 
 const filteredForms = computed<Form[]>(() => {
     if (!searchQuery.value) return forms.value;
@@ -30,10 +37,8 @@ const fetchForms = async (): Promise<void> => {
 };
 
 // Create Form
-const createForm = async (): Promise<void> => {
-    const title = prompt('Введите название новой формы:');
-    if (!title) return;
-
+const handleCreateSubmit = async (title: string): Promise<void> => {
+    createModalOpen.value = false;
     try {
         const { data, error } = await useApiFetch<Form>('/forms', {
             method: 'POST',
@@ -49,10 +54,18 @@ const createForm = async (): Promise<void> => {
     }
 };
 
-const deleteForm = async (id: number): Promise<void> => {
-    if (!confirm('Вы уверены? Форма будет отправлена в архив.')) return;
+const confirmDeleteForm = (id: number): void => {
+    formToDelete.value = id;
+    deleteModalOpen.value = true;
+};
+
+const handleDeleteConfirm = async (): Promise<void> => {
+    deleteModalOpen.value = false;
+    if (!formToDelete.value) return;
+    
     try {
-        await useApiFetch(`/forms/${id}`, { method: 'DELETE' });
+        await useApiFetch(`/forms/${formToDelete.value}`, { method: 'DELETE' });
+        formToDelete.value = null;
         await fetchForms();
     } catch (e: unknown) {
         useAppEventBus().emit('show-error', { message: 'Failed to delete form' });
@@ -71,7 +84,7 @@ onMounted(fetchForms);
                 <p class="text-gray-400">Управляйте опросами и анкетами</p>
             </div>
             <button 
-                @click="createForm"
+                @click="createModalOpen = true"
                 class="px-6 py-3 bg-red-500 hover:bg-red-600 active:scale-95 text-white font-bold rounded-xl transition-all shadow-[0_4px_0_rgb(153,27,27)] hover:shadow-[0_2px_0_rgb(153,27,27)] hover:translate-y-[2px]"
             >
                 + Создать форму
@@ -100,7 +113,7 @@ onMounted(fetchForms);
                 :key="form.id" 
                 :form="form"
                 @edit="(id: number) => navigateTo(`/admin/forms/${id}`)"
-                @delete="deleteForm"
+                @delete="confirmDeleteForm"
                 @stats="(id: number) => navigateTo(`/admin/forms/${id}/stats`)"
             />
         </div>
@@ -109,5 +122,25 @@ onMounted(fetchForms);
             <Icon name="ph:files" size="64" class="mb-4 opacity-50" />
             <p>Форм пока нет</p>
         </div>
+        
+        <!-- Modals -->
+        <PromptModal 
+            :is-open="createModalOpen"
+            title="Создать форму"
+            placeholder="Название формы..."
+            submit-text="Создать"
+            @submit="handleCreateSubmit"
+            @cancel="createModalOpen = false"
+        />
+        
+        <ConfirmModal 
+            :is-open="deleteModalOpen"
+            title="Удалить форму?"
+            message="Форма будет перемещена в архив. Это действие можно отменить позже."
+            confirm-text="Удалить"
+            confirm-variant="danger"
+            @confirm="handleDeleteConfirm"
+            @cancel="deleteModalOpen = false"
+        />
     </div>
 </template>
