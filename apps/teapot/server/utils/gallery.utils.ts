@@ -176,9 +176,6 @@ export async function getGalleryImagePublic(id: string): Promise<GalleryImagePub
  * Check if user can view image
  */
 export function canViewImage(image: GalleryImage, userUuid: string | null, isAdmin: boolean): boolean {
-
-  console.log("canViewImage", image.id, image.status, image.owner_uuid, userUuid, isAdmin)
-
   if (isAdmin) return true
   // Approved images are visible to everyone
   if (image.status === 'approved') return true

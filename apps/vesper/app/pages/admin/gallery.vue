@@ -289,7 +289,7 @@ onMounted(fetchCurrentTabData)
             class="block aspect-video bg-gray-900 overflow-hidden"
           >
             <img
-              :src="`${config.public.backendURL}/gallery/${image.id}/image`"
+              :src="`/distant-api/gallery/${image.id}/image`"
               :alt="image.description || 'Gallery image'"
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               loading="lazy"
@@ -310,7 +310,7 @@ onMounted(fetchCurrentTabData)
             <!-- Uploader -->
             <div class="flex items-center gap-2 text-sm">
               <img
-                :src="`${config.public.backendURL}/user/${image.uploader_uuid}/skin/head.png`"
+                :src="`/distant-api/user/${image.uploader_uuid}/skin/head.png`"
                 :alt="uploaderNicknames.get(image.uploader_uuid) || 'User'"
                 class="w-6 h-6 rounded"
               />

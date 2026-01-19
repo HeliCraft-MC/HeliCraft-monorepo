@@ -8,10 +8,25 @@ export const QUESTION_TYPES = {
     CHECKBOX: 'checkbox',
     DROPDOWN: 'dropdown',
     FILE_UPLOAD: 'file_upload',
-    RATING: 'rating'
+    RATING: 'rating',
+    // Decorative blocks (non-interactive)
+    IMAGE_BLOCK: 'image_block',
+    TEXT_BLOCK: 'text_block'
 } as const;
 
 export type QuestionType = string;
+
+// Options for image_block type
+export interface ImageBlockOptions {
+    images: string[];  // Array of image URLs
+    displayMode: 'grid' | 'carousel' | 'random';
+}
+
+// Options for text_block type
+export interface TextBlockOptions {
+    content: string;  // Markdown or plain text
+    style?: 'normal' | 'info' | 'warning' | 'success';
+}
 
 export interface Form {
     id: number;

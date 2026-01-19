@@ -33,12 +33,7 @@ export default defineEventHandler(async (event) => {
   const image = getGalleryImage(id)
 
   const userUuid = event.context.auth?.uuid
-
-  console.log("get image user uuid", userUuid)
-
   const admin = userUuid ? await isUserAdmin(userUuid) : false
-
-  console.log("get image admin", admin)
 
   if (!canViewImage(image, userUuid, admin)) {
     throw createError({

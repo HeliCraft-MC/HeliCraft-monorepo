@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Question } from "@/types/forms";
+import ImageCarousel from "@/components/common/ImageCarousel.vue";
+import ImageViewer from "@/components/common/ImageViewer.vue";
 
 const props = defineProps<{
     question: Question;
@@ -19,6 +21,12 @@ const internalValue = computed({
 
 interface QuestionOptions {
     choices?: string[];
+    // Image block
+    images?: string[];
+    displayMode?: 'grid' | 'carousel' | 'random';
+    // Text block
+    content?: string;
+    style?: 'normal' | 'info' | 'warning' | 'success';
 }
 
 // Parsed options if stored as JSON string
@@ -28,6 +36,48 @@ const options = computed<QuestionOptions>(() => {
     }
     return props.question.options || {};
 });
+
+// For image_block with random mode
+const randomImageIndex = ref(0);
+const randomImage = computed(() => {
+    const images = options.value.images || [];
+    if (images.length === 0) return '';
+    return images[randomImageIndex.value % images.length];
+});
+
+onMounted(() => {
+    if (options.value.displayMode === 'random' && options.value.images?.length) {
+        randomImageIndex.value = Math.floor(Math.random() * options.value.images.length);
+    }
+});
+
+// Image viewer state
+const viewerOpen = ref(false);
+const viewerIndex = ref(0);
+
+const openViewer = (index: number): void => {
+    viewerIndex.value = index;
+    viewerOpen.value = true;
+};
+
+// Text block style classes
+const textBlockClasses = computed(() => {
+    const style = options.value.style || 'normal';
+    const baseClasses = 'p-4 rounded-lg text-gray-200 whitespace-pre-wrap';
+    
+    switch (style) {
+        case 'info':
+            return `${baseClasses} bg-blue-500/10 border border-blue-500/30`;
+        case 'warning':
+            return `${baseClasses} bg-yellow-500/10 border border-yellow-500/30`;
+        case 'success':
+            return `${baseClasses} bg-green-500/10 border border-green-500/30`;
+        default:
+            return `${baseClasses} bg-white/5`;
+    }
+});
+
+const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(props.question.type));
 </script>
 
 <template>
@@ -35,20 +85,23 @@ const options = computed<QuestionOptions>(() => {
         class="rounded-xl border border-white/5 bg-black/20 p-6 backdrop-blur-sm transition-all"
         :class="{'border-red-500/50': error}"
     >
-        <!-- Header -->
-        <div class="mb-4">
-            <h4 class="text-lg text-gray-100 font-bold mb-1 flex items-start gap-2">
+        <!-- Header (only for question types and titled decorative blocks) -->
+        <div v-if="!isDecorativeBlock || question.title" class="mb-4">
+            <h4 v-if="!isDecorativeBlock" class="text-lg text-gray-100 font-bold mb-1 flex items-start gap-2">
                 <span class="pr2p text-sm mt-1 text-red-400/80">Q{{ question.order_index + 1 }}.</span>
                 {{ question.title }}
                 <span v-if="question.is_required" class="text-red-500 ml-1">*</span>
             </h4>
-            <p v-if="question.description" class="text-sm text-gray-400 ml-7">
+            <h4 v-else-if="question.title" class="text-lg text-gray-100 font-bold mb-2">
+                {{ question.title }}
+            </h4>
+            <p v-if="question.description && !isDecorativeBlock" class="text-sm text-gray-400 ml-7">
                 {{ question.description }}
             </p>
         </div>
 
         <!-- Inputs -->
-        <div class="ml-7">
+        <div :class="{'ml-7': !isDecorativeBlock}">
             <!-- Short Text -->
             <input 
                 v-if="question.type === 'short_text'"
@@ -63,7 +116,6 @@ const options = computed<QuestionOptions>(() => {
             <textarea 
                 v-else-if="question.type === 'paragraph'"
                 v-model="internalValue"
-                
                 :disabled="readonly"
                 rows="4"
                 class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400 transition-all placeholder:text-gray-600 resize-y"
@@ -120,6 +172,52 @@ const options = computed<QuestionOptions>(() => {
                     {{ opt }}
                 </option>
             </select>
+
+            <!-- Image Block -->
+            <div v-else-if="question.type === 'image_block'" class="space-y-2">
+                <!-- Grid Mode -->
+                <div v-if="options.displayMode === 'grid'" class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div 
+                        v-for="(img, idx) in options.images || []" 
+                        :key="idx"
+                        class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
+                        @click="openViewer(idx)"
+                    >
+                        <img :src="img" :alt="`Image ${Number(idx) + 1}`" class="w-full h-full object-cover" />
+                    </div>
+                </div>
+                
+                <!-- Carousel Mode -->
+                <ImageCarousel 
+                    v-else-if="options.displayMode === 'carousel'" 
+                    :images="options.images || []"
+                    :show-arrows="true"
+                    :show-dots="true"
+                    @click="openViewer"
+                />
+                
+                <!-- Random Mode -->
+                <div 
+                    v-else-if="options.displayMode === 'random'"
+                    class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
+                    @click="openViewer(randomImageIndex)"
+                >
+                    <img :src="randomImage" alt="Random image" class="w-full h-full object-cover" />
+                </div>
+                
+                <!-- Image Viewer Modal -->
+                <ImageViewer 
+                    :images="options.images || []" 
+                    :initial-index="viewerIndex"
+                    :is-open="viewerOpen" 
+                    @close="viewerOpen = false" 
+                />
+            </div>
+
+            <!-- Text Block -->
+            <div v-else-if="question.type === 'text_block'" :class="textBlockClasses">
+                {{ options.content }}
+            </div>
             
             <p v-else class="text-yellow-500 text-sm italic">
                 Неподдерживаемый тип вопроса: {{ question.type }}
@@ -132,8 +230,9 @@ const options = computed<QuestionOptions>(() => {
         </p>
     </div>
 </template>
+
 <style scoped>
-/* Custom Scrollbar for Textarea if needed */
+/* Custom Scrollbar for Textarea */
 textarea::-webkit-scrollbar {
     width: 8px;
 }

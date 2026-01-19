@@ -11,7 +11,7 @@ const exclude: ExcludeRule[] = [
     { pattern: /^\/auth\/refresh$/ },
     { pattern: /^\/auth\/logout$/ },
     { pattern: /^\/user\/[^/]+\/skin(?:\/head)?(?:\.png)?$/, methods: ['GET', 'HEAD'] },
-    { pattern: /^\/user\/[^/]$/, methods: ['GET'] }, // /user/UUID
+    { pattern: /^\/user\/[^/]$/, methods: ['GET'] },
     { pattern: /^\/$/ },
     { pattern: /^\/_scalar$/ },
     { pattern: /^\/_swagger$/ },
@@ -22,7 +22,7 @@ const exclude: ExcludeRule[] = [
     { pattern: /^\/flags(\/.*)?$/ },
     { pattern: /^\/state\/[^/]+$/, methods: ['GET'] },
     { pattern: /^\/state\/[^/]+\/some$/, methods: ['GET'] },
-    { pattern: /^\/user\/[^/]+$/, methods: ['GET'] }, // /user/UUID
+    { pattern: /^\/user\/[^/]+$/, methods: ['GET'] },
     { pattern: /^\/order\/list(?:\?.*)?$/, methods: ['GET'] },
     { pattern: /^\/warrant\/list(?:\?.*)?$/, methods: ['GET'] },
     { pattern: /^\/history\/list(?:\?.*)?$/, methods: ['GET'] },
@@ -49,10 +49,6 @@ const exclude: ExcludeRule[] = [
  * Does NOT throw errors.
  */
 async function tryExtractAuth(event: any): Promise<string | null> {
-    const url = event.path || event.node.req.url || '/'
-    console.log(`[tryExtractAuth] Starting for ${url}`)
-
-    // Рекурсивная функция для удаления всех дублей "Bearer "
     const stripBearerPrefix = (token: string): string => {
         if (token.startsWith('Bearer ')) {
             return stripBearerPrefix(token.slice(7))
@@ -60,45 +56,30 @@ async function tryExtractAuth(event: any): Promise<string | null> {
         return token
     }
 
-    // Сначала пробуем получить токен из заголовка авторизации
     const authHeader = getHeader(event, 'authorization')
     let accessToken: string | undefined
-    console.log(`[tryExtractAuth] Auth header: ${authHeader?.substring(0, 20)}...`)
 
     if (authHeader?.startsWith('Bearer ')) {
         accessToken = stripBearerPrefix(authHeader)
-        console.log(`[tryExtractAuth] Token from header: ${accessToken?.substring(0, 20)}...`)
     }
 
-    // Если не найден в заголовке, пробуем cookies
     if (!accessToken) {
         const cookies = parseCookies(event)
         accessToken = cookies['auth.token']
-        if (accessToken) {
-            console.log(`[tryExtractAuth] Token from cookie: ${accessToken?.substring(0, 20)}...`)
-        } else {
-            console.log(`[tryExtractAuth] No token in cookies. Available cookies: ${Object.keys(cookies).join(', ')}`)
-        }
     }
 
     if (!accessToken) {
-        console.log(`[tryExtractAuth] No token found at all`)
         return null
     }
 
     try {
         const payload = await verifyToken(accessToken)
         const UUID = (payload as any)?.UUID
-        if (!UUID) {
-            console.log(`[tryExtractAuth] No UUID in payload`)
-            return null
-        }
+        if (!UUID) return null
 
         await checkAuth(UUID, accessToken)
-        console.log(`[tryExtractAuth] Auth successful, UUID: ${UUID}`)
         return UUID
-    } catch (e) {
-        console.log(`[tryExtractAuth] Auth failed:`, e)
+    } catch {
         return null
     }
 }
