@@ -31,17 +31,18 @@
     <div class="absolute inset-0 bg-black/70"></div>
 
     <!-- Кредит за скриншоты / ссылка на галерею -->
-    <NuxtLink
+    <a
         v-if="currentImageId"
-        :to="`/gallery/${currentImageId}`"
-        class="absolute bottom-2 right-4 text-xs text-gray-300/80 hover:text-red-400 backdrop-blur-sm px-2 rounded transition flex items-center gap-1"
+        :href="`/gallery/${currentImageId}`"
+        target="_blank"
+        class="absolute bottom-2 right-4 z-10 text-xs text-gray-300/80 hover:text-red-400 backdrop-blur-sm px-2 rounded transition flex items-center gap-1 cursor-pointer pointer-events-auto"
     >
       <Icon name="solar:info-circle-linear" class="w-3 h-3" />
       <span>Информация о скриншоте</span>
-    </NuxtLink>
+    </a>
     <p
         v-else
-        class="absolute bottom-2 right-4 text-xs text-gray-300/80 backdrop-blur-sm px-2 rounded"
+        class="absolute bottom-2 right-4 z-10 text-xs text-gray-300/80 backdrop-blur-sm px-2 rounded"
     >
       Скриншоты игроков HeliCraft
     </p>
@@ -78,7 +79,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
 import PlayerCountText from "../components/ui/PlayerCountText.vue";
 import ServerAddressCopy from "../components/ui/ServerAddressCopy.vue";
 import type { IGalleryIdsResponse } from '~/types/gallery.types';
@@ -116,7 +116,7 @@ const useGalleryImages = computed(() => galleryImageIds.value.length > 0);
 // Combined image sources for carousel
 const images = computed(() => {
   if (useGalleryImages.value) {
-    return galleryImageIds.value.map(id => `${config.public.backendURL}/gallery/${id}/image`);
+    return galleryImageIds.value.map((id: any) => `${config.public.backendURL}/gallery/${id}/image`);
   }
   return localImages.value || [];
 });
@@ -125,7 +125,7 @@ const images = computed(() => {
 const imageIdMap = computed(() => {
   if (!useGalleryImages.value) return new Map();
   const map = new Map<string, string>();
-  galleryImageIds.value.forEach(id => {
+  galleryImageIds.value.forEach((id: any) => {
     map.set(`${config.public.backendURL}/gallery/${id}/image`, id);
   });
   return map;
@@ -161,7 +161,7 @@ function onImageLoaded(id: 'A' | 'B') {
 function waitForLoad(idToWaitFor: 'A' | 'B'): Promise<void> {
   //console.log(`[WAIT] Waiting for component '${idToWaitFor}' to load.`);
   return new Promise(resolve => {
-    const unwatch = watch(lastLoaded, (newlyLoadedId) => {
+    const unwatch = watch(lastLoaded, (newlyLoadedId: any) => {
       if (newlyLoadedId === idToWaitFor) {
         //console.log(`[WATCH] Confirmed: '${idToWaitFor}' has loaded. Resolving promise.`);
         unwatch();

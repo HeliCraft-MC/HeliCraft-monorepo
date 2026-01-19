@@ -8,6 +8,16 @@ import { useMySQL } from '~/plugins/mySql';
 
 const DB_NAME = 'forms';
 
+// Helper to convert MySQL row to proper Question with boolean is_required
+function mapQuestion(row: RowDataPacket): Question {
+    return {
+        ...row,
+        is_required: Boolean(row.is_required),
+        options: typeof row.options === 'string' ? JSON.parse(row.options) : row.options,
+        validation: typeof row.validation === 'string' ? JSON.parse(row.validation) : row.validation
+    } as Question;
+}
+
 // --- Forms ---
 
 export async function getForms(limit: number = 50, offset: number = 0): Promise<Form[]> {
@@ -109,7 +119,7 @@ export async function getQuestions(formId: number): Promise<Question[]> {
         'SELECT * FROM questions WHERE form_id = ? ORDER BY order_index ASC',
         [formId]
     );
-    return rows as Question[];
+    return rows.map(mapQuestion);
 }
 
 export async function createQuestion(formId: number, dto: CreateQuestionDto): Promise<Question> {
@@ -137,7 +147,7 @@ export async function createQuestion(formId: number, dto: CreateQuestionDto): Pr
     );
 
     const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM questions WHERE id = ?', [result.insertId]);
-    return rows[0] as Question;
+    return mapQuestion(rows[0]);
 }
 
 export async function updateQuestion(id: number, dto: UpdateQuestionDto): Promise<void> {

@@ -76,19 +76,27 @@ async function loadImage() {
   error.value = ''
 
   try {
-    const response = await $fetch<IGalleryImagePublic>(
-      `${config.public.backendURL}/gallery/${imageId.value}`
+    // Use useApiFetch for proper auth cookies and token
+    const { data, error: fetchError } = await useApiFetch<IGalleryImagePublic>(
+      `/gallery/${imageId.value}`
     )
-    image.value = response
+    
+    if (fetchError.value) {
+      const e = fetchError.value as any
+      console.error('Error loading image:', e)
+      if (e.statusCode === 404) {
+        error.value = 'Изображение не найдено'
+      } else if (e.statusCode === 403) {
+        error.value = 'У вас нет доступа к этому изображению'
+      } else {
+        error.value = e.data?.message || 'Не удалось загрузить изображение'
+      }
+    } else if (data.value) {
+      image.value = data.value
+    }
   } catch (e: any) {
     console.error('Error loading image:', e)
-    if (e.status === 404) {
-      error.value = 'Изображение не найдено'
-    } else if (e.status === 403) {
-      error.value = 'У вас нет доступа к этому изображению'
-    } else {
-      error.value = e.data?.message || 'Не удалось загрузить изображение'
-    }
+    error.value = 'Не удалось загрузить изображение'
   } finally {
     loading.value = false
   }

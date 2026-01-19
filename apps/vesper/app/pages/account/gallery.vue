@@ -45,7 +45,7 @@ async function loadImages() {
 /* ───── Filtered images ───── */
 const filteredImages = computed(() => {
   if (statusFilter.value === 'all') return images.value
-  return images.value.filter(img => img.status === statusFilter.value)
+  return images.value.filter((img: IGalleryImagePublic) => img.status === statusFilter.value)
 })
 
 /* ───── Format date ───── */
