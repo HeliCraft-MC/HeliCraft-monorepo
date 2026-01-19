@@ -37,9 +37,9 @@ const isOwner = computed(() =>
 /* ───── Can edit ───── */
 const canEdit = computed(() => isOwner.value || isAdmin.value)
 
-/* ───── Image URL ───── */
+/* ───── Image URL - use proxy for auth cookies ───── */
 const imageUrl = computed(() =>
-  `${config.public.backendURL}/gallery/${imageId.value}/image`
+  `/distant-api/gallery/${imageId.value}/image`
 )
 
 /* ───── Format date ───── */

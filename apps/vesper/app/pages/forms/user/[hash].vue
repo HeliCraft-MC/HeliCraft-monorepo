@@ -2,6 +2,8 @@
 import type { Form, Question } from "@/types/forms";
 import QuestionRenderer from "@/components/forms/QuestionRenderer.vue";
 
+definePageMeta({ auth: true })
+
 const route = useRoute();
 const form = ref<Form | null>(null);
 const questions = ref<Question[]>([]);

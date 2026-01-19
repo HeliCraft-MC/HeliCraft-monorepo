@@ -37,7 +37,7 @@
             <span class="truncate">Сервер</span>
             <Icon name="ph:caret-down" class="w-4 h-4 ml-1 transition group-hover:rotate-180" />
           </button>
-          <div class="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+          <div class="absolute top-full left-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
             <div class="bg-black/95 border border-white/10 rounded-lg py-2 min-w-40 shadow-xl backdrop-blur-sm">
               <NuxtLink
                 to="/rules"

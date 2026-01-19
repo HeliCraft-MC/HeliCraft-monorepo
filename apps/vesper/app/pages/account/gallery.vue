@@ -25,8 +25,9 @@ async function loadImages() {
   error.value = ''
 
   try {
+    // Use proxy for proper auth cookies
     const response = await $fetch<IGalleryListResponse>(
-      `${config.public.backendURL}/gallery/my`,
+      `/distant-api/gallery/my`,
       {
         query: { page: currentPage.value, perPage: perPage.value },
         headers: { Authorization: `Bearer ${token.value}` }
@@ -180,7 +181,7 @@ onMounted(loadImages)
             class="group relative aspect-video overflow-hidden rounded-lg bg-gray-800"
           >
             <img
-              :src="`${config.public.backendURL}/gallery/${image.id}/image`"
+              :src="`/distant-api/gallery/${image.id}/image`"
               :alt="image.description || 'Gallery image'"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
