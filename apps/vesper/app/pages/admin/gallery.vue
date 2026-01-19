@@ -191,7 +191,7 @@ function openDeleteConfirm(image: IGalleryImagePublic) {
 function handleUpdated(updatedImage: IGalleryImagePublic) {
   // Update the image in the list
   const list = currentList.value.value
-  const index = list.findIndex(img => img.id === updatedImage.id)
+  const index = list.findIndex((img: IGalleryImagePublic) => img.id === updatedImage.id)
   if (index !== -1) {
     list[index] = updatedImage
   }

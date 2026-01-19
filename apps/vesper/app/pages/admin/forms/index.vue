@@ -20,9 +20,7 @@ const filteredForms = computed<Form[]>(() => {
 const fetchForms = async (): Promise<void> => {
     isLoading.value = true;
     try {
-        const { data } = await useFetch<Form[]>('/api/forms', {
-            headers: { Authorization: useAuth().token.value }
-        });
+        const { data } = await useApiFetch<Form[]>('/forms');
         if (data.value) forms.value = data.value;
     } catch (e: unknown) {
         useAppEventBus().emit('show-error', { message: 'Failed to load forms' });
@@ -37,10 +35,9 @@ const createForm = async (): Promise<void> => {
     if (!title) return;
 
     try {
-        const { data, error } = await useFetch<Form>('/api/forms', {
+        const { data, error } = await useApiFetch<Form>('/forms', {
             method: 'POST',
-            body: { title },
-            headers: { Authorization: useAuth().token.value }
+            body: { title }
         });
         
         if (error.value) throw error.value;
@@ -55,10 +52,7 @@ const createForm = async (): Promise<void> => {
 const deleteForm = async (id: number): Promise<void> => {
     if (!confirm('Вы уверены? Форма будет отправлена в архив.')) return;
     try {
-        await useFetch(`/api/forms/${id}`, {
-            method: 'DELETE',
-            headers: { Authorization: useAuth().token.value }
-        });
+        await useApiFetch(`/forms/${id}`, { method: 'DELETE' });
         await fetchForms();
     } catch (e: unknown) {
         useAppEventBus().emit('show-error', { message: 'Failed to delete form' });

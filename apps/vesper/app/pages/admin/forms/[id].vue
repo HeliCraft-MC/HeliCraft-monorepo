@@ -9,7 +9,6 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const form = ref<Form | null>(null);
-// We can define a type for FormWithQuestions if reused frequently, else intersection is fine
 const questions = ref<Question[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
@@ -22,9 +21,7 @@ const publicUrl = computed<string | null>(() => {
 // Fetch Data
 const fetchData = async (): Promise<void> => {
     try {
-        const { data } = await useFetch<Form & { questions: Question[] }>(`/api/forms/${route.params.id}`, {
-            headers: { Authorization: useAuth().token.value }
-        });
+        const { data } = await useApiFetch<Form & { questions: Question[] }>(`/forms/${route.params.id}`);
         if (data.value) {
             const { questions: qs, ...f } = data.value;
             form.value = f;
@@ -42,10 +39,9 @@ const updateFormMetadata = async (): Promise<void> => {
     if (!form.value) return;
     isSaving.value = true;
     try {
-        await useFetch(`/api/forms/${form.value.id}`, {
+        await useApiFetch(`/forms/${form.value.id}`, {
             method: 'PATCH',
-            body: { title: form.value.title, description: form.value.description },
-            headers: { Authorization: useAuth().token.value }
+            body: { title: form.value.title, description: form.value.description }
         });
     } finally {
         isSaving.value = false;
@@ -55,14 +51,13 @@ const updateFormMetadata = async (): Promise<void> => {
 const addQuestion = async (): Promise<void> => {
     if (!form.value) return;
     try {
-        const { data } = await useFetch<Question>(`/api/forms/${form.value.id}/questions`, {
+        const { data } = await useApiFetch<Question>(`/forms/${form.value.id}/questions`, {
             method: 'POST',
             body: { 
                 type: 'short_text', 
                 title: 'Новый вопрос',
                 order_index: questions.value.length
-            },
-            headers: { Authorization: useAuth().token.value }
+            }
         });
         if (data.value) questions.value.push(data.value);
     } catch (e: unknown) { console.error(e) }
@@ -70,12 +65,10 @@ const addQuestion = async (): Promise<void> => {
 
 const updateQuestion = async (q: Question): Promise<void> => {
     try {
-        await useFetch(`/api/forms/questions/${q.id}`, {
+        await useApiFetch(`/forms/questions/${q.id}`, {
             method: 'PATCH',
-            body: q,
-            headers: { Authorization: useAuth().token.value }
+            body: q
         });
-        // Update local state deeply to ensure UI reflects changes (if needed)
         const idx = questions.value.findIndex((item: Question) => item.id === q.id);
         if (idx !== -1) questions.value[idx] = q;
     } catch (e: unknown) { console.error(e) }
@@ -84,10 +77,7 @@ const updateQuestion = async (q: Question): Promise<void> => {
 const deleteQuestion = async (id: number): Promise<void> => {
     if(!confirm('Удалить вопрос?')) return;
     try {
-        await useFetch(`/api/forms/questions/${id}`, {
-            method: 'DELETE',
-            headers: { Authorization: useAuth().token.value }
-        });
+        await useApiFetch(`/forms/questions/${id}`, { method: 'DELETE' });
         questions.value = questions.value.filter((q: Question) => q.id !== id);
     } catch (e: unknown) { console.error(e) }
 };
@@ -96,9 +86,8 @@ const publish = async (): Promise<void> => {
     if (!form.value) return;
     if(!confirm('Опубликовать форму? Ссылка станет доступной.')) return;
     try {
-        const { data } = await useFetch<{ public_hash: string }>(`/api/forms/${form.value.id}/publish`, {
-            method: 'POST',
-            headers: { Authorization: useAuth().token.value }
+        const { data } = await useApiFetch<{ public_hash: string }>(`/forms/${form.value.id}/publish`, {
+            method: 'POST'
         });
         if (data.value) form.value.public_hash = data.value.public_hash;
         form.value.status = 'published';
@@ -114,17 +103,14 @@ const reorder = async (direction: 'up'|'down', id: number): Promise<void> => {
     if (direction === 'down' && idx === questions.value.length - 1) return;
 
     const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-    // Swap
     const temp = questions.value[idx];
     questions.value[idx] = questions.value[newIdx];
     questions.value[newIdx] = temp;
 
-    // Send Reorder API
     const ids = questions.value.map((q: Question) => q.id);
-    await useFetch(`/api/forms/${form.value?.id}/order`, {
+    await useApiFetch(`/forms/${form.value?.id}/order`, {
         method: 'PUT',
-        body: ids,
-        headers: { Authorization: useAuth().token.value }
+        body: ids
     });
 };
 

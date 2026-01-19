@@ -6,6 +6,7 @@ const route = useRoute();
 const form = ref<Form | null>(null);
 const questions = ref<Question[]>([]);
 const answers = reactive<Record<string, any>>({}); // Key: question_uuid
+const fetchError = ref<boolean>(false);
 
 const isSubmitting = ref(false);
 const isSuccess = ref(false);
@@ -13,7 +14,11 @@ const errors = reactive<Record<string, string>>({});
 
 // Fetch
 const fetchForm = async (): Promise<void> => {
-    const { data } = await useFetch<{ form: Form, questions: Question[] }>(`/api/forms/user/${route.params.hash}`);
+    const { data, error } = await useApiFetch<{ form: Form, questions: Question[] }>(`/forms/user/${route.params.hash}`);
+    if (error.value) {
+        fetchError.value = true;
+        return;
+    }
     if (data.value) {
         form.value = data.value.form;
         questions.value = data.value.questions;
@@ -44,7 +49,7 @@ const validate = (): boolean => {
 
 const submit = async (): Promise<void> => {
     if (!validate()) {
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // or to first error
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
     }
 
@@ -54,10 +59,9 @@ const submit = async (): Promise<void> => {
             answers: Object.entries(answers).map(([uuid, value]) => ({ question_uuid: uuid, value }))
         };
 
-        const { error: submitError } = await useFetch(`/api/forms/user/${route.params.hash}/submit`, {
+        const { error: submitError } = await useApiFetch(`/forms/user/${route.params.hash}/submit`, {
             method: 'POST',
-            body: payload,
-             headers: { Authorization: useAuth().token.value } // Required by backend even for public forms
+            body: payload
         });
 
         if (submitError.value) throw submitError.value;
@@ -65,7 +69,6 @@ const submit = async (): Promise<void> => {
     } catch (e: any) {
         if (e.statusCode === 401) {
             alert('Пожалуйста, войдите в аккаунт, чтобы заполнить форму.');
-            // redirect to login safely?
         } else {
              alert('Ошибка отправки. Попробуйте позже.');
         }
@@ -126,7 +129,7 @@ const submit = async (): Promise<void> => {
             <button @click="navigateTo('/')" class="text-red-400 hover:text-red-300 underline">Вернуться на главную</button>
         </div>
     </div>
-    <div v-else-if="error" class="min-h-screen flex items-center justify-center text-center p-4">
+    <div v-else-if="fetchError" class="min-h-screen flex items-center justify-center text-center p-4">
         <div>
             <h1 class="text-2xl text-red-500 font-bold mb-2">Форма не найдена</h1>
             <p class="text-gray-500">Возможно, она была удалена или ссылка неверна.</p>
