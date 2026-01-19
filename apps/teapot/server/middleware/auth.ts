@@ -49,6 +49,9 @@ const exclude: ExcludeRule[] = [
  * Does NOT throw errors.
  */
 async function tryExtractAuth(event: any): Promise<string | null> {
+    const url = event.path || event.node.req.url || '/'
+    console.log(`[tryExtractAuth] Starting for ${url}`)
+
     // Рекурсивная функция для удаления всех дублей "Bearer "
     const stripBearerPrefix = (token: string): string => {
         if (token.startsWith('Bearer ')) {
@@ -63,26 +66,38 @@ async function tryExtractAuth(event: any): Promise<string | null> {
 
     if (authHeader?.startsWith('Bearer ')) {
         accessToken = stripBearerPrefix(authHeader)
+        console.log(`[tryExtractAuth] Token from header: ${accessToken?.substring(0, 20)}...`)
     }
 
     // Если не найден в заголовке, пробуем cookies
     if (!accessToken) {
         const cookies = parseCookies(event)
         accessToken = cookies['auth.token']
+        if (accessToken) {
+            console.log(`[tryExtractAuth] Token from cookie: ${accessToken?.substring(0, 20)}...`)
+        } else {
+            console.log(`[tryExtractAuth] No token in cookies. Available cookies: ${Object.keys(cookies).join(', ')}`)
+        }
     }
 
     if (!accessToken) {
+        console.log(`[tryExtractAuth] No token found at all`)
         return null
     }
 
     try {
         const payload = await verifyToken(accessToken)
         const UUID = (payload as any)?.UUID
-        if (!UUID) return null
+        if (!UUID) {
+            console.log(`[tryExtractAuth] No UUID in payload`)
+            return null
+        }
 
         await checkAuth(UUID, accessToken)
+        console.log(`[tryExtractAuth] Auth successful, UUID: ${UUID}`)
         return UUID
-    } catch {
+    } catch (e) {
+        console.log(`[tryExtractAuth] Auth failed:`, e)
         return null
     }
 }
