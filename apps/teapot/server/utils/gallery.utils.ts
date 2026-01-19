@@ -42,17 +42,17 @@ async function getUserInfo(uuid: string): Promise<GalleryUserInfo | null> {
  */
 async function parseInvolvedPlayers(playersStr: string | null): Promise<GalleryUserInfo[]> {
   if (!playersStr) return []
-  
+
   const uuids = playersStr.split(',').map(s => s.trim()).filter(Boolean)
   const results: GalleryUserInfo[] = []
-  
+
   for (const uuid of uuids) {
     const userInfo = await getUserInfo(uuid)
     if (userInfo) {
       results.push(userInfo)
     }
   }
-  
+
   return results
 }
 
@@ -62,7 +62,7 @@ async function parseInvolvedPlayers(playersStr: string | null): Promise<GalleryU
 async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
   const ownerInfo = await getUserInfo(image.owner_uuid)
   const involvedPlayers = await parseInvolvedPlayers(image.involved_players)
-  
+
   return {
     id: image.id,
     path: image.path,
@@ -104,7 +104,7 @@ export async function createGalleryImage(
 ): Promise<GalleryImage> {
   const db = useSkinSQLite()
   const fileService = useFileService()
-  
+
   // Check if user is banned
   const uploadError = await canUserUpload(dto.owner_uuid)
   if (uploadError) {
@@ -114,18 +114,18 @@ export async function createGalleryImage(
       data: { statusMessageRu: 'Забаненные пользователи не могут загружать изображения' }
     })
   }
-  
+
   // Save file
   const extension = mime === 'image/png' ? 'png' : mime === 'image/jpeg' ? 'jpg' : 'webp'
   const fileMeta = await fileService.saveFile(data, {
     subDir: 'gallery',
     extension
   })
-  
+
   const id = uuidv4()
   const now = Math.floor(Date.now() / 1000)
   const normalizedOwner = normalizeUuid(dto.owner_uuid)
-  
+
   db.prepare(`
     INSERT INTO gallery (
       id, path, mime, size, owner_uuid, description,
@@ -142,7 +142,7 @@ export async function createGalleryImage(
     now,
     normalizedOwner // By default, owner is the only involved player
   )
-  
+
   return getGalleryImage(id)
 }
 
@@ -152,7 +152,7 @@ export async function createGalleryImage(
 export function getGalleryImage(id: string): GalleryImage {
   const db = useSkinSQLite()
   const image = db.prepare('SELECT * FROM gallery WHERE id = ?').get(id) as GalleryImage | undefined
-  
+
   if (!image) {
     throw createError({
       statusCode: 404,
@@ -160,7 +160,7 @@ export function getGalleryImage(id: string): GalleryImage {
       data: { statusMessageRu: 'Изображение не найдено' }
     })
   }
-  
+
   return image
 }
 
@@ -176,13 +176,16 @@ export async function getGalleryImagePublic(id: string): Promise<GalleryImagePub
  * Check if user can view image
  */
 export function canViewImage(image: GalleryImage, userUuid: string | null, isAdmin: boolean): boolean {
+
+  console.log("canViewImage", image.id, image.status, image.owner_uuid, userUuid, isAdmin)
+
+  if (isAdmin) return true
   // Approved images are visible to everyone
   if (image.status === 'approved') return true
-  
+
   // Pending/rejected images visible only to owner and admins
-  if (isAdmin) return true
   if (userUuid && normalizeUuid(userUuid) === normalizeUuid(image.owner_uuid)) return true
-  
+
   return false
 }
 
@@ -196,10 +199,10 @@ export async function listGalleryImages(
   includeFullObjects: boolean = true
 ): Promise<PaginatedResponse<GalleryImagePublic | string>> {
   const db = useSkinSQLite()
-  
+
   let whereClauses: string[] = []
   let params: any[] = []
-  
+
   // Only show approved images by default
   if (filters.status) {
     whereClauses.push('status = ?')
@@ -207,47 +210,47 @@ export async function listGalleryImages(
   } else {
     whereClauses.push("status = 'approved'")
   }
-  
+
   if (filters.category) {
     whereClauses.push('category = ?')
     params.push(filters.category)
   }
-  
+
   if (filters.season) {
     whereClauses.push('season = ?')
     params.push(filters.season)
   }
-  
+
   if (filters.owner_uuid) {
     whereClauses.push('owner_uuid = ?')
     params.push(normalizeUuid(filters.owner_uuid))
   }
-  
+
   const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
-  
+
   // Get total count
   const countResult = db.prepare(`SELECT COUNT(*) as count FROM gallery ${whereClause}`).get(...params) as { count: number }
   const total = countResult.count
-  
+
   // Calculate pagination
   const totalPages = Math.ceil(total / perPage)
   const offset = (page - 1) * perPage
-  
+
   // Get items
   const rows = db.prepare(`
     SELECT * FROM gallery ${whereClause}
     ORDER BY created_at DESC
     LIMIT ? OFFSET ?
   `).all(...params, perPage, offset) as GalleryImage[]
-  
+
   let items: (GalleryImagePublic | string)[]
-  
+
   if (includeFullObjects) {
     items = await Promise.all(rows.map(toPublicImage))
   } else {
     items = rows.map(r => r.id)
   }
-  
+
   return {
     items,
     total,
@@ -283,24 +286,24 @@ export async function listUserImages(
 ): Promise<PaginatedResponse<GalleryImagePublic>> {
   const db = useSkinSQLite()
   const normalizedUuid = normalizeUuid(userUuid)
-  
+
   // Get total count
   const countResult = db.prepare('SELECT COUNT(*) as count FROM gallery WHERE owner_uuid = ?').get(normalizedUuid) as { count: number }
   const total = countResult.count
-  
+
   // Calculate pagination
   const totalPages = Math.ceil(total / perPage)
   const offset = (page - 1) * perPage
-  
+
   // Get items
   const rows = db.prepare(`
     SELECT * FROM gallery WHERE owner_uuid = ?
     ORDER BY created_at DESC
     LIMIT ? OFFSET ?
   `).all(normalizedUuid, perPage, offset) as GalleryImage[]
-  
+
   const items = await Promise.all(rows.map(toPublicImage))
-  
+
   return {
     items,
     total,
@@ -320,7 +323,7 @@ export async function updateGalleryImageByOwner(
 ): Promise<GalleryImagePublic> {
   const db = useSkinSQLite()
   const image = getGalleryImage(id)
-  
+
   // Verify ownership
   if (normalizeUuid(image.owner_uuid) !== normalizeUuid(ownerUuid)) {
     throw createError({
@@ -329,14 +332,14 @@ export async function updateGalleryImageByOwner(
       data: { statusMessageRu: 'Нет прав для редактирования этого изображения' }
     })
   }
-  
+
   const now = Math.floor(Date.now() / 1000)
-  
+
   if (dto.description !== undefined) {
     db.prepare('UPDATE gallery SET description = ?, updated_at = ? WHERE id = ?')
       .run(dto.description, now, id)
   }
-  
+
   return getGalleryImagePublic(id)
 }
 
@@ -349,54 +352,54 @@ export async function updateGalleryImageByAdmin(
 ): Promise<GalleryImagePublic> {
   const db = useSkinSQLite()
   const image = getGalleryImage(id) // Verify exists
-  
+
   const updates: string[] = []
   const params: any[] = []
-  
+
   if (dto.description !== undefined) {
     updates.push('description = ?')
     params.push(dto.description)
   }
-  
+
   if (dto.category !== undefined) {
     updates.push('category = ?')
     params.push(dto.category)
   }
-  
+
   if (dto.season !== undefined) {
     updates.push('season = ?')
     params.push(dto.season)
   }
-  
+
   if (dto.coord_x !== undefined) {
     updates.push('coord_x = ?')
     params.push(dto.coord_x)
   }
-  
+
   if (dto.coord_y !== undefined) {
     updates.push('coord_y = ?')
     params.push(dto.coord_y)
   }
-  
+
   if (dto.coord_z !== undefined) {
     updates.push('coord_z = ?')
     params.push(dto.coord_z)
   }
-  
+
   if (dto.involved_players !== undefined) {
     updates.push('involved_players = ?')
     params.push(dto.involved_players)
   }
-  
+
   if (updates.length > 0) {
     const now = Math.floor(Date.now() / 1000)
     updates.push('updated_at = ?')
     params.push(now)
     params.push(id)
-    
+
     db.prepare(`UPDATE gallery SET ${updates.join(', ')} WHERE id = ?`).run(...params)
   }
-  
+
   return getGalleryImagePublic(id)
 }
 
@@ -406,9 +409,9 @@ export async function updateGalleryImageByAdmin(
 export async function approveGalleryImage(id: string): Promise<GalleryImagePublic> {
   const db = useSkinSQLite()
   const now = Math.floor(Date.now() / 1000)
-  
+
   const result = db.prepare("UPDATE gallery SET status = 'approved', updated_at = ? WHERE id = ?").run(now, id)
-  
+
   if (result.changes === 0) {
     throw createError({
       statusCode: 404,
@@ -416,7 +419,7 @@ export async function approveGalleryImage(id: string): Promise<GalleryImagePubli
       data: { statusMessageRu: 'Изображение не найдено' }
     })
   }
-  
+
   return getGalleryImagePublic(id)
 }
 
@@ -426,9 +429,9 @@ export async function approveGalleryImage(id: string): Promise<GalleryImagePubli
 export async function rejectGalleryImage(id: string): Promise<GalleryImagePublic> {
   const db = useSkinSQLite()
   const now = Math.floor(Date.now() / 1000)
-  
+
   const result = db.prepare("UPDATE gallery SET status = 'rejected', updated_at = ? WHERE id = ?").run(now, id)
-  
+
   if (result.changes === 0) {
     throw createError({
       statusCode: 404,
@@ -436,7 +439,7 @@ export async function rejectGalleryImage(id: string): Promise<GalleryImagePublic
       data: { statusMessageRu: 'Изображение не найдено' }
     })
   }
-  
+
   return getGalleryImagePublic(id)
 }
 
@@ -446,15 +449,15 @@ export async function rejectGalleryImage(id: string): Promise<GalleryImagePublic
 export async function deleteGalleryImage(id: string): Promise<boolean> {
   const db = useSkinSQLite()
   const fileService = useFileService()
-  
+
   const image = getGalleryImage(id)
-  
+
   // Delete file
   await fileService.deleteFile(image.path)
-  
+
   // Delete from database
   db.prepare('DELETE FROM gallery WHERE id = ?').run(id)
-  
+
   return true
 }
 
@@ -468,7 +471,7 @@ export function getGalleryCategories(): string[] {
     WHERE category IS NOT NULL AND category != '' AND status = 'approved'
     ORDER BY category
   `).all() as { category: string }[]
-  
+
   return rows.map(r => r.category)
 }
 
@@ -482,6 +485,6 @@ export function getGallerySeasons(): string[] {
     WHERE season IS NOT NULL AND season != '' AND status = 'approved'
     ORDER BY season
   `).all() as { season: string }[]
-  
+
   return rows.map(r => r.season)
 }
