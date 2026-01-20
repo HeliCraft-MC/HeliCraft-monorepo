@@ -30,24 +30,22 @@ export default defineEventHandler(async (event) => {
     const form = await getFormById(id)
     if (!form) throw createError({ statusCode: 404, statusMessage: 'Form not found' })
 
-    const pool = useMySQL('forms')
+    const formsPool = useMySQL('forms')
+    const defaultPool = useMySQL('default')
 
     // Get questions for this form
     const questions = await getQuestions(id)
 
-    // Get all responses with respondent info
-    const [responses] = await pool.execute<RowDataPacket[]>(
-        `SELECT r.id, r.respondent_uuid, r.submitted_at, u.nickname as respondent_nickname
-         FROM responses r
-         LEFT JOIN helicraft.users u ON r.respondent_uuid = u.uuid
-         WHERE r.form_id = ?
-         ORDER BY r.submitted_at DESC`,
+    // Get all responses
+    const [responses] = await formsPool.execute<RowDataPacket[]>(
+        `SELECT id, respondent_uuid, submitted_at
+         FROM responses
+         WHERE form_id = ?
+         ORDER BY submitted_at DESC`,
         [id]
     )
 
-    // Get all answers for these responses
-    const responseIds = responses.map(r => r.id)
-    if (responseIds.length === 0) {
+    if (responses.length === 0) {
         return {
             form: { id: form.id, title: form.title, status: form.status },
             questions: questions.filter(q => !['image_block', 'text_block'].includes(q.type)).map(q => ({
@@ -62,7 +60,22 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    const [answers] = await pool.execute<RowDataPacket[]>(
+    // Get nicknames for respondents from default database
+    const uuids = responses.map(r => r.respondent_uuid)
+    const [users] = await defaultPool.execute<RowDataPacket[]>(
+        `SELECT uuid, nickname FROM users WHERE uuid IN (${uuids.map(() => '?').join(',')})`,
+        uuids
+    )
+
+    const nicknameMap = new Map<string, string>()
+    for (const user of users) {
+        nicknameMap.set(user.uuid, user.nickname)
+    }
+
+    // Get all answers for these responses
+    const responseIds = responses.map(r => r.id)
+
+    const [answers] = await formsPool.execute<RowDataPacket[]>(
         `SELECT a.response_id, a.question_id, a.value, q.uuid as question_uuid
          FROM answers a
          JOIN questions q ON a.question_id = q.id
@@ -88,7 +101,7 @@ export default defineEventHandler(async (event) => {
     const responsesWithAnswers: ResponseWithAnswers[] = responses.map(r => ({
         id: r.id,
         respondent_uuid: r.respondent_uuid,
-        respondent_nickname: r.respondent_nickname || 'Unknown',
+        respondent_nickname: nicknameMap.get(r.respondent_uuid) || 'Unknown',
         submitted_at: r.submitted_at,
         answers: answersByResponse.get(r.id) || {}
     }))
