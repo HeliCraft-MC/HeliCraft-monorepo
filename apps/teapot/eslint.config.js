@@ -8,7 +8,7 @@ export default antfu({
   stylistic: {
     indent: 2,
     quotes: 'single',
-    semi: false,
+    semi: true,
   },
 
   // Ignore patterns (only build artifacts)
@@ -23,7 +23,6 @@ export default antfu({
 
   // Strict rules
   rules: {
-    // Allow console.log in server code (this is backend)
     'no-console': 'off',
   },
 })
