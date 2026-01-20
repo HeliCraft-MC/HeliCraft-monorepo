@@ -74,12 +74,13 @@ async function tryExtractAuth(event: any): Promise<string | null> {
 
     try {
         const payload = await verifyToken(accessToken);
-        const UUID = (payload as any)?.UUID;
-        if (!UUID)
+        // Token payload uses camelCase (uuid, not UUID)
+        const uuid = (payload as any)?.uuid || (payload as any)?.UUID;
+        if (!uuid)
             return null;
 
-        await checkAuth(UUID, accessToken);
-        return UUID;
+        await checkAuth(uuid, accessToken);
+        return uuid;
     }
     catch {
         return null;
