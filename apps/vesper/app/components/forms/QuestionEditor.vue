@@ -12,6 +12,9 @@ const emit = defineEmits<{
     (e: 'delete', id: number): void;
     (e: 'move-up', id: number): void;
     (e: 'move-down', id: number): void;
+    (e: 'copy', q: Question): void;
+    (e: 'insert-before', id: number): void;
+    (e: 'insert-after', id: number): void;
 }>();
 
 const localQuestion = ref<Question>({...props.question});
@@ -200,6 +203,23 @@ const types = [
 
 const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(localQuestion.value.type));
 const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].includes(localQuestion.value.type));
+
+// Context menu state
+const showContextMenu = ref(false);
+const contextMenuRef = ref<HTMLElement | null>(null);
+
+// Close menu on click outside
+onMounted(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+        if (contextMenuRef.value && !contextMenuRef.value.contains(e.target as Node)) {
+            showContextMenu.value = false;
+        }
+    };
+    document.addEventListener('click', handleClickOutside);
+    onUnmounted(() => {
+        document.removeEventListener('click', handleClickOutside);
+    });
+});
 </script>
 
 <template>
@@ -213,6 +233,44 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
              <div class="flex items-center gap-2">
                  <button @click="$emit('move-up', question.id)" class="p-1 hover:text-white text-gray-500"><Icon name="ph:arrow-up" /></button>
                  <button @click="$emit('move-down', question.id)" class="p-1 hover:text-white text-gray-500"><Icon name="ph:arrow-down" /></button>
+                 <div class="h-4 w-px bg-white/10 mx-1"></div>
+                 
+                 <!-- Context Menu -->
+                 <div class="relative" ref="contextMenuRef">
+                     <button 
+                         @click.stop="showContextMenu = !showContextMenu" 
+                         class="p-1 hover:text-white text-gray-500 transition-colors"
+                     >
+                         <Icon name="ph:dots-three-bold" />
+                     </button>
+                     <div 
+                         v-if="showContextMenu" 
+                         class="absolute right-0 top-full mt-1 bg-black/95 border border-white/10 rounded-lg shadow-xl z-50 py-1 min-w-[180px]"
+                     >
+                         <button 
+                             @click="$emit('copy', {...localQuestion, options: options}); showContextMenu = false"
+                             class="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+                         >
+                             <Icon name="ph:copy" size="16" />
+                             Скопировать блок
+                         </button>
+                         <button 
+                             @click="$emit('insert-before', question.id); showContextMenu = false"
+                             class="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+                         >
+                             <Icon name="ph:arrow-up" size="16" />
+                             Новый вопрос перед
+                         </button>
+                         <button 
+                             @click="$emit('insert-after', question.id); showContextMenu = false"
+                             class="w-full px-3 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+                         >
+                             <Icon name="ph:arrow-down" size="16" />
+                             Новый вопрос после
+                         </button>
+                     </div>
+                 </div>
+                 
                  <div class="h-4 w-px bg-white/10 mx-1"></div>
                  <button @click="$emit('delete', question.id)" class="p-1 hover:text-red-400 text-gray-500 transition-colors"><Icon name="ph:trash" /></button>
              </div>

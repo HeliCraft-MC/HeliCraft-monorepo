@@ -3,6 +3,7 @@ import type { Form, Question } from "@/types/forms";
 import QuestionEditor from "@/components/forms/QuestionEditor.vue";
 import ConfirmModal from "@/components/common/ConfirmModal.vue";
 import { VueDraggable } from 'vue-draggable-plus';
+import { useDebounceFn } from '@vueuse/core';
 
 definePageMeta({
   layout: 'admin'
@@ -118,15 +119,25 @@ const addQuestion = async (): Promise<void> => {
     } catch (e: unknown) { console.error(e) }
 };
 
-const updateQuestion = async (q: Question): Promise<void> => {
+// Debounced save to prevent rapid PATCH requests
+const saveQuestionToServer = async (q: Question): Promise<void> => {
     try {
         await useApiFetch(`/forms/questions/${q.id}`, {
             method: 'PATCH',
             body: q
         });
-        const idx = questions.value.findIndex((item: Question) => item.id === q.id);
-        if (idx !== -1) questions.value[idx] = q;
     } catch (e: unknown) { console.error(e) }
+};
+
+const debouncedSave = useDebounceFn(saveQuestionToServer, 2000);
+
+const updateQuestion = (q: Question): void => {
+    // Update local state immediately
+    const idx = questions.value.findIndex((item: Question) => item.id === q.id);
+    if (idx !== -1) questions.value[idx] = q;
+    // Debounce server save
+    isSaving.value = true;
+    debouncedSave(q).then(() => { isSaving.value = false; });
 };
 
 const confirmDeleteQuestion = (id: number): void => {
@@ -186,14 +197,62 @@ const handleRepublish = async (): Promise<void> => {
     }
 };
 
-// Drag and drop reorder
-const onDragEnd = async (): Promise<void> => {
+// Copy question (duplicate below current)
+const copyQuestion = async (q: Question): Promise<void> => {
+    if (!form.value) return;
+    const idx = questions.value.findIndex((item: Question) => item.id === q.id);
+    try {
+        const { data } = await useApiFetch<Question>(`/forms/${form.value.id}/questions`, {
+            method: 'POST',
+            body: { 
+                type: q.type, 
+                title: q.title + ' (копия)',
+                options: q.options,
+                is_required: q.is_required,
+                order_index: idx + 1
+            }
+        });
+        if (data.value) {
+            questions.value.splice(idx + 1, 0, data.value);
+            await syncOrder();
+        }
+    } catch (e: unknown) { console.error(e) }
+};
+
+// Insert new question at specific position
+const insertQuestionAt = async (position: 'before' | 'after', refId: number): Promise<void> => {
+    if (!form.value) return;
+    const idx = questions.value.findIndex((q: Question) => q.id === refId);
+    const insertIdx = position === 'before' ? idx : idx + 1;
+    try {
+        const { data } = await useApiFetch<Question>(`/forms/${form.value.id}/questions`, {
+            method: 'POST',
+            body: { 
+                type: 'short_text', 
+                title: 'Новый вопрос',
+                order_index: insertIdx
+            }
+        });
+        if (data.value) {
+            questions.value.splice(insertIdx, 0, data.value);
+            await syncOrder();
+        }
+    } catch (e: unknown) { console.error(e) }
+};
+
+// Sync question order to server
+const syncOrder = async (): Promise<void> => {
     if (!form.value) return;
     const ids = questions.value.map((q: Question) => q.id);
     await useApiFetch(`/forms/${form.value.id}/order`, {
         method: 'PUT',
         body: ids
     });
+};
+
+// Drag and drop reorder
+const onDragEnd = async (): Promise<void> => {
+    await syncOrder();
 };
 
 // Manual reorder (buttons)
@@ -217,7 +276,7 @@ onMounted(fetchData);
 <template>
     <div v-if="form" class="min-h-screen bg-[#050505] pb-20">
         <!-- Sticky Header -->
-        <div class="sticky top-0 z-30 border-b border-white/5 bg-black/80 backdrop-blur-md px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl">
+        <div class="sticky top-16 z-30 border-b border-white/5 bg-black/80 backdrop-blur-md px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl">
             <div class="flex items-center gap-4 w-full md:w-auto">
                 <button @click="router.back()" class="text-gray-400 hover:text-white"><Icon name="ph:arrow-left-bold" size="24" /></button>
                 <div class="flex-1">
@@ -355,6 +414,9 @@ onMounted(fetchData);
                     @delete="confirmDeleteQuestion"
                     @move-up="reorder('up', $event)"
                     @move-down="reorder('down', $event)"
+                    @copy="copyQuestion"
+                    @insert-before="insertQuestionAt('before', $event)"
+                    @insert-after="insertQuestionAt('after', $event)"
                 />
             </VueDraggable>
 

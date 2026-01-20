@@ -58,6 +58,22 @@ export default defineNitroPlugin((nitroApp) => {
   db.run('CREATE INDEX IF NOT EXISTS idx_gallery_category ON gallery(category);')
   db.run('CREATE INDEX IF NOT EXISTS idx_gallery_season ON gallery(season);')
 
+  // Авто-миграция (таблица file_refs для CAS)
+  console.log('SQLite: creating table file_refs')
+  db.run(`
+    CREATE TABLE IF NOT EXISTS file_refs (
+      hash         TEXT PRIMARY KEY,
+      path         TEXT NOT NULL,
+      mime         TEXT NOT NULL,
+      size         INTEGER NOT NULL,
+      ref_count    INTEGER NOT NULL DEFAULT 1,
+      created_at   INTEGER NOT NULL,
+      last_used_at INTEGER NOT NULL
+    );
+  `)
+  db.run('CREATE INDEX IF NOT EXISTS idx_file_refs_path ON file_refs(path);')
+  db.run('CREATE INDEX IF NOT EXISTS idx_file_refs_refcount ON file_refs(ref_count);')
+
   // Публикуем экземпляр в контексте Nitro
   // @ts-ignore
   nitroApp.sqlite = db
