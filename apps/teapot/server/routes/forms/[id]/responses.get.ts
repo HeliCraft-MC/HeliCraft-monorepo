@@ -63,13 +63,13 @@ export default defineEventHandler(async (event) => {
     // Get nicknames for respondents from default database
     const uuids = responses.map(r => r.respondent_uuid)
     const [users] = await defaultPool.execute<RowDataPacket[]>(
-        `SELECT uuid, nickname FROM users WHERE uuid IN (${uuids.map(() => '?').join(',')})`,
+        `SELECT UUID, NICKNAME FROM AUTH WHERE UUID IN (${uuids.map(() => '?').join(',')})`,
         uuids
     )
 
     const nicknameMap = new Map<string, string>()
     for (const user of users) {
-        nicknameMap.set(user.uuid, user.nickname)
+        nicknameMap.set(user.UUID, user.NICKNAME)
     }
 
     // Get all answers for these responses
