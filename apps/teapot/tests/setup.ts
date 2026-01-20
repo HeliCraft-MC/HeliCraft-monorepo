@@ -16,54 +16,54 @@ let pool: mysql.Pool | null = null;
  * Call this in beforeAll()
  */
 export async function startMySqlContainer(): Promise<StartedMySqlContainer> {
-  if (container)
+    if (container)
+        return container;
+
+    container = await new MySqlContainer('mysql:8.0')
+        .withDatabase('test_forms')
+        .withUsername('test')
+        .withUserPassword('test')
+        .start();
+
     return container;
-
-  container = await new MySqlContainer('mysql:8.0')
-    .withDatabase('test_forms')
-    .withUsername('test')
-    .withUserPassword('test')
-    .start();
-
-  return container;
 }
 
 /**
  * Get a MySQL pool connected to the test container
  */
 export async function getTestPool(): Promise<mysql.Pool> {
-  if (pool)
+    if (pool)
+        return pool;
+    if (!container)
+        throw new Error('Container not started. Call startMySqlContainer() first.');
+
+    pool = mysql.createPool({
+        host: container.getHost(),
+        port: container.getMappedPort(3306),
+        user: container.getUsername(),
+        password: container.getUserPassword(),
+        database: container.getDatabase(),
+    });
+
     return pool;
-  if (!container)
-    throw new Error('Container not started. Call startMySqlContainer() first.');
-
-  pool = mysql.createPool({
-    host: container.getHost(),
-    port: container.getMappedPort(3306),
-    user: container.getUsername(),
-    password: container.getUserPassword(),
-    database: container.getDatabase(),
-  });
-
-  return pool;
 }
 
 /**
  * Get a Drizzle client for the test database
  */
 export async function getTestFormsDb(): Promise<MySql2Database<typeof formsSchema>> {
-  const testPool = await getTestPool();
-  return drizzle(testPool, { schema: formsSchema, mode: 'default' });
+    const testPool = await getTestPool();
+    return drizzle(testPool, { schema: formsSchema, mode: 'default' });
 }
 
 /**
  * Run migrations/create tables for testing
  */
 export async function setupTestDatabase(): Promise<void> {
-  const testPool = await getTestPool();
+    const testPool = await getTestPool();
 
-  // Create tables (simplified version of forms.sql)
-  await testPool.execute(`
+    // Create tables (simplified version of forms.sql)
+    await testPool.execute(`
     CREATE TABLE IF NOT EXISTS forms (
       id INT AUTO_INCREMENT PRIMARY KEY,
       uuid VARCHAR(36) NOT NULL UNIQUE,
@@ -79,7 +79,7 @@ export async function setupTestDatabase(): Promise<void> {
     )
   `);
 
-  await testPool.execute(`
+    await testPool.execute(`
     CREATE TABLE IF NOT EXISTS questions (
       id INT AUTO_INCREMENT PRIMARY KEY,
       form_id INT NOT NULL,
@@ -97,7 +97,7 @@ export async function setupTestDatabase(): Promise<void> {
     )
   `);
 
-  await testPool.execute(`
+    await testPool.execute(`
     CREATE TABLE IF NOT EXISTS responses (
       id INT AUTO_INCREMENT PRIMARY KEY,
       form_id INT NOT NULL,
@@ -107,7 +107,7 @@ export async function setupTestDatabase(): Promise<void> {
     )
   `);
 
-  await testPool.execute(`
+    await testPool.execute(`
     CREATE TABLE IF NOT EXISTS answers (
       id INT AUTO_INCREMENT PRIMARY KEY,
       response_id INT NOT NULL,
@@ -124,12 +124,12 @@ export async function setupTestDatabase(): Promise<void> {
  * Call this in afterAll()
  */
 export async function stopMySqlContainer(): Promise<void> {
-  if (pool) {
-    await pool.end();
-    pool = null;
-  }
-  if (container) {
-    await container.stop();
-    container = null;
-  }
+    if (pool) {
+        await pool.end();
+        pool = null;
+    }
+    if (container) {
+        await container.stop();
+        container = null;
+    }
 }

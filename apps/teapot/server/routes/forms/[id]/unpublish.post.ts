@@ -2,29 +2,29 @@ import { getFormById, unpublishForm } from '~/utils/forms.utils';
 import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
-  openAPI: {
-    tags: ['forms'],
-    description: 'Unpublish/close a form (Admin only)',
-    security: [{ bearerAuth: [] }],
-  },
+    openAPI: {
+        tags: ['forms'],
+        description: 'Unpublish/close a form (Admin only)',
+        security: [{ bearerAuth: [] }],
+    },
 });
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.auth;
-  if (!user)
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+    const user = event.context.auth;
+    if (!user)
+        throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
 
-  const isAdmin = await isUserAdmin(user.uuid);
-  if (!isAdmin)
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
+    const isAdmin = await isUserAdmin(user.uuid);
+    if (!isAdmin)
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
 
-  const id = Number.parseInt(event.context.params!.id);
-  const form = await getFormById(id);
+    const id = Number.parseInt(event.context.params!.id);
+    const form = await getFormById(id);
 
-  if (!form)
-    throw createError({ statusCode: 404, statusMessage: 'Form not found' });
+    if (!form)
+        throw createError({ statusCode: 404, statusMessage: 'Form not found' });
 
-  await unpublishForm(id);
+    await unpublishForm(id);
 
-  return { ok: true };
+    return { ok: true };
 });

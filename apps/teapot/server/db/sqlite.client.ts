@@ -15,6 +15,6 @@ export type SqliteDb = BunSQLiteDatabase<typeof sqliteSchema>;
  * Uses the existing SQLite connection from useSkinSQLite()
  */
 export function useSqliteDb(): SqliteDb {
-  const db = useSkinSQLite();
-  return drizzle(db, { schema: sqliteSchema });
+    const db = useSkinSQLite();
+    return drizzle(db, { schema: sqliteSchema });
 }

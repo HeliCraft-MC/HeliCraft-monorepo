@@ -3,65 +3,65 @@ import { canViewImage, getGalleryImage } from '~/utils/gallery.utils';
 import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
-  openAPI: {
-    tags: ['gallery'],
-    description: 'Get gallery image file. Approved images are public, pending/rejected only visible to owner and admins.',
-    parameters: [
-      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } },
-    ],
-    responses: {
-      200: {
-        description: 'Image file',
-        content: {
-          'image/png': { schema: { type: 'string', format: 'binary' } },
-          'image/jpeg': { schema: { type: 'string', format: 'binary' } },
-          'image/webp': { schema: { type: 'string', format: 'binary' } },
+    openAPI: {
+        tags: ['gallery'],
+        description: 'Get gallery image file. Approved images are public, pending/rejected only visible to owner and admins.',
+        parameters: [
+            { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } },
+        ],
+        responses: {
+            200: {
+                description: 'Image file',
+                content: {
+                    'image/png': { schema: { type: 'string', format: 'binary' } },
+                    'image/jpeg': { schema: { type: 'string', format: 'binary' } },
+                    'image/webp': { schema: { type: 'string', format: 'binary' } },
+                },
+            },
+            403: { description: 'Forbidden - Cannot view this image' },
+            404: { description: 'Image not found' },
         },
-      },
-      403: { description: 'Forbidden - Cannot view this image' },
-      404: { description: 'Image not found' },
     },
-  },
 });
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
-  if (!id) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid id' });
-  }
+    const id = getRouterParam(event, 'id');
+    if (!id) {
+        throw createError({ statusCode: 400, statusMessage: 'Invalid id' });
+    }
 
-  const image = getGalleryImage(id);
+    const image = getGalleryImage(id);
 
-  const userUuid = event.context.auth?.uuid;
-  const admin = userUuid ? await isUserAdmin(userUuid) : false;
+    const userUuid = event.context.auth?.uuid;
+    const admin = userUuid ? await isUserAdmin(userUuid) : false;
 
-  if (!canViewImage(image, userUuid, admin)) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Cannot view this image',
-      data: { statusMessageRu: 'Нет доступа к этому изображению' },
-    });
-  }
+    if (!canViewImage(image, userUuid, admin)) {
+        throw createError({
+            statusCode: 403,
+            statusMessage: 'Cannot view this image',
+            data: { statusMessageRu: 'Нет доступа к этому изображению' },
+        });
+    }
 
-  const fileService = useFileService();
-  const buf = await fileService.readFile(image.path);
+    const fileService = useFileService();
+    const buf = await fileService.readFile(image.path);
 
-  if (!buf) {
+    if (!buf) {
     // File missing - clean up orphaned DB record
-    console.log(`[Gallery] File missing for image ${id}, cleaning up DB record: ${image.path}`);
-    try {
-      const db = (await import('~/plugins/skinSqlite')).useSkinSQLite();
-      db.prepare('DELETE FROM gallery WHERE id = ?').run(id);
+        console.log(`[Gallery] File missing for image ${id}, cleaning up DB record: ${image.path}`);
+        try {
+            const db = (await import('~/plugins/skinSqlite')).useSkinSQLite();
+            db.prepare('DELETE FROM gallery WHERE id = ?').run(id);
+        }
+        catch (e) {
+            console.error('[Gallery] Failed to cleanup orphaned record:', e);
+        }
+        throw createError({ statusCode: 404, statusMessage: 'Image file not found', data: { cleaned: true } });
     }
-    catch (e) {
-      console.error('[Gallery] Failed to cleanup orphaned record:', e);
-    }
-    throw createError({ statusCode: 404, statusMessage: 'Image file not found', data: { cleaned: true } });
-  }
 
-  event.node.res.setHeader('Content-Length', buf.length.toString());
-  event.node.res.setHeader('Content-Type', image.mime);
-  event.node.res.setHeader('Cache-Control', 'public, max-age=31536000');
+    event.node.res.setHeader('Content-Length', buf.length.toString());
+    event.node.res.setHeader('Content-Type', image.mime);
+    event.node.res.setHeader('Cache-Control', 'public, max-age=31536000');
 
-  return send(event, buf, image.mime);
+    return send(event, buf, image.mime);
 });

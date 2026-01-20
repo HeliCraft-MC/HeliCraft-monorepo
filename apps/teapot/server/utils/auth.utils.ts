@@ -1,215 +1,184 @@
-import type { ResultSetHeader, RowDataPacket } from 'mysql2';
-import type { AuthUser } from '~/interfaces/mysql.types';
+// Auth utilities - refactored to use Drizzle ORM via auth.repo
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { useMySQL } from '~/plugins/mySql';
+import { useDefaultDb } from '~/db/mysql.client';
+import {
+    createUser,
+    findByNickname,
+    findByUuid,
+    nicknameExists,
+} from '~/db/repos/auth.repo';
+import {
+    generateTokens,
+    verifyTokenWithCredentials,
+} from './token.utils';
+
+// Get default database connection
+function getDb() {
+    return useDefaultDb();
+}
 
 /**
  * Logs in a user by validating the provided nickname and password.
- * Throws an error if the user is not found or the password is incorrect.
- *
- * @param {string} nickname - The nickname of the user attempting to log in.
- * @param {string} password - The plain-text password provided by the user.
- * @return {Promise<{ tokens: object, uuid: string, nickname: string }>} A promise that resolves to an object containing the user's tokens, UUID, and nickname.
- * @throws {Error} Throws an error if the user is not found or the password is incorrect.
  */
 export async function loginUser(nickname: string, password: string) {
-  const pool = useMySQL('default');
+    const db = getDb();
+    const user = await findByNickname(nickname, db);
 
-  // DEPRECATED, keeping this for info
-  // const db = useDatabase()
-  // const req = db.prepare('SELECT * FROM AUTH WHERE LOWERCASENICKNAME = ?')
-  // const user = await req.get(nickname.toLowerCase()) as AuthUser
+    if (!user || !user.hash || !user.nickname || !user.uuid) {
+        throw createError({
+            statusCode: 404,
+            statusMessage: 'User not found',
+            data: {
+                statusMessageRu: 'Пользователь не найден',
+            },
+        });
+    }
 
-  const sql = 'SELECT * FROM `AUTH` WHERE `LOWERCASENICKNAME` = ?';
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [nickname.toLowerCase()]);
-  const user = rows[0] as AuthUser | undefined;
+    if (!(await bcrypt.compare(password, user.hash))) {
+        throw createError({
+            statusCode: 401,
+            statusMessage: 'Invalid password',
+            data: {
+                statusMessageRu: 'Неверный пароль',
+            },
+        });
+    }
 
-  if (!user || !user.HASH || !user.NICKNAME || !user.UUID) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'User not found',
-      data: {
-        statusMessageRu: 'Пользователь не найден',
-      },
-    });
-  }
+    const tokens = generateTokens(user);
 
-  if (!(await bcrypt.compare(password, user.HASH))) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid password',
-      data: {
-        statusMessageRu: 'Неверный пароль',
-      },
-    });
-  }
-
-  const tokens = generateTokens(user);
-
-  return { tokens, uuid: user.UUID, nickname: user.NICKNAME };
+    return { tokens, uuid: user.uuid, nickname: user.nickname };
 }
 
 /**
  * Registers a new user by creating an account with the provided nickname and password.
- * Throws an error if the nickname is already taken or validation fails.
- *
- * @param {string} nickname - The desired nickname for the new user.
- * @param {string} password - The plain-text password for the new user.
- * @return {Promise<{ tokens: object, uuid: string, nickname: string }>} A promise that resolves to an object containing the user's tokens, UUID, and nickname.
- * @throws {Error} Throws an error if the nickname is already taken or validation fails.
  */
 export async function registerUser(nickname: string, password: string) {
-  const pool = useMySQL('default');
+    const db = getDb();
 
-  // Validate nickname length
-  if (!nickname || nickname.trim().length < 3) {
-    throw createError({
-      statusCode: 422,
-      statusMessage: 'Nickname is too short (minimum 3 characters)',
-      data: {
-        statusMessageRu: 'Ник слишком короткий (минимум 3 символа)',
-      },
-    });
-  }
+    // Validate nickname length
+    if (!nickname || nickname.trim().length < 3) {
+        throw createError({
+            statusCode: 422,
+            statusMessage: 'Nickname is too short (minimum 3 characters)',
+            data: {
+                statusMessageRu: 'Ник слишком короткий (минимум 3 символа)',
+            },
+        });
+    }
 
-  // Validate password length
-  if (!password || password.length < 6) {
-    throw createError({
-      statusCode: 422,
-      statusMessage: 'Password is too short (minimum 6 characters)',
-      data: {
-        statusMessageRu: 'Пароль слишком короткий (минимум 6 символов)',
-      },
-    });
-  }
+    // Validate password length
+    if (!password || password.length < 6) {
+        throw createError({
+            statusCode: 422,
+            statusMessage: 'Password is too short (minimum 6 characters)',
+            data: {
+                statusMessageRu: 'Пароль слишком короткий (минимум 6 символов)',
+            },
+        });
+    }
 
-  const lowerCaseNickname = nickname.toLowerCase();
+    // Check if nickname already exists
+    if (await nicknameExists(nickname, db)) {
+        throw createError({
+            statusCode: 409,
+            statusMessage: 'Nickname already taken',
+            data: {
+                statusMessageRu: 'Никнейм уже занят',
+            },
+        });
+    }
 
-  // Check if nickname already exists
-  const checkSql = 'SELECT 1 FROM `AUTH` WHERE `LOWERCASENICKNAME` = ?';
-  const [checkRows] = await pool.execute<RowDataPacket[]>(checkSql, [lowerCaseNickname]);
+    // Generate UUID and hash password
+    const uuid = uuidv4();
+    const hash = await bcrypt.hash(password, 10);
+    const regDate = Date.now();
 
-  if (checkRows.length > 0) {
-    throw createError({
-      statusCode: 409,
-      statusMessage: 'Nickname already taken',
-      data: {
-        statusMessageRu: 'Никнейм уже занят',
-      },
-    });
-  }
+    // Insert new user
+    const user = await createUser({
+        nickname,
+        lowercaseNickname: nickname.toLowerCase(),
+        hash,
+        uuid,
+        regDate,
+    }, db);
 
-  // Generate UUID and hash password
-  const uuid = uuidv4();
-  const hash = await bcrypt.hash(password, 10);
-  const regDate = Date.now();
+    if (!user) {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Failed to create user',
+        });
+    }
 
-  // Insert new user into database
-  const insertSql = `
-        INSERT INTO \`AUTH\` 
-        (\`NICKNAME\`, \`LOWERCASENICKNAME\`, \`HASH\`, \`UUID\`, \`REGDATE\`)
-        VALUES (?, ?, ?, ?, ?)
-    `;
+    const tokens = generateTokens(user);
 
-  await pool.execute<ResultSetHeader>(insertSql, [
-    nickname,
-    lowerCaseNickname,
-    hash,
-    uuid,
-    regDate,
-  ]);
-
-  // Retrieve the newly created user to generate tokens
-  const selectSql = 'SELECT * FROM `AUTH` WHERE `UUID` = ?';
-  const [rows] = await pool.execute<RowDataPacket[]>(selectSql, [uuid]);
-  const user = rows[0] as AuthUser;
-
-  const tokens = generateTokens(user);
-
-  return { tokens, uuid: user.UUID, nickname: user.NICKNAME };
+    return { tokens, uuid: user.uuid, nickname: user.nickname };
 }
 
 /**
- * Refreshes the user data by validating the provided refresh token and regenerating tokens if valid.
- *
- * @param {string} uuid - The unique identifier of the user.
- * @param {string} refreshToken - The refresh token to be validated for the user.
- * @return {Promise<{tokens: object, uuid: string, nickname: string}>} A promise that resolves with the regenerated tokens, user's UUID, and nickname if the refresh token is valid.
- * @throws {Error} Throws an error if the user is not found or if the refresh token is invalid.
+ * Refreshes the user data by validating the provided refresh token.
  */
 export async function refreshUser(uuid: string, refreshToken: string) {
-  const pool = useMySQL('default');
+    const db = getDb();
+    const user = await findByUuid(uuid, db);
 
-  // DEPRECATED, keeping this for info
-  // const db = useDatabase()
-  // const req = db.prepare('SELECT * FROM AUTH WHERE UUID = ? OR UUID_WR = ?')
-  // const user = await req.get(uuid, uuid) as AuthUser
+    if (!user || !user.hash || !user.nickname || !user.uuid) {
+        throw createError({
+            statusCode: 404,
+            statusMessage: 'User not found',
+            data: {
+                statusMessageRu: 'Пользователь не найден',
+            },
+        });
+    }
 
-  const sql = 'SELECT * FROM `AUTH` WHERE `UUID` = ? OR `UUID_WR` = ?';
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid, uuid]);
-  const user = rows[0] as AuthUser | undefined;
-
-  if (!user || !user.HASH || !user.NICKNAME || !user.UUID) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'User not found',
-      data: {
-        statusMessageRu: 'Пользователь не найден',
-      },
-    });
-  }
-
-  if (verifyTokenWithCredentials(refreshToken, user)) {
-    const tokens = generateTokens(user);
-    return { tokens, uuid: user.UUID, nickname: user.NICKNAME };
-  }
-  else {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Invalid refresh token',
-      data: {
-        statusMessageRu: 'Неверный токен обновления',
-      },
-    });
-  }
+    if (await verifyTokenWithCredentials(refreshToken, user)) {
+        const tokens = generateTokens(user);
+        return { tokens, uuid: user.uuid, nickname: user.nickname };
+    }
+    else {
+        throw createError({
+            statusCode: 401,
+            statusMessage: 'Invalid refresh token',
+            data: {
+                statusMessageRu: 'Неверный токен обновления',
+            },
+        });
+    }
 }
 
+/**
+ * Checks if user is authenticated with valid access token.
+ */
 export async function checkAuth(uuid: string, accessToken: string) {
-  const pool = useMySQL('default');
+    const db = getDb();
+    const user = await findByUuid(uuid, db);
 
-  // DEPRECATED, keeping this for info
-  // const db = useDatabase()
-  // const req = db.prepare('SELECT * FROM AUTH WHERE UUID = ? OR UUID_WR = ?')
-  // const user = await req.get(uuid, uuid) as AuthUser
+    if (!user || !user.hash || !user.nickname || !user.uuid) {
+        throw createError({
+            statusCode: 401,
+            statusMessage: 'Not authorized',
+            data: {
+                statusMessageRu: 'Не авторизован',
+            },
+        });
+    }
 
-  const sql = 'SELECT * FROM `AUTH` WHERE `UUID` = ? OR `UUID_WR` = ?';
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid, uuid]);
-  const user = rows[0] as AuthUser | undefined;
+    const isValid = await verifyTokenWithCredentials(accessToken, user);
 
-  if (!user || !user.HASH || !user.NICKNAME || !user.UUID) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Not authorized',
-      data: {
-        statusMessageRu: 'Не авторизован',
-      },
-    });
-  }
+    console.log('[checkAuth] Token verification result:', isValid, 'for UUID:', uuid);
 
-  const isValid = await verifyTokenWithCredentials(accessToken, user);
-  console.log('[checkAuth] Token verification result:', isValid, 'for UUID:', uuid);
-  if (isValid) {
-    return true;
-  }
-  else {
-    console.log('[checkAuth] Token verification failed for UUID:', uuid);
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Not authorized',
-      data: {
-        statusMessageRu: 'Не авторизован',
-      },
-    });
-  }
+    if (isValid) {
+        return true;
+    }
+    else {
+        console.log('[checkAuth] Token verification failed for UUID:', uuid);
+        throw createError({
+            statusCode: 401,
+            statusMessage: 'Not authorized',
+            data: {
+                statusMessageRu: 'Не авторизован',
+            },
+        });
+    }
 }

@@ -19,8 +19,8 @@ export type BanlistDb = MySql2Database<typeof banlistSchema>;
  * Uses the existing MySQL pool from useMySQL('default')
  */
 export function useDefaultDb(): DefaultDb {
-  const pool = useMySQL('default');
-  return drizzle(pool, { schema: defaultSchema, mode: 'default' });
+    const pool = useMySQL('default');
+    return drizzle(pool, { schema: defaultSchema, mode: 'default' });
 }
 
 /**
@@ -28,8 +28,8 @@ export function useDefaultDb(): DefaultDb {
  * Uses the existing MySQL pool from useMySQL('forms')
  */
 export function useFormsDb(): FormsDb {
-  const pool = useMySQL('forms');
-  return drizzle(pool, { schema: formsSchema, mode: 'default' });
+    const pool = useMySQL('forms');
+    return drizzle(pool, { schema: formsSchema, mode: 'default' });
 }
 
 /**
@@ -37,8 +37,8 @@ export function useFormsDb(): FormsDb {
  * Uses the existing MySQL pool from useMySQL('banlist')
  */
 export function useBanlistDb(): BanlistDb {
-  const pool = useMySQL('banlist');
-  return drizzle(pool, { schema: banlistSchema, mode: 'default' });
+    const pool = useMySQL('banlist');
+    return drizzle(pool, { schema: banlistSchema, mode: 'default' });
 }
 
 // Note: States database client intentionally omitted - functionality being removed

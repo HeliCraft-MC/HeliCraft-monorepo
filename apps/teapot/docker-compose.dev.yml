@@ -2,21 +2,21 @@
 # Run: docker-compose -f docker-compose.dev.yml up -d
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: teapot-mysql-dev
-    environment:
-      MYSQL_ROOT_PASSWORD: devpassword
-    ports:
-      - '3306:3306'
-    volumes:
-      - ./.dev/docker-init:/docker-entrypoint-initdb.d
-      - teapot_mysql_data:/var/lib/mysql
-    healthcheck:
-      test: [CMD, mysqladmin, ping, -h, localhost]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+    mysql:
+        image: mysql:8.0
+        container_name: teapot-mysql-dev
+        environment:
+            MYSQL_ROOT_PASSWORD: devpassword
+        ports:
+            -   '3306:3306'
+        volumes:
+            -   ./.dev/docker-init:/docker-entrypoint-initdb.d
+            -   teapot_mysql_data:/var/lib/mysql
+        healthcheck:
+            test: [CMD, mysqladmin, ping, -h, localhost]
+            interval: 5s
+            timeout: 5s
+            retries: 10
 
 volumes:
-  teapot_mysql_data:
+    teapot_mysql_data:
