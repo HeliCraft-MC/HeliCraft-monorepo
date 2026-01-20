@@ -46,7 +46,7 @@
             leave-active-class="transition-all duration-150"
             leave-to-class="opacity-0 -translate-y-2"
           >
-            <div v-show="serverDropdownOpen" class="absolute top-full left-0 pt-2 z-[60]">
+            <div v-if="serverDropdownOpen" class="absolute top-full left-0 pt-2 z-[60]">
               <div class="bg-black/95 border border-white/10 rounded-lg py-2 min-w-40 shadow-xl backdrop-blur-sm">
                 <NuxtLink
                   to="/rules"

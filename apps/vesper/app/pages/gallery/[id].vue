@@ -3,6 +3,7 @@
 import type { IGalleryImagePublic, IGalleryActionResponse, IPlayerSearchResult } from '~/types/gallery.types'
 import { GalleryImageStatus } from '~/types/gallery.types'
 import GalleryEditModal from '~/components/gallery/GalleryEditModal.vue'
+import ImageViewer from '~/components/common/ImageViewer.vue'
 
 definePageMeta({ auth: false })
 
@@ -25,6 +26,7 @@ const checkingAdmin = ref(false)
 // Modals
 const showEditModal = ref(false)
 const showDeleteConfirm = ref(false)
+const viewerOpen = ref(false)
 
 // Actions
 const processing = ref(false)
@@ -241,18 +243,16 @@ onMounted(() => {
       <template v-else-if="image">
         <!-- Image -->
         <section class="bg-gray-900/60 backdrop-blur-lg rounded-lg overflow-hidden">
-          <a
-            :href="imageUrl"
-            target="_blank"
-            rel="noopener"
-            class="block"
+          <div
+            @click="viewerOpen = true"
+            class="block cursor-pointer hover:opacity-90 transition-opacity"
           >
             <img
               :src="imageUrl"
               :alt="image.description || 'Gallery image'"
               class="w-full max-h-[70vh] object-contain bg-gray-800"
             />
-          </a>
+          </div>
         </section>
 
         <!-- Info -->
@@ -410,6 +410,15 @@ onMounted(() => {
         </section>
       </template>
     </div>
+
+    <!-- Image Viewer -->
+    <ImageViewer
+      :images="[imageUrl]"
+      :initial-index="0"
+      :is-open="viewerOpen"
+      :captions="image?.description ? [image.description] : []"
+      @close="viewerOpen = false"
+    />
 
     <!-- Edit modal -->
     <GalleryEditModal

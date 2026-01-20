@@ -278,7 +278,8 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
                 <ImageViewer 
                     :images="proxiedImages" 
                     :initial-index="viewerIndex"
-                    :is-open="viewerOpen" 
+                    :is-open="viewerOpen"
+                    :captions="options.showCaptions ? (options.captions || []) : []"
                     @close="viewerOpen = false" 
                 />
             </div>

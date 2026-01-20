@@ -125,7 +125,7 @@ const handleTouchEnd = (e: TouchEvent): void => {
             <div 
                 v-for="(img, idx) in images" 
                 :key="idx"
-                class="min-w-full aspect-video cursor-pointer"
+                class="min-w-full aspect-video cursor-pointer relative"
                 @click="$emit('click', idx)"
             >
                 <img 

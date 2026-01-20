@@ -8,6 +8,7 @@ const props = defineProps<{
     images: string[];
     initialIndex?: number;
     isOpen: boolean;
+    captions?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -103,12 +104,19 @@ onUnmounted(() => {
                 </button>
 
                 <!-- Main Image -->
-                <div class="max-w-[90vw] max-h-[90vh] relative">
+                <div class="max-w-[90vw] max-h-[85vh] relative flex flex-col items-center gap-3">
                     <img 
                         :src="currentImage" 
                         :alt="`Image ${currentIndex + 1}`"
-                        class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                        class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
                     />
+                    <!-- Caption -->
+                    <p 
+                        v-if="captions && captions[currentIndex]" 
+                        class="text-white text-center text-sm md:text-base max-w-2xl px-4"
+                    >
+                        {{ captions[currentIndex] }}
+                    </p>
                 </div>
 
                 <!-- Navigation: Next -->
