@@ -37,11 +37,11 @@ defineRouteMeta({
       403: { description: 'Not authorized' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const allianceUuid = getRouterParam(event, 'uuid')
-  const { byPlayerUuid, stateUuid } = await readBody(event)
-  await dissolveAlliance(allianceUuid, byPlayerUuid, stateUuid)
-  return { ok: true }
-})
+  const allianceUuid = getRouterParam(event, 'uuid');
+  const { byPlayerUuid, stateUuid } = await readBody(event);
+  await dissolveAlliance(allianceUuid, byPlayerUuid, stateUuid);
+  return { ok: true };
+});

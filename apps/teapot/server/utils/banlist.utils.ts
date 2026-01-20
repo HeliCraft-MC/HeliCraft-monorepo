@@ -1,14 +1,14 @@
-import type { ResultSetHeader, RowDataPacket } from 'mysql2'
-import type { BanEntry, BanEntryPublic, CreateBanDto } from '~/interfaces/banlist.types'
-import { useMySQL } from '~/plugins/mySql' // Путь к твоему плагину
-import { deleteSkin } from './skin.utils'
-import { getUserByUUID } from './user.utils'
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { BanEntry, BanEntryPublic, CreateBanDto } from '~/interfaces/banlist.types';
+import { useMySQL } from '~/plugins/mySql'; // Путь к твоему плагину
+import { deleteSkin } from './skin.utils';
+import { getUserByUUID } from './user.utils';
 
 /**
  * Имя подключения в конфиге.
  * Убедись, что в nitro.config.ts / runtimeConfig есть database: { banlist: { ... } }
  */
-const CONNECTION_NAME = 'banlist'
+const CONNECTION_NAME = 'banlist';
 
 /* ──────────────────────────────── helpers ──────────────────────────────── */
 
@@ -17,7 +17,7 @@ const CONNECTION_NAME = 'banlist'
  * Можно расширить или импортировать из auth утилит.
  */
 function normalizeUuid(raw: string): string {
-  return raw.replace(/-/g, '').toLowerCase()
+  return raw.replace(/-/g, '').toLowerCase();
 }
 
 /* ────────────────────────────── main utils ─────────────────────────────── */
@@ -27,14 +27,14 @@ function normalizeUuid(raw: string): string {
  */
 async function enrichBanWithNickname(ban: BanEntry): Promise<BanEntry> {
   try {
-    const user = await getUserByUUID(ban.uuid)
-    ban.uuid_nickname = user.NICKNAME
+    const user = await getUserByUUID(ban.uuid);
+    ban.uuid_nickname = user.NICKNAME;
   }
   catch (e) {
     // Если пользователь не найден, оставляем nickname пустым
-    ban.uuid_nickname = undefined
+    ban.uuid_nickname = undefined;
   }
-  return ban
+  return ban;
 }
 
 /**
@@ -58,7 +58,7 @@ function toPublicBan(ban: BanEntry): BanEntryPublic {
     silent: ban.silent,
     ipban: ban.ipban,
     active: ban.active,
-  }
+  };
 }
 
 /**
@@ -66,9 +66,9 @@ function toPublicBan(ban: BanEntry): BanEntryPublic {
  * Проверяет флаг `active = 1` и срок действия `until`.
  */
 export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntry | null> {
-  const pool = useMySQL(CONNECTION_NAME)
-  const now = Date.now()
-  const cleanUuid = normalizeUuid(uuid)
+  const pool = useMySQL(CONNECTION_NAME);
+  const now = Date.now();
+  const cleanUuid = normalizeUuid(uuid);
 
   // Логика:
   // 1. Ищем по UUID или IP
@@ -82,30 +82,30 @@ export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntr
         AND (\`until\` > ? OR \`until\` <= 0)
         ORDER BY \`id\` DESC 
         LIMIT 1
-    `
+    `;
 
-  const params: any[] = [cleanUuid]
+  const params: any[] = [cleanUuid];
   if (ip)
-    params.push(ip)
-  params.push(now)
+    params.push(ip);
+  params.push(now);
 
   try {
-    const [rows] = await pool.execute<RowDataPacket[]>(sql, params)
-    let ban = (rows[0] as BanEntry) || null
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
+    let ban = (rows[0] as BanEntry) || null;
 
     // Добавляем никнейм, если бан найден
     if (ban) {
-      ban = await enrichBanWithNickname(ban)
+      ban = await enrichBanWithNickname(ban);
     }
 
-    return ban
+    return ban;
   }
   catch (e: any) {
     throw createError({
       statusCode: 500,
       statusMessage: 'Database error checking ban',
       data: { statusMessageRu: 'Ошибка проверки бана', error: e.message },
-    })
+    });
   }
 }
 
@@ -114,29 +114,29 @@ export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntr
  * Возвращает true, если есть активный бан.
  */
 export async function isUserBanned(uuid: string): Promise<boolean> {
-  const ban = await checkActiveBan(uuid)
-  return !!ban
+  const ban = await checkActiveBan(uuid);
+  return !!ban;
 }
 
 /**
  * Создать новый бан
  */
 export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
-  const pool = useMySQL(CONNECTION_NAME)
+  const pool = useMySQL(CONNECTION_NAME);
 
-  const now = Date.now()
-  const until = dto.durationMs <= 0 ? 0 : (now + dto.durationMs)
+  const now = Date.now();
+  const until = dto.durationMs <= 0 ? 0 : (now + dto.durationMs);
 
   // Удаление скина, если бан дольше чем на 30 дней (30 * 24 * 60 * 60 * 1000 = 2592000000 ms)
   // Или если перманентный (<= 0)
   if (dto.durationMs > 2592000000 || dto.durationMs <= 0) {
     deleteSkin(dto.targetUuid).catch((err) => {
-      console.error(`[BanUtils] Failed to delete skin for banned user ${dto.targetUuid}:`, err)
-    })
+      console.error(`[BanUtils] Failed to delete skin for banned user ${dto.targetUuid}:`, err);
+    });
   }
 
-  const cleanTargetUuid = dto.targetUuid
-  const cleanAdminUuid = dto.adminUuid
+  const cleanTargetUuid = dto.targetUuid;
+  const cleanAdminUuid = dto.adminUuid;
 
   const sql = `
         INSERT INTO \`litebans_bans\` (
@@ -146,7 +146,7 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
             \`active\`, \`ipban\`, \`silent\`,
             \`server_scope\`, \`server_origin\`, \`ipban_wildcard\`
         ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, '*', NULL, 0)
-    `
+    `;
 
   const params = [
     cleanTargetUuid,
@@ -158,23 +158,23 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
     until,
     1,
     dto.silent ? 1 : 0,
-  ]
+  ];
 
   try {
-    const [result] = await pool.execute<ResultSetHeader>(sql, params)
+    const [result] = await pool.execute<ResultSetHeader>(sql, params);
 
     // Получаем созданный бан со всеми данными
-    const banId = result.insertId
-    const ban = await getBanById(banId)
+    const banId = result.insertId;
+    const ban = await getBanById(banId);
 
-    return ban
+    return ban;
   }
   catch (e: any) {
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to ban user',
       data: { statusMessageRu: 'Не удалось выдать бан', error: e.message },
-    })
+    });
   }
 }
 
@@ -183,11 +183,11 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
  * Устанавливает active = 0 и заполняет поля removed_by...
  */
 export async function removeBan(banId: number, adminUuid: string = '[Web]', adminName: string = '[Web]', reason: string = 'Unbanned via Web') {
-  const pool = useMySQL(CONNECTION_NAME)
-  const cleanAdminUuid = adminUuid
+  const pool = useMySQL(CONNECTION_NAME);
+  const cleanAdminUuid = adminUuid;
 
-  const dateObj = new Date()
-  const dateStr = dateObj.toISOString().slice(0, 19).replace('T', ' ')
+  const dateObj = new Date();
+  const dateStr = dateObj.toISOString().slice(0, 19).replace('T', ' ');
 
   const sql = `
         UPDATE \`litebans_bans\` SET 
@@ -197,7 +197,7 @@ export async function removeBan(banId: number, adminUuid: string = '[Web]', admi
             \`removed_by_reason\` = ?,
             \`removed_by_date\` = ?
         WHERE \`id\` = ? AND \`active\` = 1
-    `
+    `;
 
   try {
     const [result] = await pool.execute<ResultSetHeader>(sql, [
@@ -206,26 +206,26 @@ export async function removeBan(banId: number, adminUuid: string = '[Web]', admi
       reason,
       dateStr,
       banId,
-    ])
+    ]);
 
     if (result.affectedRows === 0) {
       throw createError({
         statusCode: 404,
         statusMessage: 'Ban not found or already inactive',
         data: { statusMessageRu: 'Бан не найден или уже снят' },
-      })
+      });
     }
   }
   catch (e: any) {
     // Если это наша ошибка 404, прокидываем дальше, иначе 500
     if (e.statusCode)
-      throw e
+      throw e;
 
     throw createError({
       statusCode: 500,
       statusMessage: 'Database error removing ban',
       data: { statusMessageRu: 'Ошибка при снятии бана', error: e.message },
-    })
+    });
   }
 }
 
@@ -233,24 +233,24 @@ export async function removeBan(banId: number, adminUuid: string = '[Web]', admi
  * Получить бан по ID
  */
 export async function getBanById(id: number): Promise<BanEntry> {
-  const pool = useMySQL(CONNECTION_NAME)
+  const pool = useMySQL(CONNECTION_NAME);
 
-  const sql = 'SELECT * FROM `litebans_bans` WHERE `id` = ?'
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [id])
-  let ban = rows[0] as BanEntry | undefined
+  const sql = 'SELECT * FROM `litebans_bans` WHERE `id` = ?';
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, [id]);
+  let ban = rows[0] as BanEntry | undefined;
 
   if (!ban) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Ban not found',
       data: { statusMessageRu: 'Бан не найден' },
-    })
+    });
   }
 
   // Добавляем никнейм забаненного пользователя
-  ban = await enrichBanWithNickname(ban)
+  ban = await enrichBanWithNickname(ban);
 
-  return ban
+  return ban;
 }
 
 export async function searchBans(
@@ -258,45 +258,45 @@ export async function searchBans(
   offset: number = 0,
   onlyActive: boolean = false,
   searchQuery?: string,
-): Promise<{ items: BanEntryPublic[], total: number }> {
-  const pool = useMySQL(CONNECTION_NAME)
+): Promise<{ items: BanEntryPublic[]; total: number }> {
+  const pool = useMySQL(CONNECTION_NAME);
 
-  let whereClause = 'WHERE 1=1'
-  const params: any[] = []
+  let whereClause = 'WHERE 1=1';
+  const params: any[] = [];
 
   if (onlyActive) {
-    whereClause += ' AND `active` = 1'
+    whereClause += ' AND `active` = 1';
   }
 
   if (searchQuery) {
-    whereClause += ' AND (`uuid` LIKE ? OR `banned_by_name` LIKE ? OR `reason` LIKE ?)'
-    const like = `%${searchQuery}%`
-    params.push(like, like, like)
+    whereClause += ' AND (`uuid` LIKE ? OR `banned_by_name` LIKE ? OR `reason` LIKE ?)';
+    const like = `%${searchQuery}%`;
+    params.push(like, like, like);
   }
 
   // Получаем общее количество для пагинации
-  const countSql = `SELECT COUNT(*) as total FROM \`litebans_bans\` ${whereClause}`
-  const [countRows] = await pool.execute<RowDataPacket[]>(countSql, params)
-  const total = countRows[0].total
+  const countSql = `SELECT COUNT(*) as total FROM \`litebans_bans\` ${whereClause}`;
+  const [countRows] = await pool.execute<RowDataPacket[]>(countSql, params);
+  const total = countRows[0].total;
 
   // Получаем данные
-  const sql = `SELECT * FROM \`litebans_bans\`  ${whereClause} ORDER BY \`id\` DESC LIMIT ? OFFSET ?`
-  params.push(limit, offset)
+  const sql = `SELECT * FROM \`litebans_bans\`  ${whereClause} ORDER BY \`id\` DESC LIMIT ? OFFSET ?`;
+  params.push(limit, offset);
 
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, params)
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
 
-  let items = rows as BanEntry[]
+  let items = rows as BanEntry[];
 
   // Добавляем никнейм для каждого забаненного пользователя
-  items = await Promise.all(items.map(ban => enrichBanWithNickname(ban)))
+  items = await Promise.all(items.map(ban => enrichBanWithNickname(ban)));
 
   // Преобразуем в публичный формат
-  const publicItems = items.map(toPublicBan)
+  const publicItems = items.map(toPublicBan);
 
   return {
     items: publicItems,
     total,
-  }
+  };
 }
 
 /**
@@ -304,8 +304,8 @@ export async function searchBans(
  * Используется для администраторских операций (удаление скинов и т.д.)
  */
 export async function getBannedUsersWithMinDuration(minDurationMs: number): Promise<BanEntry[]> {
-  const pool = useMySQL(CONNECTION_NAME)
-  const now = Date.now()
+  const pool = useMySQL(CONNECTION_NAME);
+  const now = Date.now();
 
   // Логика: для каждого активного бана проверяем длительность
   // Если until = -1 (навсегда), то длительность бесконечна
@@ -318,23 +318,23 @@ export async function getBannedUsersWithMinDuration(minDurationMs: number): Prom
             (\`until\` - \`time\`) >= ?
         )
         ORDER BY \`id\` DESC
-    `
+    `;
 
   try {
-    const [rows] = await pool.execute<RowDataPacket[]>(sql, [minDurationMs])
-    let bans = rows as BanEntry[]
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, [minDurationMs]);
+    let bans = rows as BanEntry[];
 
     // Добавляем nicknames для каждого
-    bans = await Promise.all(bans.map(ban => enrichBanWithNickname(ban)))
+    bans = await Promise.all(bans.map(ban => enrichBanWithNickname(ban)));
 
-    return bans
+    return bans;
   }
   catch (e: any) {
     throw createError({
       statusCode: 500,
       statusMessage: 'Database error getting banned users',
       data: { statusMessageRu: 'Ошибка при получении забаненных пользователей', error: e.message },
-    })
+    });
   }
 }
 
@@ -343,47 +343,47 @@ export async function getBannedUsersWithMinDuration(minDurationMs: number): Prom
  * Возвращает количество удаленных скинов и список пользователей
  */
 export async function deleteSkinsBatchForBannedUsers(minDurationMs: number): Promise<{
-  deleted: number
-  skipped: number
-  users: Array<{ uuid: string, uuid_nickname?: string, reason: string }>
-  errors: Array<{ uuid: string, error: string }>
+  deleted: number;
+  skipped: number;
+  users: Array<{ uuid: string; uuid_nickname?: string; reason: string }>;
+  errors: Array<{ uuid: string; error: string }>;
 }> {
-  const bans = await getBannedUsersWithMinDuration(minDurationMs)
+  const bans = await getBannedUsersWithMinDuration(minDurationMs);
 
-  let deleted = 0
-  let skipped = 0
-  const errors: Array<{ uuid: string, error: string }> = []
+  let deleted = 0;
+  let skipped = 0;
+  const errors: Array<{ uuid: string; error: string }> = [];
   const users = bans.map(ban => ({
     uuid: ban.uuid,
     uuid_nickname: ban.uuid_nickname,
     reason: ban.reason,
-  }))
+  }));
 
   // Параллельно удаляем скины
   await Promise.all(
     bans.map(async (ban) => {
       try {
-        const wasDeleted = await deleteSkin(ban.uuid)
+        const wasDeleted = await deleteSkin(ban.uuid);
         if (wasDeleted) {
-          deleted++
+          deleted++;
         }
         else {
-          skipped++ // Скин не найден (уже удалён или не был загружен)
+          skipped++; // Скин не найден (уже удалён или не был загружен)
         }
       }
       catch (e: any) {
         errors.push({
           uuid: ban.uuid,
           error: e.message || 'Unknown error',
-        })
+        });
       }
     }),
-  )
+  );
 
   return {
     deleted,
     skipped,
     users,
     errors,
-  }
+  };
 }

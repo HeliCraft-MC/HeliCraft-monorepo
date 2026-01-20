@@ -1,4 +1,4 @@
-import { listOrdersByState } from '~/utils/states/orders.utils'
+import { listOrdersByState } from '~/utils/states/orders.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -16,11 +16,11 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const start = query.startAt ? Number(query.startAt) : 0
-  const limit = query.limit ? Number(query.limit) : 100
-  return await listOrdersByState(String(query.stateUuid), start, limit)
-})
+  const query = getQuery(event);
+  const start = query.startAt ? Number(query.startAt) : 0;
+  const limit = query.limit ? Number(query.limit) : 100;
+  return await listOrdersByState(String(query.stateUuid), start, limit);
+});

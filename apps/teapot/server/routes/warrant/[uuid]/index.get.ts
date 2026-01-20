@@ -1,4 +1,4 @@
-import { getWarrant } from '~/utils/states/orders.utils'
+import { getWarrant } from '~/utils/states/orders.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -10,9 +10,9 @@ defineRouteMeta({
       404: { description: 'Warrant not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const uuid = getRouterParam(event, 'uuid')
-  return await getWarrant(uuid)
-})
+  const uuid = getRouterParam(event, 'uuid');
+  return await getWarrant(uuid);
+});

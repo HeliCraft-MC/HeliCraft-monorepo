@@ -26,7 +26,7 @@ defineRouteMeta({
       404: { description: 'User not found' },
     },
   },
-})
+});
 
 /**
  * GET /user/[id]
@@ -34,16 +34,16 @@ defineRouteMeta({
  * Параметр [id] может быть либо UUID, либо никнеймом (регистр не учитывается).
  */
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
-  const uuid = await resolveUuid(id)
-  const user = await getUserByUUID(uuid)
+  const id = getRouterParam(event, 'id');
+  const uuid = await resolveUuid(id);
+  const user = await getUserByUUID(uuid);
   if (!user) {
     throw createError({
       statusCode: 404,
       statusMessage: 'User not found',
       data: { statusMessageRu: 'Пользователь не найден' },
-    })
+    });
   }
   // Возвращаем только публичные поля
-  return toPublicUser(user)
-})
+  return toPublicUser(user);
+});

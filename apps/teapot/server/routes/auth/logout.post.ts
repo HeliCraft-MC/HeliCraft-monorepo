@@ -27,19 +27,19 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
   try {
-    deleteCookie(event, 'refreshToken')
+    deleteCookie(event, 'refreshToken');
     return {
       statusMessage: 'Logout successful',
       data: {
         statusMessageRu: 'Вы вышли из системы',
       },
-    }
+    };
   }
   catch (e) {
-    throw e
+    throw e;
   }
-})
+});

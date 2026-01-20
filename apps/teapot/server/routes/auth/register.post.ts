@@ -38,26 +38,26 @@ defineRouteMeta({
       422: { description: 'Validation error (nickname or password too short)' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const { nickname, password } = await readBody(event)
+  const { nickname, password } = await readBody(event);
 
   try {
-    const { tokens, uuid, nickname: userNickname } = await registerUser(nickname, password)
+    const { tokens, uuid, nickname: userNickname } = await registerUser(nickname, password);
     setCookie(event, 'refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
-    })
+    });
     return {
       uuid,
       nickname: userNickname,
       accessToken: tokens.accessToken,
-    }
+    };
   }
   catch (e) {
-    throw e
+    throw e;
   }
-})
+});

@@ -1,6 +1,6 @@
-import type { CreateQuestionDto } from '~/interfaces/forms.types'
-import { createQuestion, getFormById } from '~/utils/forms.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import type { CreateQuestionDto } from '~/interfaces/forms.types';
+import { createQuestion, getFormById } from '~/utils/forms.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -22,24 +22,24 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.auth
+  const user = event.context.auth;
   if (!user)
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
 
-  const isAdmin = await isUserAdmin(user.uuid)
+  const isAdmin = await isUserAdmin(user.uuid);
   if (!isAdmin)
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
 
-  const formId = Number.parseInt(event.context.params!.id)
-  const body = await readBody<CreateQuestionDto>(event)
+  const formId = Number.parseInt(event.context.params!.id);
+  const body = await readBody<CreateQuestionDto>(event);
 
-  const form = await getFormById(formId)
+  const form = await getFormById(formId);
   if (!form)
-    throw createError({ statusCode: 404, statusMessage: 'Form not found' })
+    throw createError({ statusCode: 404, statusMessage: 'Form not found' });
 
-  const question = await createQuestion(formId, body)
-  return question
-})
+  const question = await createQuestion(formId, body);
+  return question;
+});

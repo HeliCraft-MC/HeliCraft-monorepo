@@ -1,6 +1,6 @@
-import type { BanEntryPublic, CreateBanDto } from '~/interfaces/banlist.types'
-import { createBan } from '~/utils/banlist.utils'
-import { getUserByUUID, isUserAdmin, resolveUuid } from '~/utils/user.utils'
+import type { BanEntryPublic, CreateBanDto } from '~/interfaces/banlist.types';
+import { createBan } from '~/utils/banlist.utils';
+import { getUserByUUID, isUserAdmin, resolveUuid } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -46,41 +46,41 @@ defineRouteMeta({
       400: { description: 'Ошибка валидации' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
   // Авторизация и UUID уже проверены middleware
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
 
   if (!userUuid) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized',
       data: { statusMessageRu: 'Не авторизован' },
-    })
+    });
   }
 
   // Проверяем права администратора
-  const admin = await isUserAdmin(userUuid)
+  const admin = await isUserAdmin(userUuid);
   if (!admin) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
       data: { statusMessageRu: 'Нет прав доступа' },
-    })
+    });
   }
 
-  const body = await readBody(event)
+  const body = await readBody(event);
   if (!body.target || !body.reason || !body.duration) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Missing required fields',
       data: { statusMessageRu: 'Не заполнены обязательные поля' },
-    })
+    });
   }
 
-  const targetUuid = await resolveUuid(body.target)
-  const adminUser = await getUserByUUID(userUuid)
+  const targetUuid = await resolveUuid(body.target);
+  const adminUser = await getUserByUUID(userUuid);
 
   const dto: CreateBanDto = {
     targetUuid,
@@ -91,9 +91,9 @@ export default defineEventHandler(async (event) => {
     durationMs: Number.parseInt(body.duration),
     isIpBan: body.ipBan || false,
     silent: body.silent || false,
-  }
+  };
 
-  const ban = await createBan(dto)
+  const ban = await createBan(dto);
 
   // Преобразуем в публичный формат (без IP и uuid админа)
   const publicBan: BanEntryPublic = {
@@ -112,10 +112,10 @@ export default defineEventHandler(async (event) => {
     silent: ban.silent,
     ipban: ban.ipban,
     active: ban.active,
-  }
+  };
 
   return {
     success: true,
     ban: publicBan,
-  }
-})
+  };
+});

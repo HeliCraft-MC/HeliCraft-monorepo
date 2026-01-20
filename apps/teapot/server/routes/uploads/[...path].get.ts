@@ -1,4 +1,4 @@
-import { useFileService } from '~/utils/file.service'
+import { useFileService } from '~/utils/file.service';
 
 defineRouteMeta({
   openAPI: {
@@ -21,7 +21,7 @@ defineRouteMeta({
       404: { description: 'File not found' },
     },
   },
-})
+});
 
 // MIME type lookup by extension
 const mimeTypes: Record<string, string> = {
@@ -37,36 +37,36 @@ const mimeTypes: Record<string, string> = {
   pdf: 'application/pdf',
   json: 'application/json',
   txt: 'text/plain',
-}
+};
 
 function getMimeType(path: string): string {
-  const ext = path.split('.').pop()?.toLowerCase() || ''
-  return mimeTypes[ext] || 'application/octet-stream'
+  const ext = path.split('.').pop()?.toLowerCase() || '';
+  return mimeTypes[ext] || 'application/octet-stream';
 }
 
 export default defineEventHandler(async (event) => {
   // Get the path segments from the catch-all param
-  const pathParam = getRouterParam(event, 'path')
+  const pathParam = getRouterParam(event, 'path');
   if (!pathParam) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid path' })
+    throw createError({ statusCode: 400, statusMessage: 'Invalid path' });
   }
 
   // Decode URL-encoded characters and normalize path
-  const relativePath = decodeURIComponent(pathParam)
+  const relativePath = decodeURIComponent(pathParam);
 
   // Read file using FileService (includes path traversal protection)
-  const fileService = useFileService()
+  const fileService = useFileService();
 
-  let buf: Buffer | null
+  let buf: Buffer | null;
   try {
-    buf = await fileService.readFile(relativePath)
+    buf = await fileService.readFile(relativePath);
   }
   catch (err: any) {
     // Path traversal or other validation error
     if (err.message?.includes('traversal')) {
-      throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+      throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
     }
-    throw err
+    throw err;
   }
 
   if (!buf) {
@@ -74,15 +74,15 @@ export default defineEventHandler(async (event) => {
       statusCode: 404,
       statusMessage: 'File not found',
       data: { path: relativePath },
-    })
+    });
   }
 
-  const mime = getMimeType(relativePath)
+  const mime = getMimeType(relativePath);
 
   // Set cache headers - uploaded content can be cached
-  event.node.res.setHeader('Content-Length', buf.length.toString())
-  event.node.res.setHeader('Content-Type', mime)
-  event.node.res.setHeader('Cache-Control', 'public, max-age=2592000, immutable')
+  event.node.res.setHeader('Content-Length', buf.length.toString());
+  event.node.res.setHeader('Content-Type', mime);
+  event.node.res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
 
-  return send(event, buf, mime)
-})
+  return send(event, buf, mime);
+});

@@ -9,7 +9,7 @@ import {
   tinyint,
   uniqueIndex,
   varchar,
-} from 'drizzle-orm/mysql-core'
+} from 'drizzle-orm/mysql-core';
 
 // AUTH table - user authentication
 export const auth = mysqlTable('AUTH', {
@@ -33,8 +33,8 @@ export const auth = mysqlTable('AUTH', {
   uniqueIndex('UUID_WR').on(table.uuidWr),
   index('AUTH_PREMIUMUUID_idx').on(table.premiumUuid),
   index('AUTH_IP_idx').on(table.ip),
-])
+]);
 
 // Type exports for usage in application code
-export type Auth = typeof auth.$inferSelect
-export type NewAuth = typeof auth.$inferInsert
+export type Auth = typeof auth.$inferSelect;
+export type NewAuth = typeof auth.$inferInsert;

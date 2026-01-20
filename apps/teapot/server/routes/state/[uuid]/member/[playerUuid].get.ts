@@ -18,10 +18,10 @@ defineRouteMeta({
       404: { description: 'State or member not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const stateUuid = getRouterParam(event, 'uuid')
-  const playerUuid = getRouterParam(event, 'playerUuid')
-  return await getMember(stateUuid, playerUuid)
-})
+  const stateUuid = getRouterParam(event, 'uuid');
+  const playerUuid = getRouterParam(event, 'playerUuid');
+  return await getMember(stateUuid, playerUuid);
+});

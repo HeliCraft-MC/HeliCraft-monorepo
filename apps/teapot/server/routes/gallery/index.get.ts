@@ -1,4 +1,4 @@
-import { listGalleryImages } from '~/utils/gallery.utils'
+import { listGalleryImages } from '~/utils/gallery.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -33,15 +33,15 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
+  const query = getQuery(event);
 
-  const page = Math.max(1, Number.parseInt(query.page as string) || 1)
-  const perPage = Math.min(100, Math.max(1, Number.parseInt(query.perPage as string) || 20))
-  const category = query.category as string | undefined
-  const season = query.season as string | undefined
+  const page = Math.max(1, Number.parseInt(query.page as string) || 1);
+  const perPage = Math.min(100, Math.max(1, Number.parseInt(query.perPage as string) || 20));
+  const category = query.category as string | undefined;
+  const season = query.season as string | undefined;
 
   return await listGalleryImages(
     {
@@ -52,5 +52,5 @@ export default defineEventHandler(async (event) => {
     page,
     perPage,
     true,
-  )
-})
+  );
+});

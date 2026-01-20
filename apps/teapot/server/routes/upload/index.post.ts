@@ -1,5 +1,5 @@
-import { fileTypeFromBuffer } from 'file-type'
-import { useFileService } from '~/utils/file.service'
+import { fileTypeFromBuffer } from 'file-type';
+import { useFileService } from '~/utils/file.service';
 
 defineRouteMeta({
   openAPI: {
@@ -48,49 +48,49 @@ defineRouteMeta({
       401: { description: 'Unauthorized' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
   // 1. Auth check
-  const user = event.context.auth
+  const user = event.context.auth;
   if (!user) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
   // 2. Read multipart
-  const parts = await readMultipartFormData(event)
+  const parts = await readMultipartFormData(event);
   if (!parts || parts.length === 0) {
-    throw createError({ statusCode: 400, statusMessage: 'No file uploaded' })
+    throw createError({ statusCode: 400, statusMessage: 'No file uploaded' });
   }
 
-  const filePart = parts.find(p => p.name === 'file' || !p.name)
+  const filePart = parts.find(p => p.name === 'file' || !p.name);
   if (!filePart || !filePart.data) {
-    throw createError({ statusCode: 400, statusMessage: 'No file content' })
+    throw createError({ statusCode: 400, statusMessage: 'No file content' });
   }
 
-  const contextPart = parts.find(p => p.name === 'context')
-  const context = contextPart?.data?.toString() || 'misc'
+  const contextPart = parts.find(p => p.name === 'context');
+  const context = contextPart?.data?.toString() || 'misc';
 
   // Validate context to prevent spamming random root folders
-  const allowedContexts = ['forms', 'gallery', 'misc', 'avatars']
-  const subDir = allowedContexts.includes(context) ? context : 'misc'
+  const allowedContexts = ['forms', 'gallery', 'misc', 'avatars'];
+  const subDir = allowedContexts.includes(context) ? context : 'misc';
 
   // 3. Determine extension/mime
-  const ft = await fileTypeFromBuffer(filePart.data)
-  const extension = ft?.ext || 'bin'
-  const mime = ft?.mime || 'application/octet-stream'
+  const ft = await fileTypeFromBuffer(filePart.data);
+  const extension = ft?.ext || 'bin';
+  const mime = ft?.mime || 'application/octet-stream';
 
   // 4. Save file
-  const fileService = useFileService()
+  const fileService = useFileService();
 
   try {
     const fileMeta = await fileService.saveFile(filePart.data, {
       subDir,
       extension,
-    })
+    });
 
-    const config = useRuntimeConfig()
-    const publicUrl = `${config.publicApiUrl}/uploads/${fileMeta.path}`
+    const config = useRuntimeConfig();
+    const publicUrl = `${config.publicApiUrl}/uploads/${fileMeta.path}`;
 
     return {
       ok: true,
@@ -98,10 +98,10 @@ export default defineEventHandler(async (event) => {
         ...fileMeta,
         url: publicUrl,
       },
-    }
+    };
   }
   catch (err: any) {
-    console.error('Upload failed:', err)
-    throw createError({ statusCode: 500, statusMessage: 'File save failed' })
+    console.error('Upload failed:', err);
+    throw createError({ statusCode: 500, statusMessage: 'File save failed' });
   }
-})
+});

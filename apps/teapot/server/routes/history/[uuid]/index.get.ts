@@ -17,9 +17,9 @@ defineRouteMeta({
       404: { description: 'History event not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const uuid = getRouterParam(event, 'uuid')
-  return await getHistoryEvent(uuid)
-})
+  const uuid = getRouterParam(event, 'uuid');
+  return await getHistoryEvent(uuid);
+});

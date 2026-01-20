@@ -7,7 +7,7 @@ import {
   integer,
   sqliteTable,
   text,
-} from 'drizzle-orm/sqlite-core'
+} from 'drizzle-orm/sqlite-core';
 
 // Skins table
 export const skins = sqliteTable('skins', {
@@ -16,7 +16,7 @@ export const skins = sqliteTable('skins', {
   mime: text('mime').notNull(),
   size: integer('size'),
   created: integer('created'),
-})
+});
 
 // Gallery table
 export const gallery = sqliteTable('gallery', {
@@ -40,7 +40,7 @@ export const gallery = sqliteTable('gallery', {
   index('idx_gallery_owner').on(table.ownerUuid),
   index('idx_gallery_category').on(table.category),
   index('idx_gallery_season').on(table.season),
-])
+]);
 
 // File refs table (CAS - Content Addressable Storage)
 export const fileRefs = sqliteTable('file_refs', {
@@ -54,12 +54,12 @@ export const fileRefs = sqliteTable('file_refs', {
 }, table => [
   index('idx_file_refs_path').on(table.path),
   index('idx_file_refs_refcount').on(table.refCount),
-])
+]);
 
 // Type exports
-export type Skin = typeof skins.$inferSelect
-export type NewSkin = typeof skins.$inferInsert
-export type GalleryImage = typeof gallery.$inferSelect
-export type NewGalleryImage = typeof gallery.$inferInsert
-export type FileRef = typeof fileRefs.$inferSelect
-export type NewFileRef = typeof fileRefs.$inferInsert
+export type Skin = typeof skins.$inferSelect;
+export type NewSkin = typeof skins.$inferInsert;
+export type GalleryImage = typeof gallery.$inferSelect;
+export type NewGalleryImage = typeof gallery.$inferInsert;
+export type FileRef = typeof fileRefs.$inferSelect;
+export type NewFileRef = typeof fileRefs.$inferInsert;

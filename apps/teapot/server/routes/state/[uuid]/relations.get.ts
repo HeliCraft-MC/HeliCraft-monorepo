@@ -16,9 +16,9 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const stateUuid = getRouterParam(event, 'uuid')
-  return await getStateRelationsList(stateUuid)
-})
+  const stateUuid = getRouterParam(event, 'uuid');
+  return await getStateRelationsList(stateUuid);
+});

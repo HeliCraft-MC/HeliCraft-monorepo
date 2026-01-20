@@ -1,4 +1,4 @@
-import type { IBaseEntity } from './common.types'
+import type { IBaseEntity } from './common.types';
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Города и проживание                                          */
@@ -9,14 +9,14 @@ import type { IBaseEntity } from './common.types'
  */
 export interface ICity extends IBaseEntity {
   /** Название города */
-  name: string
+  name: string;
 
   /** Координаты в формате "x,z" или ссылка на карту */
-  coordinates: string
+  coordinates: string;
 
   /** Государство, к которому относится (null → независимый город) */
-  state_uuid: string | null
+  state_uuid: string | null;
 
   /** Является ли столицей своего государства */
-  is_capital: boolean
+  is_capital: boolean;
 }

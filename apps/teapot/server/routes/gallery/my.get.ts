@@ -1,4 +1,4 @@
-import { listUserImages } from '~/utils/gallery.utils'
+import { listUserImages } from '~/utils/gallery.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -33,18 +33,18 @@ defineRouteMeta({
       401: { description: 'Unauthorized' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
   if (!userUuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
-  const query = getQuery(event)
+  const query = getQuery(event);
 
-  const page = Math.max(1, Number.parseInt(query.page as string) || 1)
-  const perPage = Math.min(100, Math.max(1, Number.parseInt(query.perPage as string) || 20))
+  const page = Math.max(1, Number.parseInt(query.page as string) || 1);
+  const perPage = Math.min(100, Math.max(1, Number.parseInt(query.perPage as string) || 20));
 
-  return await listUserImages(userUuid, page, perPage)
-})
+  return await listUserImages(userUuid, page, perPage);
+});

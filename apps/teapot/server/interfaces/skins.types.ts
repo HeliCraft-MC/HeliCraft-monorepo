@@ -1,13 +1,13 @@
 /** Метаданные скина, лежащие в SQLite */
 export interface SkinMeta {
   /** UUID владельца (primary key) */
-  uuid: string
+  uuid: string;
   /** Относительный путь, например "skins/ab/cd/ef/<uuid>.png" */
-  path: string
+  path: string;
   /** MIME-тип, обычно image/png */
-  mime: string
+  mime: string;
   /** Размер файла в байтах */
-  size: number
+  size: number;
   /** Unix-время создания */
-  created: number
+  created: number;
 }

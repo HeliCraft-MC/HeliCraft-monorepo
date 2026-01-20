@@ -1,6 +1,6 @@
-import type { CreateFormDto } from '~/interfaces/forms.types'
-import { createForm } from '~/utils/forms.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import type { CreateFormDto } from '~/interfaces/forms.types';
+import { createForm } from '~/utils/forms.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -12,19 +12,19 @@ defineRouteMeta({
       403: { description: 'Forbidden' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.auth
+  const user = event.context.auth;
   if (!user)
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
 
-  const isAdmin = await isUserAdmin(user.uuid)
+  const isAdmin = await isUserAdmin(user.uuid);
   if (!isAdmin) {
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admins only' })
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admins only' });
   }
 
-  const body = await readBody<CreateFormDto>(event)
-  const form = await createForm(user.uuid, body)
-  return form
-})
+  const body = await readBody<CreateFormDto>(event);
+  const form = await createForm(user.uuid, body);
+  return form;
+});

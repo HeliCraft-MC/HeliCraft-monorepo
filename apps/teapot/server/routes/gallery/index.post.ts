@@ -1,7 +1,7 @@
-import type { H3Event } from 'h3'
-import { fileTypeFromBuffer } from 'file-type'
-import sharp from 'sharp'
-import { createGalleryImage } from '~/utils/gallery.utils'
+import type { H3Event } from 'h3';
+import { fileTypeFromBuffer } from 'file-type';
+import sharp from 'sharp';
+import { createGalleryImage } from '~/utils/gallery.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -46,61 +46,61 @@ defineRouteMeta({
       415: { description: 'Unsupported media type' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event: H3Event) => {
   // Get authenticated user
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
   if (!userUuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
   // Parse multipart form
-  const parts = await readMultipartFormData(event)
+  const parts = await readMultipartFormData(event);
   if (!parts || parts.length === 0) {
-    throw createError({ statusCode: 400, statusMessage: 'Empty upload' })
+    throw createError({ statusCode: 400, statusMessage: 'Empty upload' });
   }
 
   // Find file and description
-  const filePart = parts.find(p => p.name === 'file' || !p.name)
-  const descriptionPart = parts.find(p => p.name === 'description')
+  const filePart = parts.find(p => p.name === 'file' || !p.name);
+  const descriptionPart = parts.find(p => p.name === 'description');
 
   if (!filePart?.data) {
-    throw createError({ statusCode: 400, statusMessage: 'No file provided' })
+    throw createError({ statusCode: 400, statusMessage: 'No file provided' });
   }
 
   // Limit size to 10 MB
   if (filePart.data.length > 10_485_760) {
-    throw createError({ statusCode: 413, statusMessage: 'File too big (max 10MB)' })
+    throw createError({ statusCode: 413, statusMessage: 'File too big (max 10MB)' });
   }
 
   // Check file type
-  const ft = await fileTypeFromBuffer(filePart.data)
+  const ft = await fileTypeFromBuffer(filePart.data);
   if (!ft || !['image/png', 'image/jpeg', 'image/webp'].includes(ft.mime)) {
-    throw createError({ statusCode: 415, statusMessage: 'Only PNG, JPEG, and WebP images are supported' })
+    throw createError({ statusCode: 415, statusMessage: 'Only PNG, JPEG, and WebP images are supported' });
   }
 
   // Process and optimize image
-  let processedImage: Buffer
+  let processedImage: Buffer;
   try {
     processedImage = await sharp(filePart.data)
       .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
-      .toBuffer()
+      .toBuffer();
   }
   catch {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid image file' })
+    throw createError({ statusCode: 400, statusMessage: 'Invalid image file' });
   }
 
   // Create gallery image
-  const description = descriptionPart?.data?.toString('utf-8') || undefined
+  const description = descriptionPart?.data?.toString('utf-8') || undefined;
 
   const image = await createGalleryImage(processedImage, ft.mime, {
     owner_uuid: userUuid,
     description,
-  })
+  });
 
   return {
     ok: true,
     image,
-  }
-})
+  };
+});

@@ -1,5 +1,5 @@
-import type { BanEntryPublic } from '~/interfaces/banlist.types'
-import { getBanById, searchBans } from '~/utils/banlist.utils'
+import type { BanEntryPublic } from '~/interfaces/banlist.types';
+import { getBanById, searchBans } from '~/utils/banlist.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -29,18 +29,18 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
+  const query = getQuery(event);
 
-  const limit = Number.parseInt(query.limit as string) || 20
-  const offset = Number.parseInt(query.offset as string) || 0
-  const activeOnly = query.active === 'true'
-  const search = query.q as string | undefined
-  const id = query.id as string | undefined
+  const limit = Number.parseInt(query.limit as string) || 20;
+  const offset = Number.parseInt(query.offset as string) || 0;
+  const activeOnly = query.active === 'true';
+  const search = query.q as string | undefined;
+  const id = query.id as string | undefined;
   if (id) {
-    const ban = await getBanById(Number.parseInt(id))
+    const ban = await getBanById(Number.parseInt(id));
     // Преобразуем в публичный формат (без IP и uuid админа)
     const publicBan: BanEntryPublic = {
       id: ban.id,
@@ -58,9 +58,9 @@ export default defineEventHandler(async (event) => {
       silent: ban.silent,
       ipban: ban.ipban,
       active: ban.active,
-    }
-    return publicBan
+    };
+    return publicBan;
   }
 
-  return await searchBans(limit, offset, activeOnly, search)
-})
+  return await searchBans(limit, offset, activeOnly, search);
+});

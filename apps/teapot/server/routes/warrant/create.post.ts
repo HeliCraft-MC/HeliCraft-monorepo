@@ -1,4 +1,4 @@
-import { createWarrant } from '~/utils/states/orders.utils'
+import { createWarrant } from '~/utils/states/orders.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -36,10 +36,10 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const uuid = await createWarrant(body.stateUuid, body.affectedPlayerUuid, body.reason, body.issuedByPlayerUuid)
-  return { uuid }
-})
+  const body = await readBody(event);
+  const uuid = await createWarrant(body.stateUuid, body.affectedPlayerUuid, body.reason, body.issuedByPlayerUuid);
+  return { uuid };
+});

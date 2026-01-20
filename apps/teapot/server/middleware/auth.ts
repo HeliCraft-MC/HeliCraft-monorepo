@@ -2,8 +2,8 @@
 
 /* ---------- правила исключений ---------- */
 interface ExcludeRule {
-  pattern: RegExp
-  methods?: string[] // UPPER-case
+  pattern: RegExp;
+  methods?: string[]; // UPPER-case
 }
 const exclude: ExcludeRule[] = [
   { pattern: /^\/auth\/login(?:\?.*)?$/ },
@@ -42,7 +42,7 @@ const exclude: ExcludeRule[] = [
   { pattern: /^\/gallery\/[0-9a-fA-F-]+\/image$/, methods: ['GET'] },
   // Forms public routes
   { pattern: /^\/forms\/user\/[^/]+$/, methods: ['GET'] },
-]
+];
 
 /**
  * Try to extract and validate token, returns UUID if valid, null otherwise.
@@ -51,68 +51,68 @@ const exclude: ExcludeRule[] = [
 async function tryExtractAuth(event: any): Promise<string | null> {
   const stripBearerPrefix = (token: string): string => {
     if (token.startsWith('Bearer ')) {
-      return stripBearerPrefix(token.slice(7))
+      return stripBearerPrefix(token.slice(7));
     }
-    return token
-  }
+    return token;
+  };
 
-  const authHeader = getHeader(event, 'authorization')
-  let accessToken: string | undefined
+  const authHeader = getHeader(event, 'authorization');
+  let accessToken: string | undefined;
 
   if (authHeader?.startsWith('Bearer ')) {
-    accessToken = stripBearerPrefix(authHeader)
+    accessToken = stripBearerPrefix(authHeader);
   }
 
   if (!accessToken) {
-    const cookies = parseCookies(event)
-    accessToken = cookies['auth.token']
+    const cookies = parseCookies(event);
+    accessToken = cookies['auth.token'];
   }
 
   if (!accessToken) {
-    return null
+    return null;
   }
 
   try {
-    const payload = await verifyToken(accessToken)
-    const UUID = (payload as any)?.UUID
+    const payload = await verifyToken(accessToken);
+    const UUID = (payload as any)?.UUID;
     if (!UUID)
-      return null
+      return null;
 
-    await checkAuth(UUID, accessToken)
-    return UUID
+    await checkAuth(UUID, accessToken);
+    return UUID;
   }
   catch {
-    return null
+    return null;
   }
 }
 
 export default defineEventHandler(async (event) => {
-  const url = event.path || event.node.req.url || '/'
-  const method = (event.method || event.node.req.method || 'GET').toUpperCase()
+  const url = event.path || event.node.req.url || '/';
+  const method = (event.method || event.node.req.method || 'GET').toUpperCase();
 
   // Check if route is excluded from mandatory auth
-  let isExcluded = false
+  let isExcluded = false;
   for (const rule of exclude) {
     if (rule.pattern.test(url)
       && (!rule.methods || rule.methods.includes(method))) {
-      isExcluded = true
-      break
+      isExcluded = true;
+      break;
     }
   }
 
   // ALWAYS try to populate auth context if token is present
-  const uuid = await tryExtractAuth(event)
+  const uuid = await tryExtractAuth(event);
   if (uuid) {
-    event.context.auth = { uuid }
+    event.context.auth = { uuid };
   }
 
   // For excluded routes, we're done (don't throw if no auth)
   if (isExcluded) {
-    return
+    return;
   }
 
   // For protected routes, require auth
   if (!uuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Missing or invalid authentication' })
+    throw createError({ statusCode: 401, statusMessage: 'Missing or invalid authentication' });
   }
-})
+});

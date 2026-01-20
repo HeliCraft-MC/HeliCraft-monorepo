@@ -34,11 +34,11 @@ defineRouteMeta({
       404: { description: 'State not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const stateUuid = getRouterParam(event, 'uuid')
-  const { uuid } = event.context.auth || {}
-  await applyForMembership(stateUuid, uuid)
-  return { ok: true }
-})
+  const stateUuid = getRouterParam(event, 'uuid');
+  const { uuid } = event.context.auth || {};
+  await applyForMembership(stateUuid, uuid);
+  return { ok: true };
+});

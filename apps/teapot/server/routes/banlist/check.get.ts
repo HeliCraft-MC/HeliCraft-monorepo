@@ -1,5 +1,5 @@
-import { isUserBanned } from '~/utils/banlist.utils'
-import { resolveUuid } from '~/utils/user.utils'
+import { isUserBanned } from '~/utils/banlist.utils';
+import { resolveUuid } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -24,22 +24,22 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const target = query.target as string
+  const query = getQuery(event);
+  const target = query.target as string;
 
   if (!target) {
-    return { banned: false }
+    return { banned: false };
   }
 
   try {
-    const uuid = await resolveUuid(target)
-    const banned = await isUserBanned(uuid)
-    return { banned }
+    const uuid = await resolveUuid(target);
+    const banned = await isUserBanned(uuid);
+    return { banned };
   }
   catch (e) {
-    return { banned: false }
+    return { banned: false };
   }
-})
+});

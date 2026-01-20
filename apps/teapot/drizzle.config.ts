@@ -1,4 +1,4 @@
-import { defineConfig } from 'drizzle-kit'
+import { defineConfig } from 'drizzle-kit';
 
 // Drizzle Kit configuration
 // Note: This config uses environment variables for database connection
@@ -16,4 +16,4 @@ export default defineConfig({
     password: process.env.NITRO_DATABASE_DEFAULT_OPTIONS_PASSWORD || 'devpassword',
     database: process.env.NITRO_DATABASE_DEFAULT_OPTIONS_DATABASE || 'mydb',
   },
-})
+});

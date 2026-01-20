@@ -1,4 +1,4 @@
-import type { IBaseEntity } from './common.types'
+import type { IBaseEntity } from './common.types';
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Категории исторических событий                               */
@@ -50,39 +50,39 @@ export enum HistoryEventType {
 
 export interface IHistoryEvent extends IBaseEntity {
 
-  season: string | null
+  season: string | null;
 
   /** Категория события (enum) */
-  type: HistoryEventType
+  type: HistoryEventType;
 
   /** Заголовок события (Markdown) */
-  title: string
+  title: string;
 
   /** Человеко-читаемое описание (Markdown) */
-  description: string
+  description: string;
 
   /** Задействованные государства (JSON-массив UUID’ов) */
-  state_uuids: string[] | null
+  state_uuids: string[] | null;
 
   /** Задействованные игроки */
-  player_uuids: string[] | null
+  player_uuids: string[] | null;
 
   /** Задействованные альянсы */
-  alliance_uuids: string[] | null
+  alliance_uuids: string[] | null;
 
   /** Связанная война (если применимо) */
-  war_uuid: string | null
+  war_uuid: string | null;
 
   /** Связанный города (если применимо) */
-  city_uuids: string[] | null
+  city_uuids: string[] | null;
 
   /** Дополнительные данные (произвольный JSON) */
-  details_json: string | null
+  details_json: string | null;
 
   /** Автор записи (UUID игрока или админа) */
-  created_by_uuid: string
+  created_by_uuid: string;
 
-  is_deleted: boolean
-  deleted_at: number | null
-  deleted_by_uuid: string | null
+  is_deleted: boolean;
+  deleted_at: number | null;
+  deleted_by_uuid: string | null;
 }

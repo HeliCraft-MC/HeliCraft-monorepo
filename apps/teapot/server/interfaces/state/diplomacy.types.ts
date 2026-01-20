@@ -1,4 +1,4 @@
-import type { IBaseEntity } from './common.types'
+import type { IBaseEntity } from './common.types';
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Альянсы                                                      */
@@ -23,25 +23,25 @@ export enum AlliencePurpose {
  */
 export interface IAlliance extends IBaseEntity {
   /** Название */
-  name: string
+  name: string;
 
   /** Описание / устав */
-  description: string
+  description: string;
 
   /** Основная цель существования */
-  purpose: string
+  purpose: string;
 
   /** Фирменный цвет (#RRGGBB) */
-  color_hex: string
+  color_hex: string;
 
   /** Государство-основатель */
-  creator_state_uuid: string
+  creator_state_uuid: string;
 
   /** URL флага */
-  flag_link: string
+  flag_link: string;
 
   /** Текущий статус */
-  status: AllianceStatus
+  status: AllianceStatus;
 }
 
 /**
@@ -49,10 +49,10 @@ export interface IAlliance extends IBaseEntity {
  * `isPending = true` означает, что заявка ещё не одобрена.
  */
 export interface IAllianceMember extends IBaseEntity {
-  alliance_uuid: string
-  state_uuid: string
-  is_pending: boolean
-  allowed_to_manage: boolean // todo !!!!
+  alliance_uuid: string;
+  state_uuid: string;
+  is_pending: boolean;
+  allowed_to_manage: boolean; // todo !!!!
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -77,13 +77,13 @@ export enum RelationKind {
  */
 export interface IStateRelationRequest extends IBaseEntity {
   /** UUID первого (в упорядоченном виде) государства (state_a_uuid < state_b_uuid) */
-  state_a_uuid: string
+  state_a_uuid: string;
 
   /** UUID второго (в упорядоченном виде) государства */
-  state_b_uuid: string
+  state_b_uuid: string;
 
   /** UUID государства, попросившего изменение (proposer_state_uuid) */
-  proposer_state_uuid: string
+  proposer_state_uuid: string;
 
   /**
    * Требуемый новый характер отношений:
@@ -92,19 +92,19 @@ export interface IStateRelationRequest extends IBaseEntity {
    *  – RelationKind.NEUTRAL
    *  - null → удалить отношения
    */
-  requested_kind: RelationKind | null
+  requested_kind: RelationKind | null;
 
   /** Статус заявки (pending | approved | declined) */
-  status: RelationRequestStatus
+  status: RelationRequestStatus;
 }
 
 /**
  * Для каждой неупорядоченной пары государств ровно одна запись.
  */
 export interface IStateRelation extends IBaseEntity {
-  state_a_uuid: string
-  state_b_uuid: string
-  kind: RelationKind
+  state_a_uuid: string;
+  state_b_uuid: string;
+  kind: RelationKind;
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -148,32 +148,32 @@ export enum BattleStatus {
  */
 export interface IWar extends IBaseEntity {
   /** Название конфликта */
-  name: string
+  name: string;
 
-  reason: string
+  reason: string;
 
-  victory_condition: string
+  victory_condition: string;
 
   /** Текущий статус */
-  status: WarStatus
+  status: WarStatus;
 
   /** Итог («3-2», «ничья»…) ― null, пока война не закончилась */
-  result: string | null
+  result: string | null;
 
-  result_action: string | null
+  result_action: string | null;
 }
 
 export interface IWarBattle extends IBaseEntity {
-  war_uuid: string
-  name: string
-  description: string
-  type: BattleType
-  status: BattleStatus
-  result: string | null
+  war_uuid: string;
+  name: string;
+  description: string;
+  type: BattleType;
+  status: BattleStatus;
+  result: string | null;
   /** Дата начала сражения (Unix-время) */
-  start_date: number
+  start_date: number;
   /** Дата окончания сражения (Unix-время) */
-  end_date: number | null // null, если ещё не завершено
+  end_date: number | null; // null, если ещё не завершено
 }
 
 /** Роль конкретного государства в войне */
@@ -188,7 +188,7 @@ export enum WarSideRole {
  * Связка «государство ↔ война».
  */
 export interface IWarParticipant extends IBaseEntity {
-  war_uuid: string
-  state_uuid: string
-  side_role: WarSideRole
+  war_uuid: string;
+  state_uuid: string;
+  side_role: WarSideRole;
 }

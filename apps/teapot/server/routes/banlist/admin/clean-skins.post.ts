@@ -1,5 +1,5 @@
-import { deleteSkinsBatchForBannedUsers } from '~/utils/banlist.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import { deleteSkinsBatchForBannedUsers } from '~/utils/banlist.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -58,51 +58,51 @@ defineRouteMeta({
       500: { description: 'Ошибка при обработке' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
 
   if (!userUuid) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized',
       data: { statusMessageRu: 'Не авторизован' },
-    })
+    });
   }
 
   // Проверяем права администратора
-  const admin = await isUserAdmin(userUuid)
+  const admin = await isUserAdmin(userUuid);
   if (!admin) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
       data: { statusMessageRu: 'Нет прав доступа' },
-    })
+    });
   }
 
-  const query = getQuery(event)
-  const minDuration = query.minDuration as string
+  const query = getQuery(event);
+  const minDuration = query.minDuration as string;
 
   if (!minDuration) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Missing required parameter',
       data: { statusMessageRu: 'Отсутствует параметр minDuration' },
-    })
+    });
   }
 
-  const minDurationMs = Number.parseInt(minDuration)
+  const minDurationMs = Number.parseInt(minDuration);
   if (isNaN(minDurationMs)) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Invalid parameter format',
       data: { statusMessageRu: 'minDuration должен быть числом' },
-    })
+    });
   }
 
   try {
-    const result = await deleteSkinsBatchForBannedUsers(minDurationMs)
+    const result = await deleteSkinsBatchForBannedUsers(minDurationMs);
 
     return {
       success: true,
@@ -111,7 +111,7 @@ export default defineEventHandler(async (event) => {
       total: result.users.length,
       users: result.users,
       errors: result.errors.length > 0 ? result.errors : undefined,
-    }
+    };
   }
   catch (e: any) {
     throw createError({
@@ -121,6 +121,6 @@ export default defineEventHandler(async (event) => {
         statusMessageRu: 'Ошибка при удалении скинов забаненных пользователей',
         error: e.message,
       },
-    })
+    });
   }
-})
+});

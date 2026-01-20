@@ -16,6 +16,6 @@ defineRouteMeta({
       404: { description: 'Skin not found' },
     },
   },
-})
+});
 
-export { default } from './head.get'
+export { default } from './head.get';

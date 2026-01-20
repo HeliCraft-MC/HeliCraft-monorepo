@@ -1,36 +1,36 @@
-import type { ResultSetHeader, RowDataPacket } from 'mysql2'
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import type {
   HistoryEventType,
   IHistoryEvent,
-} from '~/interfaces/state/history.types'
-import { v4 as uuidv4 } from 'uuid'
-import { useMySQL } from '~/plugins/mySql'
+} from '~/interfaces/state/history.types';
+import { v4 as uuidv4 } from 'uuid';
+import { useMySQL } from '~/plugins/mySql';
 
 /* ──────────── вспомогательные типы ──────────── */
 
-type ArrOrOne<T> = T | T[]
+type ArrOrOne<T> = T | T[];
 
 /**
  * Набор фильтров для listHistoryEvents()
  */
 export interface HistoryFilters {
-  type?: ArrOrOne<HistoryEventType>
-  stateUuid?: ArrOrOne<string>
-  playerUuid?: ArrOrOne<string>
-  allianceUuid?: ArrOrOne<string>
-  warUuid?: string
-  cityUuid?: ArrOrOne<string>
-  createdByUuid?: string
+  type?: ArrOrOne<HistoryEventType>;
+  stateUuid?: ArrOrOne<string>;
+  playerUuid?: ArrOrOne<string>;
+  allianceUuid?: ArrOrOne<string>;
+  warUuid?: string;
+  cityUuid?: ArrOrOne<string>;
+  createdByUuid?: string;
   /** created >= after  */
-  after?: number
+  after?: number;
   /** created <= before */
-  before?: number
+  before?: number;
   /** Поиск по title / description (LIKE %q%) */
-  search?: string
+  search?: string;
   /** Сезон */
-  season?: number | null
+  season?: number | null;
   /** Показывать soft-deleted записи */
-  includeDeleted?: boolean
+  includeDeleted?: boolean;
 }
 
 /**
@@ -44,7 +44,7 @@ export type HistoryInsert = Omit<
   | 'is_deleted'
   | 'deleted_at'
   | 'deleted_by_uuid'
->
+>;
 
 /**
  * Поля, которые разрешено изменять через updateHistoryEvent().
@@ -61,7 +61,7 @@ export type HistoryUpdate = Partial<
     | 'city_uuids'
     | 'details_json'
   >
->
+>;
 
 /* ──────────── утилиты ──────────── */
 
@@ -69,7 +69,7 @@ export type HistoryUpdate = Partial<
  * Безопасный LIKE — экранирует % и _
  */
 function likeEscape(raw: string) {
-  return raw.replace(/([%_])/g, '\\$1')
+  return raw.replace(/([%_])/g, '\\$1');
 }
 
 /**
@@ -77,8 +77,8 @@ function likeEscape(raw: string) {
  */
 function toArray<T>(val?: ArrOrOne<T>): T[] | undefined {
   if (val === undefined)
-    return undefined
-  return Array.isArray(val) ? val : [val]
+    return undefined;
+  return Array.isArray(val) ? val : [val];
 }
 
 /**
@@ -104,7 +104,7 @@ function mapRow(row: any): IHistoryEvent {
     deleted_at: row.deleted_at ?? null,
     deleted_by_uuid: row.deleted_by_uuid ?? null,
     season: row.season ?? null,
-  } as IHistoryEvent
+  } as IHistoryEvent;
 }
 
 /* ──────────── создание ──────────── */
@@ -121,12 +121,12 @@ export async function addHistoryEvent(
   validateCb?: (payload: HistoryInsert) => Promise<void> | void,
 ): Promise<string> {
   if (validateCb)
-    await validateCb(data)
+    await validateCb(data);
 
-  const now = Date.now()
-  const uuid = uuidv4()
+  const now = Date.now();
+  const uuid = uuidv4();
 
-  const pool = useMySQL('states')
+  const pool = useMySQL('states');
 
   // DEPRECATED, keeping this for info
   // await stmtCache.insert.run(
@@ -155,7 +155,7 @@ export async function addHistoryEvent(
             created_by_uuid, is_deleted
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `
+    `;
 
   const values = [
     uuid,
@@ -172,61 +172,61 @@ export async function addHistoryEvent(
     data.city_uuids ? JSON.stringify(data.city_uuids) : null,
     data.details_json ? JSON.stringify(data.details_json) : null,
     data.created_by_uuid,
-  ]
+  ];
 
-  const [result] = await pool.execute<ResultSetHeader>(sql, values)
+  const [result] = await pool.execute<ResultSetHeader>(sql, values);
 
   if (result.affectedRows === 0) {
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to insert history event',
       data: { statusMessageRu: 'Не удалось добавить запись в историю' },
-    })
+    });
   }
 
-  return uuid
+  return uuid;
 }
 
 /* ──────────── чтение ──────────── */
 
 export async function getHistoryEvent(uuid: string): Promise<IHistoryEvent> {
-  const pool = useMySQL('states')
+  const pool = useMySQL('states');
 
   // DEPRECATED, keeping this for info
   // const row = stmtCache.selectByUuid.get(uuid) as any
 
-  const sql = 'SELECT * FROM `history_events` WHERE `uuid` = ? LIMIT 1'
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid])
-  const row = rows[0]
+  const sql = 'SELECT * FROM `history_events` WHERE `uuid` = ? LIMIT 1';
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid]);
+  const row = rows[0];
 
   if (!row || row.is_deleted) {
     throw createError({
       statusCode: 404,
       statusMessage: 'History event not found',
       data: { statusMessageRu: 'Событие не найдено' },
-    })
+    });
   }
 
-  return mapRow(row)
+  return mapRow(row);
 }
 
 /**
  * Построение WHERE по фильтрам
  */
-function buildWhere(filters: HistoryFilters): { where: string, params: any[] } {
-  const parts: string[] = []
-  const params: any[] = []
+function buildWhere(filters: HistoryFilters): { where: string; params: any[] } {
+  const parts: string[] = [];
+  const params: any[] = [];
 
   // soft-delete
   if (!filters.includeDeleted) {
-    parts.push('is_deleted = 0')
+    parts.push('is_deleted = 0');
   }
 
   // тип
   if (filters.type) {
-    const arr = toArray(filters.type)!
-    parts.push(`type IN (${arr.map(() => '?').join(',')})`)
-    params.push(...arr)
+    const arr = toArray(filters.type)!;
+    parts.push(`type IN (${arr.map(() => '?').join(',')})`);
+    params.push(...arr);
   }
 
   // JSON-поля
@@ -235,46 +235,46 @@ function buildWhere(filters: HistoryFilters): { where: string, params: any[] } {
     ['player_uuids', toArray(filters.playerUuid)],
     ['alliance_uuids', toArray(filters.allianceUuid)],
     ['city_uuids', toArray(filters.cityUuid)],
-  ]
+  ];
 
   for (const [field, arr] of jsonFilters) {
     if (arr && arr.length) {
-      parts.push(`JSON_OVERLAPS(${field}, ?)`)
-      params.push(JSON.stringify(arr))
+      parts.push(`JSON_OVERLAPS(${field}, ?)`);
+      params.push(JSON.stringify(arr));
     }
   }
 
   // war
   if (filters.warUuid) {
-    parts.push('war_uuid = ?')
-    params.push(filters.warUuid)
+    parts.push('war_uuid = ?');
+    params.push(filters.warUuid);
   }
 
   // author
   if (filters.createdByUuid) {
-    parts.push('created_by_uuid = ?')
-    params.push(filters.createdByUuid)
+    parts.push('created_by_uuid = ?');
+    params.push(filters.createdByUuid);
   }
 
   // даты
   if (filters.after) {
-    parts.push('created >= ?')
-    params.push(filters.after)
+    parts.push('created >= ?');
+    params.push(filters.after);
   }
   if (filters.before) {
-    parts.push('created <= ?')
-    params.push(filters.before)
+    parts.push('created <= ?');
+    params.push(filters.before);
   }
 
   // LIKE-поиск
   if (filters.search) {
-    const q = `%${likeEscape(filters.search)}%`
-    parts.push('(title LIKE ? ESCAPE \'\\\' OR description LIKE ? ESCAPE \'\\\')')
-    params.push(q, q)
+    const q = `%${likeEscape(filters.search)}%`;
+    parts.push('(title LIKE ? ESCAPE \'\\\' OR description LIKE ? ESCAPE \'\\\')');
+    params.push(q, q);
   }
 
-  const where = parts.length ? `WHERE ${parts.join(' AND ')}` : ''
-  return { where, params }
+  const where = parts.length ? `WHERE ${parts.join(' AND ')}` : '';
+  return { where, params };
 }
 
 /**
@@ -286,8 +286,8 @@ export async function listHistoryEvents(
   limit = 100,
   order: 'asc' | 'desc' = 'desc',
 ): Promise<IHistoryEvent[]> {
-  const pool = useMySQL('states')
-  const { where, params } = buildWhere(filters)
+  const pool = useMySQL('states');
+  const { where, params } = buildWhere(filters);
 
   // DEPRECATED, keeping this for info
   // const rows = await db.prepare(sql).all(...params, limit, startAt) as any[]
@@ -297,12 +297,12 @@ export async function listHistoryEvents(
         ${where}
         ORDER BY created ${order.toUpperCase()}
         LIMIT ? OFFSET ?
-    `
+    `;
 
-  const finalParams = [...params, limit, startAt]
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, finalParams)
+  const finalParams = [...params, limit, startAt];
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, finalParams);
 
-  return (rows as any[]).map(mapRow)
+  return (rows as any[]).map(mapRow);
 }
 
 /**
@@ -311,37 +311,37 @@ export async function listHistoryEvents(
 export async function countHistoryEvents(
   filters: HistoryFilters = {},
 ): Promise<number> {
-  const pool = useMySQL('states')
-  const { where, params } = buildWhere(filters)
+  const pool = useMySQL('states');
+  const { where, params } = buildWhere(filters);
 
   // DEPRECATED, keeping this for info
   // const row = await db
   //     .prepare(`SELECT COUNT(*) as count FROM history_events ${where}`)
   //     .get(...params) as { count: number }
 
-  const sql = `SELECT COUNT(*) as count FROM history_events ${where}`
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, params)
-  const row = rows[0] as { count: number }
+  const sql = `SELECT COUNT(*) as count FROM history_events ${where}`;
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, params);
+  const row = rows[0] as { count: number };
 
-  return row.count
+  return row.count;
 }
 
 /* ──────────── короткие алиасы (state / player / alliance …) ──────────── */
 
 export function getHistoryByState(stateUuid: string, startAt = 0, limit = 100) {
-  return listHistoryEvents({ stateUuid }, startAt, limit)
+  return listHistoryEvents({ stateUuid }, startAt, limit);
 }
 
 export function getHistoryByPlayer(playerUuid: string, startAt = 0, limit = 100) {
-  return listHistoryEvents({ playerUuid }, startAt, limit)
+  return listHistoryEvents({ playerUuid }, startAt, limit);
 }
 
 export function getHistoryByAlliance(allianceUuid: string, startAt = 0, limit = 100) {
-  return listHistoryEvents({ allianceUuid }, startAt, limit)
+  return listHistoryEvents({ allianceUuid }, startAt, limit);
 }
 
 export function getHistoryByWar(warUuid: string, startAt = 0, limit = 100) {
-  return listHistoryEvents({ warUuid }, startAt, limit)
+  return listHistoryEvents({ warUuid }, startAt, limit);
 }
 
 /* ──────────── обновление и soft-delete ──────────── */
@@ -352,18 +352,18 @@ export async function updateHistoryEvent(
   updaterUuid: string,
 ) {
   if (!Object.keys(patch).length)
-    return
+    return;
 
-  const pool = useMySQL('states')
+  const pool = useMySQL('states');
 
   // формируем SET-часть динамически
-  const cols: string[] = []
-  const params: any[] = []
-  const now = Date.now()
+  const cols: string[] = [];
+  const params: any[] = [];
+  const now = Date.now();
 
   for (const [key, val] of Object.entries(patch)) {
     if (val === undefined)
-      continue
+      continue;
 
     if (
       [
@@ -374,33 +374,33 @@ export async function updateHistoryEvent(
         'details_json',
       ].includes(key)
     ) {
-      cols.push(`${key} = ?`)
-      params.push(val ? JSON.stringify(val) : null)
+      cols.push(`${key} = ?`);
+      params.push(val ? JSON.stringify(val) : null);
     }
     else {
-      cols.push(`${key} = ?`)
-      params.push(val)
+      cols.push(`${key} = ?`);
+      params.push(val);
     }
   }
 
-  cols.push('updated = ?')
-  params.push(now)
+  cols.push('updated = ?');
+  params.push(now);
 
   // DEPRECATED, keeping this for info
   // const sql = `UPDATE history_events SET ${cols.join(', ')} WHERE uuid = ? AND is_deleted = 0`
   // const res = db.prepare(sql).run(...params, uuid)
 
-  const sql = `UPDATE history_events SET ${cols.join(', ')} WHERE uuid = ? AND is_deleted = 0`
-  params.push(uuid)
+  const sql = `UPDATE history_events SET ${cols.join(', ')} WHERE uuid = ? AND is_deleted = 0`;
+  params.push(uuid);
 
-  const [result] = await pool.execute<ResultSetHeader>(sql, params)
+  const [result] = await pool.execute<ResultSetHeader>(sql, params);
 
   if (result.affectedRows === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'History event not found or already deleted',
       data: { statusMessageRu: 'Событие не найдено или уже удалено' },
-    })
+    });
   }
 }
 
@@ -411,8 +411,8 @@ export async function softDeleteHistoryEvent(
   uuid: string,
   deletedByUuid: string,
 ) {
-  const pool = useMySQL('states')
-  const now = Date.now()
+  const pool = useMySQL('states');
+  const now = Date.now();
 
   // DEPRECATED, keeping this for info
   // const res = stmtCache.markDeleted.run(now, now, deletedByUuid, uuid)
@@ -421,15 +421,15 @@ export async function softDeleteHistoryEvent(
         UPDATE history_events
         SET is_deleted = 1, updated = ?, deleted_at = ?, deleted_by_uuid = ?
         WHERE uuid = ? AND is_deleted = 0
-    `
+    `;
 
-  const [result] = await pool.execute<ResultSetHeader>(sql, [now, now, deletedByUuid, uuid])
+  const [result] = await pool.execute<ResultSetHeader>(sql, [now, now, deletedByUuid, uuid]);
 
   if (result.affectedRows === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'History event not found or already deleted',
       data: { statusMessageRu: 'Событие не найдено или уже удалено' },
-    })
+    });
   }
 }

@@ -33,11 +33,11 @@ defineRouteMeta({
       500: { description: 'Failed to detach player' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const cityUuid = getRouterParam(event, 'uuid')
-  const { playerUuid } = await readBody(event)
-  await detachPlayerFromCity(playerUuid)
-  return { ok: true }
-})
+  const cityUuid = getRouterParam(event, 'uuid');
+  const { playerUuid } = await readBody(event);
+  await detachPlayerFromCity(playerUuid);
+  return { ok: true };
+});

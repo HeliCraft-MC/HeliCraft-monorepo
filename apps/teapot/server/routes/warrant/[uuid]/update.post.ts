@@ -1,6 +1,6 @@
-import type { IStateWarrant } from '~/interfaces/state/state.types'
-import { createError, defineEventHandler, getRouterParam, readBody } from 'h3'
-import { updateWarrant } from '~/utils/states/orders.utils'
+import type { IStateWarrant } from '~/interfaces/state/state.types';
+import { createError, defineEventHandler, getRouterParam, readBody } from 'h3';
+import { updateWarrant } from '~/utils/states/orders.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -22,11 +22,11 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const uuid = getRouterParam(event, 'uuid')
-  const body = await readBody<Record<string, any>>(event)
+  const uuid = getRouterParam(event, 'uuid');
+  const body = await readBody<Record<string, any>>(event);
 
   const allowedFields: Array<keyof IStateWarrant> = [
     'reason',
@@ -34,26 +34,26 @@ export default defineEventHandler(async (event) => {
     'actions_by_admins_details',
     'actions_taken_by_state',
     'actions_by_state_details',
-  ]
+  ];
 
-  const patch: Partial<IStateWarrant> = {}
+  const patch: Partial<IStateWarrant> = {};
   for (const field of allowedFields) {
     if (field in body) {
       // @ts-ignore
-      patch[field] = body[field]
+      patch[field] = body[field];
     }
   }
 
-  const updaterUuid = body.updaterUuid
+  const updaterUuid = body.updaterUuid;
   if (typeof updaterUuid !== 'string') {
     throw createError({
       statusCode: 400,
       statusMessage: 'Bad Request',
       data: { statusMessageRu: 'Не указан updaterUuid' },
-    })
+    });
   }
 
-  await updateWarrant(uuid, patch, updaterUuid)
+  await updateWarrant(uuid, patch, updaterUuid);
 
-  return { ok: true }
-})
+  return { ok: true };
+});

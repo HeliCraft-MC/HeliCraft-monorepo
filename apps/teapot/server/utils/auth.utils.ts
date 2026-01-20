@@ -1,8 +1,8 @@
-import type { ResultSetHeader, RowDataPacket } from 'mysql2'
-import type { AuthUser } from '~/interfaces/mysql.types'
-import bcrypt from 'bcrypt'
-import { v4 as uuidv4 } from 'uuid'
-import { useMySQL } from '~/plugins/mySql'
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { AuthUser } from '~/interfaces/mysql.types';
+import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
+import { useMySQL } from '~/plugins/mySql';
 
 /**
  * Logs in a user by validating the provided nickname and password.
@@ -14,16 +14,16 @@ import { useMySQL } from '~/plugins/mySql'
  * @throws {Error} Throws an error if the user is not found or the password is incorrect.
  */
 export async function loginUser(nickname: string, password: string) {
-  const pool = useMySQL('default')
+  const pool = useMySQL('default');
 
   // DEPRECATED, keeping this for info
   // const db = useDatabase()
   // const req = db.prepare('SELECT * FROM AUTH WHERE LOWERCASENICKNAME = ?')
   // const user = await req.get(nickname.toLowerCase()) as AuthUser
 
-  const sql = 'SELECT * FROM `AUTH` WHERE `LOWERCASENICKNAME` = ?'
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [nickname.toLowerCase()])
-  const user = rows[0] as AuthUser | undefined
+  const sql = 'SELECT * FROM `AUTH` WHERE `LOWERCASENICKNAME` = ?';
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, [nickname.toLowerCase()]);
+  const user = rows[0] as AuthUser | undefined;
 
   if (!user || !user.HASH || !user.NICKNAME || !user.UUID) {
     throw createError({
@@ -32,7 +32,7 @@ export async function loginUser(nickname: string, password: string) {
       data: {
         statusMessageRu: 'Пользователь не найден',
       },
-    })
+    });
   }
 
   if (!(await bcrypt.compare(password, user.HASH))) {
@@ -42,12 +42,12 @@ export async function loginUser(nickname: string, password: string) {
       data: {
         statusMessageRu: 'Неверный пароль',
       },
-    })
+    });
   }
 
-  const tokens = generateTokens(user)
+  const tokens = generateTokens(user);
 
-  return { tokens, uuid: user.UUID, nickname: user.NICKNAME }
+  return { tokens, uuid: user.UUID, nickname: user.NICKNAME };
 }
 
 /**
@@ -60,7 +60,7 @@ export async function loginUser(nickname: string, password: string) {
  * @throws {Error} Throws an error if the nickname is already taken or validation fails.
  */
 export async function registerUser(nickname: string, password: string) {
-  const pool = useMySQL('default')
+  const pool = useMySQL('default');
 
   // Validate nickname length
   if (!nickname || nickname.trim().length < 3) {
@@ -70,7 +70,7 @@ export async function registerUser(nickname: string, password: string) {
       data: {
         statusMessageRu: 'Ник слишком короткий (минимум 3 символа)',
       },
-    })
+    });
   }
 
   // Validate password length
@@ -81,14 +81,14 @@ export async function registerUser(nickname: string, password: string) {
       data: {
         statusMessageRu: 'Пароль слишком короткий (минимум 6 символов)',
       },
-    })
+    });
   }
 
-  const lowerCaseNickname = nickname.toLowerCase()
+  const lowerCaseNickname = nickname.toLowerCase();
 
   // Check if nickname already exists
-  const checkSql = 'SELECT 1 FROM `AUTH` WHERE `LOWERCASENICKNAME` = ?'
-  const [checkRows] = await pool.execute<RowDataPacket[]>(checkSql, [lowerCaseNickname])
+  const checkSql = 'SELECT 1 FROM `AUTH` WHERE `LOWERCASENICKNAME` = ?';
+  const [checkRows] = await pool.execute<RowDataPacket[]>(checkSql, [lowerCaseNickname]);
 
   if (checkRows.length > 0) {
     throw createError({
@@ -97,20 +97,20 @@ export async function registerUser(nickname: string, password: string) {
       data: {
         statusMessageRu: 'Никнейм уже занят',
       },
-    })
+    });
   }
 
   // Generate UUID and hash password
-  const uuid = uuidv4()
-  const hash = await bcrypt.hash(password, 10)
-  const regDate = Date.now()
+  const uuid = uuidv4();
+  const hash = await bcrypt.hash(password, 10);
+  const regDate = Date.now();
 
   // Insert new user into database
   const insertSql = `
         INSERT INTO \`AUTH\` 
         (\`NICKNAME\`, \`LOWERCASENICKNAME\`, \`HASH\`, \`UUID\`, \`REGDATE\`)
         VALUES (?, ?, ?, ?, ?)
-    `
+    `;
 
   await pool.execute<ResultSetHeader>(insertSql, [
     nickname,
@@ -118,16 +118,16 @@ export async function registerUser(nickname: string, password: string) {
     hash,
     uuid,
     regDate,
-  ])
+  ]);
 
   // Retrieve the newly created user to generate tokens
-  const selectSql = 'SELECT * FROM `AUTH` WHERE `UUID` = ?'
-  const [rows] = await pool.execute<RowDataPacket[]>(selectSql, [uuid])
-  const user = rows[0] as AuthUser
+  const selectSql = 'SELECT * FROM `AUTH` WHERE `UUID` = ?';
+  const [rows] = await pool.execute<RowDataPacket[]>(selectSql, [uuid]);
+  const user = rows[0] as AuthUser;
 
-  const tokens = generateTokens(user)
+  const tokens = generateTokens(user);
 
-  return { tokens, uuid: user.UUID, nickname: user.NICKNAME }
+  return { tokens, uuid: user.UUID, nickname: user.NICKNAME };
 }
 
 /**
@@ -139,16 +139,16 @@ export async function registerUser(nickname: string, password: string) {
  * @throws {Error} Throws an error if the user is not found or if the refresh token is invalid.
  */
 export async function refreshUser(uuid: string, refreshToken: string) {
-  const pool = useMySQL('default')
+  const pool = useMySQL('default');
 
   // DEPRECATED, keeping this for info
   // const db = useDatabase()
   // const req = db.prepare('SELECT * FROM AUTH WHERE UUID = ? OR UUID_WR = ?')
   // const user = await req.get(uuid, uuid) as AuthUser
 
-  const sql = 'SELECT * FROM `AUTH` WHERE `UUID` = ? OR `UUID_WR` = ?'
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid, uuid])
-  const user = rows[0] as AuthUser | undefined
+  const sql = 'SELECT * FROM `AUTH` WHERE `UUID` = ? OR `UUID_WR` = ?';
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid, uuid]);
+  const user = rows[0] as AuthUser | undefined;
 
   if (!user || !user.HASH || !user.NICKNAME || !user.UUID) {
     throw createError({
@@ -157,12 +157,12 @@ export async function refreshUser(uuid: string, refreshToken: string) {
       data: {
         statusMessageRu: 'Пользователь не найден',
       },
-    })
+    });
   }
 
   if (verifyTokenWithCredentials(refreshToken, user)) {
-    const tokens = generateTokens(user)
-    return { tokens, uuid: user.UUID, nickname: user.NICKNAME }
+    const tokens = generateTokens(user);
+    return { tokens, uuid: user.UUID, nickname: user.NICKNAME };
   }
   else {
     throw createError({
@@ -171,21 +171,21 @@ export async function refreshUser(uuid: string, refreshToken: string) {
       data: {
         statusMessageRu: 'Неверный токен обновления',
       },
-    })
+    });
   }
 }
 
 export async function checkAuth(uuid: string, accessToken: string) {
-  const pool = useMySQL('default')
+  const pool = useMySQL('default');
 
   // DEPRECATED, keeping this for info
   // const db = useDatabase()
   // const req = db.prepare('SELECT * FROM AUTH WHERE UUID = ? OR UUID_WR = ?')
   // const user = await req.get(uuid, uuid) as AuthUser
 
-  const sql = 'SELECT * FROM `AUTH` WHERE `UUID` = ? OR `UUID_WR` = ?'
-  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid, uuid])
-  const user = rows[0] as AuthUser | undefined
+  const sql = 'SELECT * FROM `AUTH` WHERE `UUID` = ? OR `UUID_WR` = ?';
+  const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid, uuid]);
+  const user = rows[0] as AuthUser | undefined;
 
   if (!user || !user.HASH || !user.NICKNAME || !user.UUID) {
     throw createError({
@@ -194,22 +194,22 @@ export async function checkAuth(uuid: string, accessToken: string) {
       data: {
         statusMessageRu: 'Не авторизован',
       },
-    })
+    });
   }
 
-  const isValid = await verifyTokenWithCredentials(accessToken, user)
-  console.log('[checkAuth] Token verification result:', isValid, 'for UUID:', uuid)
+  const isValid = await verifyTokenWithCredentials(accessToken, user);
+  console.log('[checkAuth] Token verification result:', isValid, 'for UUID:', uuid);
   if (isValid) {
-    return true
+    return true;
   }
   else {
-    console.log('[checkAuth] Token verification failed for UUID:', uuid)
+    console.log('[checkAuth] Token verification failed for UUID:', uuid);
     throw createError({
       statusCode: 401,
       statusMessage: 'Not authorized',
       data: {
         statusMessageRu: 'Не авторизован',
       },
-    })
+    });
   }
 }

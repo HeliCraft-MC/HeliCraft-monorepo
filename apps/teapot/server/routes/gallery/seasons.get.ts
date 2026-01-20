@@ -1,4 +1,4 @@
-import { getGallerySeasons } from '~/utils/gallery.utils'
+import { getGallerySeasons } from '~/utils/gallery.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -23,10 +23,10 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async () => {
   return {
     seasons: getGallerySeasons(),
-  }
-})
+  };
+});

@@ -40,10 +40,10 @@ defineRouteMeta({
       404: { description: 'State not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const { proposerStateUuid, targetStateUuid, requestedKind, proposerPlayerUuid } = await readBody(event)
-  const uuid = await requestRelationChange(proposerStateUuid, targetStateUuid, requestedKind, proposerPlayerUuid)
-  return { uuid }
-})
+  const { proposerStateUuid, targetStateUuid, requestedKind, proposerPlayerUuid } = await readBody(event);
+  const uuid = await requestRelationChange(proposerStateUuid, targetStateUuid, requestedKind, proposerPlayerUuid);
+  return { uuid };
+});

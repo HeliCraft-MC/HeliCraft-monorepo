@@ -20,12 +20,12 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler((event) => {
   return {
     message: 'Teapot - helicraft backend application.',
     commit: useRuntimeConfig().teapotCommit,
     timestamp: Date.now(),
-  }
-})
+  };
+});

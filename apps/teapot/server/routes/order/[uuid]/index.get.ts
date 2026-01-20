@@ -1,4 +1,4 @@
-import { getOrder } from '~/utils/states/orders.utils'
+import { getOrder } from '~/utils/states/orders.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -10,9 +10,9 @@ defineRouteMeta({
       404: { description: 'Order not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const uuid = getRouterParam(event, 'uuid')
-  return await getOrder(uuid)
-})
+  const uuid = getRouterParam(event, 'uuid');
+  return await getOrder(uuid);
+});

@@ -1,14 +1,14 @@
 // Banlist database schema (LiteBans)
 // Source: .dev/dbs/litebans_bans.sql
 
-import { sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   index,
   mysqlTable,
   tinyint,
   varchar,
-} from 'drizzle-orm/mysql-core'
+} from 'drizzle-orm/mysql-core';
 
 // LiteBans bans table
 export const litebansBans = mysqlTable('litebans_bans', {
@@ -42,8 +42,8 @@ export const litebansBans = mysqlTable('litebans_bans', {
   index('idx_litebans_bans_ipban').on(table.ipban),
   index('idx_litebans_bans_ipban_wildcard').on(table.ipbanWildcard),
   index('idx_litebans_bans_active').on(table.active),
-])
+]);
 
 // Type exports
-export type LitebansBan = typeof litebansBans.$inferSelect
-export type NewLitebansBan = typeof litebansBans.$inferInsert
+export type LitebansBan = typeof litebansBans.$inferSelect;
+export type NewLitebansBan = typeof litebansBans.$inferInsert;

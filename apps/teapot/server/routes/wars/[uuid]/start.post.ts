@@ -26,11 +26,11 @@ defineRouteMeta({
       404: { description: 'War not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const warUuid = getRouterParam(event, 'uuid')
-  const { adminUuid } = await readBody(event)
-  await startWar(warUuid, adminUuid)
-  return { ok: true }
-})
+  const warUuid = getRouterParam(event, 'uuid');
+  const { adminUuid } = await readBody(event);
+  await startWar(warUuid, adminUuid);
+  return { ok: true };
+});

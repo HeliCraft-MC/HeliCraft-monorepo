@@ -1,24 +1,24 @@
-import { mkdirSync } from 'node:fs'
-import { Database } from 'bun:sqlite'
-import { dirname } from 'pathe'
+import { mkdirSync } from 'node:fs';
+import { Database } from 'bun:sqlite';
+import { dirname } from 'pathe';
 
-let db!: Database
+let db!: Database;
 
 export default defineNitroPlugin((nitroApp) => {
-  const { sqliteSkinPath = './db/skins.sqlite' } = useRuntimeConfig()
+  const { sqliteSkinPath = './db/skins.sqlite' } = useRuntimeConfig();
 
   // Гарантируем существование директории, где будет лежать БД
-  mkdirSync(dirname(sqliteSkinPath), { recursive: true })
+  mkdirSync(dirname(sqliteSkinPath), { recursive: true });
 
   // Используем нативный bun:sqlite
-  db = new Database(sqliteSkinPath, { create: true })
+  db = new Database(sqliteSkinPath, { create: true });
 
   // Базовые PRAGMA-настройки
-  db.run('PRAGMA journal_mode = WAL;')
-  db.run('PRAGMA foreign_keys = ON;')
+  db.run('PRAGMA journal_mode = WAL;');
+  db.run('PRAGMA foreign_keys = ON;');
 
   // Авто-миграция (таблица skins)
-  console.log('SQLite: creating table skins')
+  console.log('SQLite: creating table skins');
   db.run(`
     CREATE TABLE IF NOT EXISTS skins (
       uuid     TEXT PRIMARY KEY,
@@ -27,10 +27,10 @@ export default defineNitroPlugin((nitroApp) => {
       size     INTEGER,
       created  INTEGER DEFAULT (CURRENT_TIMESTAMP)
     );
-  `)
+  `);
 
   // Авто-миграция (таблица gallery)
-  console.log('SQLite: creating table gallery')
+  console.log('SQLite: creating table gallery');
   db.run(`
     CREATE TABLE IF NOT EXISTS gallery (
       id               TEXT PRIMARY KEY,
@@ -49,16 +49,16 @@ export default defineNitroPlugin((nitroApp) => {
       created_at       INTEGER NOT NULL,
       updated_at       INTEGER NOT NULL
     );
-  `)
+  `);
 
   // Индексы для gallery
-  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_status ON gallery(status);')
-  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_owner ON gallery(owner_uuid);')
-  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_category ON gallery(category);')
-  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_season ON gallery(season);')
+  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_status ON gallery(status);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_owner ON gallery(owner_uuid);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_category ON gallery(category);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gallery_season ON gallery(season);');
 
   // Авто-миграция (таблица file_refs для CAS)
-  console.log('SQLite: creating table file_refs')
+  console.log('SQLite: creating table file_refs');
   db.run(`
     CREATE TABLE IF NOT EXISTS file_refs (
       hash         TEXT PRIMARY KEY,
@@ -69,18 +69,18 @@ export default defineNitroPlugin((nitroApp) => {
       created_at   INTEGER NOT NULL,
       last_used_at INTEGER NOT NULL
     );
-  `)
-  db.run('CREATE INDEX IF NOT EXISTS idx_file_refs_path ON file_refs(path);')
-  db.run('CREATE INDEX IF NOT EXISTS idx_file_refs_refcount ON file_refs(ref_count);')
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_file_refs_path ON file_refs(path);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_file_refs_refcount ON file_refs(ref_count);');
 
   // Публикуем экземпляр в контексте Nitro
   // @ts-ignore
-  nitroApp.sqlite = db
-})
+  nitroApp.sqlite = db;
+});
 
 export function useSkinSQLite(): Database {
   if (!db) {
-    throw new Error('SQLite not initialised')
+    throw new Error('SQLite not initialised');
   }
-  return db
+  return db;
 }

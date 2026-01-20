@@ -21,10 +21,10 @@ defineRouteMeta({
       500: { description: 'Failed to detach city' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const cityUuid = getRouterParam(event, 'uuid')
-  await detachCityFromState(cityUuid)
-  return { ok: true }
-})
+  const cityUuid = getRouterParam(event, 'uuid');
+  await detachCityFromState(cityUuid);
+  return { ok: true };
+});

@@ -21,10 +21,10 @@ defineRouteMeta({
       500: { description: 'Failed to update capital' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const cityUuid = getRouterParam(event, 'uuid')
-  await setCityAsCapital(cityUuid)
-  return { ok: true }
-})
+  const cityUuid = getRouterParam(event, 'uuid');
+  await setCityAsCapital(cityUuid);
+  return { ok: true };
+});

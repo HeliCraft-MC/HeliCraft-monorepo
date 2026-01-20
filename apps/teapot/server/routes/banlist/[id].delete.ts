@@ -1,5 +1,5 @@
-import { removeBan } from '~/utils/banlist.utils'
-import { getUserByUUID, isUserAdmin } from '~/utils/user.utils'
+import { removeBan } from '~/utils/banlist.utils';
+import { getUserByUUID, isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -40,36 +40,36 @@ defineRouteMeta({
       404: { description: 'Бан не найден или уже снят' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
   // Авторизация и UUID уже проверены middleware
-  const userUuid = event.context.auth?.uuid
-  const id = getRouterParam(event, 'id')
+  const userUuid = event.context.auth?.uuid;
+  const id = getRouterParam(event, 'id');
 
   if (!userUuid || !id) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized',
       data: { statusMessageRu: 'Не авторизован' },
-    })
+    });
   }
 
   // Проверяем права администратора
-  const admin = await isUserAdmin(userUuid)
+  const admin = await isUserAdmin(userUuid);
   if (!admin) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
       data: { statusMessageRu: 'Нет прав доступа' },
-    })
+    });
   }
 
-  const adminUser = await getUserByUUID(userUuid)
-  const body = await readBody(event).catch(() => ({}))
-  const reason = body.reason || 'Unbanned via Web'
+  const adminUser = await getUserByUUID(userUuid);
+  const body = await readBody(event).catch(() => ({}));
+  const reason = body.reason || 'Unbanned via Web';
 
-  await removeBan(Number.parseInt(id), userUuid, adminUser.NICKNAME, reason)
+  await removeBan(Number.parseInt(id), userUuid, adminUser.NICKNAME, reason);
 
-  return { success: true }
-})
+  return { success: true };
+});

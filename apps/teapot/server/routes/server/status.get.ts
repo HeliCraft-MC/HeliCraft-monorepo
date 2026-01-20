@@ -20,19 +20,19 @@ defineRouteMeta({
       500: { description: 'Server error' },
     },
   },
-})
+});
 
 interface ServerResponse {
-  status: boolean
-  count: number
-  players: string[]
-  maxPlayersCount: number
+  status: boolean;
+  count: number;
+  players: string[];
+  maxPlayersCount: number;
 }
 
 export default defineEventHandler(async (event) => {
   try {
-    let playersOnline
-    let playersMax
+    let playersOnline;
+    let playersMax;
 
     const data = await $fetch<ServerResponse>('http://localhost:5123/open/getPlayersCount', {
       method: 'GET',
@@ -41,26 +41,26 @@ export default defineEventHandler(async (event) => {
       },
       parseResponse: JSON.parse,
     }).catch((e) => {
-      console.log('Error fetching data from server:', e)
-      playersOnline = []
-      playersMax = 0
-    })
+      console.log('Error fetching data from server:', e);
+      playersOnline = [];
+      playersMax = 0;
+    });
     if (data && data.players && data.maxPlayersCount) {
-      playersOnline = data.players
-      playersMax = data.maxPlayersCount
+      playersOnline = data.players;
+      playersMax = data.maxPlayersCount;
     }
     else {
-      playersOnline = []
-      playersMax = 0
+      playersOnline = [];
+      playersMax = 0;
     }
 
     return {
       playersOnline,
       playersMax,
-    }
+    };
   }
   catch (e) {
-    console.log('Error fetching data from server:', e)
+    console.log('Error fetching data from server:', e);
     throw createError({
       statusCode: 500,
       statusMessage: 'Server error',
@@ -68,6 +68,6 @@ export default defineEventHandler(async (event) => {
         statusMessageRu: 'Ошибка сервера',
         error: e,
       },
-    })
+    });
   }
-})
+});

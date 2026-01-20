@@ -1,4 +1,4 @@
-export type FormStatus = 'draft' | 'published' | 'closed' | 'archived'
+export type FormStatus = 'draft' | 'published' | 'closed' | 'archived';
 
 // Extensible question types
 export const QUESTION_TYPES = {
@@ -12,112 +12,112 @@ export const QUESTION_TYPES = {
   // Decorative blocks (non-interactive)
   IMAGE_BLOCK: 'image_block',
   TEXT_BLOCK: 'text_block',
-} as const
+} as const;
 
-export type QuestionType = string
+export type QuestionType = string;
 
 // Options for image_block type
 export interface ImageBlockOptions {
-  images: string[] // Array of image URLs
-  displayMode: 'grid' | 'carousel' | 'random'
+  images: string[]; // Array of image URLs
+  displayMode: 'grid' | 'carousel' | 'random';
 }
 
 // Options for text_block type
 export interface TextBlockOptions {
-  content: string // Markdown or plain text
-  style?: 'normal' | 'info' | 'warning' | 'success'
+  content: string; // Markdown or plain text
+  style?: 'normal' | 'info' | 'warning' | 'success';
 }
 
 export interface Form {
-  id: number
-  uuid: string
-  owner_uuid: string
-  title: string
-  description?: string
-  status: FormStatus
-  theme?: FormTheme
-  settings?: FormSettings
-  public_hash?: string
-  created_at: number
-  updated_at: number
+  id: number;
+  uuid: string;
+  owner_uuid: string;
+  title: string;
+  description?: string;
+  status: FormStatus;
+  theme?: FormTheme;
+  settings?: FormSettings;
+  public_hash?: string;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface FormTheme {
-  color?: string
-  background_image?: string
-  dark_mode?: boolean
+  color?: string;
+  background_image?: string;
+  dark_mode?: boolean;
 }
 
 export interface FormSettings {
-  max_responses?: number
-  allow_anonymous?: boolean // If false, requires login (default for now)
-  one_response_per_user?: boolean // If true, each user can submit only once
-  start_date?: number // Timestamp: form opens at this time
-  end_date?: number // Timestamp: form closes at this time
+  max_responses?: number;
+  allow_anonymous?: boolean; // If false, requires login (default for now)
+  one_response_per_user?: boolean; // If true, each user can submit only once
+  start_date?: number; // Timestamp: form opens at this time
+  end_date?: number; // Timestamp: form closes at this time
 }
 
 export interface Question {
-  id: number
-  form_id: number
-  uuid: string
-  type: QuestionType
-  title: string
-  description?: string
-  is_required: boolean
-  options?: any // JSON
-  validation?: QuestionValidation
-  order_index: number
-  created_at: number
-  updated_at: number
+  id: number;
+  form_id: number;
+  uuid: string;
+  type: QuestionType;
+  title: string;
+  description?: string;
+  is_required: boolean;
+  options?: any; // JSON
+  validation?: QuestionValidation;
+  order_index: number;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface QuestionValidation {
-  regex?: string
-  min_length?: number
-  max_length?: number
-  min_value?: number
-  max_value?: number
-  allowed_file_types?: string[]
-  max_file_size?: number // in bytes
+  regex?: string;
+  min_length?: number;
+  max_length?: number;
+  min_value?: number;
+  max_value?: number;
+  allowed_file_types?: string[];
+  max_file_size?: number; // in bytes
 }
 
 export interface CreateFormDto {
-  title: string
-  description?: string
-  theme?: FormTheme
-  settings?: FormSettings
+  title: string;
+  description?: string;
+  theme?: FormTheme;
+  settings?: FormSettings;
 }
 
 export interface UpdateFormDto {
-  title?: string
-  description?: string
-  status?: FormStatus
-  theme?: FormTheme
-  settings?: FormSettings
+  title?: string;
+  description?: string;
+  status?: FormStatus;
+  theme?: FormTheme;
+  settings?: FormSettings;
 }
 
 export interface CreateQuestionDto {
-  type: QuestionType
-  title: string
-  description?: string
-  is_required?: boolean
-  options?: any
-  validation?: QuestionValidation
-  order_index?: number
+  type: QuestionType;
+  title: string;
+  description?: string;
+  is_required?: boolean;
+  options?: any;
+  validation?: QuestionValidation;
+  order_index?: number;
 }
 
 export interface UpdateQuestionDto {
-  type?: string
-  title?: string
-  description?: string
-  is_required?: boolean
-  options?: any
-  validation?: QuestionValidation
+  type?: string;
+  title?: string;
+  description?: string;
+  is_required?: boolean;
+  options?: any;
+  validation?: QuestionValidation;
 }
 
 export interface SubmitResponseDto {
   answers: {
-    question_uuid: string
-    value: any
-  }[]
+    question_uuid: string;
+    value: any;
+  }[];
 }

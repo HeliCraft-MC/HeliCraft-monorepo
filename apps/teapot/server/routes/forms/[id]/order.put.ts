@@ -1,5 +1,5 @@
-import { getFormById, reorderQuestions } from '~/utils/forms.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import { getFormById, reorderQuestions } from '~/utils/forms.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -17,25 +17,25 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.auth
+  const user = event.context.auth;
   if (!user)
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
 
-  const isAdmin = await isUserAdmin(user.uuid)
+  const isAdmin = await isUserAdmin(user.uuid);
   if (!isAdmin)
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
 
-  const formId = Number.parseInt(event.context.params!.id)
-  const questionIds = await readBody<number[]>(event)
+  const formId = Number.parseInt(event.context.params!.id);
+  const questionIds = await readBody<number[]>(event);
 
-  const form = await getFormById(formId)
+  const form = await getFormById(formId);
   if (!form)
-    throw createError({ statusCode: 404, statusMessage: 'Form not found' })
+    throw createError({ statusCode: 404, statusMessage: 'Form not found' });
 
-  await reorderQuestions(formId, questionIds)
+  await reorderQuestions(formId, questionIds);
 
-  return { ok: true }
-})
+  return { ok: true };
+});

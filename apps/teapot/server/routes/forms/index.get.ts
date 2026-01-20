@@ -1,5 +1,5 @@
-import { getForms } from '~/utils/forms.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import { getForms } from '~/utils/forms.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -12,18 +12,18 @@ defineRouteMeta({
       403: { description: 'Forbidden' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.auth
+  const user = event.context.auth;
   if (!user)
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
 
-  const isAdmin = await isUserAdmin(user.uuid)
+  const isAdmin = await isUserAdmin(user.uuid);
   if (!isAdmin) {
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admins only' })
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden: Admins only' });
   }
 
-  const forms = await getForms()
-  return forms
-})
+  const forms = await getForms();
+  return forms;
+});

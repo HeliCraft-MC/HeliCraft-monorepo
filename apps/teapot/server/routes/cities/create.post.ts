@@ -38,10 +38,10 @@ defineRouteMeta({
       500: { description: 'Failed to create city' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const { name, coordinates, stateUuid, isCapital } = await readBody(event)
-  await createCity(name, coordinates, stateUuid, isCapital)
-  return { ok: true }
-})
+  const { name, coordinates, stateUuid, isCapital } = await readBody(event);
+  await createCity(name, coordinates, stateUuid, isCapital);
+  return { ok: true };
+});

@@ -17,9 +17,9 @@ defineRouteMeta({
       404: { description: 'State not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const uuid = getRouterParam(event, 'uuid')
-  return await getStateByUuid(uuid)
-})
+  const uuid = getRouterParam(event, 'uuid');
+  return await getStateByUuid(uuid);
+});

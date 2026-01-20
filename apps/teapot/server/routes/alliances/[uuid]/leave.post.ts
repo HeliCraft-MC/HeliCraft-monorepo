@@ -38,11 +38,11 @@ defineRouteMeta({
       404: { description: 'Membership not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const allianceUuid = getRouterParam(event, 'uuid')
-  const { stateUuid, playerUuid } = await readBody(event)
-  await leaveAlliance(allianceUuid, stateUuid, playerUuid)
-  return { ok: true }
-})
+  const allianceUuid = getRouterParam(event, 'uuid');
+  const { stateUuid, playerUuid } = await readBody(event);
+  await leaveAlliance(allianceUuid, stateUuid, playerUuid);
+  return { ok: true };
+});

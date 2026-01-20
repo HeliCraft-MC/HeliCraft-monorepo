@@ -22,11 +22,11 @@ defineRouteMeta({
       404: { description: 'Battle not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const battleUuid = getRouterParam(event, 'battleUuid')
-  const { status, updaterUuid, result, endDate } = await readBody(event)
-  await updateBattleStatus(battleUuid, status, updaterUuid, result, endDate)
-  return { ok: true }
-})
+  const battleUuid = getRouterParam(event, 'battleUuid');
+  const { status, updaterUuid, result, endDate } = await readBody(event);
+  await updateBattleStatus(battleUuid, status, updaterUuid, result, endDate);
+  return { ok: true };
+});

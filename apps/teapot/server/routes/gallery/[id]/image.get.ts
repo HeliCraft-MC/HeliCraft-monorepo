@@ -1,6 +1,6 @@
-import { useFileService } from '~/utils/file.service'
-import { canViewImage, getGalleryImage } from '~/utils/gallery.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import { useFileService } from '~/utils/file.service';
+import { canViewImage, getGalleryImage } from '~/utils/gallery.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -22,46 +22,46 @@ defineRouteMeta({
       404: { description: 'Image not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getRouterParam(event, 'id');
   if (!id) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid id' })
+    throw createError({ statusCode: 400, statusMessage: 'Invalid id' });
   }
 
-  const image = getGalleryImage(id)
+  const image = getGalleryImage(id);
 
-  const userUuid = event.context.auth?.uuid
-  const admin = userUuid ? await isUserAdmin(userUuid) : false
+  const userUuid = event.context.auth?.uuid;
+  const admin = userUuid ? await isUserAdmin(userUuid) : false;
 
   if (!canViewImage(image, userUuid, admin)) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Cannot view this image',
       data: { statusMessageRu: 'Нет доступа к этому изображению' },
-    })
+    });
   }
 
-  const fileService = useFileService()
-  const buf = await fileService.readFile(image.path)
+  const fileService = useFileService();
+  const buf = await fileService.readFile(image.path);
 
   if (!buf) {
     // File missing - clean up orphaned DB record
-    console.log(`[Gallery] File missing for image ${id}, cleaning up DB record: ${image.path}`)
+    console.log(`[Gallery] File missing for image ${id}, cleaning up DB record: ${image.path}`);
     try {
-      const db = (await import('~/plugins/skinSqlite')).useSkinSQLite()
-      db.prepare('DELETE FROM gallery WHERE id = ?').run(id)
+      const db = (await import('~/plugins/skinSqlite')).useSkinSQLite();
+      db.prepare('DELETE FROM gallery WHERE id = ?').run(id);
     }
     catch (e) {
-      console.error('[Gallery] Failed to cleanup orphaned record:', e)
+      console.error('[Gallery] Failed to cleanup orphaned record:', e);
     }
-    throw createError({ statusCode: 404, statusMessage: 'Image file not found', data: { cleaned: true } })
+    throw createError({ statusCode: 404, statusMessage: 'Image file not found', data: { cleaned: true } });
   }
 
-  event.node.res.setHeader('Content-Length', buf.length.toString())
-  event.node.res.setHeader('Content-Type', image.mime)
-  event.node.res.setHeader('Cache-Control', 'public, max-age=31536000')
+  event.node.res.setHeader('Content-Length', buf.length.toString());
+  event.node.res.setHeader('Content-Type', image.mime);
+  event.node.res.setHeader('Cache-Control', 'public, max-age=31536000');
 
-  return send(event, buf, image.mime)
-})
+  return send(event, buf, image.mime);
+});

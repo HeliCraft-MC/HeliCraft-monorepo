@@ -1,4 +1,4 @@
-import { createOrder } from '~/utils/states/orders.utils'
+import { createOrder } from '~/utils/states/orders.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -32,10 +32,10 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const uuid = await createOrder(body.stateUuid, body.title, body.text, body.issuedByPlayerUuid, body.importance, body.expiresAt)
-  return { uuid }
-})
+  const body = await readBody(event);
+  const uuid = await createOrder(body.stateUuid, body.title, body.text, body.issuedByPlayerUuid, body.importance, body.expiresAt);
+  return { uuid };
+});

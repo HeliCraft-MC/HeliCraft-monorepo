@@ -1,4 +1,4 @@
-import { listSomeStates } from '~/utils/states/state.utils'
+import { listSomeStates } from '~/utils/states/state.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -16,8 +16,8 @@ defineRouteMeta({
       },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  return await listSomeStates(3)
-})
+  return await listSomeStates(3);
+});

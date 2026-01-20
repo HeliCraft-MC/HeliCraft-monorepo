@@ -1,8 +1,8 @@
-import type { MultiPartData } from 'h3'
-import { fileTypeFromBuffer } from 'file-type'
-import { H3Error } from 'h3'
-import sharp from 'sharp'
-import { AlliencePurpose } from '~/interfaces/state/diplomacy.types'
+import type { MultiPartData } from 'h3';
+import { fileTypeFromBuffer } from 'file-type';
+import { H3Error } from 'h3';
+import sharp from 'sharp';
+import { AlliencePurpose } from '~/interfaces/state/diplomacy.types';
 
 defineRouteMeta({
   openAPI: {
@@ -54,46 +54,46 @@ defineRouteMeta({
       500: { description: 'Failed to create alliance' },
     },
   },
-})
+});
 
 // Обновленный обработчик маршрута
 export default defineEventHandler(async (event) => {
   // 1. Проверка аутентификации пользователя
-  const { uuid: creatorPlayerUuid } = event.context.auth || {}
+  const { uuid: creatorPlayerUuid } = event.context.auth || {};
   if (!creatorPlayerUuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthenticated' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthenticated' });
   }
 
-  const parts = await readMultipartFormData(event)
+  const parts = await readMultipartFormData(event);
   if (!parts) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid multipart/form-data' })
+    throw createError({ statusCode: 400, statusMessage: 'Invalid multipart/form-data' });
   }
 
   // 2. Разбор данных из multipart/form-data
-  const bodyData: Record<string, any> = {}
-  let filePart: MultiPartData | undefined
+  const bodyData: Record<string, any> = {};
+  let filePart: MultiPartData | undefined;
 
   for (const part of parts) {
     if (part.name) {
       if (part.filename && part.name === 'flag') {
-        filePart = part
+        filePart = part;
       }
       else if (part.data) {
-        bodyData[part.name] = part.data.toString()
+        bodyData[part.name] = part.data.toString();
       }
     }
   }
 
   // 3. Валидация файла флага
   if (!filePart) {
-    throw createError({ statusCode: 400, statusMessage: 'Flag file is required', data: { statusMessageRu: 'Файл флага обязателен' } })
+    throw createError({ statusCode: 400, statusMessage: 'Flag file is required', data: { statusMessageRu: 'Файл флага обязателен' } });
   }
   if (filePart.data.length > 2 * 1024 * 1024) { // Лимит 2MB
-    throw createError({ statusCode: 413, statusMessage: 'File too large', data: { statusMessageRu: 'Файл слишком большой (макс. 2MB)' } })
+    throw createError({ statusCode: 413, statusMessage: 'File too large', data: { statusMessageRu: 'Файл слишком большой (макс. 2MB)' } });
   }
-  const fileType = await fileTypeFromBuffer(filePart.data)
+  const fileType = await fileTypeFromBuffer(filePart.data);
   if (!fileType || fileType.mime !== 'image/png') {
-    throw createError({ statusCode: 415, statusMessage: 'Only PNG images are allowed', data: { statusMessageRu: 'Разрешены только изображения в формате PNG' } })
+    throw createError({ statusCode: 415, statusMessage: 'Only PNG images are allowed', data: { statusMessageRu: 'Разрешены только изображения в формате PNG' } });
   }
 
   // 4. Извлечение данных из тела запроса
@@ -103,15 +103,15 @@ export default defineEventHandler(async (event) => {
     description,
     purpose, // Ожидается строка, соответствующая AlliancePurpose
     colorHex,
-  } = bodyData
+  } = bodyData;
 
   // Проверка наличия всех необходимых текстовых полей
   if (!creatorStateUuid || !name || !description || !purpose || !colorHex) {
-    throw createError({ statusCode: 422, statusMessage: 'Missing required fields' })
+    throw createError({ statusCode: 422, statusMessage: 'Missing required fields' });
   }
 
   try {
-    const flagBuffer = await sharp(filePart.data).toBuffer()
+    const flagBuffer = await sharp(filePart.data).toBuffer();
 
     // 5. Вызов основной логики создания альянса
     const allianceUuid = await createAlliance(
@@ -122,19 +122,19 @@ export default defineEventHandler(async (event) => {
       purpose as AlliencePurpose, // Приведение типа
       colorHex,
       flagBuffer,
-    )
+    );
 
-    return { uuid: allianceUuid }
+    return { uuid: allianceUuid };
   }
   catch (e) {
     // Обработка ошибок, которые могут быть выброшены из createAlliance или других функций
     if (e instanceof H3Error) {
-      throw e
+      throw e;
     }
-    console.error('Alliance creation failed:', e)
+    console.error('Alliance creation failed:', e);
     throw createError({
       statusCode: 500,
       statusMessage: 'Unexpected server error while creating alliance',
-    })
+    });
   }
-})
+});

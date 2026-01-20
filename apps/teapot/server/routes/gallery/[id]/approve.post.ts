@@ -1,5 +1,5 @@
-import { approveGalleryImage } from '~/utils/gallery.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import { approveGalleryImage } from '~/utils/gallery.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -29,33 +29,33 @@ defineRouteMeta({
       404: { description: 'Image not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
   if (!userUuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
   // Check admin permissions
-  const admin = await isUserAdmin(userUuid)
+  const admin = await isUserAdmin(userUuid);
   if (!admin) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
       data: { statusMessageRu: 'Только для администраторов' },
-    })
+    });
   }
 
-  const id = getRouterParam(event, 'id')
+  const id = getRouterParam(event, 'id');
   if (!id) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid id' })
+    throw createError({ statusCode: 400, statusMessage: 'Invalid id' });
   }
 
-  const image = await approveGalleryImage(id)
+  const image = await approveGalleryImage(id);
 
   return {
     ok: true,
     image,
-  }
-})
+  };
+});

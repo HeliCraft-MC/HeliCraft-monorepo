@@ -39,11 +39,11 @@ defineRouteMeta({
       404: { description: 'Alliance or state not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const allianceUuid = getRouterParam(event, 'uuid')
-  const { stateUuid, playerUuid } = await readBody(event)
-  await requestAllianceJoin(allianceUuid, stateUuid, playerUuid)
-  return { ok: true }
-})
+  const allianceUuid = getRouterParam(event, 'uuid');
+  const { stateUuid, playerUuid } = await readBody(event);
+  await requestAllianceJoin(allianceUuid, stateUuid, playerUuid);
+  return { ok: true };
+});

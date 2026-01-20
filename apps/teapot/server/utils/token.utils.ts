@@ -1,4 +1,4 @@
-import jsonwebtoken from 'jsonwebtoken'
+import jsonwebtoken from 'jsonwebtoken';
 
 /**
  * Generates an access token for the provided user.
@@ -9,16 +9,16 @@ import jsonwebtoken from 'jsonwebtoken'
  */
 export function generateAccessToken(user: any) {
   if (!user || !user.UUID) {
-    throw new Error('Invalid user object (Must contain UUID at least)')
+    throw new Error('Invalid user object (Must contain UUID at least)');
   }
-  const { jwtSecret } = useRuntimeConfig()
+  const { jwtSecret } = useRuntimeConfig();
   return jsonwebtoken.sign({
     UUID: user.UUID,
     UUID_WR: user.UUID_WR,
     NICKNAME: user.NICKNAME,
     LOWERCASENICKNAME: user.LOWERCASENICKNAME,
     REGDATE: user.REGDATE,
-  }, jwtSecret, { expiresIn: '1h' })
+  }, jwtSecret, { expiresIn: '1h' });
 }
 
 /**
@@ -31,16 +31,16 @@ export function generateAccessToken(user: any) {
  */
 export function generateRefreshToken(user: any) {
   if (!user || !user.UUID) {
-    throw new Error('Invalid user object (Must contain UUID at least)')
+    throw new Error('Invalid user object (Must contain UUID at least)');
   }
-  const { jwtSecret } = useRuntimeConfig()
+  const { jwtSecret } = useRuntimeConfig();
   return jsonwebtoken.sign({
     UUID: user.UUID,
     UUID_WR: user.UUID_WR,
     NICKNAME: user.NICKNAME,
     LOWERCASENICKNAME: user.LOWERCASENICKNAME,
     REGDATE: user.REGDATE,
-  }, jwtSecret, { expiresIn: '7d' })
+  }, jwtSecret, { expiresIn: '7d' });
 }
 
 /**
@@ -51,8 +51,8 @@ export function generateRefreshToken(user: any) {
  * or throws an error if the token is invalid or expired.
  */
 export function verifyToken(token: string) {
-  const { jwtSecret } = useRuntimeConfig()
-  return jsonwebtoken.verify(token, jwtSecret)
+  const { jwtSecret } = useRuntimeConfig();
+  return jsonwebtoken.verify(token, jwtSecret);
 }
 
 /**
@@ -64,13 +64,13 @@ export function verifyToken(token: string) {
  */
 export async function verifyTokenWithCredentials(token: string, user: any) {
   try {
-    const { jwtSecret } = useRuntimeConfig()
-    const decoded = await jsonwebtoken.verify(token, jwtSecret)
+    const { jwtSecret } = useRuntimeConfig();
+    const decoded = await jsonwebtoken.verify(token, jwtSecret);
     // @ts-ignore
-    return decoded && decoded.UUID === user.UUID
+    return decoded && decoded.UUID === user.UUID;
   }
   catch (error) {
-    return false
+    return false;
   }
 }
 
@@ -81,7 +81,7 @@ export async function verifyTokenWithCredentials(token: string, user: any) {
  * @return {{ accessToken: string, refreshToken: string }} An object containing the access and refresh tokens.
  */
 export function generateTokens(user: any) {
-  const accessToken = generateAccessToken(user)
-  const refreshToken = generateRefreshToken(user)
-  return { accessToken, refreshToken }
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  return { accessToken, refreshToken };
 }

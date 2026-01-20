@@ -1,5 +1,5 @@
-import { listPendingImages } from '~/utils/gallery.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+import { listPendingImages } from '~/utils/gallery.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -35,28 +35,28 @@ defineRouteMeta({
       403: { description: 'Forbidden - Admin only' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
   if (!userUuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
   // Check admin permissions
-  const admin = await isUserAdmin(userUuid)
+  const admin = await isUserAdmin(userUuid);
   if (!admin) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
       data: { statusMessageRu: 'Только для администраторов' },
-    })
+    });
   }
 
-  const query = getQuery(event)
+  const query = getQuery(event);
 
-  const page = Math.max(1, Number.parseInt(query.page as string) || 1)
-  const perPage = Math.min(100, Math.max(1, Number.parseInt(query.perPage as string) || 20))
+  const page = Math.max(1, Number.parseInt(query.page as string) || 1);
+  const perPage = Math.min(100, Math.max(1, Number.parseInt(query.perPage as string) || 20));
 
-  return await listPendingImages(page, perPage)
-})
+  return await listPendingImages(page, perPage);
+});

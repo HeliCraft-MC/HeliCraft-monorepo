@@ -1,7 +1,7 @@
-import { promises as fsp } from 'node:fs'
-import { useRuntimeConfig } from '#imports'
-import { join } from 'pathe'
-import { useSkinSQLite } from '~/plugins/skinSqlite'
+import { promises as fsp } from 'node:fs';
+import { useRuntimeConfig } from '#imports';
+import { join } from 'pathe';
+import { useSkinSQLite } from '~/plugins/skinSqlite';
 
 defineRouteMeta({
   openAPI: {
@@ -25,41 +25,41 @@ defineRouteMeta({
       404: { description: 'Skin not found' },
     },
   },
-})
+});
 
 /**
  * DELETE /user/[id]/skin
  * Полностью удаляет скин (файл + запись) и триггерит обновление клиента.
  */
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
-  const uuid = await resolveUuid(id)
+  const id = getRouterParam(event, 'id');
+  const uuid = await resolveUuid(id);
 
-  const { uuid: authUuid, accessToken } = await readBody(event)
+  const { uuid: authUuid, accessToken } = await readBody(event);
   if (!checkAuth(authUuid ?? uuid, accessToken)) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
-  const meta = getSkin(uuid)
+  const meta = getSkin(uuid);
   if (!meta)
-    throw createError({ statusCode: 404, statusMessage: 'Skin not found' })
+    throw createError({ statusCode: 404, statusMessage: 'Skin not found' });
 
-  const { uploadDir = './uploads' } = useRuntimeConfig()
-  await fsp.rm(join(uploadDir, meta.path))
+  const { uploadDir = './uploads' } = useRuntimeConfig();
+  await fsp.rm(join(uploadDir, meta.path));
 
   // Чистим запись
-  useSkinSQLite().prepare('DELETE FROM skins WHERE uuid = ?').run(uuid)
+  useSkinSQLite().prepare('DELETE FROM skins WHERE uuid = ?').run(uuid);
 
   // Триггер обновления клиента (без ожидания)
-  sendUpdateRequest(event, id).catch(() => {})
+  sendUpdateRequest(event, id).catch(() => {});
 
-  return { ok: true }
-})
+  return { ok: true };
+});
 
 /* ───────── helper ───────── */
 async function sendUpdateRequest(event: any, nicknameOrUuid: string) {
   await $fetch('http://localhost:5122/update', {
     query: { player: nicknameOrUuid },
     retry: 0,
-  })
+  });
 }

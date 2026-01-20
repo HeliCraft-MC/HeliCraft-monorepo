@@ -2,8 +2,8 @@ import {
   getGalleryImage,
   updateGalleryImageByAdmin,
   updateGalleryImageByOwner,
-} from '~/utils/gallery.utils'
-import { isUserAdmin } from '~/utils/user.utils'
+} from '~/utils/gallery.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -46,59 +46,59 @@ defineRouteMeta({
       404: { description: 'Image not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const userUuid = event.context.auth?.uuid
+  const userUuid = event.context.auth?.uuid;
   if (!userUuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
-  const id = getRouterParam(event, 'id')
+  const id = getRouterParam(event, 'id');
   if (!id) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid id' })
+    throw createError({ statusCode: 400, statusMessage: 'Invalid id' });
   }
 
-  const body = await readBody(event)
-  const image = getGalleryImage(id)
-  const admin = await isUserAdmin(userUuid)
+  const body = await readBody(event);
+  const image = getGalleryImage(id);
+  const admin = await isUserAdmin(userUuid);
 
   // Normalize UUIDs for comparison
-  const normalizedUserUuid = userUuid.replace(/-/g, '').toLowerCase()
-  const normalizedOwnerUuid = image.owner_uuid.replace(/-/g, '').toLowerCase()
-  const isOwner = normalizedUserUuid === normalizedOwnerUuid
+  const normalizedUserUuid = userUuid.replace(/-/g, '').toLowerCase();
+  const normalizedOwnerUuid = image.owner_uuid.replace(/-/g, '').toLowerCase();
+  const isOwner = normalizedUserUuid === normalizedOwnerUuid;
 
   if (!isOwner && !admin) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Not authorized to edit this image',
       data: { statusMessageRu: 'Нет прав для редактирования этого изображения' },
-    })
+    });
   }
 
   if (admin) {
     // Admin can update all fields
     // Validate and parse coordinates
-    let coord_x: number | undefined
-    let coord_y: number | undefined
-    let coord_z: number | undefined
+    let coord_x: number | undefined;
+    let coord_y: number | undefined;
+    let coord_z: number | undefined;
 
     if (body.coord_x !== undefined) {
-      coord_x = Number.parseInt(body.coord_x)
+      coord_x = Number.parseInt(body.coord_x);
       if (isNaN(coord_x)) {
-        throw createError({ statusCode: 400, statusMessage: 'Invalid coord_x value' })
+        throw createError({ statusCode: 400, statusMessage: 'Invalid coord_x value' });
       }
     }
     if (body.coord_y !== undefined) {
-      coord_y = Number.parseInt(body.coord_y)
+      coord_y = Number.parseInt(body.coord_y);
       if (isNaN(coord_y)) {
-        throw createError({ statusCode: 400, statusMessage: 'Invalid coord_y value' })
+        throw createError({ statusCode: 400, statusMessage: 'Invalid coord_y value' });
       }
     }
     if (body.coord_z !== undefined) {
-      coord_z = Number.parseInt(body.coord_z)
+      coord_z = Number.parseInt(body.coord_z);
       if (isNaN(coord_z)) {
-        throw createError({ statusCode: 400, statusMessage: 'Invalid coord_z value' })
+        throw createError({ statusCode: 400, statusMessage: 'Invalid coord_z value' });
       }
     }
 
@@ -110,12 +110,12 @@ export default defineEventHandler(async (event) => {
       coord_y,
       coord_z,
       involved_players: body.involved_players,
-    })
+    });
   }
   else {
     // Owner can only update description
     return await updateGalleryImageByOwner(id, userUuid, {
       description: body.description,
-    })
+    });
   }
-})
+});

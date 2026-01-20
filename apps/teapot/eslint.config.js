@@ -1,4 +1,4 @@
-import antfu from '@antfu/eslint-config'
+import antfu from '@antfu/eslint-config';
 
 export default antfu({
   // Enable TypeScript support
@@ -25,4 +25,4 @@ export default antfu({
   rules: {
     'no-console': 'off',
   },
-})
+});

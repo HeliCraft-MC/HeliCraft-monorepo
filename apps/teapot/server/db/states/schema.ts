@@ -5,7 +5,7 @@
 // NOTE: Do not implement full schema here
 // The states functionality will be gradually removed
 
-export const _placeholder = {}
+export const _placeholder = {};
 
 // If you need to add states schema in the future,
 // refer to .dev/dbs/states.sql for structure

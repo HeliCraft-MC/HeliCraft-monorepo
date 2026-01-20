@@ -1,9 +1,9 @@
-import type { MultiPartData } from 'h3'
-import type { GovernmentForm } from '~/interfaces/state/state.types'
-import { fileTypeFromBuffer } from 'file-type'
-import { H3Error } from 'h3'
-import sharp from 'sharp'
-import { declareNewState } from '~/utils/states/state.utils'
+import type { MultiPartData } from 'h3';
+import type { GovernmentForm } from '~/interfaces/state/state.types';
+import { fileTypeFromBuffer } from 'file-type';
+import { H3Error } from 'h3';
+import sharp from 'sharp';
+import { declareNewState } from '~/utils/states/state.utils';
 
 defineRouteMeta({
   openAPI: {
@@ -56,30 +56,30 @@ defineRouteMeta({
       500: { description: 'Unexpected server error' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const { uuid } = event.context.auth || {}
+  const { uuid } = event.context.auth || {};
 
   if (!uuid) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthenticated' })
+    throw createError({ statusCode: 401, statusMessage: 'Unauthenticated' });
   }
 
-  const parts = await readMultipartFormData(event)
+  const parts = await readMultipartFormData(event);
 
-  const bodyData: Record<string, any> = {}
-  let filePart: MultiPartData | undefined
+  const bodyData: Record<string, any> = {};
+  let filePart: MultiPartData | undefined;
 
   if (parts) {
     for (const part of parts) {
       if (part.name) {
         if (part.filename) {
           if (part.name === 'flag') {
-            filePart = part
+            filePart = part;
           }
         }
         else {
-          bodyData[part.name] = part.data.toString()
+          bodyData[part.name] = part.data.toString();
         }
       }
     }
@@ -95,26 +95,26 @@ export default defineEventHandler(async (event) => {
     allowDualCitezenship, // В запросе 'allowDualCitezenship', в функции 'allowDualCitizenship'
     freeEntry, // Это будет строка 'true'/'false'
     freeEntryDesc,
-  } = bodyData
+  } = bodyData;
 
   if (!filePart) {
-    throw createError({ statusCode: 400, statusMessage: 'Flag file is missing' })
+    throw createError({ statusCode: 400, statusMessage: 'Flag file is missing' });
   }
 
   if (filePart.data.length > 1_048_576) { // 1MB
-    throw createError({ statusCode: 413, statusMessage: 'File too big' })
+    throw createError({ statusCode: 413, statusMessage: 'File too big' });
   }
-  const ft = await fileTypeFromBuffer(filePart.data)
+  const ft = await fileTypeFromBuffer(filePart.data);
   if (!ft || ft.mime !== 'image/png') {
-    throw createError({ statusCode: 415, statusMessage: 'PNG only' })
+    throw createError({ statusCode: 415, statusMessage: 'PNG only' });
   }
 
   // Преобразование строковых значений в булевы и другие типы
-  const parsedGovForm = govForm as GovernmentForm // Убедитесь, что значение govForm соответствует одному из значений GovernmentForm
-  const parsedHasElections = hasElections === 'true'
+  const parsedGovForm = govForm as GovernmentForm; // Убедитесь, что значение govForm соответствует одному из значений GovernmentForm
+  const parsedHasElections = hasElections === 'true';
   // Обратите внимание на имя свойства: в запросе 'allowDualCitezenship', а функция ожидает 'allowDualCitizenship'
-  const parsedAllowDualCitizenship = allowDualCitezenship === 'true'
-  const parsedFreeEntry = freeEntry === 'true'
+  const parsedAllowDualCitizenship = allowDualCitezenship === 'true';
+  const parsedFreeEntry = freeEntry === 'true';
 
   try {
     const stateUuid = await declareNewState(
@@ -130,19 +130,19 @@ export default defineEventHandler(async (event) => {
       parsedFreeEntry,
       freeEntryDesc,
       await sharp(filePart.data).toBuffer(), // Передаем filePart.data
-    )
-    return { uuid: stateUuid }
+    );
+    return { uuid: stateUuid };
   }
   catch (e) {
     if (e instanceof H3Error || e instanceof Error) {
-      throw e
+      throw e;
     }
     else {
-      console.warn(e)
+      console.warn(e);
       throw createError({
         statusCode: 500,
         statusMessage: 'Unexpected server error',
-      })
+      });
     }
   }
-})
+});

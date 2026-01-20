@@ -7,18 +7,18 @@ import type {
   PaginatedResponse,
   UpdateGalleryImageAdminDto,
   UpdateGalleryImageOwnerDto,
-} from '~/interfaces/gallery.types'
-import { v4 as uuidv4 } from 'uuid'
-import { useSkinSQLite } from '~/plugins/skinSqlite'
-import { isUserBanned } from './banlist.utils'
-import { useFileService } from './file.service'
-import { getUserByUUID } from './user.utils'
+} from '~/interfaces/gallery.types';
+import { v4 as uuidv4 } from 'uuid';
+import { useSkinSQLite } from '~/plugins/skinSqlite';
+import { isUserBanned } from './banlist.utils';
+import { useFileService } from './file.service';
+import { getUserByUUID } from './user.utils';
 
 /**
  * Normalize UUID format (remove dashes, lowercase)
  */
 function normalizeUuid(raw: string): string {
-  return raw.replace(/-/g, '').toLowerCase()
+  return raw.replace(/-/g, '').toLowerCase();
 }
 
 /**
@@ -26,14 +26,14 @@ function normalizeUuid(raw: string): string {
  */
 async function getUserInfo(uuid: string): Promise<GalleryUserInfo | null> {
   try {
-    const user = await getUserByUUID(uuid)
+    const user = await getUserByUUID(uuid);
     return {
       uuid: user.UUID,
       nickname: user.NICKNAME,
-    }
+    };
   }
   catch {
-    return null
+    return null;
   }
 }
 
@@ -42,27 +42,27 @@ async function getUserInfo(uuid: string): Promise<GalleryUserInfo | null> {
  */
 async function parseInvolvedPlayers(playersStr: string | null): Promise<GalleryUserInfo[]> {
   if (!playersStr)
-    return []
+    return [];
 
-  const uuids = playersStr.split(',').map(s => s.trim()).filter(Boolean)
-  const results: GalleryUserInfo[] = []
+  const uuids = playersStr.split(',').map(s => s.trim()).filter(Boolean);
+  const results: GalleryUserInfo[] = [];
 
   for (const uuid of uuids) {
-    const userInfo = await getUserInfo(uuid)
+    const userInfo = await getUserInfo(uuid);
     if (userInfo) {
-      results.push(userInfo)
+      results.push(userInfo);
     }
   }
 
-  return results
+  return results;
 }
 
 /**
  * Convert database row to public gallery image
  */
 async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
-  const ownerInfo = await getUserInfo(image.owner_uuid)
-  const involvedPlayers = await parseInvolvedPlayers(image.involved_players)
+  const ownerInfo = await getUserInfo(image.owner_uuid);
+  const involvedPlayers = await parseInvolvedPlayers(image.involved_players);
 
   return {
     id: image.id,
@@ -80,7 +80,7 @@ async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
     status: image.status,
     created_at: image.created_at,
     updated_at: image.updated_at,
-  }
+  };
 }
 
 /**
@@ -88,11 +88,11 @@ async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
  * Returns error message if not allowed, null if allowed
  */
 export async function canUserUpload(uuid: string): Promise<string | null> {
-  const banned = await isUserBanned(uuid)
+  const banned = await isUserBanned(uuid);
   if (banned) {
-    return 'Banned users cannot upload to gallery'
+    return 'Banned users cannot upload to gallery';
   }
-  return null
+  return null;
 }
 
 /**
@@ -103,29 +103,29 @@ export async function createGalleryImage(
   mime: string,
   dto: CreateGalleryImageDto,
 ): Promise<GalleryImage> {
-  const db = useSkinSQLite()
-  const fileService = useFileService()
+  const db = useSkinSQLite();
+  const fileService = useFileService();
 
   // Check if user is banned
-  const uploadError = await canUserUpload(dto.owner_uuid)
+  const uploadError = await canUserUpload(dto.owner_uuid);
   if (uploadError) {
     throw createError({
       statusCode: 403,
       statusMessage: uploadError,
       data: { statusMessageRu: 'Забаненные пользователи не могут загружать изображения' },
-    })
+    });
   }
 
   // Save file
-  const extension = mime === 'image/png' ? 'png' : mime === 'image/jpeg' ? 'jpg' : 'webp'
+  const extension = mime === 'image/png' ? 'png' : mime === 'image/jpeg' ? 'jpg' : 'webp';
   const fileMeta = await fileService.saveFile(data, {
     subDir: 'gallery',
     extension,
-  })
+  });
 
-  const id = uuidv4()
-  const now = Math.floor(Date.now() / 1000)
-  const normalizedOwner = normalizeUuid(dto.owner_uuid)
+  const id = uuidv4();
+  const now = Math.floor(Date.now() / 1000);
+  const normalizedOwner = normalizeUuid(dto.owner_uuid);
 
   db.prepare(`
     INSERT INTO gallery (
@@ -142,35 +142,35 @@ export async function createGalleryImage(
     now,
     now,
     normalizedOwner, // By default, owner is the only involved player
-  )
+  );
 
-  return getGalleryImage(id)
+  return getGalleryImage(id);
 }
 
 /**
  * Get gallery image by ID
  */
 export function getGalleryImage(id: string): GalleryImage {
-  const db = useSkinSQLite()
-  const image = db.prepare('SELECT * FROM gallery WHERE id = ?').get(id) as GalleryImage | undefined
+  const db = useSkinSQLite();
+  const image = db.prepare('SELECT * FROM gallery WHERE id = ?').get(id) as GalleryImage | undefined;
 
   if (!image) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Image not found',
       data: { statusMessageRu: 'Изображение не найдено' },
-    })
+    });
   }
 
-  return image
+  return image;
 }
 
 /**
  * Get gallery image with public user info
  */
 export async function getGalleryImagePublic(id: string): Promise<GalleryImagePublic> {
-  const image = getGalleryImage(id)
-  return toPublicImage(image)
+  const image = getGalleryImage(id);
+  return toPublicImage(image);
 }
 
 /**
@@ -178,16 +178,16 @@ export async function getGalleryImagePublic(id: string): Promise<GalleryImagePub
  */
 export function canViewImage(image: GalleryImage, userUuid: string | null, isAdmin: boolean): boolean {
   if (isAdmin)
-    return true
+    return true;
   // Approved images are visible to everyone
   if (image.status === 'approved')
-    return true
+    return true;
 
   // Pending/rejected images visible only to owner and admins
   if (userUuid && normalizeUuid(userUuid) === normalizeUuid(image.owner_uuid))
-    return true
+    return true;
 
-  return false
+  return false;
 }
 
 /**
@@ -199,59 +199,59 @@ export async function listGalleryImages(
   perPage: number = 20,
   includeFullObjects: boolean = true,
 ): Promise<PaginatedResponse<GalleryImagePublic | string>> {
-  const db = useSkinSQLite()
+  const db = useSkinSQLite();
 
-  const whereClauses: string[] = []
-  const params: any[] = []
+  const whereClauses: string[] = [];
+  const params: any[] = [];
 
   // Only show approved images by default
   if (filters.status) {
-    whereClauses.push('status = ?')
-    params.push(filters.status)
+    whereClauses.push('status = ?');
+    params.push(filters.status);
   }
   else {
-    whereClauses.push('status = \'approved\'')
+    whereClauses.push('status = \'approved\'');
   }
 
   if (filters.category) {
-    whereClauses.push('category = ?')
-    params.push(filters.category)
+    whereClauses.push('category = ?');
+    params.push(filters.category);
   }
 
   if (filters.season) {
-    whereClauses.push('season = ?')
-    params.push(filters.season)
+    whereClauses.push('season = ?');
+    params.push(filters.season);
   }
 
   if (filters.owner_uuid) {
-    whereClauses.push('owner_uuid = ?')
-    params.push(normalizeUuid(filters.owner_uuid))
+    whereClauses.push('owner_uuid = ?');
+    params.push(normalizeUuid(filters.owner_uuid));
   }
 
-  const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
+  const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
   // Get total count
-  const countResult = db.prepare(`SELECT COUNT(*) as count FROM gallery ${whereClause}`).get(...params) as { count: number }
-  const total = countResult.count
+  const countResult = db.prepare(`SELECT COUNT(*) as count FROM gallery ${whereClause}`).get(...params) as { count: number };
+  const total = countResult.count;
 
   // Calculate pagination
-  const totalPages = Math.ceil(total / perPage)
-  const offset = (page - 1) * perPage
+  const totalPages = Math.ceil(total / perPage);
+  const offset = (page - 1) * perPage;
 
   // Get items
   const rows = db.prepare(`
     SELECT * FROM gallery ${whereClause}
     ORDER BY created_at DESC
     LIMIT ? OFFSET ?
-  `).all(...params, perPage, offset) as GalleryImage[]
+  `).all(...params, perPage, offset) as GalleryImage[];
 
-  let items: (GalleryImagePublic | string)[]
+  let items: (GalleryImagePublic | string)[];
 
   if (includeFullObjects) {
-    items = await Promise.all(rows.map(toPublicImage))
+    items = await Promise.all(rows.map(toPublicImage));
   }
   else {
-    items = rows.map(r => r.id)
+    items = rows.map(r => r.id);
   }
 
   return {
@@ -260,7 +260,7 @@ export async function listGalleryImages(
     page,
     perPage,
     totalPages,
-  }
+  };
 }
 
 /**
@@ -275,8 +275,8 @@ export async function listPendingImages(
     page,
     perPage,
     true,
-  )
-  return result as PaginatedResponse<GalleryImagePublic>
+  );
+  return result as PaginatedResponse<GalleryImagePublic>;
 }
 
 /**
@@ -287,25 +287,25 @@ export async function listUserImages(
   page: number = 1,
   perPage: number = 20,
 ): Promise<PaginatedResponse<GalleryImagePublic>> {
-  const db = useSkinSQLite()
-  const normalizedUuid = normalizeUuid(userUuid)
+  const db = useSkinSQLite();
+  const normalizedUuid = normalizeUuid(userUuid);
 
   // Get total count
-  const countResult = db.prepare('SELECT COUNT(*) as count FROM gallery WHERE owner_uuid = ?').get(normalizedUuid) as { count: number }
-  const total = countResult.count
+  const countResult = db.prepare('SELECT COUNT(*) as count FROM gallery WHERE owner_uuid = ?').get(normalizedUuid) as { count: number };
+  const total = countResult.count;
 
   // Calculate pagination
-  const totalPages = Math.ceil(total / perPage)
-  const offset = (page - 1) * perPage
+  const totalPages = Math.ceil(total / perPage);
+  const offset = (page - 1) * perPage;
 
   // Get items
   const rows = db.prepare(`
     SELECT * FROM gallery WHERE owner_uuid = ?
     ORDER BY created_at DESC
     LIMIT ? OFFSET ?
-  `).all(normalizedUuid, perPage, offset) as GalleryImage[]
+  `).all(normalizedUuid, perPage, offset) as GalleryImage[];
 
-  const items = await Promise.all(rows.map(toPublicImage))
+  const items = await Promise.all(rows.map(toPublicImage));
 
   return {
     items,
@@ -313,7 +313,7 @@ export async function listUserImages(
     page,
     perPage,
     totalPages,
-  }
+  };
 }
 
 /**
@@ -324,8 +324,8 @@ export async function updateGalleryImageByOwner(
   ownerUuid: string,
   dto: UpdateGalleryImageOwnerDto,
 ): Promise<GalleryImagePublic> {
-  const db = useSkinSQLite()
-  const image = getGalleryImage(id)
+  const db = useSkinSQLite();
+  const image = getGalleryImage(id);
 
   // Verify ownership
   if (normalizeUuid(image.owner_uuid) !== normalizeUuid(ownerUuid)) {
@@ -333,17 +333,17 @@ export async function updateGalleryImageByOwner(
       statusCode: 403,
       statusMessage: 'Not authorized to edit this image',
       data: { statusMessageRu: 'Нет прав для редактирования этого изображения' },
-    })
+    });
   }
 
-  const now = Math.floor(Date.now() / 1000)
+  const now = Math.floor(Date.now() / 1000);
 
   if (dto.description !== undefined) {
     db.prepare('UPDATE gallery SET description = ?, updated_at = ? WHERE id = ?')
-      .run(dto.description, now, id)
+      .run(dto.description, now, id);
   }
 
-  return getGalleryImagePublic(id)
+  return getGalleryImagePublic(id);
 }
 
 /**
@@ -353,141 +353,141 @@ export async function updateGalleryImageByAdmin(
   id: string,
   dto: UpdateGalleryImageAdminDto,
 ): Promise<GalleryImagePublic> {
-  const db = useSkinSQLite()
-  const image = getGalleryImage(id) // Verify exists
+  const db = useSkinSQLite();
+  const image = getGalleryImage(id); // Verify exists
 
-  const updates: string[] = []
-  const params: any[] = []
+  const updates: string[] = [];
+  const params: any[] = [];
 
   if (dto.description !== undefined) {
-    updates.push('description = ?')
-    params.push(dto.description)
+    updates.push('description = ?');
+    params.push(dto.description);
   }
 
   if (dto.category !== undefined) {
-    updates.push('category = ?')
-    params.push(dto.category)
+    updates.push('category = ?');
+    params.push(dto.category);
   }
 
   if (dto.season !== undefined) {
-    updates.push('season = ?')
-    params.push(dto.season)
+    updates.push('season = ?');
+    params.push(dto.season);
   }
 
   if (dto.coord_x !== undefined) {
-    updates.push('coord_x = ?')
-    params.push(dto.coord_x)
+    updates.push('coord_x = ?');
+    params.push(dto.coord_x);
   }
 
   if (dto.coord_y !== undefined) {
-    updates.push('coord_y = ?')
-    params.push(dto.coord_y)
+    updates.push('coord_y = ?');
+    params.push(dto.coord_y);
   }
 
   if (dto.coord_z !== undefined) {
-    updates.push('coord_z = ?')
-    params.push(dto.coord_z)
+    updates.push('coord_z = ?');
+    params.push(dto.coord_z);
   }
 
   if (dto.involved_players !== undefined) {
-    updates.push('involved_players = ?')
-    params.push(dto.involved_players)
+    updates.push('involved_players = ?');
+    params.push(dto.involved_players);
   }
 
   if (updates.length > 0) {
-    const now = Math.floor(Date.now() / 1000)
-    updates.push('updated_at = ?')
-    params.push(now)
-    params.push(id)
+    const now = Math.floor(Date.now() / 1000);
+    updates.push('updated_at = ?');
+    params.push(now);
+    params.push(id);
 
-    db.prepare(`UPDATE gallery SET ${updates.join(', ')} WHERE id = ?`).run(...params)
+    db.prepare(`UPDATE gallery SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   }
 
-  return getGalleryImagePublic(id)
+  return getGalleryImagePublic(id);
 }
 
 /**
  * Approve gallery image
  */
 export async function approveGalleryImage(id: string): Promise<GalleryImagePublic> {
-  const db = useSkinSQLite()
-  const now = Math.floor(Date.now() / 1000)
+  const db = useSkinSQLite();
+  const now = Math.floor(Date.now() / 1000);
 
-  const result = db.prepare('UPDATE gallery SET status = \'approved\', updated_at = ? WHERE id = ?').run(now, id)
+  const result = db.prepare('UPDATE gallery SET status = \'approved\', updated_at = ? WHERE id = ?').run(now, id);
 
   if (result.changes === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Image not found',
       data: { statusMessageRu: 'Изображение не найдено' },
-    })
+    });
   }
 
-  return getGalleryImagePublic(id)
+  return getGalleryImagePublic(id);
 }
 
 /**
  * Reject gallery image
  */
 export async function rejectGalleryImage(id: string): Promise<GalleryImagePublic> {
-  const db = useSkinSQLite()
-  const now = Math.floor(Date.now() / 1000)
+  const db = useSkinSQLite();
+  const now = Math.floor(Date.now() / 1000);
 
-  const result = db.prepare('UPDATE gallery SET status = \'rejected\', updated_at = ? WHERE id = ?').run(now, id)
+  const result = db.prepare('UPDATE gallery SET status = \'rejected\', updated_at = ? WHERE id = ?').run(now, id);
 
   if (result.changes === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Image not found',
       data: { statusMessageRu: 'Изображение не найдено' },
-    })
+    });
   }
 
-  return getGalleryImagePublic(id)
+  return getGalleryImagePublic(id);
 }
 
 /**
  * Delete gallery image permanently
  */
 export async function deleteGalleryImage(id: string): Promise<boolean> {
-  const db = useSkinSQLite()
-  const fileService = useFileService()
+  const db = useSkinSQLite();
+  const fileService = useFileService();
 
-  const image = getGalleryImage(id)
+  const image = getGalleryImage(id);
 
   // Delete file
-  await fileService.deleteFile(image.path)
+  await fileService.deleteFile(image.path);
 
   // Delete from database
-  db.prepare('DELETE FROM gallery WHERE id = ?').run(id)
+  db.prepare('DELETE FROM gallery WHERE id = ?').run(id);
 
-  return true
+  return true;
 }
 
 /**
  * Get all unique categories from gallery
  */
 export function getGalleryCategories(): string[] {
-  const db = useSkinSQLite()
+  const db = useSkinSQLite();
   const rows = db.prepare(`
     SELECT DISTINCT category FROM gallery 
     WHERE category IS NOT NULL AND category != '' AND status = 'approved'
     ORDER BY category
-  `).all() as { category: string }[]
+  `).all() as { category: string }[];
 
-  return rows.map(r => r.category)
+  return rows.map(r => r.category);
 }
 
 /**
  * Get all unique seasons from gallery
  */
 export function getGallerySeasons(): string[] {
-  const db = useSkinSQLite()
+  const db = useSkinSQLite();
   const rows = db.prepare(`
     SELECT DISTINCT season FROM gallery 
     WHERE season IS NOT NULL AND season != '' AND status = 'approved'
     ORDER BY season
-  `).all() as { season: string }[]
+  `).all() as { season: string }[];
 
-  return rows.map(r => r.season)
+  return rows.map(r => r.season);
 }

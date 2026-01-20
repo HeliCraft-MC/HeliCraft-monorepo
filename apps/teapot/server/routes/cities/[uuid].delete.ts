@@ -20,10 +20,10 @@ defineRouteMeta({
       404: { description: 'City not found' },
     },
   },
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const uuid = getRouterParam(event, 'uuid')
-  await deleteCity(uuid)
-  return { ok: true }
-})
+  const uuid = getRouterParam(event, 'uuid');
+  await deleteCity(uuid);
+  return { ok: true };
+});
