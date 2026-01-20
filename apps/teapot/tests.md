@@ -2,54 +2,73 @@
 
 ## Overview
 
-This project uses **Vitest** for testing with **Testcontainers** for database integration tests.
+This project uses **Vitest** for testing with **Docker Compose MySQL** for database integration tests.
 
 ## Test Types
 
 | Type | Directory | Description |
 |------|-----------|-------------|
-| Unit | `tests/db/*.test.ts` | Schema validation, no DB |
-| Repository Integration | `tests/db/*.integration.test.ts` | Drizzle + MySQL (Testcontainers) |
-| API Integration | `tests/api/*.api.test.ts` | Full HTTP requests |
+| Unit | `server/**/*.test.ts`, `tests/db/schema.test.ts` | Schema validation, mocked dependencies |
+| Repository Integration | `tests/db/*.integration.test.ts` | Drizzle + Docker Compose MySQL |
+| API Integration | `tests/api/*.api.test.ts` | Full HTTP requests against running server |
 
 ## Running Tests
 
 ```bash
-# All unit tests (fast, no Docker needed)
+# All tests with one command (recommended)
+bun run test:all
+
+# Unit tests only (fast, no Docker needed)
 bun run test
 
-# Integration tests (requires Docker)
+# Integration tests (requires Docker MySQL running)
 bun run test:integration
 
-# Specific test file
-bun run test tests/db/schema.test.ts
+# API tests (requires running dev server)
+bun run test:api
 
-# Watch mode
+# Watch mode for development
 bun run test:watch
 ```
-
-## Prerequisites
-
-- **Docker** - Required for Testcontainers
-- First run may take longer (pulls MySQL image)
 
 ## Test Scripts
 
 | Script | Description |
 |--------|-------------|
-| `bun run test` | Run all unit tests |
-| `bun run test:watch` | Watch mode |
-| `bun run test:integration` | Integration tests only |
-| `bun run test:api` | API tests (requires running server) |
-| `bun run test:all` | **Run everything** (migrations, server, all tests) |
+| `bun run test` | Run unit tests only |
+| `bun run test:watch` | Watch mode for unit tests |
+| `bun run test:integration` | Integration tests (needs `bun run db:dev`) |
+| `bun run test:api` | API tests (needs `bun run dev`) |
+| `bun run test:all` | **Full test suite** — starts Docker, server, runs all tests |
+
+## Prerequisites
+
+- **Docker** — Required for MySQL container
+- **Bun** — Runtime + package manager
+
+## How `test:all` Works
+
+The `scripts/test-all.mjs` runner orchestrates the full test suite:
+
+1. Starts Docker MySQL (`docker-compose -f docker-compose.dev.yml up -d`)
+2. Pushes database schema (`drizzle-kit push`)
+3. Starts dev server if not already running
+4. Runs unit tests → integration tests → API tests
+5. Cleans up (stops server if it was started by the script)
 
 ## Writing Tests
 
-### Unit Tests (Schema)
+### Unit Tests (Schema/Mocked)
+
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getTableColumns } from 'drizzle-orm';
 import { forms } from '../server/db/forms/schema';
+
+// Mock Nitro plugins if needed
+vi.mock('~/plugins/skinSqlite', () => ({
+    useSkinSQLite: vi.fn(() => ({ query: vi.fn(), run: vi.fn() })),
+}));
 
 describe('Forms Schema', () => {
     it('has required columns', () => {
@@ -60,20 +79,32 @@ describe('Forms Schema', () => {
 ```
 
 ### Repository Integration Tests
+
+Integration tests connect to Docker Compose MySQL and recreate tables:
+
 ```typescript
-import { MySqlContainer } from '@testcontainers/mysql';
 import { drizzle } from 'drizzle-orm/mysql2';
+import mysql from 'mysql2/promise';
+
+const DB_CONFIG = {
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: 'devpassword',
+    database: 'mydb',
+};
 
 describe('Auth Repository', () => {
-    let container, db;
+    let pool, db;
 
     beforeAll(async () => {
-        container = await new MySqlContainer().start();
-        // ... setup db
-    }, 60000);
+        pool = mysql.createPool(DB_CONFIG);
+        db = drizzle(pool, { schema, mode: 'default' });
+        // Recreate tables if needed
+    }, 30000);
 
     afterAll(async () => {
-        await container?.stop();
+        await pool?.end();
     });
 
     it('creates user', async () => {
@@ -85,29 +116,38 @@ describe('Auth Repository', () => {
 
 ### API Integration Tests
 
+API tests use `fetch` against the running dev server:
+
 ```typescript
+const API_BASE = process.env.TEST_API_URL || 'http://localhost:3000';
+
 describe('Auth API', () => {
     it('registers user', async () => {
-        const res = await fetch('http://localhost:3000/auth/register', {
+        const res = await fetch(`${API_BASE}/auth/register`, {
             method: 'POST',
-            body: JSON.stringify({ nickname: 'Test', password: '123456' }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: 'TestUser', password: '123456' }),
         });
         expect(res.status).toBe(200);
     });
 });
 ```
 
-## Test Files
+## Test Files Summary
 
-| File | Tests |
-|------|-------|
-| `schema.test.ts` | 12 schema validation tests |
-| `auth.repo.integration.test.ts` | 9 repository tests |
-| `forms.integration.test.ts` | 5 forms CRUD tests |
-| `auth.api.test.ts` | 11 API endpoint tests |
+| File | Tests | Type |
+|------|-------|------|
+| `server/utils/file.service.test.ts` | 3 | Unit |
+| `tests/db/schema.test.ts` | 12 | Unit |
+| `tests/db/auth.repo.integration.test.ts` | 9 | Integration |
+| `tests/db/forms.integration.test.ts` | 5 | Integration |
+| `tests/api/auth.api.test.ts` | 11 | API |
+
+**Total: 40 tests**
 
 ## Tips
 
-- Integration tests have 60s timeout for container startup
-- Use `db` parameter in repo functions for test isolation
-- API tests require running dev server (`bun run dev`)
+- Integration tests use Docker Compose MySQL (`teapot-mysql-dev`)
+- Pass `db` parameter to repo functions for test isolation
+- API tests require running dev server (`bun run dev` or use `test:all`)
+- Use `vi.mock()` to mock Nitro plugins in unit tests
