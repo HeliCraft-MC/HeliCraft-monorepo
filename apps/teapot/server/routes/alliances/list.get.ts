@@ -4,19 +4,19 @@ defineRouteMeta({
     description: 'List alliances',
     parameters: [
       { in: 'query', name: 'startAt', required: false, schema: { type: 'number' } },
-      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } }
+      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } },
     ],
     responses: {
       200: {
         description: 'Array of alliances',
         content: {
           'application/json': {
-            schema: { type: 'array', items: { $ref: '#/components/schemas/IAlliance' } }
-          }
-        }
-      }
-    }
-  }
+            schema: { type: 'array', items: { $ref: '#/components/schemas/IAlliance' } },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

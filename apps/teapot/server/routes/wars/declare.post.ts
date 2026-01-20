@@ -3,7 +3,7 @@ defineRouteMeta({
     tags: ['wars'],
     description: 'Declare a new war',
     parameters: [
-      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }
+      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
     ],
     requestBody: {
       description: 'War details',
@@ -18,7 +18,7 @@ defineRouteMeta({
               attackerPlayerUuid: { type: 'string' },
               name: { type: 'string' },
               reason: { type: 'string' },
-              victoryCondition: { type: 'string' }
+              victoryCondition: { type: 'string' },
             },
             required: [
               'attackerStateUuid',
@@ -26,11 +26,11 @@ defineRouteMeta({
               'attackerPlayerUuid',
               'name',
               'reason',
-              'victoryCondition'
-            ]
-          }
-        }
-      }
+              'victoryCondition',
+            ],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -39,20 +39,20 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { uuid: { type: 'string' } }
-            }
-          }
-        }
+              properties: { uuid: { type: 'string' } },
+            },
+          },
+        },
       },
       403: { description: 'Not authorized' },
       404: { description: 'State not found' },
-      500: { description: 'Failed to declare war' }
-    }
-  }
+      500: { description: 'Failed to declare war' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const body = await readBody(event)
-    const uuid = await declareWar(body.attackerStateUuid, body.defenderStateUuid, body.attackerPlayerUuid, body.name, body.reason, body.victoryCondition)
-    return { uuid }
+  const body = await readBody(event)
+  const uuid = await declareWar(body.attackerStateUuid, body.defenderStateUuid, body.attackerPlayerUuid, body.name, body.reason, body.victoryCondition)
+  return { uuid }
 })

@@ -1,26 +1,28 @@
+import type { UpdateQuestionDto } from '~/interfaces/forms.types'
 import { updateQuestion } from '~/utils/forms.utils'
 import { isUserAdmin } from '~/utils/user.utils'
-import type { UpdateQuestionDto } from '~/interfaces/forms.types'
 
 defineRouteMeta({
-    openAPI: {
-        tags: ['forms'],
-        description: 'Update a question',
-        security: [{ bearerAuth: [] }]
-    }
+  openAPI: {
+    tags: ['forms'],
+    description: 'Update a question',
+    security: [{ bearerAuth: [] }],
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const user = event.context.auth
-    if (!user) throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  const user = event.context.auth
+  if (!user)
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 
-    const isAdmin = await isUserAdmin(user.uuid)
-    if (!isAdmin) throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  const isAdmin = await isUserAdmin(user.uuid)
+  if (!isAdmin)
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
 
-    const questionId = parseInt(event.context.params!.questionId)
-    const body = await readBody<UpdateQuestionDto>(event)
+  const questionId = Number.parseInt(event.context.params!.questionId)
+  const body = await readBody<UpdateQuestionDto>(event)
 
-    await updateQuestion(questionId, body)
+  await updateQuestion(questionId, body)
 
-    return { ok: true }
+  return { ok: true }
 })

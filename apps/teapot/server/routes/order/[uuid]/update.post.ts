@@ -4,10 +4,10 @@ defineRouteMeta({
   openAPI: {
     tags: ['order'],
     description: 'Update an order',
-    parameters: [ { in: 'path', name: 'uuid', required: true } ],
+    parameters: [{ in: 'path', name: 'uuid', required: true }],
     requestBody: { description: 'Patch fields', required: true },
-    responses: { 200: { description: 'Updated', content: { 'application/json': { schema: { type: 'object', properties: { ok: { type: 'boolean' } } } } } } }
-  }
+    responses: { 200: { description: 'Updated', content: { 'application/json': { schema: { type: 'object', properties: { ok: { type: 'boolean' } } } } } } },
+  },
 })
 
 export default defineEventHandler(async (event) => {

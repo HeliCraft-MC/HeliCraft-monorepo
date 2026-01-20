@@ -3,7 +3,7 @@ defineRouteMeta({
     tags: ['cities'],
     description: 'Detach a player from a city',
     parameters: [
-      { in: 'path', name: 'uuid', required: true }
+      { in: 'path', name: 'uuid', required: true },
     ],
     requestBody: {
       description: 'Player UUID',
@@ -13,10 +13,10 @@ defineRouteMeta({
           schema: {
             type: 'object',
             properties: { playerUuid: { type: 'string' } },
-            required: ['playerUuid']
-          }
-        }
-      }
+            required: ['playerUuid'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -25,19 +25,19 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
       },
-      500: { description: 'Failed to detach player' }
-    }
-  }
+      500: { description: 'Failed to detach player' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const cityUuid = getRouterParam(event, 'uuid')
-    const { playerUuid } = await readBody(event)
-    await detachPlayerFromCity(playerUuid)
-    return { ok: true }
+  const cityUuid = getRouterParam(event, 'uuid')
+  const { playerUuid } = await readBody(event)
+  await detachPlayerFromCity(playerUuid)
+  return { ok: true }
 })

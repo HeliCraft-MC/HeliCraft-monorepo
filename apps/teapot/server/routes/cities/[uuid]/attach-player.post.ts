@@ -3,7 +3,7 @@ defineRouteMeta({
     tags: ['cities'],
     description: 'Attach a player to a city',
     parameters: [
-      { in: 'path', name: 'uuid', required: true }
+      { in: 'path', name: 'uuid', required: true },
     ],
     requestBody: {
       description: 'Player UUID',
@@ -13,10 +13,10 @@ defineRouteMeta({
           schema: {
             type: 'object',
             properties: { playerUuid: { type: 'string' } },
-            required: ['playerUuid']
-          }
-        }
-      }
+            required: ['playerUuid'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -25,21 +25,21 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
       },
       400: { description: 'Invalid state or player' },
       404: { description: 'City not found' },
-      500: { description: 'Failed to attach player' }
-    }
-  }
+      500: { description: 'Failed to attach player' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const cityUuid = getRouterParam(event, 'uuid')
-    const { playerUuid } = await readBody(event)
-    await attachPlayerToCity(playerUuid, cityUuid)
-    return { ok: true }
+  const cityUuid = getRouterParam(event, 'uuid')
+  const { playerUuid } = await readBody(event)
+  await attachPlayerToCity(playerUuid, cityUuid)
+  return { ok: true }
 })

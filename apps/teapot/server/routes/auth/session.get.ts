@@ -4,7 +4,7 @@ defineRouteMeta({
     tags: ['auth'],
     description: 'Return session information',
     parameters: [
-      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }
+      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
     ],
     responses: {
       200: {
@@ -15,31 +15,31 @@ defineRouteMeta({
               type: 'object',
               properties: {
                 uuid: { type: 'string' },
-                nickname: { type: 'string' }
-              }
-            }
-          }
-        }
+                nickname: { type: 'string' },
+              },
+            },
+          },
+        },
       },
       401: { description: 'Unauthenticated' },
-      404: { description: 'User not found' }
-    }
-  }
+      404: { description: 'User not found' },
+    },
+  },
 })
 export default defineEventHandler(async (event) => {
-    /* JWT уже проверен middleware ⇒ event.context.auth.uuid есть */
-    const { uuid } = event.context.auth || {}
+  /* JWT уже проверен middleware ⇒ event.context.auth.uuid есть */
+  const { uuid } = event.context.auth || {}
 
-    if (!uuid) {
-        /* если Bearer вовсе не был передан, nuxt-auth получит 401 и поймёт,
+  if (!uuid) {
+    /* если Bearer вовсе не был передан, nuxt-auth получит 401 и поймёт,
            что пользователь «гость» */
-        throw createError({ statusCode: 401, statusMessage: 'Unauthenticated' })
-    }
+    throw createError({ statusCode: 401, statusMessage: 'Unauthenticated' })
+  }
 
-    /* найдём пользователя в БД и вернём public-данные */
-    const user = await getUserByUUID(uuid)          // утилита из ваших utils
-    return {
-        uuid: user.UUID,
-        nickname: user.NICKNAME
-    }
+  /* найдём пользователя в БД и вернём public-данные */
+  const user = await getUserByUUID(uuid) // утилита из ваших utils
+  return {
+    uuid: user.UUID,
+    nickname: user.NICKNAME,
+  }
 })

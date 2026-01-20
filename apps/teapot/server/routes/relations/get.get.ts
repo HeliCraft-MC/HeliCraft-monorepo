@@ -4,24 +4,24 @@ defineRouteMeta({
     description: 'Get relation between two states',
     parameters: [
       { in: 'query', name: 'stateUuidA', required: true },
-      { in: 'query', name: 'stateUuidB', required: true }
+      { in: 'query', name: 'stateUuidB', required: true },
     ],
     responses: {
       200: {
         description: 'Relation kind or null',
         content: {
           'application/json': {
-            schema: { type: ['string', 'null'] }
-          }
-        }
-      }
-    }
-  }
+            schema: { type: ['string', 'null'] },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const query = getQuery(event)
-    const a = String(query.stateUuidA)
-    const b = String(query.stateUuidB)
-    return await getRelation(a, b)
+  const query = getQuery(event)
+  const a = String(query.stateUuidA)
+  const b = String(query.stateUuidB)
+  return await getRelation(a, b)
 })

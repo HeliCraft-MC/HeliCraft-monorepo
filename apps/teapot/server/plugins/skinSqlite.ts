@@ -1,8 +1,7 @@
-import { dirname } from 'pathe'
 import { mkdirSync } from 'node:fs'
 import { Database } from 'bun:sqlite'
+import { dirname } from 'pathe'
 
-// eslint-disable-next-line import/no-mutable-exports
 let db!: Database
 
 export default defineNitroPlugin((nitroApp) => {

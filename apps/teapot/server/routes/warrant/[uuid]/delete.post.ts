@@ -4,10 +4,10 @@ defineRouteMeta({
   openAPI: {
     tags: ['warrant'],
     description: 'Delete a warrant',
-    parameters: [ { in: 'path', name: 'uuid', required: true } ],
+    parameters: [{ in: 'path', name: 'uuid', required: true }],
     requestBody: { description: 'Requester UUID', required: true },
-    responses: { 200: { description: 'Deleted', content: { 'application/json': { schema: { type: 'object', properties: { ok: { type: 'boolean' } } } } } } }
-  }
+    responses: { 200: { description: 'Deleted', content: { 'application/json': { schema: { type: 'object', properties: { ok: { type: 'boolean' } } } } } } },
+  },
 })
 
 export default defineEventHandler(async (event) => {

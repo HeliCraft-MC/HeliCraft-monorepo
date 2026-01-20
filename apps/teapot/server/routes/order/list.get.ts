@@ -7,15 +7,15 @@ defineRouteMeta({
     parameters: [
       { in: 'query', name: 'stateUuid', required: true, schema: { type: 'string' } },
       { in: 'query', name: 'startAt', required: false, schema: { type: 'number' } },
-      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } }
+      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } },
     ],
     responses: {
       200: {
         description: 'Array of orders',
-        content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/IStateOrder' } } } }
-      }
-    }
-  }
+        content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/IStateOrder' } } } },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

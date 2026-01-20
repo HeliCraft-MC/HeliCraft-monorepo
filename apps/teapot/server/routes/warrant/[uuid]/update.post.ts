@@ -1,6 +1,6 @@
+import type { IStateWarrant } from '~/interfaces/state/state.types'
+import { createError, defineEventHandler, getRouterParam, readBody } from 'h3'
 import { updateWarrant } from '~/utils/states/orders.utils'
-import { IStateWarrant } from '~/interfaces/state/state.types'
-import { defineEventHandler, createError, getRouterParam, readBody } from 'h3'
 
 defineRouteMeta({
   openAPI: {
@@ -15,13 +15,13 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
-      }
-    }
-  }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
     'actions_taken_by_admins',
     'actions_by_admins_details',
     'actions_taken_by_state',
-    'actions_by_state_details'
+    'actions_by_state_details',
   ]
 
   const patch: Partial<IStateWarrant> = {}
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       statusMessage: 'Bad Request',
-      data: { statusMessageRu: 'Не указан updaterUuid' }
+      data: { statusMessageRu: 'Не указан updaterUuid' },
     })
   }
 

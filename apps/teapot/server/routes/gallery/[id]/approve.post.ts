@@ -7,7 +7,7 @@ defineRouteMeta({
     description: 'Approve gallery image (Admin only)',
     security: [{ bearerAuth: [] }],
     parameters: [
-      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } }
+      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } },
     ],
     responses: {
       200: {
@@ -18,17 +18,17 @@ defineRouteMeta({
               type: 'object',
               properties: {
                 ok: { type: 'boolean' },
-                image: { $ref: '#/components/schemas/GalleryImagePublic' }
-              }
-            }
-          }
-        }
+                image: { $ref: '#/components/schemas/GalleryImagePublic' },
+              },
+            },
+          },
+        },
       },
       401: { description: 'Unauthorized' },
       403: { description: 'Forbidden - Admin only' },
-      404: { description: 'Image not found' }
-    }
-  }
+      404: { description: 'Image not found' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
-      data: { statusMessageRu: 'Только для администраторов' }
+      data: { statusMessageRu: 'Только для администраторов' },
     })
   }
 
@@ -56,6 +56,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     ok: true,
-    image
+    image,
   }
 })

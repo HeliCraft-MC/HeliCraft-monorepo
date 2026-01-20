@@ -1,6 +1,6 @@
+import type { H3Event } from 'h3'
 import { fileTypeFromBuffer } from 'file-type'
 import sharp from 'sharp'
-import type { H3Event } from 'h3'
 import { createGalleryImage } from '~/utils/gallery.utils'
 
 defineRouteMeta({
@@ -17,12 +17,12 @@ defineRouteMeta({
             type: 'object',
             properties: {
               file: { type: 'string', format: 'binary' },
-              description: { type: 'string' }
+              description: { type: 'string' },
             },
-            required: ['file']
-          }
-        }
-      }
+            required: ['file'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -33,19 +33,19 @@ defineRouteMeta({
               type: 'object',
               properties: {
                 ok: { type: 'boolean' },
-                image: { $ref: '#/components/schemas/GalleryImage' }
-              }
-            }
-          }
-        }
+                image: { $ref: '#/components/schemas/GalleryImage' },
+              },
+            },
+          },
+        },
       },
       400: { description: 'Invalid request' },
       401: { description: 'Unauthorized' },
       403: { description: 'User is banned' },
       413: { description: 'File too big' },
-      415: { description: 'Unsupported media type' }
-    }
-  }
+      415: { description: 'Unsupported media type' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event: H3Event) => {
@@ -86,7 +86,8 @@ export default defineEventHandler(async (event: H3Event) => {
     processedImage = await sharp(filePart.data)
       .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
       .toBuffer()
-  } catch {
+  }
+  catch {
     throw createError({ statusCode: 400, statusMessage: 'Invalid image file' })
   }
 
@@ -95,11 +96,11 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const image = await createGalleryImage(processedImage, ft.mime, {
     owner_uuid: userUuid,
-    description
+    description,
   })
 
   return {
     ok: true,
-    image
+    image,
   }
 })

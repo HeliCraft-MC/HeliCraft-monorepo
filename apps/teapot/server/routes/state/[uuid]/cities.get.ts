@@ -3,22 +3,22 @@ defineRouteMeta({
     tags: ['state'],
     description: 'List cities of a state',
     parameters: [
-      { in: 'path', name: 'uuid', required: true }
+      { in: 'path', name: 'uuid', required: true },
     ],
-      responses: {
-        200: {
-          description: 'List of cities',
-          content: {
+    responses: {
+      200: {
+        description: 'List of cities',
+        content: {
           'application/json': {
-              schema: { type: 'array', items: { $ref: '#/components/schemas/ICity' } }
-          }
-          }
-        }
-      }
-  }
+            schema: { type: 'array', items: { $ref: '#/components/schemas/ICity' } },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const stateUuid = getRouterParam(event, 'uuid')
-    return await getCitiesByStateUuid(stateUuid)
+  const stateUuid = getRouterParam(event, 'uuid')
+  return await getCitiesByStateUuid(stateUuid)
 })

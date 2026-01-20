@@ -4,19 +4,19 @@ defineRouteMeta({
     description: 'List all states',
     parameters: [
       { in: 'query', name: 'startAt', required: false, schema: { type: 'number' } },
-      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } }
+      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } },
     ],
     responses: {
       200: {
         description: 'Array of states',
         content: {
           'application/json': {
-            schema: { type: 'array', items: { $ref: '#/components/schemas/IState' } }
-          }
-        }
-      }
-    }
-  }
+            schema: { type: 'array', items: { $ref: '#/components/schemas/IState' } },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

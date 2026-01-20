@@ -14,19 +14,19 @@ defineRouteMeta({
               properties: {
                 categories: {
                   type: 'array',
-                  items: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+                  items: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async () => {
   return {
-    categories: getGalleryCategories()
+    categories: getGalleryCategories(),
   }
 })

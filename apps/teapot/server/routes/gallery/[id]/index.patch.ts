@@ -1,7 +1,7 @@
 import {
   getGalleryImage,
+  updateGalleryImageByAdmin,
   updateGalleryImageByOwner,
-  updateGalleryImageByAdmin
 } from '~/utils/gallery.utils'
 import { isUserAdmin } from '~/utils/user.utils'
 
@@ -11,7 +11,7 @@ defineRouteMeta({
     description: 'Update gallery image. Users can update description only. Admins can update all fields.',
     security: [{ bearerAuth: [] }],
     parameters: [
-      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } }
+      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } },
     ],
     requestBody: {
       required: true,
@@ -26,26 +26,26 @@ defineRouteMeta({
               coord_x: { type: 'integer', description: 'X coordinate in game (admin only)' },
               coord_y: { type: 'integer', description: 'Y coordinate in game (admin only)' },
               coord_z: { type: 'integer', description: 'Z coordinate in game (admin only)' },
-              involved_players: { type: 'string', description: 'Comma-separated UUIDs of involved players (admin only)' }
-            }
-          }
-        }
-      }
+              involved_players: { type: 'string', description: 'Comma-separated UUIDs of involved players (admin only)' },
+            },
+          },
+        },
+      },
     },
     responses: {
       200: {
         description: 'Updated gallery image',
         content: {
           'application/json': {
-            schema: { $ref: '#/components/schemas/GalleryImagePublic' }
-          }
-        }
+            schema: { $ref: '#/components/schemas/GalleryImagePublic' },
+          },
+        },
       },
       401: { description: 'Unauthorized' },
       403: { description: 'Forbidden - Not authorized to edit this image' },
-      404: { description: 'Image not found' }
-    }
-  }
+      404: { description: 'Image not found' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 403,
       statusMessage: 'Not authorized to edit this image',
-      data: { statusMessageRu: 'Нет прав для редактирования этого изображения' }
+      data: { statusMessageRu: 'Нет прав для редактирования этого изображения' },
     })
   }
 
@@ -82,21 +82,21 @@ export default defineEventHandler(async (event) => {
     let coord_x: number | undefined
     let coord_y: number | undefined
     let coord_z: number | undefined
-    
+
     if (body.coord_x !== undefined) {
-      coord_x = parseInt(body.coord_x)
+      coord_x = Number.parseInt(body.coord_x)
       if (isNaN(coord_x)) {
         throw createError({ statusCode: 400, statusMessage: 'Invalid coord_x value' })
       }
     }
     if (body.coord_y !== undefined) {
-      coord_y = parseInt(body.coord_y)
+      coord_y = Number.parseInt(body.coord_y)
       if (isNaN(coord_y)) {
         throw createError({ statusCode: 400, statusMessage: 'Invalid coord_y value' })
       }
     }
     if (body.coord_z !== undefined) {
-      coord_z = parseInt(body.coord_z)
+      coord_z = Number.parseInt(body.coord_z)
       if (isNaN(coord_z)) {
         throw createError({ statusCode: 400, statusMessage: 'Invalid coord_z value' })
       }
@@ -109,12 +109,13 @@ export default defineEventHandler(async (event) => {
       coord_x,
       coord_y,
       coord_z,
-      involved_players: body.involved_players
+      involved_players: body.involved_players,
     })
-  } else {
+  }
+  else {
     // Owner can only update description
     return await updateGalleryImageByOwner(id, userUuid, {
-      description: body.description
+      description: body.description,
     })
   }
 })

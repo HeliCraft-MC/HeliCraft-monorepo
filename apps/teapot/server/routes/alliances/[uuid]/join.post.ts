@@ -4,7 +4,7 @@ defineRouteMeta({
     description: 'Send a request for a state to join an alliance',
     parameters: [
       { in: 'path', name: 'uuid', required: true },
-      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }
+      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
     ],
     requestBody: {
       description: 'State and player UUIDs',
@@ -15,12 +15,12 @@ defineRouteMeta({
             type: 'object',
             properties: {
               stateUuid: { type: 'string' },
-              playerUuid: { type: 'string' }
+              playerUuid: { type: 'string' },
             },
-            required: ['stateUuid', 'playerUuid']
-          }
-        }
-      }
+            required: ['stateUuid', 'playerUuid'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -29,21 +29,21 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
       },
       400: { description: 'Already member or request pending' },
       403: { description: 'Not authorized' },
-      404: { description: 'Alliance or state not found' }
-    }
-  }
+      404: { description: 'Alliance or state not found' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const allianceUuid = getRouterParam(event, 'uuid')
-    const { stateUuid, playerUuid } = await readBody(event)
-    await requestAllianceJoin(allianceUuid, stateUuid, playerUuid)
-    return { ok: true }
+  const allianceUuid = getRouterParam(event, 'uuid')
+  const { stateUuid, playerUuid } = await readBody(event)
+  await requestAllianceJoin(allianceUuid, stateUuid, playerUuid)
+  return { ok: true }
 })

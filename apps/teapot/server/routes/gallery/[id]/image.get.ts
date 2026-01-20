@@ -1,5 +1,5 @@
 import { useFileService } from '~/utils/file.service'
-import { getGalleryImage, canViewImage } from '~/utils/gallery.utils'
+import { canViewImage, getGalleryImage } from '~/utils/gallery.utils'
 import { isUserAdmin } from '~/utils/user.utils'
 
 defineRouteMeta({
@@ -7,7 +7,7 @@ defineRouteMeta({
     tags: ['gallery'],
     description: 'Get gallery image file. Approved images are public, pending/rejected only visible to owner and admins.',
     parameters: [
-      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } }
+      { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } },
     ],
     responses: {
       200: {
@@ -15,13 +15,13 @@ defineRouteMeta({
         content: {
           'image/png': { schema: { type: 'string', format: 'binary' } },
           'image/jpeg': { schema: { type: 'string', format: 'binary' } },
-          'image/webp': { schema: { type: 'string', format: 'binary' } }
-        }
+          'image/webp': { schema: { type: 'string', format: 'binary' } },
+        },
       },
       403: { description: 'Forbidden - Cannot view this image' },
-      404: { description: 'Image not found' }
-    }
-  }
+      404: { description: 'Image not found' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 403,
       statusMessage: 'Cannot view this image',
-      data: { statusMessageRu: 'Нет доступа к этому изображению' }
+      data: { statusMessageRu: 'Нет доступа к этому изображению' },
     })
   }
 
@@ -52,7 +52,8 @@ export default defineEventHandler(async (event) => {
     try {
       const db = (await import('~/plugins/skinSqlite')).useSkinSQLite()
       db.prepare('DELETE FROM gallery WHERE id = ?').run(id)
-    } catch (e) {
+    }
+    catch (e) {
       console.error('[Gallery] Failed to cleanup orphaned record:', e)
     }
     throw createError({ statusCode: 404, statusMessage: 'Image file not found', data: { cleaned: true } })

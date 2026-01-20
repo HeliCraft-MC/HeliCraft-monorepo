@@ -12,20 +12,20 @@ defineRouteMeta({
               properties: {
                 message: { type: 'string', example: 'Teapot - helicraft backend application.' },
                 commit: { type: 'string', example: 'abcdef123456' },
-                timestamp: { type: 'integer', example: 1717777777777 }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+                timestamp: { type: 'integer', example: 1717777777777 },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler((event) => {
   return {
     message: 'Teapot - helicraft backend application.',
     commit: useRuntimeConfig().teapotCommit,
-    timestamp: Date.now()
-  };
-});
+    timestamp: Date.now(),
+  }
+})

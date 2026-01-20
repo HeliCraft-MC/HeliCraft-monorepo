@@ -3,7 +3,7 @@ defineRouteMeta({
     tags: ['history'],
     description: 'Update a history event',
     parameters: [
-      { in: 'path', name: 'uuid', required: true }
+      { in: 'path', name: 'uuid', required: true },
     ],
     requestBody: { description: 'Patch fields', required: true },
     responses: {
@@ -13,18 +13,18 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
-      }
-    }
-  }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const uuid = getRouterParam(event, 'uuid')
-    const body = await readBody(event)
-    await updateHistoryEvent(uuid, body, body.updaterUuid)
-    return { ok: true }
+  const uuid = getRouterParam(event, 'uuid')
+  const body = await readBody(event)
+  await updateHistoryEvent(uuid, body, body.updaterUuid)
+  return { ok: true }
 })

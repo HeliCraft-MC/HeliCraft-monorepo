@@ -1,11 +1,9 @@
-import { join, dirname } from 'pathe'
-import { promises as fsp } from 'node:fs'
-import { useRuntimeConfig } from '#imports'
-import { useSkinSQLite } from '~/plugins/skinSqlite'
-import sharp from 'sharp'
-import { v4 as uuidv4 } from 'uuid'
 import type { SkinMeta } from '~/interfaces/skins.types'
-import { useFileService, removeEmptyDirs } from './file.service'
+import { useRuntimeConfig } from '#imports'
+import { join } from 'pathe'
+import sharp from 'sharp'
+import { useSkinSQLite } from '~/plugins/skinSqlite'
+import { removeEmptyDirs, useFileService } from './file.service'
 
 function normalizeUuid(raw: string): string {
   return raw.replace(/-/g, '').toLowerCase()
@@ -28,7 +26,7 @@ export function getSkin(uuid: string): SkinMeta | undefined {
 async function deleteSkinsFiles(uploadDir: string, paths: string[]): Promise<void> {
   const fileService = useFileService()
   await Promise.all(
-    paths.map(path => fileService.deleteFile(path).catch(() => { }))
+    paths.map(path => fileService.deleteFile(path).catch(() => { })),
   )
 }
 
@@ -75,8 +73,8 @@ export async function deleteSkin(uuid: string): Promise<boolean> {
 export async function saveSkin(
   uuid: string,
   data: Buffer,
-  mime = 'image/png'
-): Promise<{ uuid: string; path: string; mime: string; size: number; created: number }> {
+  mime = 'image/png',
+): Promise<{ uuid: string, path: string, mime: string, size: number, created: number }> {
   const { uploadDir = './uploads' } = useRuntimeConfig()
   const db = useSkinSQLite()
   const skinsRoot = join(uploadDir, 'skins')
@@ -96,12 +94,12 @@ export async function saveSkin(
   // Сохраняем новый файл через file service
   const fileMeta = await fileService.saveFile(data, {
     subDir: 'skins',
-    extension: 'png'
+    extension: 'png',
   })
 
   // Вставляем новую запись в БД
   db.prepare(
-    'INSERT INTO skins(uuid, path, mime, size) VALUES(?, ?, ?, ?)'
+    'INSERT INTO skins(uuid, path, mime, size) VALUES(?, ?, ?, ?)',
   ).run(normalizedUuid, fileMeta.path, mime, data.length)
 
   // Очищаем пустые директории
@@ -112,7 +110,7 @@ export async function saveSkin(
     path: fileMeta.path,
     mime,
     size: data.length,
-    created: Math.floor(Date.now() / 1000)
+    created: Math.floor(Date.now() / 1000),
   }
 }
 
@@ -126,30 +124,31 @@ export async function saveSkin(
  */
 export async function extractHead(
   skinBuf: Buffer,
-  outSize: number = 1024
+  outSize: number = 1024,
 ): Promise<Buffer> {
   // Области для базового слоя головы и оверлея (каждая 8×8 пикселей)
-  const baseRegion: sharp.Region = { left: 8, top: 8, width: 8, height: 8 };
-  const overlayRegion: sharp.Region = { left: 40, top: 8, width: 8, height: 8 };
+  const baseRegion: sharp.Region = { left: 8, top: 8, width: 8, height: 8 }
+  const overlayRegion: sharp.Region = { left: 40, top: 8, width: 8, height: 8 }
 
   try {
     // Параллельно извлекаем базовый слой и оверлей
     const [baseBuf, overlayBuf] = await Promise.all([
       sharp(skinBuf).extract(baseRegion).png().toBuffer(),
       sharp(skinBuf).extract(overlayRegion).png().toBuffer(),
-    ]);
+    ])
 
     // Объединяем оверлей поверх базового слоя и масштабируем до нужного размера
-    const overlay2Buf = await sharp(overlayBuf).resize(outSize, outSize, { kernel: sharp.kernel.nearest }).png().toBuffer();
+    const overlay2Buf = await sharp(overlayBuf).resize(outSize, outSize, { kernel: sharp.kernel.nearest }).png().toBuffer()
     const headBuf = await sharp(baseBuf)
       .composite([{ input: overlay2Buf }])
       .resize(outSize, outSize, { kernel: sharp.kernel.nearest })
       .png()
-      .toBuffer();
+      .toBuffer()
 
-    return headBuf;
-  } catch (err) {
+    return headBuf
+  }
+  catch (err) {
     // При любой ошибке пробрасываем дальше
-    throw err;
+    throw err
   }
 }

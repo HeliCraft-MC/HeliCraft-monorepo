@@ -4,7 +4,7 @@ defineRouteMeta({
     description: 'Create a battle for a war',
     parameters: [
       { in: 'path', name: 'uuid', required: true },
-      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }
+      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
     ],
     requestBody: {
       description: 'Battle details',
@@ -19,7 +19,7 @@ defineRouteMeta({
               name: { type: 'string' },
               description: { type: 'string' },
               type: { type: 'string' },
-              startDate: { type: 'number' }
+              startDate: { type: 'number' },
             },
             required: [
               'creatorStateUuid',
@@ -27,30 +27,30 @@ defineRouteMeta({
               'name',
               'description',
               'type',
-              'startDate'
-            ]
-          }
-        }
-      }
+              'startDate',
+            ],
+          },
+        },
+      },
     },
     responses: {
       200: {
         description: 'Battle created',
         content: {
           'application/json': {
-            schema: { type: 'object', properties: { uuid: { type: 'string' } } }
-          }
-        }
+            schema: { type: 'object', properties: { uuid: { type: 'string' } } },
+          },
+        },
       },
       403: { description: 'Not authorized' },
-      404: { description: 'War not found' }
-    }
-  }
+      404: { description: 'War not found' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const warUuid = getRouterParam(event, 'uuid')
-    const { creatorStateUuid, creatorPlayerUuid, name, description, type, startDate } = await readBody(event)
-    const uuid = await createBattle(warUuid, creatorStateUuid, creatorPlayerUuid, name, description, type, startDate)
-    return { uuid }
+  const warUuid = getRouterParam(event, 'uuid')
+  const { creatorStateUuid, creatorPlayerUuid, name, description, type, startDate } = await readBody(event)
+  const uuid = await createBattle(warUuid, creatorStateUuid, creatorPlayerUuid, name, description, type, startDate)
+  return { uuid }
 })

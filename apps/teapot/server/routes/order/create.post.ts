@@ -4,7 +4,7 @@ defineRouteMeta({
   openAPI: {
     tags: ['order'],
     description: 'Create a state order',
-    parameters: [ { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } } ],
+    parameters: [{ in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }],
     requestBody: {
       description: 'Order data',
       required: true,
@@ -18,20 +18,20 @@ defineRouteMeta({
               text: { type: 'string' },
               issuedByPlayerUuid: { type: 'string' },
               importance: { type: 'string' },
-              expiresAt: { type: 'number', nullable: true }
+              expiresAt: { type: 'number', nullable: true },
             },
-            required: ['stateUuid', 'title', 'text', 'issuedByPlayerUuid']
-          }
-        }
-      }
+            required: ['stateUuid', 'title', 'text', 'issuedByPlayerUuid'],
+          },
+        },
+      },
     },
     responses: {
       200: {
         description: 'Order created',
-        content: { 'application/json': { schema: { type: 'object', properties: { uuid: { type: 'string' } } } } }
-      }
-    }
-  }
+        content: { 'application/json': { schema: { type: 'object', properties: { uuid: { type: 'string' } } } } },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

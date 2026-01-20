@@ -3,7 +3,7 @@ defineRouteMeta({
     tags: ['state'],
     description: 'Apply for membership in a state',
     parameters: [
-      { in: 'path', name: 'uuid', required: true }
+      { in: 'path', name: 'uuid', required: true },
     ],
     requestBody: {
       description: 'Applicant UUID',
@@ -13,10 +13,10 @@ defineRouteMeta({
           schema: {
             type: 'object',
             properties: { applicantUuid: { type: 'string' } },
-            required: ['applicantUuid']
-          }
-        }
-      }
+            required: ['applicantUuid'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -25,20 +25,20 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
       },
       400: { description: 'Already a member or dual citizenship not allowed' },
-      404: { description: 'State not found' }
-    }
-  }
+      404: { description: 'State not found' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const stateUuid = getRouterParam(event, 'uuid')
+  const stateUuid = getRouterParam(event, 'uuid')
   const { uuid } = event.context.auth || {}
-    await applyForMembership(stateUuid, uuid)
-    return { ok: true }
+  await applyForMembership(stateUuid, uuid)
+  return { ok: true }
 })

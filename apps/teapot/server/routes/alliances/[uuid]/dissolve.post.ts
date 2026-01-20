@@ -4,7 +4,7 @@ defineRouteMeta({
     description: 'Dissolve an alliance',
     parameters: [
       { in: 'path', name: 'uuid', required: true },
-      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }
+      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
     ],
     requestBody: {
       description: 'Initiator and state info',
@@ -15,12 +15,12 @@ defineRouteMeta({
             type: 'object',
             properties: {
               byPlayerUuid: { type: 'string' },
-              stateUuid: { type: 'string', nullable: true }
+              stateUuid: { type: 'string', nullable: true },
             },
-            required: ['byPlayerUuid']
-          }
-        }
-      }
+            required: ['byPlayerUuid'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -29,19 +29,19 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
       },
-      403: { description: 'Not authorized' }
-    }
-  }
+      403: { description: 'Not authorized' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const allianceUuid = getRouterParam(event, 'uuid')
-    const { byPlayerUuid, stateUuid } = await readBody(event)
-    await dissolveAlliance(allianceUuid, byPlayerUuid, stateUuid)
-    return { ok: true }
+  const allianceUuid = getRouterParam(event, 'uuid')
+  const { byPlayerUuid, stateUuid } = await readBody(event)
+  await dissolveAlliance(allianceUuid, byPlayerUuid, stateUuid)
+  return { ok: true }
 })

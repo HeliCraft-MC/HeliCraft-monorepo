@@ -34,33 +34,33 @@ export interface IFileService {
    * @param options Save options
    * @returns File metadata
    */
-  saveFile(data: Buffer, options: FileSaveOptions): Promise<FileMeta>
+  saveFile: (data: Buffer, options: FileSaveOptions) => Promise<FileMeta>
 
   /**
    * Delete a file from storage
    * @param relativePath Relative path to the file
    * @returns true if file was deleted, false if not found
    */
-  deleteFile(relativePath: string): Promise<boolean>
+  deleteFile: (relativePath: string) => Promise<boolean>
 
   /**
    * Read a file from storage
    * @param relativePath Relative path to the file
    * @returns File buffer or null if not found
    */
-  readFile(relativePath: string): Promise<Buffer | null>
+  readFile: (relativePath: string) => Promise<Buffer | null>
 
   /**
    * Check if a file exists
    * @param relativePath Relative path to the file
    * @returns true if file exists
    */
-  fileExists(relativePath: string): Promise<boolean>
+  fileExists: (relativePath: string) => Promise<boolean>
 
   /**
    * Get the absolute path to a file
    * @param relativePath Relative path to the file
    * @returns Absolute path
    */
-  getAbsolutePath(relativePath: string): string
+  getAbsolutePath: (relativePath: string) => string
 }

@@ -3,12 +3,12 @@
 /* ────────────────────────────────────────────────────────────── */
 
 export interface IBaseEntity {
-    /** UUID v4 ― первичный ключ */
-    uuid: string;
+  /** UUID v4 ― первичный ключ */
+  uuid: string
 
-    /** UNIX-time (мс) создания записи */
-    created: number;
+  /** UNIX-time (мс) создания записи */
+  created: number
 
-    /** UNIX-time (мс) последнего изменения */
-    updated: number;
+  /** UNIX-time (мс) последнего изменения */
+  updated: number
 }

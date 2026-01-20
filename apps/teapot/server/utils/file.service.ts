@@ -1,8 +1,8 @@
-import { join, dirname, resolve, normalize } from 'pathe'
-import { promises as fsp } from 'node:fs'
-import { v4 as uuidv4 } from 'uuid'
+import type { FileMeta, FileSaveOptions, IFileService } from '~/interfaces/file.service'
 import { createHash } from 'node:crypto'
-import type { IFileService, FileMeta, FileSaveOptions } from '~/interfaces/file.service'
+import { promises as fsp } from 'node:fs'
+import { dirname, join, normalize, resolve } from 'pathe'
+import { v4 as uuidv4 } from 'uuid'
 import { useSkinSQLite } from '~/plugins/skinSqlite'
 
 /**
@@ -84,14 +84,14 @@ class FileService implements IFileService {
 
       // Check if hash already exists
       const existing = db.query<FileRef, [string]>(
-        'SELECT * FROM file_refs WHERE hash = ?'
+        'SELECT * FROM file_refs WHERE hash = ?',
       ).get(hash)
 
       if (existing) {
         // Increment ref count and update last_used
         db.run(
           'UPDATE file_refs SET ref_count = ref_count + 1, last_used_at = ? WHERE hash = ?',
-          [now, hash]
+          [now, hash],
         )
         console.log(`[FileService] CAS hit: hash=${hash.slice(0, 12)}... ref_count=${existing.ref_count + 1}`)
 
@@ -100,7 +100,7 @@ class FileService implements IFileService {
           path: existing.path,
           mime: existing.mime,
           size: existing.size,
-          created: existing.created_at
+          created: existing.created_at,
         }
       }
 
@@ -114,7 +114,7 @@ class FileService implements IFileService {
       // Insert into file_refs
       db.run(
         'INSERT INTO file_refs (hash, path, mime, size, ref_count, created_at, last_used_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [hash, relPath, mime, data.length, 1, now, now]
+        [hash, relPath, mime, data.length, 1, now, now],
       )
 
       console.log(`[FileService] CAS new: hash=${hash.slice(0, 12)}... path=${relPath}`)
@@ -122,11 +122,12 @@ class FileService implements IFileService {
       return {
         id: hash,
         path: relPath,
-        mime: mime,
+        mime,
         size: data.length,
-        created: Math.floor(now / 1000)
+        created: Math.floor(now / 1000),
       }
-    } catch (err: any) {
+    }
+    catch (err: any) {
       // SQLite not ready (during startup) - fall back to legacy behavior
       console.warn('[FileService] SQLite not ready, using legacy save:', err.message)
       return this.saveFileLegacy(data, options)
@@ -149,7 +150,7 @@ class FileService implements IFileService {
       path: relPath,
       mime: this.getMimeFromExtension(extension),
       size: data.length,
-      created: Math.floor(Date.now() / 1000)
+      created: Math.floor(Date.now() / 1000),
     }
   }
 
@@ -162,9 +163,10 @@ class FileService implements IFileService {
       const db = useSkinSQLite()
       db.run(
         'UPDATE file_refs SET ref_count = MAX(0, ref_count - 1) WHERE hash = ?',
-        [hash]
+        [hash],
       )
-    } catch (err) {
+    }
+    catch (err) {
       console.warn('[FileService] Failed to decrement ref:', err)
     }
   }
@@ -176,9 +178,10 @@ class FileService implements IFileService {
     try {
       const db = useSkinSQLite()
       return db.query<FileRef, []>(
-        'SELECT * FROM file_refs WHERE ref_count = 0 ORDER BY last_used_at ASC'
+        'SELECT * FROM file_refs WHERE ref_count = 0 ORDER BY last_used_at ASC',
       ).all()
-    } catch {
+    }
+    catch {
       return []
     }
   }
@@ -196,7 +199,8 @@ class FileService implements IFileService {
         const db = useSkinSQLite()
         db.run('DELETE FROM file_refs WHERE hash = ?', [file.hash])
         deleted++
-      } catch (err) {
+      }
+      catch (err) {
         console.warn(`[FileService] Failed to purge ${file.hash}:`, err)
       }
     }
@@ -210,8 +214,10 @@ class FileService implements IFileService {
       await fsp.rm(absPath, { force: true })
       await this.cleanEmptyDirs(dirname(absPath))
       return true
-    } catch (err: any) {
-      if (err.code === 'ENOENT') return false
+    }
+    catch (err: any) {
+      if (err.code === 'ENOENT')
+        return false
       throw err
     }
   }
@@ -223,9 +229,11 @@ class FileService implements IFileService {
       const buf = await fsp.readFile(absPath)
       console.log(`[FileService] readFile: success, size=${buf.length}`)
       return buf
-    } catch (err: any) {
+    }
+    catch (err: any) {
       console.log(`[FileService] readFile: failed, code=${err.code}`)
-      if (err.code === 'ENOENT') return null
+      if (err.code === 'ENOENT')
+        return null
       throw err
     }
   }
@@ -235,7 +243,8 @@ class FileService implements IFileService {
     try {
       await fsp.access(absPath)
       return true
-    } catch {
+    }
+    catch {
       return false
     }
   }
@@ -255,19 +264,20 @@ class FileService implements IFileService {
         await fsp.rmdir(dirPath)
         await this.cleanEmptyDirs(dirname(dirPath))
       }
-    } catch {
+    }
+    catch {
       // Directory might not exist or not be accessible
     }
   }
 
   private getMimeFromExtension(extension: string): string {
     const mimeMap: Record<string, string> = {
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'gif': 'image/gif',
-      'webp': 'image/webp',
-      'bin': 'application/octet-stream'
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      bin: 'application/octet-stream',
     }
     return mimeMap[extension.toLowerCase()] || 'application/octet-stream'
   }
@@ -304,7 +314,8 @@ export async function removeEmptyDirs(root: string): Promise<void> {
         }
       }
     }
-  } catch {
+  }
+  catch {
     // Directory might not exist
   }
 }
@@ -319,4 +330,3 @@ export async function purgeOrphanedFiles(): Promise<number> {
   const service = useFileService() as FileService
   return service.purgeOrphanedFiles()
 }
-

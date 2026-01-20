@@ -3,7 +3,7 @@ defineRouteMeta({
     tags: ['cities'],
     description: 'Create a new city',
     parameters: [
-      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } }
+      { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
     ],
     requestBody: {
       description: 'City info',
@@ -16,12 +16,12 @@ defineRouteMeta({
               name: { type: 'string' },
               coordinates: { type: 'string' },
               stateUuid: { type: 'string' },
-              isCapital: { type: 'boolean' }
+              isCapital: { type: 'boolean' },
             },
-            required: ['name', 'coordinates']
-          }
-        }
-      }
+            required: ['name', 'coordinates'],
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -30,18 +30,18 @@ defineRouteMeta({
           'application/json': {
             schema: {
               type: 'object',
-              properties: { ok: { type: 'boolean' } }
-            }
-          }
-        }
+              properties: { ok: { type: 'boolean' } },
+            },
+          },
+        },
       },
-      500: { description: 'Failed to create city' }
-    }
-  }
+      500: { description: 'Failed to create city' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {
-    const { name, coordinates, stateUuid, isCapital } = await readBody(event)
-    await createCity(name, coordinates, stateUuid, isCapital)
-    return { ok: true }
+  const { name, coordinates, stateUuid, isCapital } = await readBody(event)
+  await createCity(name, coordinates, stateUuid, isCapital)
+  return { ok: true }
 })

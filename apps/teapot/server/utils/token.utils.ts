@@ -1,5 +1,4 @@
-import jsonwebtoken from 'jsonwebtoken';
-import { AuthUser } from '~/interfaces/mysql.types'
+import jsonwebtoken from 'jsonwebtoken'
 
 /**
  * Generates an access token for the provided user.
@@ -9,39 +8,39 @@ import { AuthUser } from '~/interfaces/mysql.types'
  * @throws {Error} If the user object is invalid or missing the `UUID` property.
  */
 export function generateAccessToken(user: any) {
-    if (!user || !user.UUID) {
-        throw new Error('Invalid user object (Must contain UUID at least)');
-    }
-    const { jwtSecret } = useRuntimeConfig()
-    return jsonwebtoken.sign({
-        UUID: user.UUID,
-        UUID_WR: user.UUID_WR,
-        NICKNAME: user.NICKNAME,
-        LOWERCASENICKNAME: user.LOWERCASENICKNAME,
-        REGDATE: user.REGDATE,
-    }, jwtSecret, { expiresIn: '1h' });
+  if (!user || !user.UUID) {
+    throw new Error('Invalid user object (Must contain UUID at least)')
+  }
+  const { jwtSecret } = useRuntimeConfig()
+  return jsonwebtoken.sign({
+    UUID: user.UUID,
+    UUID_WR: user.UUID_WR,
+    NICKNAME: user.NICKNAME,
+    LOWERCASENICKNAME: user.LOWERCASENICKNAME,
+    REGDATE: user.REGDATE,
+  }, jwtSecret, { expiresIn: '1h' })
 }
 
 /**
  * Generates a refresh token for the provided user.
  *
- * @param {Object} user - The user object for which the refresh token needs to be generated.
+ * @param {object} user - The user object for which the refresh token needs to be generated.
  *                        Must include a UUID property.
  * @return {string} A signed JSON Web Token (JWT) representing the refresh token.
  * @throws {Error} If the user object is invalid or does not contain a UUID property.
  */
 export function generateRefreshToken(user: any) {
-    if (!user || !user.UUID) {
-        throw new Error('Invalid user object (Must contain UUID at least)');
-    }
-    const { jwtSecret } = useRuntimeConfig()
-    return jsonwebtoken.sign({
-        UUID: user.UUID,
-        UUID_WR: user.UUID_WR,
-        NICKNAME: user.NICKNAME,
-        LOWERCASENICKNAME: user.LOWERCASENICKNAME,
-        REGDATE: user.REGDATE,
-    }, jwtSecret, { expiresIn: '7d' });
+  if (!user || !user.UUID) {
+    throw new Error('Invalid user object (Must contain UUID at least)')
+  }
+  const { jwtSecret } = useRuntimeConfig()
+  return jsonwebtoken.sign({
+    UUID: user.UUID,
+    UUID_WR: user.UUID_WR,
+    NICKNAME: user.NICKNAME,
+    LOWERCASENICKNAME: user.LOWERCASENICKNAME,
+    REGDATE: user.REGDATE,
+  }, jwtSecret, { expiresIn: '7d' })
 }
 
 /**
@@ -52,8 +51,8 @@ export function generateRefreshToken(user: any) {
  * or throws an error if the token is invalid or expired.
  */
 export function verifyToken(token: string) {
-    const { jwtSecret } = useRuntimeConfig()
-    return jsonwebtoken.verify(token, jwtSecret);
+  const { jwtSecret } = useRuntimeConfig()
+  return jsonwebtoken.verify(token, jwtSecret)
 }
 
 /**
@@ -64,14 +63,15 @@ export function verifyToken(token: string) {
  * @return {boolean} Returns true if the token is valid and matches the user's UUID, otherwise false.
  */
 export async function verifyTokenWithCredentials(token: string, user: any) {
-    try {
-        const { jwtSecret } = useRuntimeConfig()
-        const decoded = await jsonwebtoken.verify(token, jwtSecret);
-        // @ts-ignore
-        return decoded && decoded.UUID === user.UUID;
-    } catch (error) {
-        return false;
-    }
+  try {
+    const { jwtSecret } = useRuntimeConfig()
+    const decoded = await jsonwebtoken.verify(token, jwtSecret)
+    // @ts-ignore
+    return decoded && decoded.UUID === user.UUID
+  }
+  catch (error) {
+    return false
+  }
 }
 
 /**
@@ -81,7 +81,7 @@ export async function verifyTokenWithCredentials(token: string, user: any) {
  * @return {{ accessToken: string, refreshToken: string }} An object containing the access and refresh tokens.
  */
 export function generateTokens(user: any) {
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-    return { accessToken, refreshToken };
+  const accessToken = generateAccessToken(user)
+  const refreshToken = generateRefreshToken(user)
+  return { accessToken, refreshToken }
 }

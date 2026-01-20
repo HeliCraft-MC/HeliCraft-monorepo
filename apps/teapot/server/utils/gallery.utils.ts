@@ -1,19 +1,18 @@
-import { v4 as uuidv4 } from 'uuid'
-import { useSkinSQLite } from '~/plugins/skinSqlite'
-import { useFileService } from './file.service'
-import { getUserByUUID } from './user.utils'
-import { isUserBanned } from './banlist.utils'
 import type {
+  CreateGalleryImageDto,
   GalleryImage,
   GalleryImagePublic,
-  GalleryImageStatus,
-  GalleryUserInfo,
-  CreateGalleryImageDto,
-  UpdateGalleryImageOwnerDto,
-  UpdateGalleryImageAdminDto,
   GalleryListFilters,
-  PaginatedResponse
+  GalleryUserInfo,
+  PaginatedResponse,
+  UpdateGalleryImageAdminDto,
+  UpdateGalleryImageOwnerDto,
 } from '~/interfaces/gallery.types'
+import { v4 as uuidv4 } from 'uuid'
+import { useSkinSQLite } from '~/plugins/skinSqlite'
+import { isUserBanned } from './banlist.utils'
+import { useFileService } from './file.service'
+import { getUserByUUID } from './user.utils'
 
 /**
  * Normalize UUID format (remove dashes, lowercase)
@@ -30,9 +29,10 @@ async function getUserInfo(uuid: string): Promise<GalleryUserInfo | null> {
     const user = await getUserByUUID(uuid)
     return {
       uuid: user.UUID,
-      nickname: user.NICKNAME
+      nickname: user.NICKNAME,
     }
-  } catch {
+  }
+  catch {
     return null
   }
 }
@@ -41,7 +41,8 @@ async function getUserInfo(uuid: string): Promise<GalleryUserInfo | null> {
  * Parse involved players string into array of user info
  */
 async function parseInvolvedPlayers(playersStr: string | null): Promise<GalleryUserInfo[]> {
-  if (!playersStr) return []
+  if (!playersStr)
+    return []
 
   const uuids = playersStr.split(',').map(s => s.trim()).filter(Boolean)
   const results: GalleryUserInfo[] = []
@@ -78,7 +79,7 @@ async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
     involved_players: involvedPlayers,
     status: image.status,
     created_at: image.created_at,
-    updated_at: image.updated_at
+    updated_at: image.updated_at,
   }
 }
 
@@ -100,7 +101,7 @@ export async function canUserUpload(uuid: string): Promise<string | null> {
 export async function createGalleryImage(
   data: Buffer,
   mime: string,
-  dto: CreateGalleryImageDto
+  dto: CreateGalleryImageDto,
 ): Promise<GalleryImage> {
   const db = useSkinSQLite()
   const fileService = useFileService()
@@ -111,7 +112,7 @@ export async function createGalleryImage(
     throw createError({
       statusCode: 403,
       statusMessage: uploadError,
-      data: { statusMessageRu: 'Забаненные пользователи не могут загружать изображения' }
+      data: { statusMessageRu: 'Забаненные пользователи не могут загружать изображения' },
     })
   }
 
@@ -119,7 +120,7 @@ export async function createGalleryImage(
   const extension = mime === 'image/png' ? 'png' : mime === 'image/jpeg' ? 'jpg' : 'webp'
   const fileMeta = await fileService.saveFile(data, {
     subDir: 'gallery',
-    extension
+    extension,
   })
 
   const id = uuidv4()
@@ -140,7 +141,7 @@ export async function createGalleryImage(
     dto.description || null,
     now,
     now,
-    normalizedOwner // By default, owner is the only involved player
+    normalizedOwner, // By default, owner is the only involved player
   )
 
   return getGalleryImage(id)
@@ -157,7 +158,7 @@ export function getGalleryImage(id: string): GalleryImage {
     throw createError({
       statusCode: 404,
       statusMessage: 'Image not found',
-      data: { statusMessageRu: 'Изображение не найдено' }
+      data: { statusMessageRu: 'Изображение не найдено' },
     })
   }
 
@@ -176,12 +177,15 @@ export async function getGalleryImagePublic(id: string): Promise<GalleryImagePub
  * Check if user can view image
  */
 export function canViewImage(image: GalleryImage, userUuid: string | null, isAdmin: boolean): boolean {
-  if (isAdmin) return true
+  if (isAdmin)
+    return true
   // Approved images are visible to everyone
-  if (image.status === 'approved') return true
+  if (image.status === 'approved')
+    return true
 
   // Pending/rejected images visible only to owner and admins
-  if (userUuid && normalizeUuid(userUuid) === normalizeUuid(image.owner_uuid)) return true
+  if (userUuid && normalizeUuid(userUuid) === normalizeUuid(image.owner_uuid))
+    return true
 
   return false
 }
@@ -193,19 +197,20 @@ export async function listGalleryImages(
   filters: GalleryListFilters,
   page: number = 1,
   perPage: number = 20,
-  includeFullObjects: boolean = true
+  includeFullObjects: boolean = true,
 ): Promise<PaginatedResponse<GalleryImagePublic | string>> {
   const db = useSkinSQLite()
 
-  let whereClauses: string[] = []
-  let params: any[] = []
+  const whereClauses: string[] = []
+  const params: any[] = []
 
   // Only show approved images by default
   if (filters.status) {
     whereClauses.push('status = ?')
     params.push(filters.status)
-  } else {
-    whereClauses.push("status = 'approved'")
+  }
+  else {
+    whereClauses.push('status = \'approved\'')
   }
 
   if (filters.category) {
@@ -244,7 +249,8 @@ export async function listGalleryImages(
 
   if (includeFullObjects) {
     items = await Promise.all(rows.map(toPublicImage))
-  } else {
+  }
+  else {
     items = rows.map(r => r.id)
   }
 
@@ -253,7 +259,7 @@ export async function listGalleryImages(
     total,
     page,
     perPage,
-    totalPages
+    totalPages,
   }
 }
 
@@ -262,13 +268,13 @@ export async function listGalleryImages(
  */
 export async function listPendingImages(
   page: number = 1,
-  perPage: number = 20
+  perPage: number = 20,
 ): Promise<PaginatedResponse<GalleryImagePublic>> {
   const result = await listGalleryImages(
     { status: 'pending' },
     page,
     perPage,
-    true
+    true,
   )
   return result as PaginatedResponse<GalleryImagePublic>
 }
@@ -279,7 +285,7 @@ export async function listPendingImages(
 export async function listUserImages(
   userUuid: string,
   page: number = 1,
-  perPage: number = 20
+  perPage: number = 20,
 ): Promise<PaginatedResponse<GalleryImagePublic>> {
   const db = useSkinSQLite()
   const normalizedUuid = normalizeUuid(userUuid)
@@ -306,7 +312,7 @@ export async function listUserImages(
     total,
     page,
     perPage,
-    totalPages
+    totalPages,
   }
 }
 
@@ -316,7 +322,7 @@ export async function listUserImages(
 export async function updateGalleryImageByOwner(
   id: string,
   ownerUuid: string,
-  dto: UpdateGalleryImageOwnerDto
+  dto: UpdateGalleryImageOwnerDto,
 ): Promise<GalleryImagePublic> {
   const db = useSkinSQLite()
   const image = getGalleryImage(id)
@@ -326,7 +332,7 @@ export async function updateGalleryImageByOwner(
     throw createError({
       statusCode: 403,
       statusMessage: 'Not authorized to edit this image',
-      data: { statusMessageRu: 'Нет прав для редактирования этого изображения' }
+      data: { statusMessageRu: 'Нет прав для редактирования этого изображения' },
     })
   }
 
@@ -345,7 +351,7 @@ export async function updateGalleryImageByOwner(
  */
 export async function updateGalleryImageByAdmin(
   id: string,
-  dto: UpdateGalleryImageAdminDto
+  dto: UpdateGalleryImageAdminDto,
 ): Promise<GalleryImagePublic> {
   const db = useSkinSQLite()
   const image = getGalleryImage(id) // Verify exists
@@ -407,13 +413,13 @@ export async function approveGalleryImage(id: string): Promise<GalleryImagePubli
   const db = useSkinSQLite()
   const now = Math.floor(Date.now() / 1000)
 
-  const result = db.prepare("UPDATE gallery SET status = 'approved', updated_at = ? WHERE id = ?").run(now, id)
+  const result = db.prepare('UPDATE gallery SET status = \'approved\', updated_at = ? WHERE id = ?').run(now, id)
 
   if (result.changes === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Image not found',
-      data: { statusMessageRu: 'Изображение не найдено' }
+      data: { statusMessageRu: 'Изображение не найдено' },
     })
   }
 
@@ -427,13 +433,13 @@ export async function rejectGalleryImage(id: string): Promise<GalleryImagePublic
   const db = useSkinSQLite()
   const now = Math.floor(Date.now() / 1000)
 
-  const result = db.prepare("UPDATE gallery SET status = 'rejected', updated_at = ? WHERE id = ?").run(now, id)
+  const result = db.prepare('UPDATE gallery SET status = \'rejected\', updated_at = ? WHERE id = ?').run(now, id)
 
   if (result.changes === 0) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Image not found',
-      data: { statusMessageRu: 'Изображение не найдено' }
+      data: { statusMessageRu: 'Изображение не найдено' },
     })
   }
 
