@@ -16,6 +16,7 @@
     "@types/node": "^25.0.3",
     "@vueuse/nuxt": "13.3.0",
     "better-sqlite3": "^12.5.0",
+    "chart.js": "^4.5.1",
     "mitt": "^3.0.1",
     "nuxt": "^4.2.2",
     "ofetch": "^1.5.1",
