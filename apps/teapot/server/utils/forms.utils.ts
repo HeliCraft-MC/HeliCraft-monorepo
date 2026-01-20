@@ -286,3 +286,103 @@ export async function getFormResponses(formId: number, limit: number = 100): Pro
     );
     return rows;
 }
+
+// --- One Response Per User ---
+
+export async function hasUserResponded(formId: number, userUuid: string): Promise<boolean> {
+    const pool = useMySQL(DB_NAME);
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        'SELECT id FROM responses WHERE form_id = ? AND respondent_uuid = ? LIMIT 1',
+        [formId, userUuid]
+    );
+    return rows.length > 0;
+}
+
+// --- Delete Response ---
+
+export async function deleteResponse(responseId: number): Promise<void> {
+    const pool = useMySQL(DB_NAME);
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        // Delete answers first (foreign key constraint)
+        await connection.execute('DELETE FROM answers WHERE response_id = ?', [responseId]);
+        // Delete response
+        await connection.execute('DELETE FROM responses WHERE id = ?', [responseId]);
+        await connection.commit();
+    } catch (e) {
+        await connection.rollback();
+        throw e;
+    } finally {
+        connection.release();
+    }
+}
+
+// --- Unpublish/Republish Form ---
+
+export async function unpublishForm(id: number): Promise<void> {
+    const pool = useMySQL(DB_NAME);
+    await pool.execute(
+        'UPDATE forms SET status = "closed", updated_at = ? WHERE id = ?',
+        [Date.now(), id]
+    );
+}
+
+export async function republishForm(id: number): Promise<string> {
+    const pool = useMySQL(DB_NAME);
+    const form = await getFormById(id);
+    if (!form) throw createError({ statusCode: 404, statusMessage: 'Form not found' });
+
+    // If form already has public_hash, reuse it
+    const hash = form.public_hash || uuidv4().replace(/-/g, '').slice(0, 12);
+
+    await pool.execute(
+        'UPDATE forms SET status = "published", public_hash = ?, updated_at = ? WHERE id = ?',
+        [hash, Date.now(), id]
+    );
+    return hash;
+}
+
+// --- Available Forms for User ---
+
+export async function getAvailableForms(): Promise<Form[]> {
+    const pool = useMySQL(DB_NAME);
+    const now = Date.now();
+
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT * FROM forms 
+         WHERE status = "published" 
+         ORDER BY created_at DESC`,
+    );
+
+    // Filter by date in code (settings is JSON)
+    return (rows as Form[]).filter(form => {
+        const settings = typeof form.settings === 'string'
+            ? JSON.parse(form.settings)
+            : (form.settings || {});
+
+        // Check start_date
+        if (settings.start_date && now < settings.start_date) return false;
+        // Check end_date
+        if (settings.end_date && now > settings.end_date) return false;
+
+        return true;
+    });
+}
+
+export async function getUserResponsesForForms(userUuid: string, formIds: number[]): Promise<Map<number, boolean>> {
+    if (formIds.length === 0) return new Map();
+
+    const pool = useMySQL(DB_NAME);
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT DISTINCT form_id FROM responses WHERE respondent_uuid = ? AND form_id IN (${formIds.join(',')})`,
+        [userUuid]
+    );
+
+    const responded = new Map<number, boolean>();
+    for (const row of rows) {
+        responded.set(row.form_id, true);
+    }
+    return responded;
+}
+

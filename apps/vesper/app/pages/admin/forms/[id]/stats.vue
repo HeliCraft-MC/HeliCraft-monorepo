@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js';
+import ConfirmModal from "@/components/common/ConfirmModal.vue";
+
+Chart.register(ArcElement, Tooltip, Legend, DoughnutController);
+
 definePageMeta({
   layout: 'admin'
 });
@@ -34,11 +39,26 @@ const data = ref<StatsData | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 
+// Delete response state
+const deleteModalOpen = ref(false);
+const responseToDelete = ref<number | null>(null);
+
+// Chart display mode per question
+const chartModes = ref<Record<number, 'bar' | 'pie'>>({});
+
 const fetchData = async (): Promise<void> => {
     try {
         const { data: result, error: fetchError } = await useApiFetch<StatsData>(`/forms/${formId.value}/responses`);
         if (fetchError.value) throw fetchError.value;
-        if (result.value) data.value = result.value;
+        if (result.value) {
+            data.value = result.value;
+            // Initialize chart modes
+            result.value.questions.forEach(q => {
+                if (['multiple_choice', 'checkbox', 'dropdown'].includes(q.type)) {
+                    chartModes.value[q.id] = 'bar';
+                }
+            });
+        }
     } catch (e: unknown) {
         error.value = 'Не удалось загрузить статистику';
     } finally {
@@ -85,6 +105,31 @@ function getChoiceDistribution(questionUuid: string, choices: string[]): Record<
     return dist;
 }
 
+// Generate colors for pie chart
+const chartColors = [
+    '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', 
+    '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1', '#06b6d4'
+];
+
+// Delete response
+const confirmDeleteResponse = (id: number): void => {
+    responseToDelete.value = id;
+    deleteModalOpen.value = true;
+};
+
+const handleDeleteResponseConfirm = async (): Promise<void> => {
+    deleteModalOpen.value = false;
+    if (!responseToDelete.value || !data.value) return;
+    
+    try {
+        await useApiFetch(`/forms/responses/${responseToDelete.value}`, { method: 'DELETE' });
+        data.value.responses = data.value.responses.filter(r => r.id !== responseToDelete.value);
+        responseToDelete.value = null;
+    } catch (e: unknown) {
+        useAppEventBus().emit('show-error', { message: 'Failed to delete response' });
+    }
+};
+
 // Export to CSV
 function exportCSV(): void {
     if (!data.value) return;
@@ -110,6 +155,51 @@ function exportCSV(): void {
     link.click();
     URL.revokeObjectURL(url);
 }
+
+// Pie chart component
+const PieChart = defineComponent({
+    props: {
+        distribution: { type: Object as PropType<Record<string, number>>, required: true }
+    },
+    setup(props) {
+        const chartCanvas = ref<HTMLCanvasElement | null>(null);
+        let chartInstance: Chart | null = null;
+
+        onMounted(() => {
+            if (!chartCanvas.value) return;
+            const labels = Object.keys(props.distribution);
+            const values = Object.values(props.distribution);
+            
+            chartInstance = new Chart(chartCanvas.value, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: chartColors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#9ca3af', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        });
+
+        onUnmounted(() => {
+            chartInstance?.destroy();
+        });
+
+        return () => h('canvas', { ref: chartCanvas, class: 'w-full h-48' });
+    }
+});
 </script>
 
 <template>
@@ -175,27 +265,58 @@ function exportCSV(): void {
                 <h2 class="text-xl font-bold text-white">Аналитика по вопросам</h2>
                 
                 <div v-for="question in data.questions" :key="question.id" class="bg-black/40 border border-white/5 rounded-xl p-6">
-                    <h3 class="font-bold text-white mb-4">{{ question.title }}</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-white">{{ question.title }}</h3>
+                        
+                        <!-- Chart mode toggle for choice questions -->
+                        <div 
+                            v-if="['multiple_choice', 'checkbox', 'dropdown'].includes(question.type) && question.options?.choices"
+                            class="flex gap-1 bg-white/5 rounded-lg p-1"
+                        >
+                            <button 
+                                @click="chartModes[question.id] = 'bar'"
+                                class="px-2 py-1 text-xs rounded transition-colors"
+                                :class="chartModes[question.id] === 'bar' ? 'bg-red-500 text-white' : 'text-gray-400 hover:text-white'"
+                            >
+                                Бары
+                            </button>
+                            <button 
+                                @click="chartModes[question.id] = 'pie'"
+                                class="px-2 py-1 text-xs rounded transition-colors"
+                                :class="chartModes[question.id] === 'pie' ? 'bg-red-500 text-white' : 'text-gray-400 hover:text-white'"
+                            >
+                                Диаграмма
+                            </button>
+                        </div>
+                    </div>
                     
                     <!-- Choice-based questions -->
-                    <div v-if="['multiple_choice', 'checkbox', 'dropdown'].includes(question.type) && question.options?.choices" class="space-y-2">
-                        <div 
-                            v-for="(count, choice) in getChoiceDistribution(question.uuid, question.options.choices)" 
-                            :key="String(choice)"
-                            class="flex items-center gap-3"
-                        >
-                            <div class="flex-1">
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-gray-300 text-sm">{{ choice }}</span>
-                                    <span class="text-gray-500 text-sm">{{ count }} ({{ data.responses.length > 0 ? Math.round((count / data.responses.length) * 100) : 0 }}%)</span>
-                                </div>
-                                <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
-                                    <div 
-                                        class="h-full bg-red-500 transition-all"
-                                        :style="{ width: `${data.responses.length > 0 ? (count / data.responses.length) * 100 : 0}%` }"
-                                    ></div>
+                    <div v-if="['multiple_choice', 'checkbox', 'dropdown'].includes(question.type) && question.options?.choices">
+                        <!-- Bar mode -->
+                        <div v-if="chartModes[question.id] === 'bar'" class="space-y-2">
+                            <div 
+                                v-for="(count, choice) in getChoiceDistribution(question.uuid, question.options.choices)" 
+                                :key="String(choice)"
+                                class="flex items-center gap-3"
+                            >
+                                <div class="flex-1">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-gray-300 text-sm">{{ choice }}</span>
+                                        <span class="text-gray-500 text-sm">{{ count }} ({{ data.responses.length > 0 ? Math.round((count / data.responses.length) * 100) : 0 }}%)</span>
+                                    </div>
+                                    <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                                        <div 
+                                            class="h-full bg-red-500 transition-all"
+                                            :style="{ width: `${data.responses.length > 0 ? (count / data.responses.length) * 100 : 0}%` }"
+                                        ></div>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <!-- Pie chart mode -->
+                        <div v-else class="h-48">
+                            <PieChart :distribution="getChoiceDistribution(question.uuid, question.options.choices)" />
                         </div>
                     </div>
                     
@@ -224,20 +345,21 @@ function exportCSV(): void {
                     <p>Ответов пока нет</p>
                 </div>
                 
-                <div v-else class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                <div v-else class="overflow-x-auto rounded-xl border border-white/5">
+                    <table class="w-full text-left text-sm" style="min-width: 800px;">
                         <thead class="bg-black/60 text-gray-400">
                             <tr>
-                                <th class="px-4 py-3 font-medium">Никнейм</th>
-                                <th class="px-4 py-3 font-medium">Дата</th>
+                                <th class="px-4 py-3 font-medium sticky left-0 bg-black/80 z-10 min-w-[120px]">Никнейм</th>
+                                <th class="px-4 py-3 font-medium sticky left-[120px] bg-black/80 z-10 min-w-[120px]">Дата</th>
                                 <th 
                                     v-for="q in data.questions" 
                                     :key="q.id" 
-                                    class="px-4 py-3 font-medium max-w-[200px] truncate"
+                                    class="px-4 py-3 font-medium min-w-[150px] max-w-[200px] truncate"
                                     :title="q.title"
                                 >
                                     {{ q.title }}
                                 </th>
+                                <th class="px-4 py-3 font-medium w-[60px]"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
@@ -246,8 +368,8 @@ function exportCSV(): void {
                                 :key="resp.id"
                                 class="hover:bg-white/5 transition-colors"
                             >
-                                <td class="px-4 py-3 text-white font-medium">{{ resp.respondent_nickname }}</td>
-                                <td class="px-4 py-3 text-gray-400">{{ formatDate(resp.submitted_at) }}</td>
+                                <td class="px-4 py-3 text-white font-medium sticky left-0 bg-[#0a0a0a] z-10">{{ resp.respondent_nickname }}</td>
+                                <td class="px-4 py-3 text-gray-400 sticky left-[120px] bg-[#0a0a0a] z-10">{{ formatDate(resp.submitted_at) }}</td>
                                 <td 
                                     v-for="q in data.questions" 
                                     :key="`${resp.id}-${q.id}`" 
@@ -256,11 +378,32 @@ function exportCSV(): void {
                                 >
                                     {{ formatAnswer(resp.answers[q.uuid]) }}
                                 </td>
+                                <td class="px-4 py-3">
+                                    <button 
+                                        @click="confirmDeleteResponse(resp.id)"
+                                        class="p-1 text-gray-500 hover:text-red-400 transition-colors"
+                                        title="Удалить ответ"
+                                    >
+                                        <Icon name="ph:trash-bold" size="16" />
+                                    </button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        
+        <!-- Delete Response Modal -->
+        <ConfirmModal 
+            :is-open="deleteModalOpen"
+            title="Удалить ответ?"
+            message="Ответ будет удален безвозвратно."
+            confirm-text="Удалить"
+            confirm-variant="danger"
+            @confirm="handleDeleteResponseConfirm"
+            @cancel="deleteModalOpen = false"
+        />
     </div>
 </template>
+

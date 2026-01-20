@@ -1,4 +1,4 @@
-export type FormStatus = 'draft' | 'published' | 'archived';
+export type FormStatus = 'draft' | 'published' | 'closed' | 'archived';
 
 export interface Form {
     id: number;

@@ -8,8 +8,18 @@ const route = useRoute();
 const { data: authData } = useAuth();
 const userNickname = computed(() => authData.value?.nickname || 'Гость');
 
+interface FormResponse {
+    form: Form;
+    questions: Question[];
+    availability: 'open' | 'closed' | 'not_started' | 'ended' | 'already_submitted';
+    availability_message: string | null;
+    has_responded: boolean;
+}
+
 const form = ref<Form | null>(null);
 const questions = ref<Question[]>([]);
+const availability = ref<string>('open');
+const availabilityMessage = ref<string | null>(null);
 const answers = reactive<Record<string, any>>({}); // Key: question_uuid
 const fetchError = ref<boolean>(false);
 const loading = ref(true);
@@ -19,13 +29,15 @@ const isSuccess = ref(false);
 const errors = reactive<Record<string, string>>({});
 
 // Fetch - use useFetch for proper SSR handling
-const { data, error } = await useApiFetch<{ form: Form, questions: Question[] }>(`/forms/user/${route.params.hash}`);
+const { data, error } = await useApiFetch<FormResponse>(`/forms/user/${route.params.hash}`);
 
 if (error.value) {
     fetchError.value = true;
 } else if (data.value) {
     form.value = data.value.form;
     questions.value = data.value.questions;
+    availability.value = data.value.availability;
+    availabilityMessage.value = data.value.availability_message;
     
     // Init answers
     questions.value.forEach((q: Question) => {
@@ -33,6 +45,8 @@ if (error.value) {
     });
 }
 loading.value = false;
+
+const canSubmit = computed(() => availability.value === 'open');
 
 const validate = (): boolean => {
     let isValid = true;
@@ -51,6 +65,7 @@ const validate = (): boolean => {
 };
 
 const submit = async (): Promise<void> => {
+    if (!canSubmit.value) return;
     if (!validate()) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
@@ -72,6 +87,10 @@ const submit = async (): Promise<void> => {
     } catch (e: any) {
         if (e.statusCode === 401) {
             alert('Пожалуйста, войдите в аккаунт, чтобы заполнить форму.');
+        } else if (e.statusCode === 409) {
+            alert('Вы уже отправили ответ на эту форму.');
+            availability.value = 'already_submitted';
+            availabilityMessage.value = 'Вы уже отправили ответ на эту форму';
         } else {
              alert('Ошибка отправки. Попробуйте позже.');
         }
@@ -86,7 +105,27 @@ const submit = async (): Promise<void> => {
         <Icon name="svg-spinners:3-dots-fade" size="40" class="text-red-400" />
     </div>
     <div v-else-if="form" class="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-black py-10 px-4 pt-24">
-        <div v-if="!isSuccess" class="max-w-3xl mx-auto space-y-6">
+        <!-- Availability Message -->
+        <div v-if="!canSubmit && availabilityMessage" class="max-w-3xl mx-auto mb-6">
+            <div 
+                class="rounded-xl p-6 text-center border backdrop-blur-md"
+                :class="{
+                    'bg-yellow-500/10 border-yellow-500/30 text-yellow-400': availability === 'not_started',
+                    'bg-red-500/10 border-red-500/30 text-red-400': availability === 'closed' || availability === 'ended',
+                    'bg-blue-500/10 border-blue-500/30 text-blue-400': availability === 'already_submitted'
+                }"
+            >
+                <Icon 
+                    :name="availability === 'not_started' ? 'ph:clock-bold' : availability === 'already_submitted' ? 'ph:check-circle-bold' : 'ph:lock-bold'" 
+                    size="48" 
+                    class="mb-4 opacity-80" 
+                />
+                <p class="text-lg font-medium">{{ availabilityMessage }}</p>
+                <button @click="navigateTo('/')" class="mt-4 text-gray-400 hover:text-white underline text-sm">На главную</button>
+            </div>
+        </div>
+
+        <div v-if="!isSuccess && canSubmit" class="max-w-3xl mx-auto space-y-6">
             <!-- Header -->
             <div class="rounded-xl border-t-8 border-red-500 bg-black/60 border border-white/5 p-8 backdrop-blur-md shadow-2xl">
                 <h1 class="text-3xl md:text-4xl pr2p text-white mb-4">{{ form.title }}</h1>
@@ -126,13 +165,23 @@ const submit = async (): Promise<void> => {
         </div>
 
         <!-- Success State -->
-        <div v-else class="max-w-2xl mx-auto text-center py-20 animate-fade-in">
+        <div v-else-if="isSuccess" class="max-w-2xl mx-auto text-center py-20 animate-fade-in">
             <div class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Icon name="ph:check-bold" class="text-green-500" size="48" />
             </div>
             <h2 class="text-3xl font-bold text-white mb-2">Ответ записан!</h2>
             <p class="text-gray-400 mb-8">Спасибо за ваше участие.</p>
             <button @click="navigateTo('/')" class="text-red-400 hover:text-red-300 underline">Вернуться на главную</button>
+        </div>
+        
+        <!-- Read-only view for already submitted but form is visible -->
+        <div v-else-if="!canSubmit && form" class="max-w-3xl mx-auto space-y-6 opacity-60 pointer-events-none">
+            <div class="rounded-xl border-t-8 border-gray-500 bg-black/60 border border-white/5 p-8 backdrop-blur-md shadow-2xl">
+                <h1 class="text-3xl md:text-4xl pr2p text-white mb-4">{{ form.title }}</h1>
+                <div v-if="form.description" class="text-gray-300 text-lg whitespace-pre-line leading-relaxed">
+                    {{ form.description }}
+                </div>
+            </div>
         </div>
     </div>
     <div v-else-if="fetchError" class="min-h-screen flex items-center justify-center text-center p-4 pt-24">
@@ -152,3 +201,4 @@ const submit = async (): Promise<void> => {
     to { opacity: 1; transform: translateY(0); }
 }
 </style>
+

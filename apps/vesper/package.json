@@ -21,7 +21,8 @@
     "ofetch": "^1.5.1",
     "pathe": "^2.0.3",
     "sharp": "^0.34.5",
-    "skinview3d": "^3.4.1"
+    "skinview3d": "^3.4.1",
+    "vue-draggable-plus": "^0.6.1"
   },
   "devDependencies": {
     "@iconify-json/ic": "^1.2.4",

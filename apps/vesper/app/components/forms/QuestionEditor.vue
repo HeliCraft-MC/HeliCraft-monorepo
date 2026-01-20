@@ -207,7 +207,7 @@ const isChoiceType = computed(() => ['multiple_choice', 'checkbox', 'dropdown'].
         <!-- Toolbar -->
         <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
             <div class="flex items-center gap-2 text-gray-400">
-                <Icon name="ph:dots-six-vertical-bold" size="20" class="cursor-move hover:text-white" />
+                <Icon name="ph:dots-six-vertical-bold" size="20" class="drag-handle cursor-grab active:cursor-grabbing hover:text-white" />
                 <span class="text-xs font-mono">{{ isDecorativeBlock ? 'BLOCK' : 'Q' }}{{ question.order_index + 1 }}</span>
             </div>
              <div class="flex items-center gap-2">

@@ -1,4 +1,4 @@
-export type FormStatus = 'draft' | 'published' | 'archived';
+export type FormStatus = 'draft' | 'published' | 'closed' | 'archived';
 
 // Extensible question types
 export const QUESTION_TYPES = {
@@ -51,8 +51,9 @@ export interface FormTheme {
 export interface FormSettings {
     max_responses?: number;
     allow_anonymous?: boolean; // If false, requires login (default for now)
-    start_date?: number;
-    end_date?: number;
+    one_response_per_user?: boolean; // If true, each user can submit only once
+    start_date?: number;  // Timestamp: form opens at this time
+    end_date?: number;    // Timestamp: form closes at this time
 }
 
 export interface Question {
