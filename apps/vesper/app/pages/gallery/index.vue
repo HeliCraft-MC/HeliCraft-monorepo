@@ -1,13 +1,14 @@
 <!-- pages/gallery/index.vue -->
 <script setup lang="ts">
-import type { IGalleryListResponse, IGalleryCategoriesResponse, IGallerySeasonsResponse } from '~/types/gallery.types'
+import type { IGalleryListResponse, IGalleryCategoriesResponse, IGallerySeasonsResponse, GallerySortBy } from '~/types/gallery.types'
 import GalleryGrid from '~/components/gallery/GalleryGrid.vue'
 import GalleryUploadModal from '~/components/gallery/GalleryUploadModal.vue'
 
 definePageMeta({ auth: false })
 
 const config = useRuntimeConfig()
-const { status, data: session } = useAuth()
+const { status } = useAuth()
+const $api = use$apiFetch()
 
 const isLoggedIn = computed(() => status.value === 'authenticated')
 
@@ -28,6 +29,7 @@ const error = ref('')
 // Filters
 const selectedCategory = ref('')
 const selectedSeason = ref('')
+const sortBy = ref<GallerySortBy>('created_at')
 const perPage = ref(20)
 const currentPage = ref(1)
 
@@ -45,7 +47,8 @@ async function loadGallery() {
   try {
     const query: Record<string, any> = {
       page: currentPage.value,
-      perPage: perPage.value
+      perPage: perPage.value,
+      sort: sortBy.value
     }
 
     if (selectedCategory.value) {
@@ -55,11 +58,11 @@ async function loadGallery() {
       query.season = selectedSeason.value
     }
 
-    const response = await $fetch<IGalleryListResponse>(`${config.public.backendURL}/gallery`, {
-      query
-    })
+    const { data } = await useApiFetch<IGalleryListResponse>('/gallery', { query })
 
-    galleryData.value = response
+    if (data.value) {
+      galleryData.value = data.value
+    }
   } catch (e: any) {
     console.error('Error loading gallery:', e)
     error.value = e.data?.message || 'Не удалось загрузить галерею'
@@ -72,13 +75,34 @@ async function loadGallery() {
 async function loadFilters() {
   try {
     const [categoriesRes, seasonsRes] = await Promise.all([
-      $fetch<IGalleryCategoriesResponse>(`${config.public.backendURL}/gallery/categories`),
-      $fetch<IGallerySeasonsResponse>(`${config.public.backendURL}/gallery/seasons`)
+      useApiFetch<IGalleryCategoriesResponse>('/gallery/categories'),
+      useApiFetch<IGallerySeasonsResponse>('/gallery/seasons')
     ])
-    categories.value = categoriesRes.categories
-    seasons.value = seasonsRes.seasons
+    if (categoriesRes.data.value) {
+      categories.value = categoriesRes.data.value.categories
+    }
+    if (seasonsRes.data.value) {
+      seasons.value = seasonsRes.data.value.seasons
+    }
   } catch (e) {
     console.error('Error loading filters:', e)
+  }
+}
+
+/* ───── Like/Unlike ───── */
+async function toggleLike(imageId: string, isLiked: boolean) {
+  if (!isLoggedIn.value) return
+
+  try {
+    if (isLiked) {
+      await $api(`/gallery/${imageId}/like`, { method: 'DELETE' })
+    } else {
+      await $api(`/gallery/${imageId}/like`, { method: 'POST' })
+    }
+    // Reload to update like status
+    loadGallery()
+  } catch (e) {
+    console.error('Error toggling like:', e)
   }
 }
 
@@ -101,7 +125,7 @@ function prevPage() {
 }
 
 /* ───── Watch for changes ───── */
-watch([selectedCategory, selectedSeason], () => {
+watch([selectedCategory, selectedSeason, sortBy], () => {
   currentPage.value = 1
   loadGallery()
 })
@@ -150,7 +174,7 @@ onMounted(() => {
 
       <!-- Filters -->
       <section class="bg-gray-900/60 backdrop-blur-lg rounded-lg p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Category filter -->
           <div>
             <label class="block text-sm text-gray-400 mb-2">Категория</label>
@@ -176,6 +200,18 @@ onMounted(() => {
               <option v-for="s in seasons" :key="s" :value="s">
                 {{ s }}
               </option>
+            </select>
+          </div>
+
+          <!-- Sort -->
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Сортировка</label>
+            <select
+              v-model="sortBy"
+              class="w-full bg-gray-800/70 rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 transition"
+            >
+              <option value="created_at">Новые</option>
+              <option value="likes">Популярные</option>
             </select>
           </div>
 
@@ -208,7 +244,13 @@ onMounted(() => {
 
       <!-- Gallery -->
       <section class="bg-gray-900/60 backdrop-blur-lg rounded-lg p-6">
-        <GalleryGrid :images="galleryData.items" :loading="loading" />
+        <GalleryGrid 
+          :images="galleryData.items" 
+          :loading="loading"
+          :show-likes="true"
+          :can-like="isLoggedIn"
+          @like="(id, isLiked) => toggleLike(id, isLiked)"
+        />
       </section>
 
       <!-- Pagination -->

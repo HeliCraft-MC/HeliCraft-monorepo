@@ -1,0 +1,784 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "5b5a30fe-c496-4319-8c34-700d68cec867",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "litebans_bans": {
+      "name": "litebans_bans",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip": {
+          "name": "ip",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "banned_by_uuid": {
+          "name": "banned_by_uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "banned_by_name": {
+          "name": "banned_by_name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "removed_by_uuid": {
+          "name": "removed_by_uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "removed_by_name": {
+          "name": "removed_by_name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "removed_by_reason": {
+          "name": "removed_by_reason",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "removed_by_date": {
+          "name": "removed_by_date",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "time": {
+          "name": "time",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "until": {
+          "name": "until",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "template": {
+          "name": "template",
+          "type": "tinyint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 255
+        },
+        "server_scope": {
+          "name": "server_scope",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "server_origin": {
+          "name": "server_origin",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "silent": {
+          "name": "silent",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "ipban": {
+          "name": "ipban",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "ipban_wildcard": {
+          "name": "ipban_wildcard",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "active": {
+          "name": "active",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "idx_litebans_bans_uuid": {
+          "name": "idx_litebans_bans_uuid",
+          "columns": [
+            "uuid"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_ip": {
+          "name": "idx_litebans_bans_ip",
+          "columns": [
+            "ip"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_banned_by_uuid": {
+          "name": "idx_litebans_bans_banned_by_uuid",
+          "columns": [
+            "banned_by_uuid"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_time": {
+          "name": "idx_litebans_bans_time",
+          "columns": [
+            "time"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_until": {
+          "name": "idx_litebans_bans_until",
+          "columns": [
+            "until"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_template": {
+          "name": "idx_litebans_bans_template",
+          "columns": [
+            "template"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_ipban": {
+          "name": "idx_litebans_bans_ipban",
+          "columns": [
+            "ipban"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_ipban_wildcard": {
+          "name": "idx_litebans_bans_ipban_wildcard",
+          "columns": [
+            "ipban_wildcard"
+          ],
+          "isUnique": false
+        },
+        "idx_litebans_bans_active": {
+          "name": "idx_litebans_bans_active",
+          "columns": [
+            "active"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "litebans_bans_id": {
+          "name": "litebans_bans_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "AUTH": {
+      "name": "AUTH",
+      "columns": {
+        "NICKNAME": {
+          "name": "NICKNAME",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "LOWERCASENICKNAME": {
+          "name": "LOWERCASENICKNAME",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "HASH": {
+          "name": "HASH",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "IP": {
+          "name": "IP",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "isAdmin": {
+          "name": "isAdmin",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "TOTPTOKEN": {
+          "name": "TOTPTOKEN",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "REGDATE": {
+          "name": "REGDATE",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "UUID": {
+          "name": "UUID",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "UUID_WR": {
+          "name": "UUID_WR",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "PREMIUMUUID": {
+          "name": "PREMIUMUUID",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "LOGINIP": {
+          "name": "LOGINIP",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "LOGINDATE": {
+          "name": "LOGINDATE",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ISSUEDTIME": {
+          "name": "ISSUEDTIME",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "accessToken": {
+          "name": "accessToken",
+          "type": "char(32)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "serverID": {
+          "name": "serverID",
+          "type": "varchar(41)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "hwidId": {
+          "name": "hwidId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "UUID_WR": {
+          "name": "UUID_WR",
+          "columns": [
+            "UUID_WR"
+          ],
+          "isUnique": true
+        },
+        "AUTH_PREMIUMUUID_idx": {
+          "name": "AUTH_PREMIUMUUID_idx",
+          "columns": [
+            "PREMIUMUUID"
+          ],
+          "isUnique": false
+        },
+        "AUTH_IP_idx": {
+          "name": "AUTH_IP_idx",
+          "columns": [
+            "IP"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "AUTH_LOWERCASENICKNAME": {
+          "name": "AUTH_LOWERCASENICKNAME",
+          "columns": [
+            "LOWERCASENICKNAME"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "answers": {
+      "name": "answers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "response_id": {
+          "name": "response_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "answers_response_id_idx": {
+          "name": "answers_response_id_idx",
+          "columns": [
+            "response_id"
+          ],
+          "isUnique": false
+        },
+        "answers_question_id_idx": {
+          "name": "answers_question_id_idx",
+          "columns": [
+            "question_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "answers_response_id_responses_id_fk": {
+          "name": "answers_response_id_responses_id_fk",
+          "tableFrom": "answers",
+          "tableTo": "responses",
+          "columnsFrom": [
+            "response_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "answers_question_id_questions_id_fk": {
+          "name": "answers_question_id_questions_id_fk",
+          "tableFrom": "answers",
+          "tableTo": "questions",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "answers_id": {
+          "name": "answers_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "forms": {
+      "name": "forms",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_uuid": {
+          "name": "owner_uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('draft','published','closed','archived')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'draft'"
+        },
+        "theme": {
+          "name": "theme",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "settings": {
+          "name": "settings",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "public_hash": {
+          "name": "public_hash",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "forms_id": {
+          "name": "forms_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "forms_uuid_unique": {
+          "name": "forms_uuid_unique",
+          "columns": [
+            "uuid"
+          ]
+        },
+        "forms_public_hash_unique": {
+          "name": "forms_public_hash_unique",
+          "columns": [
+            "public_hash"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "questions": {
+      "name": "questions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "form_id": {
+          "name": "form_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_required": {
+          "name": "is_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "options": {
+          "name": "options",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "validation": {
+          "name": "validation",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "order_index": {
+          "name": "order_index",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "questions_form_id_idx": {
+          "name": "questions_form_id_idx",
+          "columns": [
+            "form_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "questions_form_id_forms_id_fk": {
+          "name": "questions_form_id_forms_id_fk",
+          "tableFrom": "questions",
+          "tableTo": "forms",
+          "columnsFrom": [
+            "form_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "questions_id": {
+          "name": "questions_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "questions_uuid_unique": {
+          "name": "questions_uuid_unique",
+          "columns": [
+            "uuid"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "responses": {
+      "name": "responses",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "form_id": {
+          "name": "form_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "respondent_uuid": {
+          "name": "respondent_uuid",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "submitted_at": {
+          "name": "submitted_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "responses_form_id_idx": {
+          "name": "responses_form_id_idx",
+          "columns": [
+            "form_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "responses_form_id_forms_id_fk": {
+          "name": "responses_form_id_forms_id_fk",
+          "tableFrom": "responses",
+          "tableTo": "forms",
+          "columnsFrom": [
+            "form_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "responses_id": {
+          "name": "responses_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    }
+  },
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
+  }
+}

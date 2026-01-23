@@ -12,3 +12,4 @@ states.txt
 /uploads
 /package-lock.json
 data
+/public/uploads

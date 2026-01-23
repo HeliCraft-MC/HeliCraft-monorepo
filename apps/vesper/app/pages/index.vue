@@ -98,8 +98,9 @@ const { data: localImages } = await useFetch<string[]>('/api/intro-images');
 // Try to load gallery images
 async function loadGalleryImages() {
   try {
-    const response = await $fetch<IGalleryIdsResponse>(
-      `${config.public.backendURL}/gallery/ids`,
+    const $apiFetch = use$apiFetch()
+    const response = await $apiFetch<IGalleryIdsResponse>(
+      '/gallery/ids',
       { query: { page: 1, perPage: 100 } }
     );
     if (response.items && response.items.length > 0) {
@@ -176,9 +177,9 @@ function getNextImage(currentSrc: string | null): string | null {
   if (!images.value || images.value.length === 0) return null;
   if (images.value.length === 1) return images.value[0];
 
-  let next;
+  let next: string = '';
   do {
-    next = images.value[Math.floor(Math.random() * images.value.length)];
+    next = images.value[Math.floor(Math.random() * images.value.length)] as string;
   } while (next === currentSrc);
   return next;
 }

@@ -31,7 +31,7 @@ async function enrichBanWithNickname(ban: BanEntry): Promise<BanEntry> {
         ban.uuid_nickname = user.NICKNAME;
     }
     catch (e) {
-    // Если пользователь не найден, оставляем nickname пустым
+        // Если пользователь не найден, оставляем nickname пустым
         ban.uuid_nickname = undefined;
     }
     return ban;
@@ -101,6 +101,12 @@ export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntr
         return ban;
     }
     catch (e: any) {
+        console.error('Database error checking ban:', e);
+        // не в проде не кидаем ошибку
+        // eslint-disable-next-line node/prefer-global/process
+        if (process.env.NODE_ENV !== 'production') {
+            return null;
+        }
         throw createError({
             statusCode: 500,
             statusMessage: 'Database error checking ban',
@@ -217,7 +223,7 @@ export async function removeBan(banId: number, adminUuid: string = '[Web]', admi
         }
     }
     catch (e: any) {
-    // Если это наша ошибка 404, прокидываем дальше, иначе 500
+        // Если это наша ошибка 404, прокидываем дальше, иначе 500
         if (e.statusCode)
             throw e;
 

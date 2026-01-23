@@ -7,8 +7,9 @@ import GalleryEditModal from '~/components/gallery/GalleryEditModal.vue'
 definePageMeta({ layout: 'admin' })
 
 const config = useRuntimeConfig()
-const { data: session, token } = useAuth()
+const { data: session } = useAuth()
 const userUuid = computed(() => session.value?.uuid)
+const $api = use$apiFetch()
 
 /* ───── State ───── */
 const activeTab = ref<'pending' | 'approved' | 'rejected'>('pending')
@@ -60,13 +61,9 @@ async function fetchCurrentTabData() {
         break
     }
 
-    const response = await $fetch<IGalleryListResponse>(
-      `${config.public.backendURL}${endpoint}`,
-      {
-        query: { page: currentPage.value, perPage: perPage.value },
-        headers: { Authorization: `Bearer ${token.value}` }
-      }
-    )
+    const response = await $api<IGalleryListResponse>(endpoint, {
+      query: { page: currentPage.value, perPage: perPage.value }
+    })
 
     currentList.value.value = response.items
     totalItems.value = response.total
@@ -84,13 +81,9 @@ async function approveImage(image: IGalleryImagePublic) {
   processing.value = image.id
 
   try {
-    const response = await $fetch<IGalleryActionResponse>(
-      `${config.public.backendURL}/gallery/${image.id}/approve`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token.value}` }
-      }
-    )
+    const response = await $api<IGalleryActionResponse>(`/gallery/${image.id}/approve`, {
+      method: 'POST'
+    })
 
     if (response.ok) {
       await fetchCurrentTabData()
@@ -108,13 +101,9 @@ async function rejectImage(image: IGalleryImagePublic) {
   processing.value = image.id
 
   try {
-    const response = await $fetch<IGalleryActionResponse>(
-      `${config.public.backendURL}/gallery/${image.id}/reject`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token.value}` }
-      }
-    )
+    const response = await $api<IGalleryActionResponse>(`/gallery/${image.id}/reject`, {
+      method: 'POST'
+    })
 
     if (response.ok) {
       await fetchCurrentTabData()
@@ -132,13 +121,9 @@ async function deleteImage() {
   processing.value = deletingImage.value.id
 
   try {
-    await $fetch<IGalleryActionResponse>(
-      `${config.public.backendURL}/gallery/${deletingImage.value.id}`,
-      {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token.value}` }
-      }
-    )
+    await $api<IGalleryActionResponse>(`/gallery/${deletingImage.value.id}`, {
+      method: 'DELETE'
+    })
 
     showDeleteConfirm.value = false
     deletingImage.value = null

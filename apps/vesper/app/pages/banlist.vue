@@ -116,7 +116,8 @@ async function checkAdminStatus() {
 
   checkingAdmin.value = true
   try {
-    isAdmin.value = await $fetch<boolean>(`/distant-api/user/${userUuid.value}/isAdmin`)
+    const $apiFetch = use$apiFetch()
+    isAdmin.value = await $apiFetch<boolean>(`/user/${userUuid.value}/isAdmin`)
   } catch (e) {
     console.error('Ошибка проверки админ-статуса:', e)
     isAdmin.value = false

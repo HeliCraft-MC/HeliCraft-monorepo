@@ -34,6 +34,10 @@ export interface IGalleryImagePublic {
   involved_players: IPlayerSearchResult[]
   /** Approval status */
   status: GalleryImageStatus
+  /** Number of likes */
+  likes_count: number
+  /** Whether current user has liked (only when authenticated) */
+  is_liked?: boolean
   /** UNIX-time (seconds) of creation */
   created_at: number
   /** UNIX-time (seconds) of last update */
@@ -97,6 +101,16 @@ export interface IGalleryActionResponse {
   image?: IGalleryImagePublic
   message?: string
 }
+
+/** Response for like/unlike operations */
+export interface IGalleryLikeResponse {
+  ok: boolean
+  liked?: boolean
+  unliked?: boolean
+}
+
+/** Sort options for gallery listing */
+export type GallerySortBy = 'created_at' | 'likes' | 'updated_at'
 
 /** Player search result */
 export interface IPlayerSearchResult {

@@ -113,7 +113,8 @@ async function checkAdminStatus() {
 
   checkingAdmin.value = true
   try {
-    isAdmin.value = await $fetch<boolean>(`/distant-api/user/${userUuid.value}/isAdmin`)
+    const $apiFetch = use$apiFetch()
+    isAdmin.value = await $apiFetch<boolean>(`/user/${userUuid.value}/isAdmin`)
   } catch {
     isAdmin.value = false
   } finally {
@@ -127,11 +128,11 @@ async function approveImage() {
   
   processing.value = true
   try {
-    const response = await $fetch<IGalleryActionResponse>(
-      `${config.public.backendURL}/gallery/${imageId.value}/approve`,
+    const $apiFetch = use$apiFetch()
+    const response = await $apiFetch<IGalleryActionResponse>(
+      `/gallery/${imageId.value}/approve`,
       {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token.value}` }
+        method: 'POST'
       }
     )
     
@@ -151,11 +152,11 @@ async function rejectImage() {
   
   processing.value = true
   try {
-    const response = await $fetch<IGalleryActionResponse>(
-      `${config.public.backendURL}/gallery/${imageId.value}/reject`,
+    const $apiFetch = use$apiFetch()
+    const response = await $apiFetch<IGalleryActionResponse>(
+      `/gallery/${imageId.value}/reject`,
       {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token.value}` }
+        method: 'POST'
       }
     )
     
@@ -175,11 +176,11 @@ async function deleteImage() {
   
   processing.value = true
   try {
-    await $fetch<IGalleryActionResponse>(
-      `${config.public.backendURL}/gallery/${imageId.value}`,
+    const $apiFetch = use$apiFetch()
+    await $apiFetch<IGalleryActionResponse>(
+      `/gallery/${imageId.value}`,
       {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token.value}` }
+        method: 'DELETE'
       }
     )
     

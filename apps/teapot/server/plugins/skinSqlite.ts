@@ -46,16 +46,42 @@ export default defineNitroPlugin((nitroApp) => {
       coord_z          INTEGER,
       involved_players TEXT,
       status           TEXT NOT NULL DEFAULT 'pending',
+      likes_count      INTEGER NOT NULL DEFAULT 0,
       created_at       INTEGER NOT NULL,
       updated_at       INTEGER NOT NULL
     );
   `);
+
+    // Миграция: добавить likes_count если не существует
+    try {
+        db.run('ALTER TABLE gallery ADD COLUMN likes_count INTEGER NOT NULL DEFAULT 0;');
+        console.log('SQLite: added likes_count column to gallery');
+    }
+    catch {
+    // Колонка уже существует
+    }
 
     // Индексы для gallery
     db.run('CREATE INDEX IF NOT EXISTS idx_gallery_status ON gallery(status);');
     db.run('CREATE INDEX IF NOT EXISTS idx_gallery_owner ON gallery(owner_uuid);');
     db.run('CREATE INDEX IF NOT EXISTS idx_gallery_category ON gallery(category);');
     db.run('CREATE INDEX IF NOT EXISTS idx_gallery_season ON gallery(season);');
+    db.run('CREATE INDEX IF NOT EXISTS idx_gallery_likes ON gallery(likes_count);');
+
+    // Авто-миграция (таблица gallery_likes для лайков)
+    console.log('SQLite: creating table gallery_likes');
+    db.run(`
+    CREATE TABLE IF NOT EXISTS gallery_likes (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      image_id    TEXT NOT NULL,
+      user_uuid   TEXT NOT NULL,
+      created_at  INTEGER NOT NULL,
+      UNIQUE(image_id, user_uuid),
+      FOREIGN KEY (image_id) REFERENCES gallery(id) ON DELETE CASCADE
+    );
+  `);
+    db.run('CREATE INDEX IF NOT EXISTS idx_gallery_likes_image ON gallery_likes(image_id);');
+    db.run('CREATE INDEX IF NOT EXISTS idx_gallery_likes_user ON gallery_likes(user_uuid);');
 
     // Авто-миграция (таблица file_refs для CAS)
     console.log('SQLite: creating table file_refs');

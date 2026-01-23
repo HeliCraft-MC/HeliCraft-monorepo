@@ -1,6 +1,6 @@
 import type { Auth } from '~/db/default/schema';
 // User utilities - refactored to use Drizzle ORM via auth.repo
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { useDefaultDb } from '~/db/mysql.client';
 import {
     deleteUser as deleteUserFromDb,
@@ -90,6 +90,7 @@ export function toPublicUser(user: Auth) {
 
 /**
  * Get user by UUID
+ * Note: findByUuid searches both UUID (with dashes) and UUID_WR (without dashes) columns
  */
 export async function getUserByUUID(uuid: string): Promise<Auth> {
     const db = getDb();

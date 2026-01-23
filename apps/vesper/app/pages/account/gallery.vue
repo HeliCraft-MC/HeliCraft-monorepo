@@ -5,7 +5,7 @@ import { GalleryImageStatus } from '~/types/gallery.types'
 definePageMeta({ auth: true })
 
 const config = useRuntimeConfig()
-const { token } = useAuth()
+const $api = use$apiFetch()
 
 /* ───── State ───── */
 const images = ref<IGalleryImagePublic[]>([])
@@ -25,12 +25,10 @@ async function loadImages() {
   error.value = ''
 
   try {
-    // Use proxy for proper auth cookies
-    const response = await $fetch<IGalleryListResponse>(
-      `/distant-api/gallery/my`,
+    const response = await $api<IGalleryListResponse>(
+      '/gallery/my',
       {
-        query: { page: currentPage.value, perPage: perPage.value },
-        headers: { Authorization: `Bearer ${token.value}` }
+        query: { page: currentPage.value, perPage: perPage.value }
       }
     )
     images.value = response.items

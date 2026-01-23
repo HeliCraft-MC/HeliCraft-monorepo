@@ -8,7 +8,7 @@ import { isUserAdmin } from '~/utils/user.utils';
 defineRouteMeta({
     openAPI: {
         tags: ['gallery'],
-        description: 'Update gallery image. Users can update description only. Admins can update all fields.',
+        description: 'Update gallery image. Owners can update all metadata fields. Admins have the same permissions.',
         security: [{ bearerAuth: [] }],
         parameters: [
             { name: 'id', in: 'path', required: true, description: 'Gallery image ID', schema: { type: 'string' } },
@@ -20,13 +20,13 @@ defineRouteMeta({
                     schema: {
                         type: 'object',
                         properties: {
-                            description: { type: 'string', description: 'Image description (owner or admin)' },
-                            category: { type: 'string', description: 'Category (admin only)' },
-                            season: { type: 'string', description: 'Season (admin only)' },
-                            coord_x: { type: 'integer', description: 'X coordinate in game (admin only)' },
-                            coord_y: { type: 'integer', description: 'Y coordinate in game (admin only)' },
-                            coord_z: { type: 'integer', description: 'Z coordinate in game (admin only)' },
-                            involved_players: { type: 'string', description: 'Comma-separated UUIDs of involved players (admin only)' },
+                            description: { type: 'string', description: 'Image description' },
+                            category: { type: 'string', description: 'Category' },
+                            season: { type: 'string', description: 'Season' },
+                            coord_x: { type: 'integer', description: 'X coordinate in game' },
+                            coord_y: { type: 'integer', description: 'Y coordinate in game' },
+                            coord_z: { type: 'integer', description: 'Z coordinate in game' },
+                            involved_players: { type: 'string', description: 'Comma-separated UUIDs of involved players' },
                         },
                     },
                 },
@@ -76,46 +76,46 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    if (admin) {
-    // Admin can update all fields
     // Validate and parse coordinates
-        let coord_x: number | undefined;
-        let coord_y: number | undefined;
-        let coord_z: number | undefined;
+    let coord_x: number | undefined;
+    let coord_y: number | undefined;
+    let coord_z: number | undefined;
 
-        if (body.coord_x !== undefined) {
-            coord_x = Number.parseInt(body.coord_x);
-            if (isNaN(coord_x)) {
-                throw createError({ statusCode: 400, statusMessage: 'Invalid coord_x value' });
-            }
+    if (body.coord_x !== undefined) {
+        coord_x = Number.parseInt(body.coord_x);
+        if (isNaN(coord_x)) {
+            throw createError({ statusCode: 400, statusMessage: 'Invalid coord_x value' });
         }
-        if (body.coord_y !== undefined) {
-            coord_y = Number.parseInt(body.coord_y);
-            if (isNaN(coord_y)) {
-                throw createError({ statusCode: 400, statusMessage: 'Invalid coord_y value' });
-            }
+    }
+    if (body.coord_y !== undefined) {
+        coord_y = Number.parseInt(body.coord_y);
+        if (isNaN(coord_y)) {
+            throw createError({ statusCode: 400, statusMessage: 'Invalid coord_y value' });
         }
-        if (body.coord_z !== undefined) {
-            coord_z = Number.parseInt(body.coord_z);
-            if (isNaN(coord_z)) {
-                throw createError({ statusCode: 400, statusMessage: 'Invalid coord_z value' });
-            }
+    }
+    if (body.coord_z !== undefined) {
+        coord_z = Number.parseInt(body.coord_z);
+        if (isNaN(coord_z)) {
+            throw createError({ statusCode: 400, statusMessage: 'Invalid coord_z value' });
         }
+    }
 
-        return await updateGalleryImageByAdmin(id, {
-            description: body.description,
-            category: body.category,
-            season: body.season,
-            coord_x,
-            coord_y,
-            coord_z,
-            involved_players: body.involved_players,
-        });
+    const updateDto = {
+        description: body.description,
+        category: body.category,
+        season: body.season,
+        coord_x,
+        coord_y,
+        coord_z,
+        involved_players: body.involved_players,
+    };
+
+    // Both owners and admins can update all fields now
+    if (admin) {
+        return await updateGalleryImageByAdmin(id, updateDto);
     }
     else {
-    // Owner can only update description
-        return await updateGalleryImageByOwner(id, userUuid, {
-            description: body.description,
-        });
+        // Owner can update all fields
+        return await updateGalleryImageByOwner(id, userUuid, updateDto);
     }
 });

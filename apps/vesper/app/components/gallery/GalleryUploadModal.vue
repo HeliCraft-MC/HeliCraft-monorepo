@@ -11,10 +11,11 @@ const emit = defineEmits<{
   uploaded: [image: IGalleryActionResponse]
 }>()
 
-const config = useRuntimeConfig()
-const { token } = useAuth()
+const $api = use$apiFetch()
 
 const description = ref('')
+const category = ref('')
+const season = ref('')
 const selectedFile = ref<File | null>(null)
 const previewUrl = ref<string | null>(null)
 const isUploading = ref(false)
@@ -86,13 +87,17 @@ async function upload() {
     if (description.value.trim()) {
       formData.append('description', description.value.trim())
     }
+    if (category.value.trim()) {
+      formData.append('category', category.value.trim())
+    }
+    if (season.value.trim()) {
+      formData.append('season', season.value.trim())
+    }
     
-    const response = await $fetch<IGalleryActionResponse>(`${config.public.backendURL}/gallery`, {
+    // Use use$apiFetch for FormData upload
+    const response = await $api<IGalleryActionResponse>('/gallery', {
       method: 'POST',
       body: formData,
-      headers: {
-        Authorization: `Bearer ${token.value}`
-      }
     })
     
     if (response.ok) {
@@ -120,6 +125,8 @@ async function upload() {
 
 function resetForm() {
   description.value = ''
+  category.value = ''
+  season.value = ''
   selectedFile.value = null
   previewUrl.value = null
   error.value = ''
@@ -143,7 +150,7 @@ function closeSuccess() {
       class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4"
       @click.self="closeModal"
     >
-      <div class="bg-gray-900/90 backdrop-blur-lg rounded-lg shadow-xl w-full max-w-lg border border-gray-700">
+      <div class="bg-gray-900/90 backdrop-blur-lg rounded-lg shadow-xl w-full max-w-lg border border-gray-700 max-h-[90vh] overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b border-gray-700">
           <h2 class="text-xl font-bold text-red-500">Загрузить изображение</h2>
@@ -234,6 +241,28 @@ function closeSuccess() {
               placeholder="Добавьте описание к изображению..."
               class="w-full bg-gray-800/70 rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 transition resize-none h-24"
             />
+          </div>
+
+          <!-- Category and Season (optional, can be edited later) -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">Категория</label>
+              <input
+                v-model="category"
+                type="text"
+                placeholder="Например: Постройки"
+                class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">Сезон</label>
+              <input
+                v-model="season"
+                type="text"
+                placeholder="Например: Сезон 5"
+                class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
+              />
+            </div>
           </div>
 
           <!-- Info -->

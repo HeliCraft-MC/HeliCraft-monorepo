@@ -15,7 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const config = useRuntimeConfig()
-const { token } = useAuth()
+const $api = use$apiFetch()
 
 const description = ref('')
 const category = ref('')
@@ -50,27 +50,21 @@ async function save() {
   
   try {
     const body: IGalleryImageUpdateRequest = {
-      description: description.value.trim() || undefined
+      description: description.value.trim() || undefined,
+      category: category.value.trim() || undefined,
+      season: season.value.trim() || undefined,
+      coord_x: coordX.value ?? undefined,
+      coord_y: coordY.value ?? undefined,
+      coord_z: coordZ.value ?? undefined,
+      involved_players: involvedPlayers.value.map(p => p.uuid).join(',') || undefined
     }
     
-    // Admin-only fields
-    if (props.isAdmin) {
-      body.category = category.value.trim() || undefined
-      body.season = season.value.trim() || undefined
-      body.coord_x = coordX.value ?? undefined
-      body.coord_y = coordY.value ?? undefined
-      body.coord_z = coordZ.value ?? undefined
-      body.involved_players = involvedPlayers.value.map(p => p.uuid).join(',') || undefined
-    }
-    
-    const response = await $fetch<IGalleryImagePublic>(
-      `${config.public.backendURL}/gallery/${props.image.id}`,
+    // Use use$apiFetch for PATCH request
+    const response = await $api<IGalleryImagePublic>(
+      `/gallery/${props.image.id}`,
       {
         method: 'PATCH',
         body,
-        headers: {
-          Authorization: `Bearer ${token.value}`
-        }
       }
     )
     
@@ -140,80 +134,78 @@ function closeModal() {
             />
           </div>
 
-          <!-- Admin-only fields -->
-          <template v-if="isAdmin">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Category -->
+          <!-- Category and Season (available to all users now) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Category -->
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">
+                Категория
+              </label>
+              <input
+                v-model="category"
+                type="text"
+                placeholder="Например: Постройки"
+                class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
+              />
+            </div>
+
+            <!-- Season -->
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">
+                Сезон
+              </label>
+              <input
+                v-model="season"
+                type="text"
+                placeholder="Например: Сезон 5"
+                class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
+              />
+            </div>
+          </div>
+
+          <!-- Coordinates -->
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">
+              Координаты в игре
+            </label>
+            <div class="grid grid-cols-3 gap-3">
               <div>
-                <label class="block text-sm text-gray-400 mb-2">
-                  Категория
-                </label>
+                <label class="block text-xs text-gray-500 mb-1">X</label>
                 <input
-                  v-model="category"
-                  type="text"
-                  placeholder="Например: Постройки"
+                  v-model.number="coordX"
+                  type="number"
+                  placeholder="X"
                   class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
                 />
               </div>
-
-              <!-- Season -->
               <div>
-                <label class="block text-sm text-gray-400 mb-2">
-                  Сезон
-                </label>
+                <label class="block text-xs text-gray-500 mb-1">Y</label>
                 <input
-                  v-model="season"
-                  type="text"
-                  placeholder="Например: Сезон 5"
+                  v-model.number="coordY"
+                  type="number"
+                  placeholder="Y"
+                  class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Z</label>
+                <input
+                  v-model.number="coordZ"
+                  type="number"
+                  placeholder="Z"
                   class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
                 />
               </div>
             </div>
+          </div>
 
-            <!-- Coordinates -->
-            <div>
-              <label class="block text-sm text-gray-400 mb-2">
-                Координаты в игре
-              </label>
-              <div class="grid grid-cols-3 gap-3">
-                <div>
-                  <label class="block text-xs text-gray-500 mb-1">X</label>
-                  <input
-                    v-model.number="coordX"
-                    type="number"
-                    placeholder="X"
-                    class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-500 mb-1">Y</label>
-                  <input
-                    v-model.number="coordY"
-                    type="number"
-                    placeholder="Y"
-                    class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-500 mb-1">Z</label>
-                  <input
-                    v-model.number="coordZ"
-                    type="number"
-                    placeholder="Z"
-                    class="w-full bg-gray-800/70 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Involved players -->
-            <div>
-              <label class="block text-sm text-gray-400 mb-2">
-                Участвующие игроки
-              </label>
-              <PlayerSearchInput v-model="involvedPlayers" />
-            </div>
-          </template>
+          <!-- Involved players -->
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">
+              Участвующие игроки
+            </label>
+            <PlayerSearchInput v-model="involvedPlayers" />
+          </div>
         </div>
 
         <!-- Footer -->

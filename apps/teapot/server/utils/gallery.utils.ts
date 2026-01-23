@@ -3,6 +3,7 @@ import type {
     GalleryImage,
     GalleryImagePublic,
     GalleryListFilters,
+    GallerySortBy,
     GalleryUserInfo,
     PaginatedResponse,
     UpdateGalleryImageAdminDto,
@@ -27,9 +28,10 @@ function normalizeUuid(raw: string): string {
 async function getUserInfo(uuid: string): Promise<GalleryUserInfo | null> {
     try {
         const user = await getUserByUUID(uuid);
+        // FIXED: Drizzle uses camelCase (uuid, nickname), not UPPERCASE
         return {
-            uuid: user.UUID,
-            nickname: user.NICKNAME,
+            uuid: user.uuid || '',
+            nickname: user.nickname || 'Unknown',
         };
     }
     catch {
@@ -60,9 +62,15 @@ async function parseInvolvedPlayers(playersStr: string | null): Promise<GalleryU
 /**
  * Convert database row to public gallery image
  */
-async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
+async function toPublicImage(image: GalleryImage, currentUserUuid?: string): Promise<GalleryImagePublic> {
     const ownerInfo = await getUserInfo(image.owner_uuid);
     const involvedPlayers = await parseInvolvedPlayers(image.involved_players);
+
+    // Check if current user has liked this image
+    let isLiked: boolean | undefined;
+    if (currentUserUuid) {
+        isLiked = hasUserLikedImage(image.id, currentUserUuid);
+    }
 
     return {
         id: image.id,
@@ -78,6 +86,8 @@ async function toPublicImage(image: GalleryImage): Promise<GalleryImagePublic> {
         coord_z: image.coord_z,
         involved_players: involvedPlayers,
         status: image.status,
+        likes_count: image.likes_count || 0,
+        is_liked: isLiked,
         created_at: image.created_at,
         updated_at: image.updated_at,
     };
@@ -99,7 +109,7 @@ export async function canUserUpload(uuid: string): Promise<string | null> {
  * Create a new gallery image
  */
 export async function createGalleryImage(
-    data: Buffer,
+    data: any, // Using any here to avoid Buffer global issue if needed, or follow linter
     mime: string,
     dto: CreateGalleryImageDto,
 ): Promise<GalleryImage> {
@@ -130,8 +140,9 @@ export async function createGalleryImage(
     db.prepare(`
     INSERT INTO gallery (
       id, path, mime, size, owner_uuid, description,
-      status, created_at, updated_at, involved_players
-    ) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
+      category, season, coord_x, coord_y, coord_z,
+      status, likes_count, created_at, updated_at, involved_players
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0, ?, ?, ?)
   `).run(
         id,
         fileMeta.path,
@@ -139,9 +150,14 @@ export async function createGalleryImage(
         data.length,
         normalizedOwner,
         dto.description || null,
+        dto.category || null,
+        dto.season || null,
+        dto.coord_x ?? null,
+        dto.coord_y ?? null,
+        dto.coord_z ?? null,
         now,
         now,
-        normalizedOwner, // By default, owner is the only involved player
+        dto.involved_players || normalizedOwner, // By default, owner is the only involved player
     );
 
     return getGalleryImage(id);
@@ -168,9 +184,9 @@ export function getGalleryImage(id: string): GalleryImage {
 /**
  * Get gallery image with public user info
  */
-export async function getGalleryImagePublic(id: string): Promise<GalleryImagePublic> {
+export async function getGalleryImagePublic(id: string, currentUserUuid?: string): Promise<GalleryImagePublic> {
     const image = getGalleryImage(id);
-    return toPublicImage(image);
+    return toPublicImage(image, currentUserUuid);
 }
 
 /**
@@ -191,13 +207,15 @@ export function canViewImage(image: GalleryImage, userUuid: string | null, isAdm
 }
 
 /**
- * List gallery images with filters and pagination
+ * List gallery images with filters, pagination and sorting
  */
 export async function listGalleryImages(
     filters: GalleryListFilters,
     page: number = 1,
     perPage: number = 20,
     includeFullObjects: boolean = true,
+    sortBy: GallerySortBy = 'created_at',
+    currentUserUuid?: string,
 ): Promise<PaginatedResponse<GalleryImagePublic | string>> {
     const db = useSkinSQLite();
 
@@ -228,6 +246,24 @@ export async function listGalleryImages(
         params.push(normalizeUuid(filters.owner_uuid));
     }
 
+    // Search filter (description and involved players)
+    if (filters.search) {
+        const searchLower = `%${filters.search.toLowerCase()}%`;
+        whereClauses.push('(LOWER(description) LIKE ? OR LOWER(involved_players) LIKE ?)');
+        params.push(searchLower, searchLower);
+    }
+
+    // Date filters
+    if (filters.date_from) {
+        whereClauses.push('created_at >= ?');
+        params.push(filters.date_from);
+    }
+
+    if (filters.date_to) {
+        whereClauses.push('created_at <= ?');
+        params.push(filters.date_to);
+    }
+
     const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
     // Get total count
@@ -238,17 +274,26 @@ export async function listGalleryImages(
     const totalPages = Math.ceil(total / perPage);
     const offset = (page - 1) * perPage;
 
+    // Determine sort order
+    let orderBy = 'created_at DESC';
+    if (sortBy === 'likes') {
+        orderBy = 'likes_count DESC, created_at DESC';
+    }
+    else if (sortBy === 'updated_at') {
+        orderBy = 'updated_at DESC';
+    }
+
     // Get items
     const rows = db.prepare(`
     SELECT * FROM gallery ${whereClause}
-    ORDER BY created_at DESC
+    ORDER BY ${orderBy}
     LIMIT ? OFFSET ?
   `).all(...params, perPage, offset) as GalleryImage[];
 
     let items: (GalleryImagePublic | string)[];
 
     if (includeFullObjects) {
-        items = await Promise.all(rows.map(toPublicImage));
+        items = await Promise.all(rows.map(row => toPublicImage(row, currentUserUuid)));
     }
     else {
         items = rows.map(r => r.id);
@@ -305,7 +350,7 @@ export async function listUserImages(
     LIMIT ? OFFSET ?
   `).all(normalizedUuid, perPage, offset) as GalleryImage[];
 
-    const items = await Promise.all(rows.map(toPublicImage));
+    const items = await Promise.all(rows.map(row => toPublicImage(row, userUuid)));
 
     return {
         items,
@@ -317,7 +362,7 @@ export async function listUserImages(
 }
 
 /**
- * Update gallery image by owner (only description)
+ * Update gallery image by owner (now supports all metadata fields)
  */
 export async function updateGalleryImageByOwner(
     id: string,
@@ -336,14 +381,54 @@ export async function updateGalleryImageByOwner(
         });
     }
 
-    const now = Math.floor(Date.now() / 1000);
+    const updates: string[] = [];
+    const params: any[] = [];
 
     if (dto.description !== undefined) {
-        db.prepare('UPDATE gallery SET description = ?, updated_at = ? WHERE id = ?')
-            .run(dto.description, now, id);
+        updates.push('description = ?');
+        params.push(dto.description);
     }
 
-    return getGalleryImagePublic(id);
+    if (dto.category !== undefined) {
+        updates.push('category = ?');
+        params.push(dto.category);
+    }
+
+    if (dto.season !== undefined) {
+        updates.push('season = ?');
+        params.push(dto.season);
+    }
+
+    if (dto.coord_x !== undefined) {
+        updates.push('coord_x = ?');
+        params.push(dto.coord_x);
+    }
+
+    if (dto.coord_y !== undefined) {
+        updates.push('coord_y = ?');
+        params.push(dto.coord_y);
+    }
+
+    if (dto.coord_z !== undefined) {
+        updates.push('coord_z = ?');
+        params.push(dto.coord_z);
+    }
+
+    if (dto.involved_players !== undefined) {
+        updates.push('involved_players = ?');
+        params.push(dto.involved_players);
+    }
+
+    if (updates.length > 0) {
+        const now = Math.floor(Date.now() / 1000);
+        updates.push('updated_at = ?');
+        params.push(now);
+        params.push(id);
+
+        db.prepare(`UPDATE gallery SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+    }
+
+    return getGalleryImagePublic(id, ownerUuid);
 }
 
 /**
@@ -354,7 +439,7 @@ export async function updateGalleryImageByAdmin(
     dto: UpdateGalleryImageAdminDto,
 ): Promise<GalleryImagePublic> {
     const db = useSkinSQLite();
-    const image = getGalleryImage(id); // Verify exists
+    getGalleryImage(id); // Verify exists
 
     const updates: string[] = [];
     const params: any[] = [];
@@ -458,6 +543,9 @@ export async function deleteGalleryImage(id: string): Promise<boolean> {
     // Delete file
     await fileService.deleteFile(image.path);
 
+    // Delete likes first (cascade should handle this, but be explicit)
+    db.prepare('DELETE FROM gallery_likes WHERE image_id = ?').run(id);
+
     // Delete from database
     db.prepare('DELETE FROM gallery WHERE id = ?').run(id);
 
@@ -490,4 +578,111 @@ export function getGallerySeasons(): string[] {
   `).all() as { season: string }[];
 
     return rows.map(r => r.season);
+}
+
+// ==================== LIKES FUNCTIONALITY ====================
+
+/**
+ * Check if user has liked an image
+ */
+export function hasUserLikedImage(imageId: string, userUuid: string): boolean {
+    const db = useSkinSQLite();
+    const normalizedUuid = normalizeUuid(userUuid);
+
+    const result = db.prepare(
+        'SELECT id FROM gallery_likes WHERE image_id = ? AND user_uuid = ?',
+    ).get(imageId, normalizedUuid);
+
+    return !!result;
+}
+
+/**
+ * Like an image
+ * Returns true if like was added, false if already liked
+ */
+export function likeImage(imageId: string, userUuid: string): boolean {
+    const db = useSkinSQLite();
+    const normalizedUuid = normalizeUuid(userUuid);
+
+    // Check image exists
+    getGalleryImage(imageId);
+
+    // Check if already liked
+    if (hasUserLikedImage(imageId, userUuid)) {
+        return false;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+
+    // Add like
+    db.prepare(
+        'INSERT INTO gallery_likes (image_id, user_uuid, created_at) VALUES (?, ?, ?)',
+    ).run(imageId, normalizedUuid, now);
+
+    // Update cached count
+    db.prepare(
+        'UPDATE gallery SET likes_count = likes_count + 1 WHERE id = ?',
+    ).run(imageId);
+
+    return true;
+}
+
+/**
+ * Unlike an image
+ * Returns true if like was removed, false if wasn't liked
+ */
+export function unlikeImage(imageId: string, userUuid: string): boolean {
+    const db = useSkinSQLite();
+    const normalizedUuid = normalizeUuid(userUuid);
+
+    // Check image exists
+    getGalleryImage(imageId);
+
+    // Check if liked
+    if (!hasUserLikedImage(imageId, userUuid)) {
+        return false;
+    }
+
+    // Remove like
+    db.prepare(
+        'DELETE FROM gallery_likes WHERE image_id = ? AND user_uuid = ?',
+    ).run(imageId, normalizedUuid);
+
+    // Update cached count
+    db.prepare(
+        'UPDATE gallery SET likes_count = CASE WHEN likes_count > 0 THEN likes_count - 1 ELSE 0 END WHERE id = ?',
+    ).run(imageId);
+
+    return true;
+}
+
+/**
+ * Get likes count for an image
+ */
+export function getImageLikesCount(imageId: string): number {
+    const db = useSkinSQLite();
+    const result = db.prepare(
+        'SELECT likes_count FROM gallery WHERE id = ?',
+    ).get(imageId) as { likes_count: number } | undefined;
+
+    return result?.likes_count || 0;
+}
+
+/**
+ * Recalculate likes count for an image (for maintenance)
+ */
+export function recalculateLikesCount(imageId: string): number {
+    const db = useSkinSQLite();
+
+    const countResult = db.prepare(
+        'SELECT COUNT(*) as count FROM gallery_likes WHERE image_id = ?',
+    ).get(imageId) as { count: number };
+
+    const count = countResult.count;
+
+    db.prepare(
+        'UPDATE gallery SET likes_count = ? WHERE id = ?',
+    ).run(count, imageId);
+
+    return count;
 }

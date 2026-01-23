@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Question } from "@/types/forms";
+import type { IGalleryImagePublic } from "~/types/gallery.types";
 import ImageCarousel from "@/components/common/ImageCarousel.vue";
 import ImageViewer from "@/components/common/ImageViewer.vue";
 
@@ -23,6 +24,8 @@ interface QuestionOptions {
     choices?: string[];
     // Image block
     images?: string[];
+    galleryImageIds?: string[]; // IDs from gallery
+    useGalleryImages?: boolean;
     displayMode?: 'grid' | 'carousel' | 'random' | 'vertical';
     showCaptions?: boolean;
     captions?: string[];
@@ -60,14 +63,46 @@ const proxiedImages = computed(() =>
     (options.value.images || []).map(proxyImageUrl)
 );
 
+// Fetch gallery image info for watermarks
+const galleryImageInfo = ref<Map<string, IGalleryImagePublic>>(new Map());
+
+async function fetchGalleryInfo() {
+    const ids = options.value.galleryImageIds || [];
+    if (ids.length === 0) return;
+    
+    for (const id of ids) {
+        if (galleryImageInfo.value.has(id)) continue;
+        try {
+            const { data } = await useApiFetch<IGalleryImagePublic>(`/gallery/${id}`);
+            if (data.value) {
+                galleryImageInfo.value.set(id, data.value);
+            }
+        } catch {
+            // Ignore errors - just won't show watermark
+        }
+    }
+}
+
+// Get author info for image by index
+const getImageAuthor = (idx: number) => {
+    const ids = options.value.galleryImageIds || [];
+    if (idx >= ids.length) return null;
+    return galleryImageInfo.value.get(ids[idx])?.owner || null;
+};
+
+// Get gallery link for image by index
+const getGalleryLink = (idx: number): string | null => {
+    const ids = options.value.galleryImageIds || [];
+    if (idx >= ids.length) return null;
+    return `/gallery/${ids[idx]}`;
+};
+
 // For image_block with random mode
 const randomImageIndex = ref(0);
 const randomImage = computed(() => {
     if (proxiedImages.value.length === 0) return '';
     return proxiedImages.value[randomImageIndex.value % proxiedImages.value.length];
 });
-
-
 
 const randomCaption = computed(() => {
     const list = options.value.captions || [];
@@ -79,6 +114,10 @@ const randomCaption = computed(() => {
 onMounted(() => {
     if (options.value.displayMode === 'random' && options.value.images?.length) {
         randomImageIndex.value = Math.floor(Math.random() * options.value.images.length);
+    }
+    // Fetch gallery info for watermarks
+    if (options.value.useGalleryImages && options.value.galleryImageIds?.length) {
+        fetchGalleryInfo();
     }
 });
 
@@ -221,10 +260,33 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
                     <div 
                         v-for="(img, idx) in proxiedImages" 
                         :key="idx"
-                        class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
+                        class="relative aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity group"
                         @click="openViewer(idx)"
                     >
                         <img :src="img" :alt="`Image ${Number(idx) + 1}`" class="w-full h-full object-cover" />
+                        
+                        <!-- Author Watermark for Gallery Images -->
+                        <div 
+                            v-if="options.useGalleryImages && getImageAuthor(idx)"
+                            class="absolute bottom-1 right-1 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5 text-xs text-white"
+                        >
+                            <img 
+                                :src="`/distant-api/user/${getImageAuthor(idx)?.uuid}/head`" 
+                                class="w-4 h-4 rounded-sm"
+                            />
+                            <span>{{ getImageAuthor(idx)?.nickname }}</span>
+                        </div>
+                        
+                        <!-- Gallery Link Button -->
+                        <NuxtLink 
+                            v-if="options.useGalleryImages && getGalleryLink(idx)"
+                            :to="getGalleryLink(idx)!"
+                            @click.stop
+                            class="absolute top-1 right-1 p-1 bg-black/70 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                            title="Открыть в галерее"
+                        >
+                            <Icon name="ph:arrow-square-out" class="w-4 h-4 text-white" />
+                        </NuxtLink>
                     </div>
                 </div>
                 
@@ -241,10 +303,11 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
                 <!-- Random Mode -->
                 <div v-else-if="options.displayMode === 'random'" class="space-y-2">
                     <div 
-                        class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity relative"
+                        class="aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity relative group"
                         @click="openViewer(randomImageIndex)"
                     >
                         <img :src="randomImage" alt="Random image" class="w-full h-full object-cover" />
+                        
                         <!-- Caption Overlay for Random -->
                         <div 
                             v-if="options.showCaptions && randomCaption" 
@@ -252,6 +315,30 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
                         >
                             <p class="text-white text-sm md:text-base font-medium">{{ randomCaption }}</p>
                         </div>
+                        
+                        <!-- Author Watermark for Random -->
+                        <div 
+                            v-if="options.useGalleryImages && getImageAuthor(randomImageIndex)"
+                            class="absolute bottom-1 right-1 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5 text-xs text-white"
+                            :class="{ 'bottom-12': options.showCaptions && randomCaption }"
+                        >
+                            <img 
+                                :src="`/distant-api/user/${getImageAuthor(randomImageIndex)?.uuid}/head`" 
+                                class="w-4 h-4 rounded-sm"
+                            />
+                            <span>{{ getImageAuthor(randomImageIndex)?.nickname }}</span>
+                        </div>
+                        
+                        <!-- Gallery Link Button -->
+                        <NuxtLink 
+                            v-if="options.useGalleryImages && getGalleryLink(randomImageIndex)"
+                            :to="getGalleryLink(randomImageIndex)!"
+                            @click.stop
+                            class="absolute top-1 right-1 p-1 bg-black/70 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                            title="Открыть в галерее"
+                        >
+                            <Icon name="ph:arrow-square-out" class="w-4 h-4 text-white" />
+                        </NuxtLink>
                     </div>
                 </div>
 
@@ -263,10 +350,33 @@ const isDecorativeBlock = computed(() => ['image_block', 'text_block'].includes(
                         class="flex flex-col md:flex-row gap-4 items-start"
                     >
                         <div 
-                            class="w-full md:w-2/5 aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
+                            class="relative w-full md:w-2/5 aspect-video rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity shrink-0 group"
                             @click="openViewer(idx)"
                         >
                              <img :src="img" :alt="`Image ${Number(idx) + 1}`" class="w-full h-full object-cover" />
+                             
+                             <!-- Author Watermark -->
+                             <div 
+                                v-if="options.useGalleryImages && getImageAuthor(idx)"
+                                class="absolute bottom-1 right-1 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5 text-xs text-white"
+                             >
+                                <img 
+                                    :src="`/distant-api/user/${getImageAuthor(idx)?.uuid}/head`" 
+                                    class="w-4 h-4 rounded-sm"
+                                />
+                                <span>{{ getImageAuthor(idx)?.nickname }}</span>
+                             </div>
+                             
+                             <!-- Gallery Link Button -->
+                             <NuxtLink 
+                                v-if="options.useGalleryImages && getGalleryLink(idx)"
+                                :to="getGalleryLink(idx)!"
+                                @click.stop
+                                class="absolute top-1 right-1 p-1 bg-black/70 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                                title="Открыть в галерее"
+                             >
+                                <Icon name="ph:arrow-square-out" class="w-4 h-4 text-white" />
+                             </NuxtLink>
                         </div>
                         <div class="w-full md:w-3/5 text-gray-200 whitespace-pre-wrap pt-1">
                             {{ options.captions?.[idx] || '' }}

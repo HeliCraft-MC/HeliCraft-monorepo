@@ -1,5 +1,5 @@
 // Auth utilities - refactored to use Drizzle ORM via auth.repo
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { useDefaultDb } from '~/db/mysql.client';
 import {

@@ -27,8 +27,9 @@ async function searchPlayers() {
 
   isSearching.value = true
   try {
+    const $apiFetch = use$apiFetch()
     // API returns AuthUser[] with UUID and NICKNAME fields (uppercase)
-    const response = await $fetch<Array<{ UUID: string; NICKNAME: string }>>(`${config.public.backendURL}/user/search`, {
+    const response = await $apiFetch<Array<{ UUID: string; NICKNAME: string }>>('/user/search', {
       query: {
         nickname: searchQuery.value,
         startAt: 0,

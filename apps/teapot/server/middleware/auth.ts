@@ -42,6 +42,8 @@ const exclude: ExcludeRule[] = [
     { pattern: /^\/gallery\/[0-9a-fA-F-]+\/image$/, methods: ['GET'] },
     // Forms public routes
     { pattern: /^\/forms\/user\/[^/]+$/, methods: ['GET'] },
+    // Dev routes (only available in non-production anyway)
+    { pattern: /^\/dev\/.*$/, methods: ['GET'] },
 ];
 
 /**

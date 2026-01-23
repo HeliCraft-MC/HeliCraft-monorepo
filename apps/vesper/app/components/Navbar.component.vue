@@ -303,6 +303,7 @@ const isStatesDisabled = useRuntimeConfig().public.statesDisabled
 
 // Check if user is admin
 const isAdminUser = ref(false)
+const $api = use$apiFetch()
 
 async function checkAdminStatus() {
   if (!isLoggedIn.value || !userUuid.value) {
@@ -310,7 +311,7 @@ async function checkAdminStatus() {
     return
   }
   try {
-    isAdminUser.value = await $fetch<boolean>(`/distant-api/user/${userUuid.value}/isAdmin`)
+    isAdminUser.value = await $api<boolean>(`/user/${userUuid.value}/isAdmin`)
   } catch {
     isAdminUser.value = false
   }

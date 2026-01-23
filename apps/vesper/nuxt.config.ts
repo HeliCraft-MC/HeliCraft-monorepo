@@ -2,22 +2,22 @@
 
 export default defineNuxtConfig({
 
-    app: {
-        head: {
-          htmlAttrs: {
-            lang: 'ru'
-          },
-          title: 'HeliCraft',
-          charset: 'utf-8',
-          viewport: 'width=device-width, initial-scale=1',
-          meta: [
-              { name: 'description', content: 'Helicraft - майнкрафт сервер' },
-          ],
-          link: [
-              { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-          ]
-        }
-    },
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: 'ru'
+      },
+      title: 'HeliCraft',
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
+      meta: [
+        { name: 'description', content: 'Helicraft - майнкрафт сервер' },
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
+  },
 
   compatibilityDate: '2026-01-06',
   devtools: {
@@ -84,7 +84,7 @@ export default defineNuxtConfig({
     debug: false
   },
   sourcemap: {
-    server: true,
+    server: false,
     client: false
   },
   vite: {
@@ -122,9 +122,9 @@ export default defineNuxtConfig({
       type: 'local',
       /* --- эндпоинты --- */
       endpoints: {
-        signIn:     { path: '/auth/login',   method: 'post' },
-        signOut:    { path: '/auth/logout',  method: 'post' },
-        getSession: { path: '/auth/session', method: 'get'  }, // новый роут!
+        signIn: { path: '/auth/login', method: 'post' },
+        signOut: { path: '/auth/logout', method: 'post' },
+        getSession: { path: '/auth/session', method: 'get' },
         signUp: false
       },
       /* --- access token --- */
@@ -154,7 +154,7 @@ export default defineNuxtConfig({
       /* --- типы данных сессии --- */
       session: {
         dataType: {
-          uuid:     'string',
+          uuid: 'string',
           nickname: 'string'
         }
       }

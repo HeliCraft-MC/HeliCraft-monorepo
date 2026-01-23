@@ -3,10 +3,20 @@
 import type { IGalleryImagePublic } from '~/types/gallery.types'
 import GalleryCard from './GalleryCard.vue'
 
-defineProps<{
+const props = defineProps<{
   images: IGalleryImagePublic[]
   loading?: boolean
+  showLikes?: boolean
+  canLike?: boolean
 }>()
+
+const emit = defineEmits<{
+  (e: 'like', imageId: string, isLiked: boolean): void
+}>()
+
+function handleLike(imageId: string, isLiked: boolean) {
+  emit('like', imageId, isLiked)
+}
 </script>
 
 <template>
@@ -38,6 +48,9 @@ defineProps<{
         v-for="image in images"
         :key="image.id"
         :image="image"
+        :show-likes="showLikes"
+        :can-like="canLike"
+        @like="handleLike"
       />
     </div>
   </div>

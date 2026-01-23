@@ -19,20 +19,22 @@ export interface GalleryImage {
     owner_uuid: string;
     /** Image description (editable by owner and admin) */
     description: string | null;
-    /** Category for filtering (set by admin) */
+    /** Category for filtering (set by owner or admin) */
     category: string | null;
-    /** Season for filtering (set by admin) */
+    /** Season for filtering (set by owner or admin) */
     season: string | null;
-    /** X coordinate in game (set by admin) */
+    /** X coordinate in game (set by owner or admin) */
     coord_x: number | null;
-    /** Y coordinate in game (set by admin) */
+    /** Y coordinate in game (set by owner or admin) */
     coord_y: number | null;
-    /** Z coordinate in game (set by admin) */
+    /** Z coordinate in game (set by owner or admin) */
     coord_z: number | null;
-    /** Comma-separated UUIDs of involved players (set by admin) */
+    /** Comma-separated UUIDs of involved players (set by owner or admin) */
     involved_players: string | null;
     /** Moderation status */
     status: GalleryImageStatus;
+    /** Cached like count */
+    likes_count: number;
     /** Unix timestamp of upload */
     created_at: number;
     /** Unix timestamp of last update */
@@ -64,6 +66,9 @@ export interface GalleryImagePublic {
     coord_z: number | null;
     involved_players: GalleryUserInfo[];
     status: GalleryImageStatus;
+    likes_count: number;
+    /** Whether current user has liked this image (only set when user is authenticated) */
+    is_liked?: boolean;
     created_at: number;
     updated_at: number;
 }
@@ -74,13 +79,26 @@ export interface GalleryImagePublic {
 export interface CreateGalleryImageDto {
     owner_uuid: string;
     description?: string;
+    category?: string;
+    season?: string;
+    coord_x?: number;
+    coord_y?: number;
+    coord_z?: number;
+    involved_players?: string;
 }
 
 /**
  * DTO for updating gallery image (by owner)
+ * Now allows owner to set all metadata fields
  */
 export interface UpdateGalleryImageOwnerDto {
     description?: string;
+    category?: string;
+    season?: string;
+    coord_x?: number;
+    coord_y?: number;
+    coord_z?: number;
+    involved_players?: string;
 }
 
 /**
@@ -104,7 +122,15 @@ export interface GalleryListFilters {
     season?: string;
     owner_uuid?: string;
     status?: GalleryImageStatus;
+    search?: string;
+    date_from?: number;
+    date_to?: number;
 }
+
+/**
+ * Sort options for gallery listing
+ */
+export type GallerySortBy = 'created_at' | 'likes' | 'updated_at';
 
 /**
  * Paginated response
@@ -115,4 +141,14 @@ export interface PaginatedResponse<T> {
     page: number;
     perPage: number;
     totalPages: number;
+}
+
+/**
+ * Gallery like record
+ */
+export interface GalleryLike {
+    id: number;
+    image_id: string;
+    user_uuid: string;
+    created_at: number;
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IGalleryListResponse, IGalleryImagePublic } from '~/types/gallery.types'
+import type { IGalleryListResponse, IGalleryImagePublic, IGalleryCategoriesResponse, IGallerySeasonsResponse, GallerySortBy } from '~/types/gallery.types'
 
 const props = defineProps<{
     isOpen: boolean;
@@ -16,22 +16,40 @@ const images = ref<IGalleryImagePublic[]>([]);
 const loading = ref(true);
 const page = ref(1);
 const totalPages = ref(1);
+
+// Filters
 const searchQuery = ref('');
+const selectedCategory = ref('');
+const selectedSeason = ref('');
+const sortBy = ref<GallerySortBy>('created_at');
+const categories = ref<string[]>([]);
+const seasons = ref<string[]>([]);
 
 const selectedImages = ref<IGalleryImagePublic[]>([]);
 
-// Fetch images
+// Debounce search
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+// Fetch images with filters
 const fetchImages = async () => {
     loading.value = true;
     try {
         const query: Record<string, any> = {
             page: page.value,
-            perPage: 12
+            perPage: 12,
+            sort: sortBy.value
         };
-        // Searching by user or generic search if backend supports it (assuming not for now, just listing)
         
-        // Use backend URL via proxy or direct?
-        // useApiFetch handles baseURL
+        if (searchQuery.value.trim()) {
+            query.search = searchQuery.value.trim();
+        }
+        if (selectedCategory.value) {
+            query.category = selectedCategory.value;
+        }
+        if (selectedSeason.value) {
+            query.season = selectedSeason.value;
+        }
+        
         const { data } = await useApiFetch<IGalleryListResponse>('/gallery', { query });
         
         if (data.value) {
@@ -45,12 +63,51 @@ const fetchImages = async () => {
     }
 };
 
+// Fetch filter options
+const fetchFilters = async () => {
+    try {
+        const [catData, seasonData] = await Promise.all([
+            useApiFetch<IGalleryCategoriesResponse>('/gallery/categories'),
+            useApiFetch<IGallerySeasonsResponse>('/gallery/seasons')
+        ]);
+        
+        if (catData.data.value) {
+            categories.value = catData.data.value.categories;
+        }
+        if (seasonData.data.value) {
+            seasons.value = seasonData.data.value.seasons;
+        }
+    } catch (e) {
+        console.error('Failed to load filters:', e);
+    }
+};
+
 watch(() => props.isOpen, (open) => {
     if (open) {
         selectedImages.value = [];
         page.value = 1;
+        searchQuery.value = '';
+        selectedCategory.value = '';
+        selectedSeason.value = '';
+        sortBy.value = 'created_at';
         fetchImages();
+        fetchFilters();
     }
+});
+
+// Watch for filter changes
+watch([selectedCategory, selectedSeason, sortBy], () => {
+    page.value = 1;
+    fetchImages();
+});
+
+// Debounced search
+watch(searchQuery, () => {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        page.value = 1;
+        fetchImages();
+    }, 300);
 });
 
 watch(page, fetchImages);
@@ -82,13 +139,57 @@ const getImageUrl = (id: string) => `${config.public.backendURL}/gallery/${id}/i
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="emit('close')"></div>
         
         <!-- Modal -->
-        <div class="relative w-full max-w-4xl bg-[#0a0a0a] border border-white/10 rounded-2xl flex flex-col max-h-[90vh]">
+        <div class="relative w-full max-w-5xl bg-[#0a0a0a] border border-white/10 rounded-2xl flex flex-col max-h-[90vh]">
             <!-- Header -->
             <div class="p-6 border-b border-white/10 flex items-center justify-between">
                 <h3 class="text-xl font-bold text-white pr2p">Выберите изображения</h3>
                 <button @click="emit('close')" class="text-gray-400 hover:text-white">
                     <Icon name="ph:x-bold" size="24" />
                 </button>
+            </div>
+            
+            <!-- Filters -->
+            <div class="p-4 border-b border-white/10 space-y-4">
+                <!-- Search -->
+                <div class="relative">
+                    <Icon name="ph:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input 
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Поиск по описанию, игрокам..."
+                        class="w-full bg-gray-800/70 rounded-lg pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-red-500 transition"
+                    />
+                </div>
+                
+                <!-- Filter row -->
+                <div class="flex flex-wrap gap-3">
+                    <!-- Category -->
+                    <select 
+                        v-model="selectedCategory"
+                        class="bg-gray-800/70 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition min-w-[150px]"
+                    >
+                        <option value="">Все категории</option>
+                        <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                    </select>
+                    
+                    <!-- Season -->
+                    <select 
+                        v-model="selectedSeason"
+                        class="bg-gray-800/70 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition min-w-[150px]"
+                    >
+                        <option value="">Все сезоны</option>
+                        <option v-for="s in seasons" :key="s" :value="s">{{ s }}</option>
+                    </select>
+                    
+                    <!-- Sort -->
+                    <select 
+                        v-model="sortBy"
+                        class="bg-gray-800/70 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-red-500 transition min-w-[150px]"
+                    >
+                        <option value="created_at">Новые</option>
+                        <option value="likes">Популярные</option>
+                    </select>
+                </div>
             </div>
             
             <!-- Content -->
@@ -118,9 +219,16 @@ const getImageUrl = (id: string) => `${config.public.backendURL}/gallery/${id}/i
                             </div>
                         </div>
                         
-                        <!-- Info -->
-                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                            {{ img.description || 'Без описания' }}
+                        <!-- Info overlay -->
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p class="text-xs text-white truncate">{{ img.description || 'Без описания' }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-gray-400">{{ img.owner.nickname }}</span>
+                                <span v-if="img.likes_count > 0" class="text-xs text-gray-400 flex items-center gap-1">
+                                    <Icon name="ph:heart-fill" class="text-red-400" size="12" />
+                                    {{ img.likes_count }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
