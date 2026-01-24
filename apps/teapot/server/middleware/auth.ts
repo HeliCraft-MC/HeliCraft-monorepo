@@ -65,10 +65,9 @@ async function tryExtractAuth(event: any): Promise<string | null> {
         accessToken = stripBearerPrefix(authHeader);
     }
 
-    if (!accessToken) {
+    if (!accessToken && (event.method === 'GET' || event.method === 'HEAD')) {
         const cookies = parseCookies(event);
-        // eslint-disable-next-line dot-notation
-        accessToken = cookies['refreshToken'] || cookies['auth.token'];
+        accessToken = cookies.refreshToken;
     }
 
     if (!accessToken) {
@@ -116,6 +115,6 @@ export default defineEventHandler(async (event) => {
 
     // For protected routes, require auth
     if (!uuid) {
-        throw createError({ statusCode: 401, statusMessage: 'Missing or invalid authentication' });
+        throw createError({ statusCode: 401, statusMessage: 'Missing or invalid authentication (MW-level)' });
     }
 });

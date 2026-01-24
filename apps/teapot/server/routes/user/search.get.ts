@@ -11,5 +11,6 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Nickname query parameter is required',
         });
     }
-    return await searchUsers(nickname, startAt, limit);
+    const users = await searchUsers(nickname, startAt, limit);
+    return users.map(toPublicUser);
 });

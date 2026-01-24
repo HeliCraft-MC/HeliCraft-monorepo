@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { useAuth } from '#imports'
 import * as skinview3d from 'skinview3d'
 import FileDropDown from "~/components/ui/FileDropDown.vue";
 
-const { data } = useAuth()
+const { user: data } = useAuthSystem()
 const nickname = computed(() => data.value?.nickname ?? '')
 
 /* ---------- viewer ---------- */
@@ -59,7 +58,7 @@ async function confirmUpload() {
 
   try {
     //const config = useRuntimeConfig()
-    const { token } = useAuth()
+    const { accessToken: token } = useAuthSystem()
 
     const fd = new FormData()
     fd.append('skin', file.value)

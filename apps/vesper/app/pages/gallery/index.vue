@@ -4,10 +4,10 @@ import type { IGalleryListResponse, IGalleryCategoriesResponse, IGallerySeasonsR
 import GalleryGrid from '~/components/gallery/GalleryGrid.vue'
 import GalleryUploadModal from '~/components/gallery/GalleryUploadModal.vue'
 
-definePageMeta({ auth: false })
+
 
 const config = useRuntimeConfig()
-const { status } = useAuth()
+const { user } = useAuthSystem(); const status = computed(() => !!user.value ? 'authenticated' : 'unauthenticated')
 const $api = use$apiFetch()
 
 const isLoggedIn = computed(() => status.value === 'authenticated')

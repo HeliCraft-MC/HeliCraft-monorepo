@@ -5,12 +5,12 @@ import { GalleryImageStatus } from '~/types/gallery.types'
 import GalleryEditModal from '~/components/gallery/GalleryEditModal.vue'
 import ImageViewer from '~/components/common/ImageViewer.vue'
 
-definePageMeta({ auth: false })
+
 
 const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
-const { data: session, status, token } = useAuth()
+const { user: session, accessToken: token } = useAuthSystem(); const status = computed(() => !!session.value ? 'authenticated' : 'unauthenticated')
 
 const imageId = computed(() => route.params.id as string)
 const isLoggedIn = computed(() => status.value === 'authenticated')

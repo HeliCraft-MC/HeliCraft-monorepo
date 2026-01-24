@@ -2,16 +2,17 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth, useCookie } from '#imports'
+import { useCookie } from '#imports'
 
 /* ---------- meta ---------- */
 definePageMeta({
-  auth: { unauthenticatedOnly: true, navigateAuthenticatedTo: '/account' }
+  middleware: 'guest'
 })
 
 /* ---------- refs & state ---------- */
+/* ---------- refs & state ---------- */
 const router        = useRouter()
-const { signIn }    = useAuth()
+const { login, register } = useAuthSystem()
 
 const form          = reactive({ nickname: '', password: '' })
 const loading       = ref(false)
@@ -128,16 +129,7 @@ async function handleLogin () {
 
 async function registerUser() {
   try {
-    const { data } = await useApiFetch('/auth/register', {
-      method: 'POST',
-      body: { nickname: form.nickname, password: form.password }
-    })
-
-    // После регистрации автоматически входим
-    await signIn(
-        { nickname: form.nickname, password: form.password },
-        { redirect: false }
-    )
+    await register({ nickname: form.nickname, password: form.password })
     await router.push('/account')
   } catch (e: any) {
     throw e
@@ -146,10 +138,7 @@ async function registerUser() {
 
 async function loginUser() {
   try {
-    await signIn(
-        { nickname: form.nickname, password: form.password },
-        { redirect: false }
-    )
+    await login({ nickname: form.nickname, password: form.password })
     await router.push('/account')
   } catch (e: any) {
     throw e

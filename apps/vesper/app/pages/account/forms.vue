@@ -1,7 +1,7 @@
 <script setup lang="ts">
-definePageMeta({ auth: true })
+definePageMeta({ middleware: 'auth' })
 
-const { data: authData } = useAuth();
+const { user: authData } = useAuthSystem()
 const userNickname = computed(() => authData.value?.nickname || 'Гость');
 
 interface AvailableForm {

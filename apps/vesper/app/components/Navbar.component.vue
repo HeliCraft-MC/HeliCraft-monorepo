@@ -286,17 +286,15 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '#imports'
-
 const config = useRuntimeConfig()
 const banlistEnabled = computed(() => config.public.banlistEnabled)
 
 const showMobileMenu = ref(false)
 const serverDropdownOpen = ref(false)
-const { status, data, signOut } = useAuth()
-const isLoggedIn = computed(() => status.value === 'authenticated')
-const nickname   = computed(() => data.value?.nickname || '')
-const userUuid   = computed(() => data.value?.uuid || '')
+const { user, logout } = useAuthSystem()
+const isLoggedIn = computed(() => !!user.value)
+const nickname   = computed(() => user.value?.nickname || '')
+const userUuid   = computed(() => user.value?.uuid || '')
 const origin     = process.client ? window.location.origin : ''
 
 const isStatesDisabled = useRuntimeConfig().public.statesDisabled
@@ -333,7 +331,7 @@ function closeMobileMenu () {
   showMobileMenu.value = false
 }
 function handleLogout () {
-  signOut()              /* nuxt-auth signOut */
+  logout()
   closeMobileMenu()
 }
 

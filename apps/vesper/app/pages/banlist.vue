@@ -5,10 +5,10 @@ import BanlistTable from '~/components/banlist/BanlistTable.vue'
 import TimeFormatToggle from '~/components/ui/TimeFormatToggle.vue'
 import AdminCleanSkinsPanel from '~/components/banlist/AdminCleanSkinsPanel.vue'
 
-definePageMeta({ auth: false })
+
 
 const config = useRuntimeConfig()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 
 // Проверка, включён ли банлист
 if (!config.public.banlistEnabled) {

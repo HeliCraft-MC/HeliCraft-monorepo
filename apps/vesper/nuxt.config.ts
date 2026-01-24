@@ -35,7 +35,7 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@nuxtjs/turnstile',
     '@nuxt/icon',
-    '@sidebase/nuxt-auth',
+
     '@vueuse/nuxt',
   ],
   css: ['~/assets/css/fonts.css'],
@@ -107,57 +107,5 @@ export default defineNuxtConfig({
     siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
     addValidateEndpoint: true
   },
-  auth: {
-    isEnabled: true,
-    /* originEnvKey позволяет менять baseURL без ребилда */
-    originEnvKey: 'NUXT_PUBLIC_BACKEND_URL',
-    /* fallback на случай отсутствия env (dev-режим) */
-    baseURL: `${process.env.NUXT_PUBLIC_BACKEND_URL || 'https://api.helicraft.ru'}`,
-    /* автоматическое обновление access-токена */
-    sessionRefresh: { enableOnWindowFocus: true, enablePeriodically: 15 * 60_000 },
-    /* включать/выключать глобальную защиту на всё приложение */
-    globalAppMiddleware: true,                              // точечная защита страниц
 
-    provider: {
-      type: 'local',
-      /* --- эндпоинты --- */
-      endpoints: {
-        signIn: { path: '/auth/login', method: 'post' },
-        signOut: { path: '/auth/logout', method: 'post' },
-        getSession: { path: '/auth/session', method: 'get' },
-        signUp: false
-      },
-      /* --- access token --- */
-      token: {
-        signInResponseTokenPointer: '/accessToken',          // backend → {accessToken,…} :contentReference[oaicite:7]{index=7}
-        type: 'Bearer',
-        headerName: 'Authorization',
-        cookieName: 'auth.token',
-        maxAgeInSeconds: 60 * 30,
-        sameSiteAttribute: 'lax'
-      },
-      /* --- refresh token --- */
-      refresh: {
-        isEnabled: true,
-        endpoint: { path: '/auth/refresh', method: 'post' },
-        refreshOnlyToken: true,
-        token: {
-          signInResponseRefreshTokenPointer: '/uuid',
-          refreshResponseTokenPointer: '/accessToken',
-          refreshRequestTokenPointer: '/uuid',               // nuxt-auth отправит {uuid}
-          cookieName: 'auth.refresh',
-          maxAgeInSeconds: 60 * 60 * 24 * 7
-        }
-      },
-      /* --- редиректы --- */
-      pages: { login: '/login' },
-      /* --- типы данных сессии --- */
-      session: {
-        dataType: {
-          uuid: 'string',
-          nickname: 'string'
-        }
-      }
-    }
-  },
 })

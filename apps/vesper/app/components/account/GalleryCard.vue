@@ -3,7 +3,7 @@
 import type { IGalleryListResponse, IGalleryImagePublic } from '~/types/gallery.types'
 
 const config = useRuntimeConfig()
-const { token } = useAuth()
+const { accessToken: token } = useAuthSystem()
 
 const images = ref<IGalleryImagePublic[]>([])
 const total = ref(0)

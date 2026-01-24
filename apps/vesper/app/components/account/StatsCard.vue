@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { useAuth } from '#imports'
 import { usePlanFetch } from '@/composables/usePlanFetch'
 
 /* ---------- auth ---------- */
-const { data } = useAuth()
+const { user: data } = useAuthSystem()
 const uuid = computed(() => data.value?.uuid ?? '')
 const nickname = computed(() => data.value?.nickname ?? '')
 

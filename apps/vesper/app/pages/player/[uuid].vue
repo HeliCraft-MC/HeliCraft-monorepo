@@ -4,11 +4,11 @@ import TimeFormatToggle from '~/components/ui/TimeFormatToggle.vue'
 import PlayerBanHistory from '~/components/banlist/PlayerBanHistory.vue'
 import AdminBanPanel from '~/components/banlist/AdminBanPanel.vue'
 
-definePageMeta({ auth: false })
+
 
 const route = useRoute()
 const config = useRuntimeConfig()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 
 // Проверка, включён ли банлист
 if (!config.public.banlistEnabled) {

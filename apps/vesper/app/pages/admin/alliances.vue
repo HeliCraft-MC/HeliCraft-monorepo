@@ -1,7 +1,6 @@
 <!-- pages/admin/alliances.vue -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { useAuth } from '#imports'
 import { AllianceStatus, AlliencePurpose } from '~/types/diplomacy.types'
 import type { IAlliance, IAllianceMember } from '~/types/diplomacy.types'
 import type { IState } from '~/types/state.types'
@@ -9,7 +8,7 @@ import type { IState } from '~/types/state.types'
 definePageMeta({ layout: 'admin' })
 
 /* ───── Auth ───── */
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 
 /* ───── Reactive state ───── */

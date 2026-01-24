@@ -8,7 +8,7 @@ definePageMeta({
 })
 
 const router = useRouter()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 
 interface IStateWithMembers extends IState {
   members?: number;

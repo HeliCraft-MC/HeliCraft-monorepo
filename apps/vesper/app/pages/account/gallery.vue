@@ -2,7 +2,7 @@
 import type { IGalleryListResponse, IGalleryImagePublic } from '~/types/gallery.types'
 import { GalleryImageStatus } from '~/types/gallery.types'
 
-definePageMeta({ auth: true })
+definePageMeta({ middleware: 'auth' })
 
 const config = useRuntimeConfig()
 const $api = use$apiFetch()

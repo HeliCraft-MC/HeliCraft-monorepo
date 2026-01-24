@@ -2,10 +2,10 @@
 import type { Form, Question } from "@/types/forms";
 import QuestionRenderer from "@/components/forms/QuestionRenderer.vue";
 
-definePageMeta({ auth: true })
+definePageMeta({ middleware: 'auth' })
 
 const route = useRoute();
-const { data: authData } = useAuth();
+const { user: authData } = useAuthSystem()
 const userNickname = computed(() => authData.value?.nickname || 'Гость');
 
 interface FormResponse {

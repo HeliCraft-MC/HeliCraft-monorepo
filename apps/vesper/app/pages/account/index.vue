@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { useAuth } from '#imports'
 import PlayerCard from "~/components/account/PlayerCard.vue";
 import SkinCard from "~/components/account/SkinCard.vue";
 import StatsCard from "~/components/account/StatsCard.vue";
 import NationsCard from "~/components/account/NationsCard.vue";
 import GalleryCard from "~/components/account/GalleryCard.vue";
 
-definePageMeta({ auth: true })
+definePageMeta({ middleware: 'auth' })
 
-const { signOut }: { signOut: () => void } = useAuth()
+const { logout: signOut } = useAuthSystem()
 
 const signOutPage = async () => {
   try {

@@ -7,7 +7,7 @@ import GalleryEditModal from '~/components/gallery/GalleryEditModal.vue'
 definePageMeta({ layout: 'admin' })
 
 const config = useRuntimeConfig()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 const $api = use$apiFetch()
 

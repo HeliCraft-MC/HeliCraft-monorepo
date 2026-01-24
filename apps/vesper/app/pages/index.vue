@@ -83,7 +83,7 @@ import PlayerCountText from "../components/ui/PlayerCountText.vue";
 import ServerAddressCopy from "../components/ui/ServerAddressCopy.vue";
 import type { IGalleryIdsResponse } from '~/types/gallery.types';
 
-definePageMeta({ auth: false });
+
 
 const config = useRuntimeConfig();
 const serverAddress = 'mc.helicraft.ru';

@@ -1,0 +1,155 @@
+
+export interface User {
+    uuid: string;
+    nickname: string;
+}
+
+export const useAuthSystem = () => {
+    const accessToken = useState<string | null>('auth:token', () => null)
+    const user = useState<User | null>('auth:user', () => null)
+    const loading = useState<boolean>('auth:loading', () => false)
+
+    // Proxy path prefix
+    const PROXY_PREFIX = '/distant-api/auth'
+
+    const setToken = (token: string | null) => {
+        accessToken.value = token
+    }
+
+    const setUser = (u: User | null) => {
+        user.value = u
+    }
+
+    const fetchUser = async () => {
+        if (!accessToken.value) return null
+        try {
+            const data = await $fetch<User>(`${PROXY_PREFIX}/me`, {
+                headers: { Authorization: `Bearer ${accessToken.value}` }
+            })
+            setUser(data)
+            return data
+        } catch (e) {
+            console.error('Failed to fetch user', e)
+            setToken(null)
+            setUser(null)
+            return null
+        }
+    }
+
+    const refresh = async () => {
+        // Refresh token is in HttpOnly cookie, automatically sent by browser to same-origin (proxy)
+        try {
+            // We need to pass a UUID in body if backend requires it.
+            // Backend `refresh.post.ts` expects `uuid`.
+            // If we don't have user.uuid (e.g. page reload), we can't refresh?
+            // Wait, implementation plan/backend check: `refresh.post.ts` requires `uuid`.
+            // If page reloads, `user` state is lost (unless persisted).
+            // We need to store UUID in localStorage or rely on the fact that refresh token *should* identify user (backend improvement).
+            // BUT, current backend requires UUID.
+            // So we MUST store UUID in localStorage or cookie (public).
+            // nuxt-auth used to store session data.
+            // I'll add localStorage for UUID.
+
+            let uuid = user.value?.uuid
+            if (!uuid && import.meta.client) {
+                uuid = localStorage.getItem('auth:uuid') || undefined
+            }
+
+            if (!uuid) return false
+
+            const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/refresh`, {
+                method: 'POST',
+                body: { uuid } // Backend expects { uuid }
+            })
+
+            setToken(data.accessToken)
+            setUser({ uuid: data.uuid, nickname: data.nickname })
+
+            if (import.meta.client) {
+                localStorage.setItem('auth:uuid', data.uuid)
+            }
+            return true
+        } catch (e) {
+            // Refresh failed
+            setToken(null)
+            setUser(null)
+            if (import.meta.client) {
+                localStorage.removeItem('auth:uuid')
+            }
+            return false
+        }
+    }
+
+    const login = async (credentials: { nickname: string, password: string }) => {
+        loading.value = true
+        try {
+            const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/login`, {
+                method: 'POST',
+                body: credentials
+            })
+            setToken(data.accessToken)
+            setUser({ uuid: data.uuid, nickname: data.nickname })
+            if (import.meta.client) {
+                localStorage.setItem('auth:uuid', data.uuid)
+            }
+            return true
+        } catch (e) {
+            throw e
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const register = async (credentials: { nickname: string, password: string }) => {
+        loading.value = true
+        try {
+            const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/register`, {
+                method: 'POST',
+                body: credentials
+            })
+            setToken(data.accessToken)
+            setUser({ uuid: data.uuid, nickname: data.nickname })
+            if (import.meta.client) {
+                localStorage.setItem('auth:uuid', data.uuid)
+            }
+            return true
+        } catch (e) {
+            throw e
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const logout = async () => {
+        try {
+            await $fetch(`${PROXY_PREFIX}/logout`, { method: 'POST' })
+        } catch (e) {
+            // validation fail? ignore
+        }
+        setToken(null)
+        setUser(null)
+        if (import.meta.client) {
+            localStorage.removeItem('auth:uuid')
+        }
+        // Redirect to home or login? User choice.
+        const router = useRouter()
+        router.push('/')
+    }
+
+    const init = async () => {
+        if (accessToken.value) return // already init
+        await refresh()
+    }
+
+    return {
+        accessToken,
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        refresh,
+        init,
+        fetchUser
+    }
+}

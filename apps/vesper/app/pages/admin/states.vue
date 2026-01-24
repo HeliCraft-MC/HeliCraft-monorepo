@@ -2,14 +2,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '#imports'
 import { StateStatus, GovernmentForm } from '~/types/state.types'
 import type { IState } from '~/types/state.types'
 
 definePageMeta({ layout: 'admin' })
 
 /* ───── Auth & router ───── */
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 const router = useRouter()
 

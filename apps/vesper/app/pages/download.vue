@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 
-definePageMeta({ auth: false })
+
 
 type OSType = 'windows' | 'macos' | 'linux' | 'unknown'
 

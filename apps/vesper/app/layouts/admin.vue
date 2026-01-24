@@ -189,7 +189,7 @@
 <script setup lang="ts">
 const router = useRouter()
 const config = useRuntimeConfig()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 const nickname = computed(() => session.value?.nickname || 'Admin')
 const isAdmin = ref<boolean|null>(null)

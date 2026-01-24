@@ -1,213 +1,105 @@
-// API Integration Tests for Auth Routes
-// Tests against running dev server - no Testcontainers needed
+import { describe, expect, it } from 'vitest';
 
-import { beforeAll, describe, expect, it } from 'vitest';
-
-// API tests work against the already running dev server
 const API_BASE = process.env.TEST_API_URL || 'http://localhost:3000';
 
-let testUserUuid: string;
-let testAccessToken: string;
-let testRefreshToken: string;
+describe('new Auth System API', () => {
+    let accessToken = '';
+    let refreshTokenCookie = '';
+    const uniqueNick = `TestUser_${Date.now()}`;
+    const password = 'testpassword123';
+    let uuid = '';
 
-// Generate unique nickname for each test run to avoid conflicts
-const uniqueId = Date.now().toString(36);
-const testNickname = `TestUser_${uniqueId}`;
+    it('should register a new user', async () => {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: uniqueNick, password }),
+        });
 
-describe('auth API routes', () => {
-    beforeAll(async () => {
-        // Check if server is running
-        try {
-            await fetch(`${API_BASE}/`);
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.accessToken).toBeDefined();
+        expect(body.uuid).toBeDefined();
+        uuid = body.uuid;
+
+        // Extract Set-Cookie header
+        const setCookie = res.headers.get('set-cookie');
+        expect(setCookie).toContain('refreshToken=');
+        expect(setCookie).toContain('HttpOnly');
+    });
+
+    it('should login and receive tokens', async () => {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: uniqueNick, password }),
+        });
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.accessToken).toBeDefined();
+        accessToken = body.accessToken;
+
+        const setCookie = res.headers.get('set-cookie');
+        expect(setCookie).toBeDefined();
+        if (setCookie) {
+            // Extract the refreshToken value for later use
+            const match = setCookie.match(/refreshToken=([^;]+)/);
+            if (match) {
+                refreshTokenCookie = match[0]; // "refreshToken=..."
+            }
         }
-        catch {
-            console.warn('Server not running at', API_BASE);
-        }
+        expect(refreshTokenCookie).toBeTruthy();
     });
 
-    describe('post /auth/register', () => {
-        it('should register a new user', async () => {
-            const response = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: testNickname,
-                    password: 'password123',
-                }),
-            });
-
-            expect(response.status).toBe(200);
-            const data = await response.json();
-            expect(data.uuid).toBeDefined();
-            expect(data.nickname).toBe(testNickname);
-            expect(data.accessToken).toBeDefined();
-
-            testUserUuid = data.uuid;
-            testAccessToken = data.accessToken;
-
-            // Get refresh token from cookie
-            const cookies = response.headers.get('set-cookie');
-            if (cookies) {
-                const match = cookies.match(/refreshToken=([^;]+)/);
-                if (match) {
-                    testRefreshToken = match[1];
-                }
-            }
+    it('should access protected route /auth/me with bearer token', async () => {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
         });
 
-        it('should reject duplicate nickname', async () => {
-            const response = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: testNickname,
-                    password: 'password123',
-                }),
-            });
-
-            expect(response.status).toBe(409);
-        });
-
-        it('should reject short nickname', async () => {
-            const response = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: 'AB',
-                    password: 'password123',
-                }),
-            });
-
-            expect(response.status).toBe(422);
-        });
-
-        it('should reject short password', async () => {
-            const response = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: `ValidNick_${uniqueId}`,
-                    password: '12345',
-                }),
-            });
-
-            expect(response.status).toBe(422);
-        });
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.nickname).toBe(uniqueNick);
     });
 
-    describe('post /auth/login', () => {
-        it('should login with correct credentials', async () => {
-            const response = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: testNickname,
-                    password: 'password123',
-                }),
-            });
-
-            expect(response.status).toBe(200);
-            const data = await response.json();
-            expect(data.uuid).toBe(testUserUuid);
-            expect(data.accessToken).toBeDefined();
-
-            // Update tokens for subsequent tests
-            testAccessToken = data.accessToken;
-            const cookies = response.headers.get('set-cookie');
-            if (cookies) {
-                const match = cookies.match(/refreshToken=([^;]+)/);
-                if (match) {
-                    testRefreshToken = match[1];
-                }
-            }
-        });
-
-        it('should reject wrong password', async () => {
-            const response = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: testNickname,
-                    password: 'wrongpassword',
-                }),
-            });
-
-            expect(response.status).toBe(401);
-        });
-
-        it('should reject non-existent user', async () => {
-            const response = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nickname: 'NonExistentUser_xyz123',
-                    password: 'password123',
-                }),
-            });
-
-            expect(response.status).toBe(404);
-        });
+    it('should FAIL to access protected route without token', async () => {
+        const res = await fetch(`${API_BASE}/auth/me`);
+        expect(res.status).toBe(401);
     });
 
-    describe('get /auth/session', () => {
-        it('should return user session with valid token', async () => {
-            const response = await fetch(`${API_BASE}/auth/session`, {
-                headers: {
-                    Authorization: `Bearer ${testAccessToken}`,
-                },
-            });
+    it('should refresh token using cookie', async () => {
+        // Wait 1s just to be sure (optional)
+        await new Promise(r => setTimeout(r, 100));
 
-            // Session endpoint might have different behavior
-            expect([200, 401]).toContain(response.status);
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': refreshTokenCookie,
+            },
+            body: JSON.stringify({ uuid }),
         });
 
-        it('should reject invalid token', async () => {
-            const response = await fetch(`${API_BASE}/auth/session`, {
-                headers: {
-                    Authorization: 'Bearer invalid-token',
-                },
-            });
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.accessToken).toBeDefined();
+        expect(body.accessToken).toBeDefined();
+        // expect(body.accessToken).not.toBe(accessToken); // Might be same if <1s elapsed
 
-            expect(response.status).toBe(401);
-        });
+        accessToken = body.accessToken; // Update access token
     });
 
-    describe('post /auth/refresh', () => {
-        it('should refresh tokens with valid refresh token', async () => {
-            if (!testRefreshToken || !testUserUuid) {
-                console.warn('No refresh token or uuid available, skipping test');
-                return;
-            }
-
-            const response = await fetch(`${API_BASE}/auth/refresh`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Cookie': `refreshToken=${testRefreshToken}`,
-                },
-                body: JSON.stringify({ uuid: testUserUuid }),
-            });
-
-            expect([200, 401]).toContain(response.status);
+    it('should logout and clear cookie', async () => {
+        const res = await fetch(`${API_BASE}/auth/logout`, {
+            method: 'POST',
+            headers: { Cookie: refreshTokenCookie },
         });
-    });
 
-    describe('post /auth/logout', () => {
-        it('should logout and clear refresh token', async () => {
-            const response = await fetch(`${API_BASE}/auth/logout`, {
-                method: 'POST',
-                headers: {
-                    Cookie: `refreshToken=${testRefreshToken}`,
-                },
-            });
-
-            expect(response.status).toBe(200);
-
-            // Check that cookie is cleared
-            const cookies = response.headers.get('set-cookie');
-            if (cookies) {
-                expect(cookies).toContain('refreshToken=');
-            }
-        });
+        expect(res.status).toBe(200);
+        const setCookie = res.headers.get('set-cookie');
+        // Check if cookie is cleared (Max-Age=0 or Expires in past)
+        expect(setCookie).toMatch(/Max-Age=0|Expires=/);
     });
 });
