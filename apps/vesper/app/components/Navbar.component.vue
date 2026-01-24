@@ -16,7 +16,7 @@
 
       <!-- Десктоп-меню ≥1280 px (xl) -->
       <ul
-          class="hidden xl:flex flex-1 justify-end items-center gap-6"
+          class="hidden xl:!flex flex-1 justify-end items-center gap-6"
       >
         <li>
           <NuxtLink
