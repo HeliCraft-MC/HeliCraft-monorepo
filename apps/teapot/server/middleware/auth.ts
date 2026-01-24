@@ -67,7 +67,8 @@ async function tryExtractAuth(event: any): Promise<string | null> {
 
     if (!accessToken) {
         const cookies = parseCookies(event);
-        accessToken = cookies['auth.token'];
+        // eslint-disable-next-line dot-notation
+        accessToken = cookies['refreshToken'] || cookies['auth.token'];
     }
 
     if (!accessToken) {
@@ -76,7 +77,6 @@ async function tryExtractAuth(event: any): Promise<string | null> {
 
     try {
         const payload = await verifyToken(accessToken);
-        // Token payload uses camelCase (uuid, not UUID)
         const uuid = (payload as any)?.uuid || (payload as any)?.UUID;
         if (!uuid)
             return null;

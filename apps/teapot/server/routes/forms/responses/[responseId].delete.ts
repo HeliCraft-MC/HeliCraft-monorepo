@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 403, statusMessage: 'Forbidden' });
 
     const responseId = Number.parseInt(event.context.params!.responseId);
-    if (isNaN(responseId)) {
+    if (Number.isNaN(responseId)) {
         throw createError({ statusCode: 400, statusMessage: 'Invalid response ID' });
     }
 
