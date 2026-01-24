@@ -14,9 +14,9 @@
         <span class="hidden sm:inline truncate">HeliCraft</span>
       </NuxtLink>
 
-      <!-- Десктоп-меню ≥1320 px -->
+      <!-- Десктоп-меню ≥1280 px (xl) -->
       <ul
-          class="hidden min-[1320px]:flex flex-1 justify-end items-center gap-6 overflow-hidden"
+          class="hidden xl:flex flex-1 justify-end items-center gap-6"
       >
         <li>
           <NuxtLink
@@ -141,9 +141,9 @@
         </li>
       </ul>
 
-      <!-- Бургер ≤1319 px -->
+      <!-- Бургер <1280 px -->
       <button
-          class="min-[1320px]:hidden flex-shrink-0 text-gray-200 hover:text-red-400 transition"
+          class="xl:hidden flex-shrink-0 text-gray-200 hover:text-red-400 transition"
           @click="toggleMobileMenu"
           aria-label="Открыть меню"
       >
@@ -162,7 +162,7 @@
     >
       <div
           v-if="showMobileMenu"
-          class="absolute top-full left-0 w-full bg-black/95 backdrop-blur-sm min-[1320px]:hidden border-b border-white/10"
+          class="absolute top-full left-0 w-full bg-black/95 backdrop-blur-sm xl:hidden border-b border-white/10"
       >
         <ul class="flex flex-col px-6 py-4 space-y-3">
           <li>
