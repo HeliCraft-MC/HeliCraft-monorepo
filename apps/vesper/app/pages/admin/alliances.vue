@@ -5,7 +5,7 @@ import { AllianceStatus, AlliencePurpose } from '~/types/diplomacy.types'
 import type { IAlliance, IAllianceMember } from '~/types/diplomacy.types'
 import type { IState } from '~/types/state.types'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', middleware: 'auth' })
 
 /* ───── Auth ───── */
 const { user: session } = useAuthSystem()

@@ -5,7 +5,8 @@ import PromptModal from "@/components/common/PromptModal.vue";
 import ConfirmModal from "@/components/common/ConfirmModal.vue";
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 });
 
 const forms = ref<Form[]>([]);

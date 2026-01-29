@@ -6,7 +6,8 @@ import { VueDraggable } from 'vue-draggable-plus';
 import { useDebounceFn } from '@vueuse/core';
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 });
 
 interface FormSettings {

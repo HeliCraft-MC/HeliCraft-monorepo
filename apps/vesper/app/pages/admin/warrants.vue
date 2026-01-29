@@ -4,7 +4,7 @@ import { ref, watch, computed } from 'vue'
 import { StateStatus } from '~/types/state.types'
 import type { IStateWarrant, IState } from '~/types/state.types'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', middleware: 'auth' })
 
 /* ───── Auth ───── */
 const { user: session } = useAuthSystem()
