@@ -8,6 +8,13 @@ export const useAuthSystem = () => {
     const accessToken = useState<string | null>('auth:token', () => null)
     const user = useState<User | null>('auth:user', () => null)
     const loading = useState<boolean>('auth:loading', () => false)
+    const initialized = useState<boolean>('auth:initialized', () => false)
+    
+    // Use cookie for UUID to allow SSR access and persistence
+    const authUuid = useCookie<string | null>('auth:uuid', {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        sameSite: 'lax'
+    })
 
     // Proxy path prefix
     const PROXY_PREFIX = '/distant-api/auth'
@@ -37,42 +44,42 @@ export const useAuthSystem = () => {
     }
 
     const refresh = async () => {
-        // Refresh token is in HttpOnly cookie, automatically sent by browser to same-origin (proxy)
         try {
-            // We need to pass a UUID in body if backend requires it.
-            // Backend `refresh.post.ts` expects `uuid`.
-            // If we don't have user.uuid (e.g. page reload), we can't refresh?
-            // Wait, implementation plan/backend check: `refresh.post.ts` requires `uuid`.
-            // If page reloads, `user` state is lost (unless persisted).
-            // We need to store UUID in localStorage or rely on the fact that refresh token *should* identify user (backend improvement).
-            // BUT, current backend requires UUID.
-            // So we MUST store UUID in localStorage or cookie (public).
-            // nuxt-auth used to store session data.
-            // I'll add localStorage for UUID.
+            let uuid = user.value?.uuid || authUuid.value
 
-            let uuid = user.value?.uuid
+            // Migration from localStorage (Client-side only)
             if (!uuid && import.meta.client) {
-                uuid = localStorage.getItem('auth:uuid') || undefined
+                const localUuid = localStorage.getItem('auth:uuid')
+                if (localUuid) {
+                    uuid = localUuid
+                    authUuid.value = localUuid
+                }
             }
 
             if (!uuid) return false
 
+            // Forward cookies on SSR
+            const headers = import.meta.server ? useRequestHeaders(['cookie']) : {}
+
             const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/refresh`, {
                 method: 'POST',
-                body: { uuid } // Backend expects { uuid }
+                body: { uuid },
+                headers: headers as Record<string, string>
             })
 
             setToken(data.accessToken)
             setUser({ uuid: data.uuid, nickname: data.nickname })
+            authUuid.value = data.uuid // Ensure cookie is updated
 
             if (import.meta.client) {
-                localStorage.setItem('auth:uuid', data.uuid)
+                localStorage.setItem('auth:uuid', data.uuid) // Keep in sync just in case
             }
             return true
         } catch (e) {
             // Refresh failed
             setToken(null)
             setUser(null)
+            authUuid.value = null
             if (import.meta.client) {
                 localStorage.removeItem('auth:uuid')
             }
@@ -89,6 +96,7 @@ export const useAuthSystem = () => {
             })
             setToken(data.accessToken)
             setUser({ uuid: data.uuid, nickname: data.nickname })
+            authUuid.value = data.uuid
             if (import.meta.client) {
                 localStorage.setItem('auth:uuid', data.uuid)
             }
@@ -109,6 +117,7 @@ export const useAuthSystem = () => {
             })
             setToken(data.accessToken)
             setUser({ uuid: data.uuid, nickname: data.nickname })
+            authUuid.value = data.uuid
             if (import.meta.client) {
                 localStorage.setItem('auth:uuid', data.uuid)
             }
@@ -128,23 +137,26 @@ export const useAuthSystem = () => {
         }
         setToken(null)
         setUser(null)
+        authUuid.value = null
         if (import.meta.client) {
             localStorage.removeItem('auth:uuid')
         }
-        // Redirect to home or login? User choice.
+        
         const router = useRouter()
         router.push('/')
     }
 
     const init = async () => {
-        if (accessToken.value) return // already init
+        if (initialized.value) return
         await refresh()
+        initialized.value = true
     }
 
     return {
         accessToken,
         user,
         loading,
+        initialized,
         login,
         register,
         logout,

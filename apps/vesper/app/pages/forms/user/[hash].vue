@@ -67,6 +67,7 @@ const validate = (): boolean => {
 const submit = async (): Promise<void> => {
     if (!canSubmit.value) return;
     if (!validate()) {
+        await nextTick();
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
     }
@@ -84,6 +85,8 @@ const submit = async (): Promise<void> => {
 
         if (submitError.value) throw submitError.value;
         isSuccess.value = true;
+        await nextTick();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e: any) {
         if (e.statusCode === 401) {
             alert('Пожалуйста, войдите в аккаунт, чтобы заполнить форму.');
@@ -201,4 +204,3 @@ const submit = async (): Promise<void> => {
     to { opacity: 1; transform: translateY(0); }
 }
 </style>
-
