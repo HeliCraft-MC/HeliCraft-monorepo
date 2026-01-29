@@ -20,27 +20,23 @@ export const useAuthSystem = () => {
     const PROXY_PREFIX = '/distant-api/auth'
 
     const setToken = (token: string | null) => {
-        console.log('[AuthSystem] Setting token:', token ? 'PRESENT' : 'NULL')
         accessToken.value = token
     }
 
     const setUser = (u: User | null) => {
-        console.log('[AuthSystem] Setting user:', u)
         user.value = u
     }
 
     const fetchUser = async () => {
-        console.log('[AuthSystem] fetchUser called. Token present:', !!accessToken.value)
         if (!accessToken.value) return null
         try {
             const data = await $fetch<User>(`${PROXY_PREFIX}/me`, {
                 headers: { Authorization: `Bearer ${accessToken.value}` }
             })
-            console.log('[AuthSystem] fetchUser success:', data)
             setUser(data)
             return data
         } catch (e) {
-            console.error('[AuthSystem] Failed to fetch user', e)
+            console.error('Failed to fetch user', e)
             setToken(null)
             setUser(null)
             return null
@@ -48,29 +44,22 @@ export const useAuthSystem = () => {
     }
 
     const refresh = async () => {
-        console.log('[AuthSystem] refresh called')
         try {
             let uuid = user.value?.uuid || authUuid.value
-            console.log('[AuthSystem] refresh - initial uuid:', uuid)
 
             // Migration from localStorage (Client-side only)
             if (!uuid && import.meta.client) {
                 const localUuid = localStorage.getItem('auth:uuid')
-                console.log('[AuthSystem] refresh - checking localStorage:', localUuid)
                 if (localUuid) {
                     uuid = localUuid
                     authUuid.value = localUuid
                 }
             }
 
-            if (!uuid) {
-                console.log('[AuthSystem] refresh - no UUID found, aborting')
-                return false
-            }
+            if (!uuid) return false
 
             // Forward cookies on SSR
             const headers = import.meta.server ? useRequestHeaders(['cookie']) : {}
-            console.log('[AuthSystem] refresh - sending request with uuid:', uuid)
 
             const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/refresh`, {
                 method: 'POST',
@@ -78,7 +67,6 @@ export const useAuthSystem = () => {
                 headers: headers as Record<string, string>
             })
 
-            console.log('[AuthSystem] refresh - success:', data)
             setToken(data.accessToken)
             setUser({ uuid: data.uuid, nickname: data.nickname })
             authUuid.value = data.uuid // Ensure cookie is updated
@@ -88,7 +76,6 @@ export const useAuthSystem = () => {
             }
             return true
         } catch (e) {
-            console.error('[AuthSystem] refresh - failed:', e)
             // Refresh failed
             setToken(null)
             setUser(null)
@@ -101,14 +88,12 @@ export const useAuthSystem = () => {
     }
 
     const login = async (credentials: { nickname: string, password: string }) => {
-        console.log('[AuthSystem] login called for:', credentials.nickname)
         loading.value = true
         try {
             const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/login`, {
                 method: 'POST',
                 body: credentials
             })
-            console.log('[AuthSystem] login success:', data)
             setToken(data.accessToken)
             setUser({ uuid: data.uuid, nickname: data.nickname })
             authUuid.value = data.uuid
@@ -117,7 +102,6 @@ export const useAuthSystem = () => {
             }
             return true
         } catch (e) {
-            console.error('[AuthSystem] login failed:', e)
             throw e
         } finally {
             loading.value = false
@@ -125,14 +109,12 @@ export const useAuthSystem = () => {
     }
 
     const register = async (credentials: { nickname: string, password: string }) => {
-        console.log('[AuthSystem] register called for:', credentials.nickname)
         loading.value = true
         try {
             const data = await $fetch<{ accessToken: string, uuid: string, nickname: string }>(`${PROXY_PREFIX}/register`, {
                 method: 'POST',
                 body: credentials
             })
-            console.log('[AuthSystem] register success:', data)
             setToken(data.accessToken)
             setUser({ uuid: data.uuid, nickname: data.nickname })
             authUuid.value = data.uuid
@@ -141,7 +123,6 @@ export const useAuthSystem = () => {
             }
             return true
         } catch (e) {
-            console.error('[AuthSystem] register failed:', e)
             throw e
         } finally {
             loading.value = false
@@ -149,11 +130,10 @@ export const useAuthSystem = () => {
     }
 
     const logout = async () => {
-        console.log('[AuthSystem] logout called')
         try {
             await $fetch(`${PROXY_PREFIX}/logout`, { method: 'POST' })
         } catch (e) {
-            console.warn('[AuthSystem] logout API call failed (ignoring):', e)
+            // validation fail? ignore
         }
         setToken(null)
         setUser(null)
@@ -167,11 +147,9 @@ export const useAuthSystem = () => {
     }
 
     const init = async () => {
-        console.log('[AuthSystem] init called. Initialized:', initialized.value, 'Server:', import.meta.server)
         if (initialized.value) return
         await refresh()
         initialized.value = true
-        console.log('[AuthSystem] init completed')
     }
 
     return {
