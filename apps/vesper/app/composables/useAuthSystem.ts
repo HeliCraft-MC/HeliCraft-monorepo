@@ -8,6 +8,7 @@ export const useAuthSystem = () => {
     const accessToken = useState<string | null>('auth:token', () => null)
     const user = useState<User | null>('auth:user', () => null)
     const loading = useState<boolean>('auth:loading', () => false)
+    const initialized = useState<boolean>('auth:initialized', () => false)
 
     // Proxy path prefix
     const PROXY_PREFIX = '/distant-api/auth'
@@ -137,14 +138,17 @@ export const useAuthSystem = () => {
     }
 
     const init = async () => {
-        if (accessToken.value) return // already init
+        if (initialized.value) return
+        if (import.meta.server) return
         await refresh()
+        initialized.value = true
     }
 
     return {
         accessToken,
         user,
         loading,
+        initialized,
         login,
         register,
         logout,
