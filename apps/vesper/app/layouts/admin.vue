@@ -180,7 +180,7 @@
 
       <!-- Контент разделов -->
       <div v-else class="p-4 lg:p-6">
-        <slot />
+        <NuxtPage />
       </div>
     </main>
   </div>
