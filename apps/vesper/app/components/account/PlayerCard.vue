@@ -26,7 +26,7 @@ async function changePassword () {
     <h2 class="pr2p text-2xl text-red-500 mb-6">Игрок</h2>
 
     <div class="flex flex-col sm:flex-row sm:items-center gap-8">
-      <img :src="`/distant-api/user/${nickname}/skin/head`"
+      <img :src="`/distant-api/user/${nickname}/skin/head.png`"
            alt="Avatar" class="w-32 h-32 rounded-lg border-4 border-gray-800" />
 
       <div class="flex-1 space-y-6">
