@@ -1,7 +1,7 @@
 <!-- pages/login.vue -->
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onBeforeUnmount, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useCookie } from '#imports'
 
 /* ---------- meta ---------- */
@@ -12,6 +12,7 @@ definePageMeta({
 /* ---------- refs & state ---------- */
 /* ---------- refs & state ---------- */
 const router        = useRouter()
+const route         = useRoute()
 const { login, register } = useAuthSystem()
 
 const form          = reactive({ nickname: '', password: '' })
@@ -139,7 +140,11 @@ async function registerUser() {
 async function loginUser() {
   try {
     await login({ nickname: form.nickname, password: form.password })
-    await router.push('/account')
+
+    // Если пользователь логинится и запрашивал не страницу аккаунта,
+    //  перебрасываем на запрошенную страницу
+    const redirect = route.query.redirect as string
+    await router.push(redirect || '/account')
   } catch (e: any) {
     throw e
   }

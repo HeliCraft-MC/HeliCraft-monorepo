@@ -264,8 +264,8 @@ const reorder = async (direction: 'up'|'down', id: number): Promise<void> => {
 
     const newIdx = direction === 'up' ? idx - 1 : idx + 1;
     const temp = questions.value[idx];
-    questions.value[idx] = questions.value[newIdx];
-    questions.value[newIdx] = temp;
+    questions.value[idx] = questions.value[newIdx]!;
+    questions.value[newIdx] = temp!;
 
     await onDragEnd();
 };
@@ -313,9 +313,9 @@ onMounted(fetchData);
                     <div class="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5 border border-white/10">
                         <Icon name="ph:globe" class="text-green-400" />
                         <span class="text-xs text-gray-400 truncate max-w-[150px]">{{ form.public_hash }}</span>
-                        <button class="text-gray-500 hover:text-white" @click="navigateTo(`/forms/user/${form.public_hash}`, { open: { target: '_blank'}})">
+                        <a class="text-gray-500 hover:text-white" href="/forms/user/{{ form.public_hash }}" target="_blank">
                             <Icon name="ph:arrow-square-out" />
-                        </button>
+                        </a>
                     </div>
                     <button 
                         @click="unpublishModalOpen = true"
