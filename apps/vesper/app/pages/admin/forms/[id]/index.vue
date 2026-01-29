@@ -314,7 +314,7 @@ onMounted(fetchData);
                     <div class="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5 border border-white/10">
                         <Icon name="ph:globe" class="text-green-400" />
                         <span class="text-xs text-gray-400 truncate max-w-[150px]">{{ form.public_hash }}</span>
-                        <a class="text-gray-500 hover:text-white" href="/forms/user/{{ form.public_hash }}" target="_blank">
+                        <a class="text-gray-500 hover:text-white" :href="`/forms/user/${form.public_hash}`" target="_blank">
                             <Icon name="ph:arrow-square-out" />
                         </a>
                     </div>
