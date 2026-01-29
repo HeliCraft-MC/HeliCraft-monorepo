@@ -1,10 +1,9 @@
 <!-- pages/admin/gallery.vue -->
 <script setup lang="ts">
-import type { IGalleryListResponse, IGalleryImagePublic, IGalleryActionResponse, IPlayerSearchResult } from '~/types/gallery.types'
-import { GalleryImageStatus } from '~/types/gallery.types'
+import type { IGalleryListResponse, IGalleryImagePublic, IGalleryActionResponse } from '~/types/gallery.types'
 import GalleryEditModal from '~/components/gallery/GalleryEditModal.vue'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', middleware: 'auth' })
 
 const config = useRuntimeConfig()
 const { user: session } = useAuthSystem()

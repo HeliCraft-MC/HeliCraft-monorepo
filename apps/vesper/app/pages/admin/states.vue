@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { StateStatus, GovernmentForm } from '~/types/state.types'
 import type { IState } from '~/types/state.types'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', middleware: 'auth' })
 
 /* ───── Auth & router ───── */
 const { user: session } = useAuthSystem()

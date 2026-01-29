@@ -5,7 +5,8 @@ import ConfirmModal from "@/components/common/ConfirmModal.vue";
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController);
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 });
 
 const route = useRoute();

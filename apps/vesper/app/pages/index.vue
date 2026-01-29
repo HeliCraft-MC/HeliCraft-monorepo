@@ -56,7 +56,7 @@
       </h1>
 
       <p class="text-lg sm:text-xl text-gray-300 mb-6">
-        Ванильный сервер на версии 1.21.6
+        Ванильный сервер на версии 1.21.11
       </p>
 
       <ServerAddressCopy
