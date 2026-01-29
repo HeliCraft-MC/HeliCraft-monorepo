@@ -255,7 +255,7 @@
                 @click="closeMobileMenu"
             >
               <NuxtImg
-                  :src="`${origin}/distant-api/user/${nickname}/skin/head.png`"
+                  :src="`${origin}/distant-api/user/${nickname}/skin/head`"
                   alt="Avatar"
                   class="w-8 h-8 rounded-md"
               />
