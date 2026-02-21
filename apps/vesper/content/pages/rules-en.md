@@ -64,7 +64,6 @@ title: "Server Rules (TOS)"
         3. Impersonating an admin or causing major harm — punished under Section 2.3.
         4. Repeat offense — maximum possible punishment.
     3. **Selling anything for real money** — **permanent IP ban**.
-    4. **Violation of state regulations** (as per rule 7.8) — **punishment determined situationally**.
 
 4. ## Chat Behavior Rules
 
@@ -83,10 +82,31 @@ title: "Server Rules (TOS)"
     2. Building or placing signs/maps/etc. with profanity (even disguised) is prohibited — **ban from 7 days to permanent**.
     3. Building or placing signs/maps/etc. with sexual or 18+ content is prohibited — **ban from 30 days to permanent**.
     4. Building or placing signs/maps/etc. violating other Section 4 rules — punishment equal to or exceeding the relevant penalty.
+    5. **PvP and Damage to Players**
+        1. Any damage to another player without their prior voluntary consent is prohibited.
+        2. The following actions are considered PvP:
+            1. Direct attacks using any weapon or item.
+            2. Use of potions, crystals, lava, fire, explosions, or any other damage-dealing methods.
+            3. Creating traps or mechanisms that result in a player's death.
+            4. Intentionally luring mobs to kill another player.
+            5. Finishing off a player after PvE combat.
+            6. Any actions that lead to a player’s death, even without direct physical contact.
+        3. Allowed:
+            1. PvP by mutual consent of both parties.
+            2. PvP during official events approved by the administration.
+            3. Self-defense during a direct attack.
+        4. Self-defense applies only to repelling an ongoing attack. Revenge or delayed retaliation is not considered self-defense.
+        5. Provocation, chat conflicts, or theft do not justify attacking another player.
+        6. Loot obtained through illegal PvP must be returned. Refusal to return loot is considered griefing.
+        7. Punishment:
+            1. First violation — account ban from 3 to 7 days.
+            2. Repeated violation — IP ban from 14 days to 1 month.
+            3. Systematic violations — up to permanent ban.
+        8. The Administration reserves the right to classify actions as PvP even if no direct hit was made, if the actions resulted in another player’s death.
 
 6. ## Punishment and Appeals
 
-    1. Vigilantism in any form is prohibited (except Section 7).
+    1. Vigilantism in any form is prohibited.
     2. Appeal consists of two stages:
         1. Appeal with the administrator who issued the punishment:
             1. Player contacts the admin. If successful — the punishment is lifted, player may continue playing.
@@ -97,19 +117,7 @@ title: "Server Rules (TOS)"
     3. Punishment may be lifted through conflict resolution.
     4. Punishment may be canceled by head admin decision.
 
-7. ## State Rules
-
-    1. Any player can found (announce) their own state with its own laws. In the absence of a core law, server rules apply.
-    2. A state may declare any borders.
-    3. Disputes between states are resolved by server administration.
-    4. Any use of force against states is prohibited without mutual agreement.
-    5. A state may be destroyed (denounced) by server admins.
-    6. States must strictly follow rules 2.2–2.6. Violations invoke rule 7.5.
-    7. States may have any laws not contradicting rule 7.6.
-    8. States may request admin enforcement of their laws on players.
-    9. States may unite into any kind of unions.
-
-8. ## Administration Rules
+7. ## Administration Rules
 
     1. Abuse of admin powers — **ban from 7 days to permanent, progress wipe, and demotion**.
     2. Violation of rules from Section 2 — **punishment increased by at least 40% (if applicable), progress wipe, and demotion**.
