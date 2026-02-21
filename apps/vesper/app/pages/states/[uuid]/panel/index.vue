@@ -275,7 +275,7 @@ async function saveChanges() {
     const boolChanged = (a: unknown, b: unknown) => normBool(a) !== normBool(b);
 
     const formData = new FormData();
-    const { data: session } = useAuth();
+    const { user: session } = useAuthSystem()
 
     // Всегда добавляем того, кто обновляет
     formData.append('updaterUuid', session.value?.uuid || '');

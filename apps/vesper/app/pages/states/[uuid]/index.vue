@@ -2,8 +2,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuth } from '#imports'
-
 // Import components
 import ConfirmationModal from '~/components/ui/ConfirmationModal.vue'
 import DiplomaticActionModal from '~/components/states/DiplomaticActionModal.vue'
@@ -16,7 +14,7 @@ import { RolesInState, StateStatus, GovernmentForm } from '~/types/state.types'
 import type { IState, IStateOrder, IStateWarrant } from '~/types/state.types'
 import type { IHistoryEvent } from '~/types/history.types'
 
-definePageMeta({ auth: false })
+
 
 const route = useRoute()
 const router = useRouter()
@@ -39,7 +37,7 @@ const activeOrdersTab = ref<'active' | 'archive'>('active')
 const activeWarrantsTab = ref<'active' | 'archive'>('active')
 
 // User specific data
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 const userRole = ref<RolesInState | 'none'>('none')
 const isAdmin = ref(false)

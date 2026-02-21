@@ -1,17 +1,19 @@
 <!-- pages/login.vue -->
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onBeforeUnmount, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuth, useCookie } from '#imports'
+import { useRouter, useRoute } from 'vue-router'
+import { useCookie } from '#imports'
 
 /* ---------- meta ---------- */
 definePageMeta({
-  auth: { unauthenticatedOnly: true, navigateAuthenticatedTo: '/account' }
+  middleware: 'guest'
 })
 
 /* ---------- refs & state ---------- */
+/* ---------- refs & state ---------- */
 const router        = useRouter()
-const { signIn }    = useAuth()
+const route         = useRoute()
+const { login, register } = useAuthSystem()
 
 const form          = reactive({ nickname: '', password: '' })
 const loading       = ref(false)
@@ -128,16 +130,7 @@ async function handleLogin () {
 
 async function registerUser() {
   try {
-    const { data } = await useApiFetch('/auth/register', {
-      method: 'POST',
-      body: { nickname: form.nickname, password: form.password }
-    })
-
-    // После регистрации автоматически входим
-    await signIn(
-        { nickname: form.nickname, password: form.password },
-        { redirect: false }
-    )
+    await register({ nickname: form.nickname, password: form.password })
     await router.push('/account')
   } catch (e: any) {
     throw e
@@ -146,11 +139,12 @@ async function registerUser() {
 
 async function loginUser() {
   try {
-    await signIn(
-        { nickname: form.nickname, password: form.password },
-        { redirect: false }
-    )
-    await router.push('/account')
+    await login({ nickname: form.nickname, password: form.password })
+
+    // Если пользователь логинится и запрашивал не страницу аккаунта,
+    //  перебрасываем на запрошенную страницу
+    const redirect = route.query.redirect as string
+    await router.push(redirect || '/account')
   } catch (e: any) {
     throw e
   }

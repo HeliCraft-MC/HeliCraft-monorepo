@@ -5,10 +5,10 @@ import BanlistTable from '~/components/banlist/BanlistTable.vue'
 import TimeFormatToggle from '~/components/ui/TimeFormatToggle.vue'
 import AdminCleanSkinsPanel from '~/components/banlist/AdminCleanSkinsPanel.vue'
 
-definePageMeta({ auth: false })
+
 
 const config = useRuntimeConfig()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 
 // Проверка, включён ли банлист
 if (!config.public.banlistEnabled) {
@@ -116,7 +116,8 @@ async function checkAdminStatus() {
 
   checkingAdmin.value = true
   try {
-    isAdmin.value = await $fetch<boolean>(`/distant-api/user/${userUuid.value}/isAdmin`)
+    const $apiFetch = use$apiFetch()
+    isAdmin.value = await $apiFetch<boolean>(`/user/${userUuid.value}/isAdmin`)
   } catch (e) {
     console.error('Ошибка проверки админ-статуса:', e)
     isAdmin.value = false

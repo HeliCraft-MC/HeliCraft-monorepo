@@ -3,7 +3,7 @@
 import StateCard from '@/components/states/StateCard.vue'
 import type { IState } from '~/types/state.types'
 
-definePageMeta({ auth: false })
+
 
 const q = ref('')
 const filters = ref({

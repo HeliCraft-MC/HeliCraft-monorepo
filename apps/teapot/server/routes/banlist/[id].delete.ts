@@ -1,5 +1,5 @@
-import { removeBan } from "~/utils/banlist.utils";
-import { getUserByUUID, isUserAdmin } from "~/utils/user.utils";
+import { removeBan } from '~/utils/banlist.utils';
+import { getUserByUUID, isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
     openAPI: {
@@ -7,7 +7,7 @@ defineRouteMeta({
         description: 'Снять бан (Admin only)',
         security: [{ bearerAuth: [] }],
         parameters: [
-            { name: 'id', in: 'path', required: true, description: 'ID бана', schema: { type: 'integer' } }
+            { name: 'id', in: 'path', required: true, description: 'ID бана', schema: { type: 'integer' } },
         ],
         requestBody: {
             content: {
@@ -15,11 +15,11 @@ defineRouteMeta({
                     schema: {
                         type: 'object',
                         properties: {
-                            reason: { type: 'string', description: 'Причина снятия бана (default: Unbanned via Web)' }
-                        }
-                    }
-                }
-            }
+                            reason: { type: 'string', description: 'Причина снятия бана (default: Unbanned via Web)' },
+                        },
+                    },
+                },
+            },
         },
         responses: {
             200: {
@@ -29,18 +29,18 @@ defineRouteMeta({
                         schema: {
                             type: 'object',
                             properties: {
-                                success: { type: 'boolean', example: true }
-                            }
-                        }
-                    }
-                }
+                                success: { type: 'boolean', example: true },
+                            },
+                        },
+                    },
+                },
             },
             401: { description: 'Не авторизован' },
             403: { description: 'Нет прав доступа' },
-            404: { description: 'Бан не найден или уже снят' }
-        }
-    }
-})
+            404: { description: 'Бан не найден или уже снят' },
+        },
+    },
+});
 
 export default defineEventHandler(async (event) => {
     // Авторизация и UUID уже проверены middleware
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 401,
             statusMessage: 'Unauthorized',
-            data: { statusMessageRu: 'Не авторизован' }
+            data: { statusMessageRu: 'Не авторизован' },
         });
     }
 
@@ -61,15 +61,15 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 403,
             statusMessage: 'Forbidden',
-            data: { statusMessageRu: 'Нет прав доступа' }
+            data: { statusMessageRu: 'Нет прав доступа' },
         });
     }
 
     const adminUser = await getUserByUUID(userUuid);
     const body = await readBody(event).catch(() => ({}));
-    const reason = body.reason || "Unbanned via Web";
+    const reason = body.reason || 'Unbanned via Web';
 
-    await removeBan(parseInt(id), userUuid, adminUser.NICKNAME, reason);
+    await removeBan(Number.parseInt(id), userUuid, adminUser.NICKNAME, reason);
 
     return { success: true };
 });

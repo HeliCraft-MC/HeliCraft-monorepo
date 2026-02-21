@@ -1,87 +1,85 @@
+// Token utilities - JWT generation and verification
+import type { Auth } from '~/db/default/schema';
 import jsonwebtoken from 'jsonwebtoken';
-import { AuthUser } from '~/interfaces/mysql.types'
+
+// Type for user data needed for token generation
+export interface TokenUser {
+    uuid: string | null;
+    uuidWr?: string | null;
+    nickname: string;
+    lowercaseNickname: string;
+    regDate?: number | null;
+}
 
 /**
  * Generates an access token for the provided user.
- *
- * @param {object} user - The user object containing user data. Must include a `UUID` property.
- * @return {string} The generated JWT access token.
- * @throws {Error} If the user object is invalid or missing the `UUID` property.
  */
-export function generateAccessToken(user: any) {
-    if (!user || !user.UUID) {
-        throw new Error('Invalid user object (Must contain UUID at least)');
+export function generateAccessToken(user: TokenUser) {
+    if (!user || !user.uuid) {
+        throw new Error('Invalid user object (Must contain uuid at least)');
     }
-    const { jwtSecret } = useRuntimeConfig()
+    const { jwtSecret } = useRuntimeConfig();
     return jsonwebtoken.sign({
-        UUID: user.UUID,
-        UUID_WR: user.UUID_WR,
-        NICKNAME: user.NICKNAME,
-        LOWERCASENICKNAME: user.LOWERCASENICKNAME,
-        REGDATE: user.REGDATE,
+        uuid: user.uuid,
+        uuidWr: user.uuidWr,
+        nickname: user.nickname,
+        lowercaseNickname: user.lowercaseNickname,
+        regDate: user.regDate,
     }, jwtSecret, { expiresIn: '1h' });
 }
 
 /**
  * Generates a refresh token for the provided user.
- *
- * @param {Object} user - The user object for which the refresh token needs to be generated.
- *                        Must include a UUID property.
- * @return {string} A signed JSON Web Token (JWT) representing the refresh token.
- * @throws {Error} If the user object is invalid or does not contain a UUID property.
  */
-export function generateRefreshToken(user: any) {
-    if (!user || !user.UUID) {
-        throw new Error('Invalid user object (Must contain UUID at least)');
+export function generateRefreshToken(user: TokenUser) {
+    if (!user || !user.uuid) {
+        throw new Error('Invalid user object (Must contain uuid at least)');
     }
-    const { jwtSecret } = useRuntimeConfig()
+    const { jwtSecret } = useRuntimeConfig();
     return jsonwebtoken.sign({
-        UUID: user.UUID,
-        UUID_WR: user.UUID_WR,
-        NICKNAME: user.NICKNAME,
-        LOWERCASENICKNAME: user.LOWERCASENICKNAME,
-        REGDATE: user.REGDATE,
+        uuid: user.uuid,
+        uuidWr: user.uuidWr,
+        nickname: user.nickname,
+        lowercaseNickname: user.lowercaseNickname,
+        regDate: user.regDate,
     }, jwtSecret, { expiresIn: '7d' });
 }
 
 /**
  * Verifies the provided JWT token using the secret key.
- *
- * @param {string} token - The JSON Web Token (JWT) to be verified.
- * @return {object|string} Returns the decoded token payload if verification is successful,
- * or throws an error if the token is invalid or expired.
  */
 export function verifyToken(token: string) {
-    const { jwtSecret } = useRuntimeConfig()
+    const { jwtSecret } = useRuntimeConfig();
     return jsonwebtoken.verify(token, jwtSecret);
 }
 
 /**
  * Verifies a given token against a user's credentials.
- *
- * @param {string} token - The JWT token to be verified.
- * @param {any} user - The user object containing credentials to match the token.
- * @return {boolean} Returns true if the token is valid and matches the user's UUID, otherwise false.
  */
-export async function verifyTokenWithCredentials(token: string, user: any) {
+export async function verifyTokenWithCredentials(token: string, user: TokenUser) {
     try {
-        const { jwtSecret } = useRuntimeConfig()
-        const decoded = await jsonwebtoken.verify(token, jwtSecret);
-        // @ts-ignore
-        return decoded && decoded.UUID === user.UUID;
-    } catch (error) {
+        const { jwtSecret } = useRuntimeConfig();
+        const decoded = jsonwebtoken.verify(token, jwtSecret) as { uuid?: string };
+        return decoded && decoded.uuid === user.uuid;
+    }
+    catch {
         return false;
     }
 }
 
 /**
  * Generates access and refresh tokens for the given user.
- *
- * @param {any} user - The user object for which the tokens should be generated.
- * @return {{ accessToken: string, refreshToken: string }} An object containing the access and refresh tokens.
  */
-export function generateTokens(user: any) {
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+export function generateTokens(user: TokenUser | Auth) {
+    // Support both new camelCase format and Auth type from Drizzle
+    const tokenUser: TokenUser = {
+        uuid: user.uuid,
+        uuidWr: user.uuidWr,
+        nickname: user.nickname,
+        lowercaseNickname: user.lowercaseNickname,
+        regDate: user.regDate,
+    };
+    const accessToken = generateAccessToken(tokenUser);
+    const refreshToken = generateRefreshToken(tokenUser);
     return { accessToken, refreshToken };
 }
