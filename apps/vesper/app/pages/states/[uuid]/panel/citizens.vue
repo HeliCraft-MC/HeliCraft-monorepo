@@ -23,7 +23,7 @@ const cities            = ref<ICity[]>([]);           // ⇐ NEW
 const loading           = ref(true);
 const error             = ref<string | null>(null);
 const activeTab         = ref<'citizens'|'applicants'>('citizens');
-const { data: session } = useAuth();
+const { user: session } = useAuthSystem()
 const currentUserUuid   = computed(() => session.value?.uuid);
 const updatingMemberUuid = ref<string | null>(null); // UUID участника, который сейчас обновляется
 

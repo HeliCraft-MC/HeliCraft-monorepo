@@ -209,7 +209,6 @@
 /* Импорты                                                                     */
 /* -------------------------------------------------------------------------- */
 import { ref, computed, onMounted, watch, inject, type Ref } from 'vue';
-import { useAuth } from '#imports';
 import type { IState } from '~/types/state.types';
 import {
   type IStateRelation,
@@ -230,7 +229,7 @@ definePageMeta({ layout: 'panel' });
 /* -------------------------------------------------------------------------- */
 /* Auth & user                                                                */
 /* -------------------------------------------------------------------------- */
-const { data: session } = useAuth();
+const { user: session } = useAuthSystem()
 const currentUserUuid = computed(() => session.value?.uuid);
 
 /* -------------------------------------------------------------------------- */
