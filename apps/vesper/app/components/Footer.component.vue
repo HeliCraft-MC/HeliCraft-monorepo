@@ -2,7 +2,6 @@
   <footer class="bg-[#2a0000] mt-auto py-8 px-6">
     <div class="max-w-7xl mx-auto text-center text-gray-400 space-y-4">
       <div class="flex items-center justify-center space-x-6">
-        <a href="#" class="transition hover:text-red-500 font-medium">Discord</a>
         <NuxtLink href="https://t.me/helicraft" class="transition hover:text-red-500 font-medium">Telegram</NuxtLink>
         <NuxtLink href="https://github.com/HeliCraft-MC" class="transition hover:text-red-500 font-medium">GitHub</NuxtLink>
       </div>
@@ -22,7 +21,7 @@
       </p>
 
 
-      <p class="text-sm">Site software developed by ms0ur. Licensed under <NuxtLink to="https://polyformproject.org/licenses/noncommercial/1.0.0" class="underline">PolyForm Noncommercial License 1.0.0</NuxtLink></p>
+      <p class="text-sm">Site software developed by <NuxtLink to="https://ms0ur.dev" class="underline">ms0ur</NuxtLink>. Licensed under <NuxtLink to="https://polyformproject.org/licenses/noncommercial/1.0.0" class="underline">PolyForm Noncommercial License 1.0.0</NuxtLink></p>
     </div>
   </footer>
 </template>
