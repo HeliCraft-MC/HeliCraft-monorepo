@@ -11,6 +11,7 @@
         <NuxtLink to="/privacy" class="transition hover:text-red-500 font-medium">Политика конфиденциальности / Privacy Policy / GDPR</NuxtLink>
       </div>
       <p class="text-sm">© 2020-{{currentYear}} HeliCraft.</p>
+      <p class="text-sm">ALL CONTENT ON SITE IS LICENSED UNDER <NuxtLink class="underline" to="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA-4.0</NuxtLink>.</p>
       <p class="text-sm">NOT AN OFFICIAL MINECRAFT SERVICE. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
 
       <p class="text-sm">
@@ -21,7 +22,7 @@
       </p>
 
 
-      <p class="text-sm">Site software developed by ms0ur. Licensed under <NuxtLink to="https://eupl.eu/1.2/en/" class="underline">EUPL-1.2-or-later</NuxtLink></p>
+      <p class="text-sm">Site software developed by ms0ur. Licensed under <NuxtLink to="https://polyformproject.org/licenses/noncommercial/1.0.0" class="underline">PolyForm Noncommercial License 1.0.0</NuxtLink></p>
     </div>
   </footer>
 </template>
