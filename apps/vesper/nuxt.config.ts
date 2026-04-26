@@ -46,6 +46,7 @@ export default defineNuxtConfig({
       planApiURL: '/plan-api',
       statesDisabled: process.env.VESPER_DISABLE_STATE_LOGIC ? process.env.VESPER_DISABLE_STATE_LOGIC === 'true' : true,
       banlistEnabled: process.env.NUXT_PUBLIC_BANLIST_ENABLED !== 'false',
+      launcherDownloadEnabled: process.env.VESPER_LAUNCHER_DOWNLOAD_ENABLED === 'true',
       vesperCommit: process.env.NUXT_PUBLIC_VESPER_COMMIT || 'unknown', //frontend software commit
     },
     turnstile: {

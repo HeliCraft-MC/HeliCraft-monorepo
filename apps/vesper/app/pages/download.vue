@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 
+const launcher_download_enabled = useRuntimeConfig().public.launcherDownloadEnabled
+if (!launcher_download_enabled) {
+  throw createError({ statusCode: 404, statusMessage: 'Page Not Found' })
+}
 
 
 type OSType = 'windows' | 'macos' | 'linux' | 'unknown'
