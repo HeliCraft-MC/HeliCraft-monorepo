@@ -78,7 +78,7 @@
           </Transition>
         </li>
 
-        <li>
+        <li v-if="launcher_download_enabled">
           <NuxtLink
               to="/download"
               class="flex items-center gap-1 font-bold pr2p text-gray-200 hover:text-red-400 transition"
@@ -195,7 +195,7 @@
               <span class="truncate">Карта</span>
             </NuxtLink>
           </li>
-          <li>
+          <li v-if="launcher_download_enabled">
             <NuxtLink
                 to="/download"
                 class="flex items-center gap-2 pr2p text-gray-200 hover:text-red-400 transition"
@@ -288,6 +288,7 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 const banlistEnabled = computed(() => config.public.banlistEnabled)
+const launcher_download_enabled = computed(() => config.public.launcherDownloadEnabled)
 
 const showMobileMenu = ref(false)
 const serverDropdownOpen = ref(false)
