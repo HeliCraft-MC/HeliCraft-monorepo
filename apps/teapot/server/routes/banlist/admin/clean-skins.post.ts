@@ -1,5 +1,5 @@
-import { deleteSkinsBatchForBannedUsers } from "~/utils/banlist.utils";
-import { isUserAdmin } from "~/utils/user.utils";
+import { deleteSkinsBatchForBannedUsers } from '~/utils/banlist.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 defineRouteMeta({
     openAPI: {
@@ -12,8 +12,8 @@ defineRouteMeta({
                 in: 'query',
                 required: true,
                 description: 'Минимальная длительность бана в мс. Примеры: -1 (навсегда), 2592000000 (30 дней)',
-                schema: { type: 'integer' }
-            }
+                schema: { type: 'integer' },
+            },
         ],
         responses: {
             200: {
@@ -34,9 +34,9 @@ defineRouteMeta({
                                         properties: {
                                             uuid: { type: 'string' },
                                             uuid_nickname: { type: 'string' },
-                                            reason: { type: 'string' }
-                                        }
-                                    }
+                                            reason: { type: 'string' },
+                                        },
+                                    },
                                 },
                                 errors: {
                                     type: 'array',
@@ -44,21 +44,21 @@ defineRouteMeta({
                                         type: 'object',
                                         properties: {
                                             uuid: { type: 'string' },
-                                            error: { type: 'string' }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                                            error: { type: 'string' },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
             400: { description: 'Отсутствует параметр minDuration' },
             403: { description: 'Нет прав доступа (не администратор)' },
-            500: { description: 'Ошибка при обработке' }
-        }
-    }
-})
+            500: { description: 'Ошибка при обработке' },
+        },
+    },
+});
 
 export default defineEventHandler(async (event) => {
     const userUuid = event.context.auth?.uuid;
@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 401,
             statusMessage: 'Unauthorized',
-            data: { statusMessageRu: 'Не авторизован' }
+            data: { statusMessageRu: 'Не авторизован' },
         });
     }
 
@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 403,
             statusMessage: 'Forbidden',
-            data: { statusMessageRu: 'Нет прав доступа' }
+            data: { statusMessageRu: 'Нет прав доступа' },
         });
     }
 
@@ -88,16 +88,16 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 400,
             statusMessage: 'Missing required parameter',
-            data: { statusMessageRu: 'Отсутствует параметр minDuration' }
+            data: { statusMessageRu: 'Отсутствует параметр minDuration' },
         });
     }
 
-    const minDurationMs = parseInt(minDuration);
+    const minDurationMs = Number.parseInt(minDuration);
     if (isNaN(minDurationMs)) {
         throw createError({
             statusCode: 400,
             statusMessage: 'Invalid parameter format',
-            data: { statusMessageRu: 'minDuration должен быть числом' }
+            data: { statusMessageRu: 'minDuration должен быть числом' },
         });
     }
 
@@ -110,17 +110,17 @@ export default defineEventHandler(async (event) => {
             skipped: result.skipped,
             total: result.users.length,
             users: result.users,
-            errors: result.errors.length > 0 ? result.errors : undefined
+            errors: result.errors.length > 0 ? result.errors : undefined,
         };
-    } catch (e: any) {
+    }
+    catch (e: any) {
         throw createError({
             statusCode: 500,
             statusMessage: 'Error cleaning banned user skins',
             data: {
                 statusMessageRu: 'Ошибка при удалении скинов забаненных пользователей',
-                error: e.message
-            }
+                error: e.message,
+            },
         });
     }
 });
-

@@ -1,14 +1,13 @@
 <!-- pages/admin/warrants.vue -->
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useAuth } from '#imports'
 import { StateStatus } from '~/types/state.types'
 import type { IStateWarrant, IState } from '~/types/state.types'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', middleware: 'auth' })
 
 /* ───── Auth ───── */
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 
 /* ───── Reactive state ───── */

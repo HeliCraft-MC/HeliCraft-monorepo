@@ -8,7 +8,7 @@ import {
 } from '~/types/diplomacy.types'
 import type { IState } from '~/types/state.types'
 
-definePageMeta({ auth: false })
+
 
 /* ───── Шаблонные данные ───── */
 
@@ -24,7 +24,7 @@ const rows = ref<(IAlliance & { members: number | null })[]>([])
 
 /* ───── Данные по пользователю ───── */
 
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid)
 
 const managedStates = ref<IState[]>([])

@@ -4,11 +4,11 @@ import TimeFormatToggle from '~/components/ui/TimeFormatToggle.vue'
 import PlayerBanHistory from '~/components/banlist/PlayerBanHistory.vue'
 import AdminBanPanel from '~/components/banlist/AdminBanPanel.vue'
 
-definePageMeta({ auth: false })
+
 
 const route = useRoute()
 const config = useRuntimeConfig()
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 
 // Проверка, включён ли банлист
 if (!config.public.banlistEnabled) {
@@ -31,10 +31,10 @@ const checkingAdmin = ref(false)
 /* ───── Загрузка никнейма игрока ───── */
 async function loadPlayerNickname() {
   try {
-    // Исправлен запрос: убрана часть /uuid/
-    const response = await $fetch(`/distant-api/user/${playerUuid.value}`)
-    if (response && typeof response === 'object' && 'nickname' in response) {
-      nickname.value = (response as any).nickname
+    const $apiFetch = use$apiFetch()
+    const response = await $apiFetch<any>(`/user/${playerUuid.value}`)
+    if (response && response.nickname) {
+      nickname.value = response.nickname
     } else {
       // Если API не возвращает ник, используем UUID
       nickname.value = playerUuid.value.slice(0, 8)
@@ -57,7 +57,8 @@ async function checkAdminStatus() {
 
   checkingAdmin.value = true
   try {
-    isAdmin.value = await $fetch<boolean>(`/distant-api/user/${userUuid.value}/isAdmin`)
+    const $apiFetch = use$apiFetch()
+    isAdmin.value = await $apiFetch<boolean>(`/user/${userUuid.value}/isAdmin`)
   } catch (e) {
     console.error('Ошибка проверки админ-статуса:', e)
     isAdmin.value = false

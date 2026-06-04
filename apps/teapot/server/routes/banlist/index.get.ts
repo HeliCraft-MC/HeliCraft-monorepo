@@ -1,5 +1,5 @@
-import {getBanById, searchBans} from "~/utils/banlist.utils";
-import { BanEntryPublic } from "~/interfaces/banlist.types";
+import type { BanEntryPublic } from '~/interfaces/banlist.types';
+import { getBanById, searchBans } from '~/utils/banlist.utils';
 
 defineRouteMeta({
     openAPI: {
@@ -10,7 +10,7 @@ defineRouteMeta({
             { name: 'offset', in: 'query', description: 'Смещение (default 0)', schema: { type: 'integer' } },
             { name: 'active', in: 'query', description: 'Только активные баны (true/false)', schema: { type: 'boolean' } },
             { name: 'q', in: 'query', description: 'Поиск по UUID, имени админа или причине', schema: { type: 'string' } },
-            { name: 'id', in: 'query', description: 'Фильтрация по ID бана', schema: { type: 'integer' } }
+            { name: 'id', in: 'query', description: 'Фильтрация по ID бана', schema: { type: 'integer' } },
         ],
         responses: {
             200: {
@@ -21,26 +21,26 @@ defineRouteMeta({
                             type: 'object',
                             properties: {
                                 items: { type: 'array', items: { $ref: '#/components/schemas/BanEntry' } },
-                                total: { type: 'integer' }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-})
+                                total: { type: 'integer' },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+});
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event);
 
-    const limit = parseInt(query.limit as string) || 20;
-    const offset = parseInt(query.offset as string) || 0;
+    const limit = Number.parseInt(query.limit as string) || 20;
+    const offset = Number.parseInt(query.offset as string) || 0;
     const activeOnly = query.active === 'true';
     const search = query.q as string | undefined;
     const id = query.id as string | undefined;
     if (id) {
-        const ban = await getBanById(parseInt(id));
+        const ban = await getBanById(Number.parseInt(id));
         // Преобразуем в публичный формат (без IP и uuid админа)
         const publicBan: BanEntryPublic = {
             id: ban.id,
@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
             server_scope: ban.server_scope,
             silent: ban.silent,
             ipban: ban.ipban,
-            active: ban.active
+            active: ban.active,
         };
         return publicBan;
     }

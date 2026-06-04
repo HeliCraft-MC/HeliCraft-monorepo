@@ -3,7 +3,7 @@
 import { defineProps, defineEmits } from 'vue'
 
 // Определяем props, которые компонент принимает
-const props = defineProps({
+const { isOpen, title, message } = defineProps({
   // Флаг, отвечающий за отображение модального окна
   isOpen: {
     type: Boolean,

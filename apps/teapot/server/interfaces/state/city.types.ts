@@ -1,4 +1,4 @@
-import { IBaseEntity } from './common.types';
+import type { IBaseEntity } from './common.types';
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Города и проживание                                          */

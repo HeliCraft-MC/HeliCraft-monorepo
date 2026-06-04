@@ -16,7 +16,7 @@ const error = ref<string | null>(null);
 const isCreateModalOpen = ref(false);
 const isSubmitting = ref(false);
 const activeTab = ref<'active' | 'archive'>('active');
-const { data: session } = useAuth();
+const { user: session } = useAuthSystem()
 const currentUserUuid = computed(() => session.value?.uuid);
 
 const newWarrant = reactive({ affectedPlayerNickname: '', affectedPlayerUuid: null as string | null, reason: '' });

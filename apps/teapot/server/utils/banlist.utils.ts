@@ -1,18 +1,19 @@
-import { useMySQL } from "~/plugins/mySql"; // Путь к твоему плагину
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { BanEntry, BanEntryPublic, CreateBanDto } from "~/interfaces/banlist.types";
-import { deleteSkin } from "./skin.utils";
-import { getUserByUUID } from "./user.utils";
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { BanEntry, BanEntryPublic, CreateBanDto } from '~/interfaces/banlist.types';
+import { useMySQL } from '~/plugins/mySql'; // Путь к твоему плагину
+import { deleteSkin } from './skin.utils';
+import { getUserByUUID } from './user.utils';
 
 /**
- * Имя подключения в конфиге. 
+ * Имя подключения в конфиге.
  * Убедись, что в nitro.config.ts / runtimeConfig есть database: { banlist: { ... } }
  */
 const CONNECTION_NAME = 'banlist';
 
 /* ──────────────────────────────── helpers ──────────────────────────────── */
 
-/** * Простой валидатор, чтобы не вставлять мусор.
+/**
+ * Простой валидатор, чтобы не вставлять мусор.
  * Можно расширить или импортировать из auth утилит.
  */
 function normalizeUuid(raw: string): string {
@@ -28,7 +29,8 @@ async function enrichBanWithNickname(ban: BanEntry): Promise<BanEntry> {
     try {
         const user = await getUserByUUID(ban.uuid);
         ban.uuid_nickname = user.NICKNAME;
-    } catch (e) {
+    }
+    catch (e) {
         // Если пользователь не найден, оставляем nickname пустым
         ban.uuid_nickname = undefined;
     }
@@ -55,7 +57,7 @@ function toPublicBan(ban: BanEntry): BanEntryPublic {
         server_scope: ban.server_scope,
         silent: ban.silent,
         ipban: ban.ipban,
-        active: ban.active
+        active: ban.active,
     };
 }
 
@@ -73,7 +75,7 @@ export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntr
     // 2. Бан должен быть active = 1
     // 3. Время 'until' должно быть больше текущего (или <= 0, если это перманентный бан)
 
-    let sql = `
+    const sql = `
         SELECT * FROM \`litebans_bans\` 
         WHERE (\`uuid\` = ? ${ip ? 'OR `ip` = ?' : ''})
         AND \`active\` = 1 
@@ -83,7 +85,8 @@ export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntr
     `;
 
     const params: any[] = [cleanUuid];
-    if (ip) params.push(ip);
+    if (ip)
+        params.push(ip);
     params.push(now);
 
     try {
@@ -96,11 +99,18 @@ export async function checkActiveBan(uuid: string, ip?: string): Promise<BanEntr
         }
 
         return ban;
-    } catch (e: any) {
+    }
+    catch (e: any) {
+        console.error('Database error checking ban:', e);
+        // не в проде не кидаем ошибку
+        // eslint-disable-next-line node/prefer-global/process
+        if (process.env.NODE_ENV !== 'production') {
+            return null;
+        }
         throw createError({
             statusCode: 500,
             statusMessage: 'Database error checking ban',
-            data: { statusMessageRu: 'Ошибка проверки бана', error: e.message }
+            data: { statusMessageRu: 'Ошибка проверки бана', error: e.message },
         });
     }
 }
@@ -114,8 +124,6 @@ export async function isUserBanned(uuid: string): Promise<boolean> {
     return !!ban;
 }
 
-
-
 /**
  * Создать новый бан
  */
@@ -128,7 +136,7 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
     // Удаление скина, если бан дольше чем на 30 дней (30 * 24 * 60 * 60 * 1000 = 2592000000 ms)
     // Или если перманентный (<= 0)
     if (dto.durationMs > 2592000000 || dto.durationMs <= 0) {
-        deleteSkin(dto.targetUuid).catch(err => {
+        deleteSkin(dto.targetUuid).catch((err) => {
             console.error(`[BanUtils] Failed to delete skin for banned user ${dto.targetUuid}:`, err);
         });
     }
@@ -155,7 +163,7 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
         now,
         until,
         1,
-        dto.silent ? 1 : 0
+        dto.silent ? 1 : 0,
     ];
 
     try {
@@ -166,11 +174,12 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
         const ban = await getBanById(banId);
 
         return ban;
-    } catch (e: any) {
+    }
+    catch (e: any) {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to ban user',
-            data: { statusMessageRu: 'Не удалось выдать бан', error: e.message }
+            data: { statusMessageRu: 'Не удалось выдать бан', error: e.message },
         });
     }
 }
@@ -179,7 +188,7 @@ export async function createBan(dto: CreateBanDto): Promise<BanEntry> {
  * Снять бан (Pardon)
  * Устанавливает active = 0 и заполняет поля removed_by...
  */
-export async function removeBan(banId: number, adminUuid: string = "[Web]", adminName: string = "[Web]", reason: string = "Unbanned via Web") {
+export async function removeBan(banId: number, adminUuid: string = '[Web]', adminName: string = '[Web]', reason: string = 'Unbanned via Web') {
     const pool = useMySQL(CONNECTION_NAME);
     const cleanAdminUuid = adminUuid;
 
@@ -202,24 +211,26 @@ export async function removeBan(banId: number, adminUuid: string = "[Web]", admi
             adminName,
             reason,
             dateStr,
-            banId
+            banId,
         ]);
 
         if (result.affectedRows === 0) {
             throw createError({
                 statusCode: 404,
                 statusMessage: 'Ban not found or already inactive',
-                data: { statusMessageRu: 'Бан не найден или уже снят' }
+                data: { statusMessageRu: 'Бан не найден или уже снят' },
             });
         }
-    } catch (e: any) {
+    }
+    catch (e: any) {
         // Если это наша ошибка 404, прокидываем дальше, иначе 500
-        if (e.statusCode) throw e;
+        if (e.statusCode)
+            throw e;
 
         throw createError({
             statusCode: 500,
             statusMessage: 'Database error removing ban',
-            data: { statusMessageRu: 'Ошибка при снятии бана', error: e.message }
+            data: { statusMessageRu: 'Ошибка при снятии бана', error: e.message },
         });
     }
 }
@@ -238,7 +249,7 @@ export async function getBanById(id: number): Promise<BanEntry> {
         throw createError({
             statusCode: 404,
             statusMessage: 'Ban not found',
-            data: { statusMessageRu: 'Бан не найден' }
+            data: { statusMessageRu: 'Бан не найден' },
         });
     }
 
@@ -252,8 +263,8 @@ export async function searchBans(
     limit: number = 10,
     offset: number = 0,
     onlyActive: boolean = false,
-    searchQuery?: string
-): Promise<{ items: BanEntryPublic[], total: number }> {
+    searchQuery?: string,
+): Promise<{ items: BanEntryPublic[]; total: number }> {
     const pool = useMySQL(CONNECTION_NAME);
 
     let whereClause = 'WHERE 1=1';
@@ -290,7 +301,7 @@ export async function searchBans(
 
     return {
         items: publicItems,
-        total
+        total,
     };
 }
 
@@ -323,11 +334,12 @@ export async function getBannedUsersWithMinDuration(minDurationMs: number): Prom
         bans = await Promise.all(bans.map(ban => enrichBanWithNickname(ban)));
 
         return bans;
-    } catch (e: any) {
+    }
+    catch (e: any) {
         throw createError({
             statusCode: 500,
             statusMessage: 'Database error getting banned users',
-            data: { statusMessageRu: 'Ошибка при получении забаненных пользователей', error: e.message }
+            data: { statusMessageRu: 'Ошибка при получении забаненных пользователей', error: e.message },
         });
     }
 }
@@ -350,7 +362,7 @@ export async function deleteSkinsBatchForBannedUsers(minDurationMs: number): Pro
     const users = bans.map(ban => ({
         uuid: ban.uuid,
         uuid_nickname: ban.uuid_nickname,
-        reason: ban.reason
+        reason: ban.reason,
     }));
 
     // Параллельно удаляем скины
@@ -360,23 +372,24 @@ export async function deleteSkinsBatchForBannedUsers(minDurationMs: number): Pro
                 const wasDeleted = await deleteSkin(ban.uuid);
                 if (wasDeleted) {
                     deleted++;
-                } else {
+                }
+                else {
                     skipped++; // Скин не найден (уже удалён или не был загружен)
                 }
-            } catch (e: any) {
+            }
+            catch (e: any) {
                 errors.push({
                     uuid: ban.uuid,
-                    error: e.message || 'Unknown error'
+                    error: e.message || 'Unknown error',
                 });
             }
-        })
+        }),
     );
 
     return {
         deleted,
         skipped,
         users,
-        errors
+        errors,
     };
 }
-

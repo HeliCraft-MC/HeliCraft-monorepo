@@ -1,28 +1,31 @@
-
-import {
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type {
+    AlliencePurpose,
     IAlliance,
     IAllianceMember,
-    AllianceStatus,
-    AlliencePurpose,
     IStateRelation,
-    RelationKind,
     IStateRelationRequest,
-    RelationRequestStatus,
-} from '~/interfaces/state/diplomacy.types'
-import {
+} from '~/interfaces/state/diplomacy.types';
+import type {
     IHistoryEvent,
+} from '~/interfaces/state/history.types';
+import { promises as fsp } from 'node:fs';
+import { dirname, join } from 'pathe';
+import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
+import {
+    AllianceStatus,
+    RelationKind,
+    RelationRequestStatus,
+} from '~/interfaces/state/diplomacy.types';
+import {
     HistoryEventType,
-} from '~/interfaces/state/history.types'
-import { getStateByUuid } from '~/utils/states/state.utils'
-import { addHistoryEvent } from '~/utils/states/history.utils'
-import { v4 as uuidv4 } from 'uuid'
-import {RolesInState} from "~/interfaces/state/state.types";
-import {dirname, join} from "pathe";
-import sharp from "sharp";
+} from '~/interfaces/state/history.types';
+import { RolesInState } from '~/interfaces/state/state.types';
 
-import { promises as fsp } from 'node:fs'
-import {ResultSetHeader, RowDataPacket} from "mysql2";
-import {useMySQL} from "~/plugins/mySql";
+import { useMySQL } from '~/plugins/mySql';
+import { addHistoryEvent } from '~/utils/states/history.utils';
+import { getStateByUuid } from '~/utils/states/state.utils';
 
 /* ─────────────────────────── helpers ────────────────────────── */
 
@@ -32,11 +35,11 @@ function assertHexColor(hex: string) {
             statusCode: 422,
             statusMessage: 'Invalid color',
             data: { statusMessageRu: 'Неверный цвет (ожидается #RRGGBB)' },
-        })
+        });
     }
 }
 
-const NAME_RE = /^[a-zA-Z0-9А-Яа-яЁё\s]{3,64}$/
+const NAME_RE = /^[a-zA-Z0-9А-Яа-яЁё\s]{3,64}$/;
 
 async function assertAllianceName(name: string) {
     if (!NAME_RE.test(name.trim())) {
@@ -44,7 +47,7 @@ async function assertAllianceName(name: string) {
             statusCode: 422,
             statusMessage: 'Invalid name',
             data: { statusMessageRu: 'Недопустимое название альянса' },
-        })
+        });
     }
 
     const pool = useMySQL('states');
@@ -63,10 +66,9 @@ async function assertAllianceName(name: string) {
             statusCode: 409,
             statusMessage: 'Alliance already exists',
             data: { statusMessageRu: 'Альянс с таким названием уже существует' },
-        })
+        });
     }
 }
-
 
 /**
  * Загружает файл флага и возвращает относительный путь.
@@ -89,7 +91,7 @@ async function flagToUploads(flag: Buffer): Promise<string> {
 
 /** Лексикографическое упорядочение пары UUID (state_a_uuid < state_b_uuid) */
 function sortPair(a: string, b: string): [string, string] {
-    return a < b ? [a, b] : [b, a]
+    return a < b ? [a, b] : [b, a];
 }
 
 /* ──────────────────────── 1. АЛЬЯНСЫ ────────────────────────── */
@@ -157,8 +159,16 @@ export async function createAlliance(
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const valuesAlliance = [
-        allianceUuid, now, now, name, description, purpose,
-        colorHex, creatorStateUuid, flagLink, AllianceStatus.ACTIVE
+        allianceUuid,
+        now,
+        now,
+        name,
+        description,
+        purpose,
+        colorHex,
+        creatorStateUuid,
+        flagLink,
+        AllianceStatus.ACTIVE,
     ];
     const [resAlliance] = await pool.execute<ResultSetHeader>(sqlAlliance, valuesAlliance);
 
@@ -213,7 +223,6 @@ export async function createAlliance(
     return allianceUuid;
 }
 
-
 /**
  * Вспомогательная функция для преобразования flag_link.
  * Добавляет префикс /distant-api/ к локальным ссылкам.
@@ -229,18 +238,17 @@ function transformFlagLink(flagLink: string | null): string | null {
         return flagLink;
     }
 
-    const prefix = "/distant-api";
+    const prefix = '/distant-api';
 
     // Если ссылка уже начинается со слеша (например, /defaults/flag.png)
     if (flagLink.startsWith('/')) {
         return prefix + flagLink; // результат: /distant-api/defaults/flag.png
-    } else {
-        // Для относительных путей (например, flags/hash.png)
-        return prefix + '/' + flagLink; // результат: /distant-api/flags/hash.png
+    }
+    else {
+    // Для относительных путей (например, flags/hash.png)
+        return `${prefix}/${flagLink}`; // результат: /distant-api/flags/hash.png
     }
 }
-
-
 
 export async function requestAllianceJoin(
     allianceUuid: string,
@@ -310,7 +318,6 @@ export async function requestAllianceJoin(
     await pool.execute<ResultSetHeader>(sqlInsert, values);
 }
 
-
 export async function reviewAllianceJoin(
     allianceUuid: string,
     applicantStateUuid: string,
@@ -352,10 +359,10 @@ export async function reviewAllianceJoin(
     }
 
     if (approve) {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare('UPDATE alliance_members SET is_pending = 0, updated = ? WHERE uuid = ?')
-        //     .run(Date.now(), row.uuid)
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare('UPDATE alliance_members SET is_pending = 0, updated = ? WHERE uuid = ?')
+    //     .run(Date.now(), row.uuid)
         const now = Date.now();
         const sqlUpdate = 'UPDATE alliance_members SET is_pending = 0, updated = ? WHERE uuid = ?';
         await pool.execute<ResultSetHeader>(sqlUpdate, [now, row.uuid]);
@@ -382,16 +389,16 @@ export async function reviewAllianceJoin(
         };
 
         await addHistoryEvent(hist);
-    } else {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare('DELETE FROM alliance_members WHERE uuid = ?')
-        //     .run(row.uuid)
+    }
+    else {
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare('DELETE FROM alliance_members WHERE uuid = ?')
+    //     .run(row.uuid)
         const sqlDelete = 'DELETE FROM alliance_members WHERE uuid = ?';
         await pool.execute<ResultSetHeader>(sqlDelete, [row.uuid]);
     }
 }
-
 
 export async function leaveAlliance(
     allianceUuid: string,
@@ -466,7 +473,6 @@ export async function leaveAlliance(
     }
 }
 
-
 export async function dissolveAlliance(
     allianceUuid: string,
     byPlayerUuid: string,
@@ -522,7 +528,6 @@ export async function dissolveAlliance(
 
     await addHistoryEvent(hist);
 }
-
 
 export async function getAllianceByUuid(uuid: string): Promise<IAlliance> {
     const pool = useMySQL('states');
@@ -592,7 +597,7 @@ export async function listAlliancesForState(
 
 export async function listAlliances(
     startAt = 0,
-    limit = 100
+    limit = 100,
 ): Promise<IAlliance[]> {
     const pool = useMySQL('states');
 
@@ -608,12 +613,11 @@ export async function listAlliances(
     `;
     const [rows] = await pool.execute<RowDataPacket[]>(sql, [AllianceStatus.ACTIVE, limit, startAt]);
     const alliances = rows as IAlliance[];
-    alliances.forEach(row => {
+    alliances.forEach((row) => {
         row.flag_link = transformFlagLink(row.flag_link);
     });
     return alliances;
 }
-
 
 /* ───────────────── 2. ДВУСТОРОННИЕ ОТНОШЕНИЯ ────────────────── */
 
@@ -632,10 +636,10 @@ async function _applyRelation(
     const pool = useMySQL('states');
 
     if (kind === null) {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare('DELETE FROM state_relations WHERE state_a_uuid = ? AND state_b_uuid = ?')
-        //     .run(a, b)
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare('DELETE FROM state_relations WHERE state_a_uuid = ? AND state_b_uuid = ?')
+    //     .run(a, b)
         const sqlDelete = 'DELETE FROM state_relations WHERE state_a_uuid = ? AND state_b_uuid = ?';
         await pool.execute<ResultSetHeader>(sqlDelete, [a, b]);
         return;
@@ -650,22 +654,23 @@ async function _applyRelation(
     const exists = existsRows.length > 0;
 
     if (exists) {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare('UPDATE state_relations SET kind = ?, updated = ? WHERE state_a_uuid = ? AND state_b_uuid = ?')
-        //     .run(kind, Date.now(), a, b)
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare('UPDATE state_relations SET kind = ?, updated = ? WHERE state_a_uuid = ? AND state_b_uuid = ?')
+    //     .run(kind, Date.now(), a, b)
         const sqlUpdate = 'UPDATE state_relations SET kind = ?, updated = ? WHERE state_a_uuid = ? AND state_b_uuid = ?';
         await pool.execute<ResultSetHeader>(sqlUpdate, [kind, Date.now(), a, b]);
-    } else {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare(`
-        // INSERT INTO state_relations (
-        //   uuid, created, updated,
-        //   state_a_uuid, state_b_uuid, kind
-        // ) VALUES (?, ?, ?, ?, ?, ?)
-        // `)
-        //     .run(uuidv4(), Date.now(), Date.now(), a, b, kind)
+    }
+    else {
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare(`
+    // INSERT INTO state_relations (
+    //   uuid, created, updated,
+    //   state_a_uuid, state_b_uuid, kind
+    // ) VALUES (?, ?, ?, ?, ?, ?)
+    // `)
+    //     .run(uuidv4(), Date.now(), Date.now(), a, b, kind)
         const sqlInsert = `
             INSERT INTO state_relations (
                 uuid, created, updated,
@@ -674,11 +679,15 @@ async function _applyRelation(
         `;
         const now = Date.now();
         await pool.execute<ResultSetHeader>(sqlInsert, [
-            uuidv4(), now, now, a, b, kind
+            uuidv4(),
+            now,
+            now,
+            a,
+            b,
+            kind,
         ]);
     }
 }
-
 
 /**
  * 2.1. Создать заявку на изменение двусторонних отношений
@@ -785,7 +794,6 @@ export async function requestRelationChange(
     return reqUuid;
 }
 
-
 /**
  * 2.2. Рассмотреть (одобрить/отклонить) заявку на изменение отношений
  *
@@ -829,8 +837,8 @@ export async function reviewRelationChange(
     const { state_a_uuid, state_b_uuid, proposer_state_uuid, requested_kind } = row;
 
     if (
-        (reviewerStateUuid !== state_a_uuid && reviewerStateUuid !== state_b_uuid) ||
-        reviewerStateUuid === proposer_state_uuid
+        (reviewerStateUuid !== state_a_uuid && reviewerStateUuid !== state_b_uuid)
+        || reviewerStateUuid === proposer_state_uuid
     ) {
         throw createError({
             statusCode: 403,
@@ -842,13 +850,13 @@ export async function reviewRelationChange(
     const now = Date.now();
 
     if (approve) {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare(`
-        //         DELETE FROM state_relation_requests
-        //         WHERE state_a_uuid = ? AND state_b_uuid = ? AND status = ?
-        //     `)
-        //     .run(state_a_uuid, state_b_uuid, RelationRequestStatus.APPROVED);
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare(`
+    //         DELETE FROM state_relation_requests
+    //         WHERE state_a_uuid = ? AND state_b_uuid = ? AND status = ?
+    //     `)
+    //     .run(state_a_uuid, state_b_uuid, RelationRequestStatus.APPROVED);
         const sqlDeleteDuplicates = `
             DELETE FROM state_relation_requests
             WHERE state_a_uuid = ? AND state_b_uuid = ? AND status = ?
@@ -878,7 +886,8 @@ export async function reviewRelationChange(
         ]);
 
         const relationText = (kind: RelationKind | null) => {
-            if (kind === null) return 'Нейтралитет (разрыв)';
+            if (kind === null)
+                return 'Нейтралитет (разрыв)';
             return {
                 [RelationKind.NEUTRAL]: 'Нейтралитет',
                 [RelationKind.ALLY]: 'Дружба',
@@ -886,8 +895,8 @@ export async function reviewRelationChange(
             }[kind];
         };
 
-        const description =
-            requested_kind === null
+        const description
+            = requested_kind === null
                 ? 'Отношения расторгнуты'
                 : `Государства ${state_a.name} и ${state_b.name} установили статус двусторонних отношений «${relationText(requested_kind)}».`;
 
@@ -912,14 +921,15 @@ export async function reviewRelationChange(
         };
 
         await addHistoryEvent(hist);
-    } else {
-        // DEPRECATED, keeping this for info
-        // await db()
-        //     .prepare(`
-        //         DELETE FROM state_relation_requests
-        //         WHERE state_a_uuid = ? AND state_b_uuid = ? AND status = ?
-        //     `)
-        //     .run(state_a_uuid, state_b_uuid, RelationRequestStatus.DECLINED);
+    }
+    else {
+    // DEPRECATED, keeping this for info
+    // await db()
+    //     .prepare(`
+    //         DELETE FROM state_relation_requests
+    //         WHERE state_a_uuid = ? AND state_b_uuid = ? AND status = ?
+    //     `)
+    //     .run(state_a_uuid, state_b_uuid, RelationRequestStatus.DECLINED);
         const sqlDeleteDeclined = `
             DELETE FROM state_relation_requests
             WHERE state_a_uuid = ? AND state_b_uuid = ? AND status = ?
@@ -938,8 +948,6 @@ export async function reviewRelationChange(
         await pool.execute<ResultSetHeader>(sqlUpdateDeclined, [RelationRequestStatus.DECLINED, now, requestUuid]);
     }
 }
-
-
 
 export async function getRelation(
     stateUuidA: string,
@@ -980,7 +988,7 @@ export async function getStateRelationsList(
 }
 
 export async function listPendingRelationRequests(
-    stateUuid: string
+    stateUuid: string,
 ): Promise<IStateRelationRequest[]> {
     const pool = useMySQL('states');
 
@@ -1000,7 +1008,5 @@ export async function listPendingRelationRequests(
     const [rows] = await pool.execute<RowDataPacket[]>(sql, [stateUuid, stateUuid, RelationRequestStatus.PENDING]);
     return rows as IStateRelationRequest[];
 }
-
-
 
 /* ─────────────────────────── EOF ────────────────────────────── */

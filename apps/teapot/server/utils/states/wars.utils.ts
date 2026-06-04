@@ -1,24 +1,27 @@
-import { v4 as uuidv4 } from 'uuid'
-import {
-    BattleStatus,
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type {
     BattleType,
     IWar,
     IWarBattle,
-    WarSideRole,
-    WarStatus
-} from '~/interfaces/state/diplomacy.types'
-import { RolesInState } from '~/interfaces/state/state.types'
-import { IHistoryEvent, HistoryEventType } from '~/interfaces/state/history.types'
-import { getStateByUuid } from '~/utils/states/state.utils'
-import { addHistoryEvent } from '~/utils/states/history.utils'
-import { isRoleHigherOrEqual } from '~/utils/states/citizenship.utils'
+} from '~/interfaces/state/diplomacy.types';
+import type { IHistoryEvent } from '~/interfaces/state/history.types';
+import { v4 as uuidv4 } from 'uuid';
 import {
-    listAlliancesForState,
+    BattleStatus,
+    WarSideRole,
+    WarStatus,
+} from '~/interfaces/state/diplomacy.types';
+import { HistoryEventType } from '~/interfaces/state/history.types';
+import { RolesInState } from '~/interfaces/state/state.types';
+import { useMySQL } from '~/plugins/mySql';
+import { isRoleHigherOrEqual } from '~/utils/states/citizenship.utils';
+import {
     listAllianceMembers,
-} from '~/utils/states/diplomacy.utils'
-import { isUserAdmin } from '~/utils/user.utils'
-import {useMySQL} from "~/plugins/mySql";
-import {ResultSetHeader, RowDataPacket} from "mysql2";
+    listAlliancesForState,
+} from '~/utils/states/diplomacy.utils';
+import { addHistoryEvent } from '~/utils/states/history.utils';
+import { getStateByUuid } from '~/utils/states/state.utils';
+import { isUserAdmin } from '~/utils/user.utils';
 
 export async function declareWar(
     attackerStateUuid: string,
@@ -26,22 +29,22 @@ export async function declareWar(
     attackerPlayerUuid: string,
     name: string,
     reason: string,
-    victoryCondition: string
+    victoryCondition: string,
 ): Promise<string> {
-    await getStateByUuid(attackerStateUuid)
-    await getStateByUuid(defenderStateUuid)
+    await getStateByUuid(attackerStateUuid);
+    await getStateByUuid(defenderStateUuid);
 
     if (!await isRoleHigherOrEqual(attackerStateUuid, attackerPlayerUuid, RolesInState.DIPLOMAT)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав для объявления войны' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав для объявления войны' },
+        });
     }
 
-    const now = Date.now()
-    const warUuid = uuidv4()
-    const pool = useMySQL('states')
+    const now = Date.now();
+    const warUuid = uuidv4();
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // const warStmt = db().prepare(`INSERT INTO wars (...) VALUES (...)`)
@@ -52,52 +55,60 @@ export async function declareWar(
             uuid, created, updated,
             name, reason, victory_condition,
             status, result, result_action
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL)`;
     const [warRes] = await pool.execute<ResultSetHeader>(warSql, [
-        warUuid, now, now, name, reason, victoryCondition, WarStatus.PROPOSED
-    ])
+        warUuid,
+        now,
+        now,
+        name,
+        reason,
+        victoryCondition,
+        WarStatus.PROPOSED,
+    ]);
     if (warRes.affectedRows === 0) {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to declare war',
-            data: { statusMessageRu: 'Не удалось объявить войну' }
-        })
+            data: { statusMessageRu: 'Не удалось объявить войну' },
+        });
     }
 
     const partSql = `
         INSERT INTO war_participants (
             uuid, created, updated,
             war_uuid, state_uuid, side_role
-        ) VALUES (?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?)`;
 
-    const participantSet = new Set<string>()
-    await pool.execute(partSql, [uuidv4(), now, now, warUuid, attackerStateUuid, WarSideRole.ATTACKER])
-    participantSet.add(attackerStateUuid)
-    await pool.execute(partSql, [uuidv4(), now, now, warUuid, defenderStateUuid, WarSideRole.DEFENDER])
-    participantSet.add(defenderStateUuid)
+    const participantSet = new Set<string>();
+    await pool.execute(partSql, [uuidv4(), now, now, warUuid, attackerStateUuid, WarSideRole.ATTACKER]);
+    participantSet.add(attackerStateUuid);
+    await pool.execute(partSql, [uuidv4(), now, now, warUuid, defenderStateUuid, WarSideRole.DEFENDER]);
+    participantSet.add(defenderStateUuid);
 
-    const attackerAlliances = await listAlliancesForState(attackerStateUuid)
-    const defenderAlliances = await listAlliancesForState(defenderStateUuid)
+    const attackerAlliances = await listAlliancesForState(attackerStateUuid);
+    const defenderAlliances = await listAlliancesForState(defenderStateUuid);
 
-    const allianceUuids: string[] = []
+    const allianceUuids: string[] = [];
 
     for (const alliance of attackerAlliances) {
-        allianceUuids.push(alliance.uuid)
-        const members = await listAllianceMembers(alliance.uuid)
+        allianceUuids.push(alliance.uuid);
+        const members = await listAllianceMembers(alliance.uuid);
         for (const member of members) {
-            if (participantSet.has(member.state_uuid)) continue
-            participantSet.add(member.state_uuid)
-            await pool.execute(partSql, [uuidv4(), now, now, warUuid, member.state_uuid, WarSideRole.ALLY_ATTACKER])
+            if (participantSet.has(member.state_uuid))
+                continue;
+            participantSet.add(member.state_uuid);
+            await pool.execute(partSql, [uuidv4(), now, now, warUuid, member.state_uuid, WarSideRole.ALLY_ATTACKER]);
         }
     }
 
     for (const alliance of defenderAlliances) {
-        allianceUuids.push(alliance.uuid)
-        const members = await listAllianceMembers(alliance.uuid)
+        allianceUuids.push(alliance.uuid);
+        const members = await listAllianceMembers(alliance.uuid);
         for (const member of members) {
-            if (participantSet.has(member.state_uuid)) continue
-            participantSet.add(member.state_uuid)
-            await pool.execute(partSql, [uuidv4(), now, now, warUuid, member.state_uuid, WarSideRole.ALLY_DEFENDER])
+            if (participantSet.has(member.state_uuid))
+                continue;
+            participantSet.add(member.state_uuid);
+            await pool.execute(partSql, [uuidv4(), now, now, warUuid, member.state_uuid, WarSideRole.ALLY_DEFENDER]);
         }
     }
 
@@ -119,154 +130,150 @@ export async function declareWar(
         is_deleted: false,
         deleted_at: null,
         deleted_by_uuid: null,
-    }
-    await addHistoryEvent(hist)
+    };
+    await addHistoryEvent(hist);
 
-    return warUuid
+    return warUuid;
 }
-
 
 export async function respondWarDeclaration(
     warUuid: string,
     defenderStateUuid: string,
     defenderPlayerUuid: string,
-    accept: boolean
+    accept: boolean,
 ): Promise<void> {
-    const war = await getWarByUuid(warUuid)
+    const war = await getWarByUuid(warUuid);
 
     if (war.status !== WarStatus.PROPOSED) {
         throw createError({
             statusCode: 400,
             statusMessage: 'War already processed',
-            data: { statusMessageRu: 'Война уже обработана' }
-        })
+            data: { statusMessageRu: 'Война уже обработана' },
+        });
     }
 
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // const row = await db().prepare(
     //     'SELECT 1 FROM war_participants WHERE war_uuid = ? AND state_uuid = ? AND side_role = ?'
     // ).get(warUuid, defenderStateUuid, WarSideRole.DEFENDER)
-    const sql = 'SELECT 1 FROM war_participants WHERE war_uuid = ? AND state_uuid = ? AND side_role = ?'
-    const [rows] = await pool.execute<RowDataPacket[]>(sql, [warUuid, defenderStateUuid, WarSideRole.DEFENDER])
-    const row = rows[0]
+    const sql = 'SELECT 1 FROM war_participants WHERE war_uuid = ? AND state_uuid = ? AND side_role = ?';
+    const [rows] = await pool.execute<RowDataPacket[]>(sql, [warUuid, defenderStateUuid, WarSideRole.DEFENDER]);
+    const row = rows[0];
 
     if (!row) {
         throw createError({
             statusCode: 404,
             statusMessage: 'Defender not found',
-            data: { statusMessageRu: 'Государство не является защитником в этой войне' }
-        })
+            data: { statusMessageRu: 'Государство не является защитником в этой войне' },
+        });
     }
 
     if (!await isRoleHigherOrEqual(defenderStateUuid, defenderPlayerUuid, RolesInState.DIPLOMAT)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав для ответа на объявление войны' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав для ответа на объявление войны' },
+        });
     }
 
-    const newStatus = accept ? WarStatus.ACCEPTED : WarStatus.DECLINED
+    const newStatus = accept ? WarStatus.ACCEPTED : WarStatus.DECLINED;
 
     // DEPRECATED:
     // await db().prepare('UPDATE wars SET status = ?, updated = ? WHERE uuid = ?').run(...)
 
-    const updateSql = 'UPDATE wars SET status = ?, updated = ? WHERE uuid = ?'
-    await pool.execute(updateSql, [newStatus, Date.now(), warUuid])
+    const updateSql = 'UPDATE wars SET status = ?, updated = ? WHERE uuid = ?';
+    await pool.execute(updateSql, [newStatus, Date.now(), warUuid]);
 }
-
 
 export async function scheduleWar(warUuid: string, adminUuid: string): Promise<void> {
     if (!await isUserAdmin(adminUuid)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав администратора' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав администратора' },
+        });
     }
 
-    const war = await getWarByUuid(warUuid)
+    const war = await getWarByUuid(warUuid);
     if (war.status !== WarStatus.ACCEPTED) {
         throw createError({
             statusCode: 400,
             statusMessage: 'War must be accepted',
-            data: { statusMessageRu: 'Война должна быть принята' }
-        })
+            data: { statusMessageRu: 'Война должна быть принята' },
+        });
     }
 
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // await db().prepare('UPDATE wars SET status = ?, updated = ? WHERE uuid = ?').run(...)
 
-    const sql = 'UPDATE wars SET status = ?, updated = ? WHERE uuid = ?'
-    await pool.execute(sql, [WarStatus.SCHEDULED, Date.now(), warUuid])
+    const sql = 'UPDATE wars SET status = ?, updated = ? WHERE uuid = ?';
+    await pool.execute(sql, [WarStatus.SCHEDULED, Date.now(), warUuid]);
 }
-
 
 export async function startWar(warUuid: string, adminUuid: string): Promise<void> {
     if (!await isUserAdmin(adminUuid)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав администратора' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав администратора' },
+        });
     }
 
-    const war = await getWarByUuid(warUuid)
+    const war = await getWarByUuid(warUuid);
     if (war.status !== WarStatus.SCHEDULED) {
         throw createError({
             statusCode: 400,
             statusMessage: 'War not scheduled',
-            data: { statusMessageRu: 'Война не назначена' }
-        })
+            data: { statusMessageRu: 'Война не назначена' },
+        });
     }
 
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // await db().prepare('UPDATE wars SET status = ?, updated = ? WHERE uuid = ?').run(...)
 
-    const sql = 'UPDATE wars SET status = ?, updated = ? WHERE uuid = ?'
-    await pool.execute(sql, [WarStatus.ONGOING, Date.now(), warUuid])
+    const sql = 'UPDATE wars SET status = ?, updated = ? WHERE uuid = ?';
+    await pool.execute(sql, [WarStatus.ONGOING, Date.now(), warUuid]);
 }
-
 
 export async function finishWar(
     warUuid: string,
     result: string,
     resultAction: string,
-    adminUuid: string
+    adminUuid: string,
 ): Promise<void> {
     if (!await isUserAdmin(adminUuid)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав администратора' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав администратора' },
+        });
     }
 
-    const war = await getWarByUuid(warUuid)
+    const war = await getWarByUuid(warUuid);
     if (war.status !== WarStatus.ONGOING && war.status !== WarStatus.SCHEDULED) {
         throw createError({
             statusCode: 400,
             statusMessage: 'War not active',
-            data: { statusMessageRu: 'Война не активна' }
-        })
+            data: { statusMessageRu: 'Война не активна' },
+        });
     }
 
-    const now = Date.now()
-    const pool = useMySQL('states')
+    const now = Date.now();
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // await db().prepare(
     //     'UPDATE wars SET status = ?, result = ?, result_action = ?, updated = ? WHERE uuid = ?'
     // ).run(...)
 
-    const sql = 'UPDATE wars SET status = ?, result = ?, result_action = ?, updated = ? WHERE uuid = ?'
-    await pool.execute(sql, [WarStatus.ENDED, result, resultAction, now, warUuid])
+    const sql = 'UPDATE wars SET status = ?, result = ?, result_action = ?, updated = ? WHERE uuid = ?';
+    await pool.execute(sql, [WarStatus.ENDED, result, resultAction, now, warUuid]);
 
     const hist: IHistoryEvent = {
         uuid: uuidv4(),
@@ -287,10 +294,9 @@ export async function finishWar(
         is_deleted: false,
         deleted_at: null,
         deleted_by_uuid: null,
-    }
-    await addHistoryEvent(hist)
+    };
+    await addHistoryEvent(hist);
 }
-
 
 export async function createBattle(
     warUuid: string,
@@ -299,11 +305,11 @@ export async function createBattle(
     name: string,
     description: string,
     type: BattleType,
-    startDate: number
+    startDate: number,
 ): Promise<string> {
-    await getWarByUuid(warUuid)
+    await getWarByUuid(warUuid);
 
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // const participant = await db().prepare(
@@ -311,28 +317,28 @@ export async function createBattle(
     // ).get(warUuid, creatorStateUuid)
     const [checkRows] = await pool.execute<RowDataPacket[]>(
         'SELECT 1 FROM war_participants WHERE war_uuid = ? AND state_uuid = ?',
-        [warUuid, creatorStateUuid]
-    )
-    const participant = checkRows[0]
+        [warUuid, creatorStateUuid],
+    );
+    const participant = checkRows[0];
 
     if (!participant) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not participant',
-            data: { statusMessageRu: 'Государство не участвует в войне' }
-        })
+            data: { statusMessageRu: 'Государство не участвует в войне' },
+        });
     }
 
     if (!await isRoleHigherOrEqual(creatorStateUuid, creatorPlayerUuid, RolesInState.OFFICER)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав для создания сражения' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав для создания сражения' },
+        });
     }
 
-    const now = Date.now()
-    const battleUuid = uuidv4()
+    const now = Date.now();
+    const battleUuid = uuidv4();
 
     // DEPRECATED:
     // await db().prepare(`INSERT INTO war_battles (...) VALUES (...)`).run(...)
@@ -344,10 +350,18 @@ export async function createBattle(
             type, status, result,
             start_date, end_date
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL)
-    `
+    `;
     await pool.execute(sql, [
-        battleUuid, now, now, warUuid, name, description, type, BattleStatus.SCHEDULED, startDate
-    ])
+        battleUuid,
+        now,
+        now,
+        warUuid,
+        name,
+        description,
+        type,
+        BattleStatus.SCHEDULED,
+        startDate,
+    ]);
 
     const hist: IHistoryEvent = {
         uuid: uuidv4(),
@@ -368,44 +382,43 @@ export async function createBattle(
         is_deleted: false,
         deleted_at: null,
         deleted_by_uuid: null,
-    }
-    await addHistoryEvent(hist)
+    };
+    await addHistoryEvent(hist);
 
-    return battleUuid
+    return battleUuid;
 }
-
 
 export async function updateBattleStatus(
     battleUuid: string,
     status: BattleStatus,
     updaterUuid: string,
     result?: string,
-    endDate?: number
+    endDate?: number,
 ): Promise<void> {
     if (!await isUserAdmin(updaterUuid)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'Not authorized',
-            data: { statusMessageRu: 'Недостаточно прав' }
-        })
+            data: { statusMessageRu: 'Недостаточно прав' },
+        });
     }
 
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // const row = await db().prepare('SELECT * FROM war_battles WHERE uuid = ?').get(battleUuid)
     const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM war_battles WHERE uuid = ?',
-        [battleUuid]
-    )
-    const row = rows[0] as IWarBattle | undefined
+        [battleUuid],
+    );
+    const row = rows[0] as IWarBattle | undefined;
 
     if (!row) {
         throw createError({
             statusCode: 404,
             statusMessage: 'Battle not found',
-            data: { statusMessageRu: 'Сражение не найдено' }
-        })
+            data: { statusMessageRu: 'Сражение не найдено' },
+        });
     }
 
     // DEPRECATED:
@@ -415,54 +428,51 @@ export async function updateBattleStatus(
         UPDATE war_battles
         SET status = ?, result = ?, end_date = ?, updated = ?
         WHERE uuid = ?
-    `
+    `;
     await pool.execute(sql, [
         status,
         result ?? row.result,
         endDate ?? row.end_date,
         Date.now(),
-        battleUuid
-    ])
+        battleUuid,
+    ]);
 }
 
-
 export async function getWarByUuid(uuid: string): Promise<IWar> {
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // const row = await db().prepare('SELECT * FROM wars WHERE uuid = ?').get(uuid) as IWar | undefined
 
     const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM wars WHERE uuid = ?',
-        [uuid]
-    )
-    const row = rows[0] as IWar | undefined
+        [uuid],
+    );
+    const row = rows[0] as IWar | undefined;
 
     if (!row) {
         throw createError({
             statusCode: 404,
             statusMessage: 'War not found',
-            data: { statusMessageRu: 'Война не найдена' }
-        })
+            data: { statusMessageRu: 'Война не найдена' },
+        });
     }
 
-    return row
+    return row;
 }
 
-
 export async function listWarBattles(warUuid: string): Promise<IWarBattle[]> {
-    await getWarByUuid(warUuid)
+    await getWarByUuid(warUuid);
 
-    const pool = useMySQL('states')
+    const pool = useMySQL('states');
 
     // DEPRECATED:
     // return (await db().prepare('SELECT * FROM war_battles WHERE war_uuid = ? ORDER BY start_date').all(warUuid)) as IWarBattle[]
 
     const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM war_battles WHERE war_uuid = ? ORDER BY start_date',
-        [warUuid]
-    )
+        [warUuid],
+    );
 
-    return rows as IWarBattle[]
+    return rows as IWarBattle[];
 }
-

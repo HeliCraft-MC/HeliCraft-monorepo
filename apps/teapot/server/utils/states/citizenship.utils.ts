@@ -1,15 +1,15 @@
-import { v4 as uuidv4 } from 'uuid'
-import {getStateByUuid} from "~/utils/states/state.utils";
-import {RolesInState} from "~/interfaces/state/state.types";
-import {ResultSetHeader, RowDataPacket} from "mysql2";
-import {useMySQL} from "~/plugins/mySql";
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { v4 as uuidv4 } from 'uuid';
+import { RolesInState } from '~/interfaces/state/state.types';
+import { useMySQL } from '~/plugins/mySql';
+import { getStateByUuid } from '~/utils/states/state.utils';
 
 export async function applyForMembership(stateUuid: string, applicantUuid: string): Promise<void> {
     if (!await getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: {statusMessageRu: 'Государство не найдено'}
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -27,7 +27,7 @@ export async function applyForMembership(stateUuid: string, applicantUuid: strin
         throw createError({
             statusCode: 400,
             statusMessage: 'Already a member',
-            data: { statusMessageRu: 'Уже является участником или заявка отправлена' }
+            data: { statusMessageRu: 'Уже является участником или заявка отправлена' },
         });
     }
 
@@ -35,7 +35,7 @@ export async function applyForMembership(stateUuid: string, applicantUuid: strin
         throw createError({
             statusCode: 400,
             statusMessage: 'Dual citizenship not allowed',
-            data: { statusMessageRu: 'Двойное гражданство не разрешено' }
+            data: { statusMessageRu: 'Двойное гражданство не разрешено' },
         });
     }
 
@@ -62,7 +62,7 @@ export async function applyForMembership(stateUuid: string, applicantUuid: strin
         stateUuid,
         null,
         applicantUuid,
-        RolesInState.APPLICANT
+        RolesInState.APPLICANT,
     ];
 
     const [result] = await pool.execute<ResultSetHeader>(insertSql, values);
@@ -71,23 +71,22 @@ export async function applyForMembership(stateUuid: string, applicantUuid: strin
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to apply for membership',
-            data: { statusMessageRu: 'Не удалось отправить заявку на вступление' }
+            data: { statusMessageRu: 'Не удалось отправить заявку на вступление' },
         });
     }
 }
-
 
 export async function reviewMembershipApplication(
     stateUuid: string,
     applicantUuid: string,
     reviewerUuid: string,
-    approve: boolean
+    approve: boolean,
 ): Promise<void> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -96,16 +95,16 @@ export async function reviewMembershipApplication(
         throw createError({
             statusCode: 403,
             statusMessage: 'Insufficient permissions',
-            data: { statusMessageRu: 'Недостаточно прав' }
+            data: { statusMessageRu: 'Недостаточно прав' },
         });
     }
 
     const pool = useMySQL('states');
 
     if (approve) {
-        // DEPRECATED, keeping this for info
-        // const req = db.prepare('UPDATE state_members SET role = ?, updated = ? WHERE state_uuid = ? AND player_uuid = ?');
-        // req.run(RolesInState.CITIZEN, Date.now(), stateUuid, applicantUuid);
+    // DEPRECATED, keeping this for info
+    // const req = db.prepare('UPDATE state_members SET role = ?, updated = ? WHERE state_uuid = ? AND player_uuid = ?');
+    // req.run(RolesInState.CITIZEN, Date.now(), stateUuid, applicantUuid);
 
         const sql = 'UPDATE state_members SET role = ?, updated = ? WHERE state_uuid = ? AND player_uuid = ?';
         const values = [RolesInState.CITIZEN, Date.now(), stateUuid, applicantUuid];
@@ -116,13 +115,14 @@ export async function reviewMembershipApplication(
             throw createError({
                 statusCode: 500,
                 statusMessage: 'Failed to approve membership',
-                data: { statusMessageRu: 'Не удалось одобрить заявку' }
+                data: { statusMessageRu: 'Не удалось одобрить заявку' },
             });
         }
-    } else {
-        // DEPRECATED, keeping this for info
-        // const req = db.prepare('DELETE FROM state_members WHERE state_uuid = ? AND player_uuid = ?');
-        // req.run(stateUuid, applicantUuid);
+    }
+    else {
+    // DEPRECATED, keeping this for info
+    // const req = db.prepare('DELETE FROM state_members WHERE state_uuid = ? AND player_uuid = ?');
+    // req.run(stateUuid, applicantUuid);
 
         const sql = 'DELETE FROM state_members WHERE state_uuid = ? AND player_uuid = ?';
         const values = [stateUuid, applicantUuid];
@@ -133,19 +133,18 @@ export async function reviewMembershipApplication(
             throw createError({
                 statusCode: 500,
                 statusMessage: 'Failed to reject membership',
-                data: { statusMessageRu: 'Не удалось отклонить заявку' }
+                data: { statusMessageRu: 'Не удалось отклонить заявку' },
             });
         }
     }
 }
-
 
 export async function removeMember(stateUuid: string, uuidToRemove: string, uuidWhoRemoved: string): Promise<void> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -154,7 +153,7 @@ export async function removeMember(stateUuid: string, uuidToRemove: string, uuid
         throw createError({
             statusCode: 403,
             statusMessage: 'Insufficient permissions',
-            data: { statusMessageRu: 'Недостаточно прав' }
+            data: { statusMessageRu: 'Недостаточно прав' },
         });
     }
 
@@ -173,18 +172,17 @@ export async function removeMember(stateUuid: string, uuidToRemove: string, uuid
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to remove member',
-            data: { statusMessageRu: 'Не удалось удалить участника' }
+            data: { statusMessageRu: 'Не удалось удалить участника' },
         });
     }
 }
-
 
 export async function getMembers(stateUuid: string, startAt: number = 0, limit: number = 0): Promise<any[]> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -202,13 +200,12 @@ export async function getMembers(stateUuid: string, startAt: number = 0, limit: 
     return rows as any[];
 }
 
-
 export async function getStateMembersCount(stateUuid: string): Promise<number> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -225,13 +222,12 @@ export async function getStateMembersCount(stateUuid: string): Promise<number> {
     return result.count;
 }
 
-
 export async function getMember(stateUuid: string, playerUuid: string): Promise<any> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -249,13 +245,12 @@ export async function getMember(stateUuid: string, playerUuid: string): Promise<
         throw createError({
             statusCode: 404,
             statusMessage: 'Member not found',
-            data: { statusMessageRu: 'Участник не найден' }
+            data: { statusMessageRu: 'Участник не найден' },
         });
     }
 
     return member;
 }
-
 
 export async function isPlayerRulerSomewhere(playerUuid: string): Promise<boolean> {
     const pool = useMySQL('states');
@@ -271,7 +266,6 @@ export async function isPlayerRulerSomewhere(playerUuid: string): Promise<boolea
     return result.count > 0;
 }
 
-
 export async function isDiplomaticActionsAllowedForPlayer(playerUuid: string) {
     const pool = useMySQL('states');
 
@@ -279,7 +273,7 @@ export async function isDiplomaticActionsAllowedForPlayer(playerUuid: string) {
         RolesInState.DIPLOMAT,
         RolesInState.MINISTER,
         RolesInState.VICE_RULER,
-        RolesInState.RULER
+        RolesInState.RULER,
     ];
 
     if (allowedRoles.length === 0) {
@@ -301,10 +295,9 @@ export async function isDiplomaticActionsAllowedForPlayer(playerUuid: string) {
 
     return (rows as { state_uuid: string; role: string }[]).map(row => ({
         stateUuid: row.state_uuid,
-        isDiplomaticActionsAllowed: true
+        isDiplomaticActionsAllowed: true,
     }));
 }
-
 
 export async function isPlayerInAnyState(playerUuid: string): Promise<boolean> {
     const pool = useMySQL('states');
@@ -320,7 +313,6 @@ export async function isPlayerInAnyState(playerUuid: string): Promise<boolean> {
     return result.count > 0;
 }
 
-
 export async function getPlayerStates(playerUuid: string): Promise<any[]> {
     const pool = useMySQL('states');
 
@@ -333,7 +325,6 @@ export async function getPlayerStates(playerUuid: string): Promise<any[]> {
 
     return rows as any[];
 }
-
 
 export async function isDualCitizenshipAllowed(playerUuid: string): Promise<boolean | null> {
     const pool = useMySQL('states');
@@ -369,13 +360,12 @@ export async function isDualCitizenshipAllowed(playerUuid: string): Promise<bool
     return allAllowDual;
 }
 
-
 export async function isPlayerInState(stateUuid: string, playerUuid: string): Promise<boolean> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -392,13 +382,12 @@ export async function isPlayerInState(stateUuid: string, playerUuid: string): Pr
     return result.count > 0;
 }
 
-
 export async function getStateMemberRole(stateUuid: string, playerUuid: string): Promise<RolesInState | null> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -415,12 +404,11 @@ export async function getStateMemberRole(stateUuid: string, playerUuid: string):
     return result ? result.role : null;
 }
 
-
 export async function isRoleHigherOrEqual(
     stateUuid: string,
     playerUuid: string,
     roleToCheck: RolesInState,
-    excludedRoles: RolesInState[] = []
+    excludedRoles: RolesInState[] = [],
 ): Promise<boolean> {
     const memberRole = await getStateMemberRole(stateUuid, playerUuid);
 
@@ -428,7 +416,7 @@ export async function isRoleHigherOrEqual(
         throw createError({
             statusCode: 404,
             statusMessage: 'Member not found',
-            data: { statusMessageRu: 'Участник не найден' }
+            data: { statusMessageRu: 'Участник не найден' },
         });
     }
 
@@ -443,25 +431,24 @@ export async function isRoleHigherOrEqual(
         RolesInState.DIPLOMAT,
         RolesInState.MINISTER,
         RolesInState.VICE_RULER,
-        RolesInState.RULER
+        RolesInState.RULER,
     ];
 
     return rolesOrder.indexOf(memberRole) >= rolesOrder.indexOf(roleToCheck);
 }
 
-
 export async function updateMemberRole(
     stateUuid: string,
     playerUuid: string,
     updaterUuid: string,
-    newRole: RolesInState
+    newRole: RolesInState,
 ): Promise<void> {
     // 1. Проверяем существование государства
     if (!await getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
-            statusMessage: "State not found",
-            data: { statusMessageRu: "Государство не найдено" }
+            statusMessage: 'State not found',
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -469,8 +456,8 @@ export async function updateMemberRole(
     if (playerUuid === updaterUuid) {
         throw createError({
             statusCode: 400,
-            statusMessage: "Cannot change own role",
-            data: { statusMessageRu: "Нельзя самостоятельно менять себе роль" }
+            statusMessage: 'Cannot change own role',
+            data: { statusMessageRu: 'Нельзя самостоятельно менять себе роль' },
         });
     }
 
@@ -479,8 +466,8 @@ export async function updateMemberRole(
     if (!isTargetInState) {
         throw createError({
             statusCode: 404,
-            statusMessage: "Member not found",
-            data: { statusMessageRu: "Игрок не является участником государства" }
+            statusMessage: 'Member not found',
+            data: { statusMessageRu: 'Игрок не является участником государства' },
         });
     }
 
@@ -489,8 +476,8 @@ export async function updateMemberRole(
     if (!isUpdaterInState) {
         throw createError({
             statusCode: 403,
-            statusMessage: "Insufficient permissions",
-            data: { statusMessageRu: "Не состоит в данном государстве" }
+            statusMessage: 'Insufficient permissions',
+            data: { statusMessageRu: 'Не состоит в данном государстве' },
         });
     }
 
@@ -499,8 +486,8 @@ export async function updateMemberRole(
     if (!allRoles.includes(newRole)) {
         throw createError({
             statusCode: 400,
-            statusMessage: "Invalid role",
-            data: { statusMessageRu: "Недопустимая роль" }
+            statusMessage: 'Invalid role',
+            data: { statusMessageRu: 'Недопустимая роль' },
         });
     }
 
@@ -511,16 +498,16 @@ export async function updateMemberRole(
     if (!updaterRole) {
         throw createError({
             statusCode: 404,
-            statusMessage: "Updater not found",
-            data: { statusMessageRu: "Инициатор не найден среди членов государства" }
+            statusMessage: 'Updater not found',
+            data: { statusMessageRu: 'Инициатор не найден среди членов государства' },
         });
     }
 
     if (!targetRole) {
         throw createError({
             statusCode: 404,
-            statusMessage: "Member not found",
-            data: { statusMessageRu: "Игрок не найден среди участников государства" }
+            statusMessage: 'Member not found',
+            data: { statusMessageRu: 'Игрок не найден среди участников государства' },
         });
     }
 
@@ -532,7 +519,7 @@ export async function updateMemberRole(
         RolesInState.DIPLOMAT,
         RolesInState.MINISTER,
         RolesInState.VICE_RULER,
-        RolesInState.RULER
+        RolesInState.RULER,
     ];
 
     const updaterRank = rolesOrder.indexOf(updaterRole);
@@ -543,27 +530,27 @@ export async function updateMemberRole(
     if (updaterRank <= targetRank) {
         throw createError({
             statusCode: 403,
-            statusMessage: "Insufficient permissions",
-            data: { statusMessageRu: "Недостаточно прав для смены данной роли участника" }
+            statusMessage: 'Insufficient permissions',
+            data: { statusMessageRu: 'Недостаточно прав для смены данной роли участника' },
         });
     }
 
     if (updaterRank <= newRoleRank && newRole !== RolesInState.RULER) {
         throw createError({
             statusCode: 403,
-            statusMessage: "Insufficient permissions",
-            data: { statusMessageRu: "Недостаточно прав для присвоения такой роли" }
+            statusMessage: 'Insufficient permissions',
+            data: { statusMessageRu: 'Недостаточно прав для присвоения такой роли' },
         });
     }
 
-    const pool = useMySQL("states");
+    const pool = useMySQL('states');
 
     if (newRole === RolesInState.RULER) {
         if (updaterRole !== RolesInState.RULER) {
             throw createError({
                 statusCode: 403,
-                statusMessage: "Only current ruler can assign new ruler",
-                data: { statusMessageRu: "Только текущий глава может назначить нового главу" }
+                statusMessage: 'Only current ruler can assign new ruler',
+                data: { statusMessageRu: 'Только текущий глава может назначить нового главу' },
             });
         }
 
@@ -584,14 +571,14 @@ export async function updateMemberRole(
             RolesInState.VICE_RULER,
             Date.now(),
             stateUuid,
-            updaterUuid
+            updaterUuid,
         ]);
 
         if (downgradeRes.affectedRows === 0) {
             throw createError({
                 statusCode: 500,
-                statusMessage: "Failed to downgrade current ruler",
-                data: { statusMessageRu: "Не удалось понизить текущего главу" }
+                statusMessage: 'Failed to downgrade current ruler',
+                data: { statusMessageRu: 'Не удалось понизить текущего главу' },
             });
         }
     }
@@ -613,25 +600,24 @@ export async function updateMemberRole(
         newRole,
         Date.now(),
         stateUuid,
-        playerUuid
+        playerUuid,
     ]);
 
     if (updateRes.affectedRows === 0) {
         throw createError({
             statusCode: 500,
-            statusMessage: "Failed to update member role",
-            data: { statusMessageRu: "Не удалось обновить роль участника" }
+            statusMessage: 'Failed to update member role',
+            data: { statusMessageRu: 'Не удалось обновить роль участника' },
         });
     }
 }
-
 
 export async function leaveState(stateUuid: string, playerUuid: string): Promise<void> {
     if (!getStateByUuid(stateUuid)) {
         throw createError({
             statusCode: 404,
             statusMessage: 'State not found',
-            data: { statusMessageRu: 'Государство не найдено' }
+            data: { statusMessageRu: 'Государство не найдено' },
         });
     }
 
@@ -639,7 +625,7 @@ export async function leaveState(stateUuid: string, playerUuid: string): Promise
         throw createError({
             statusCode: 400,
             statusMessage: 'Cannot leave as ruler',
-            data: { statusMessageRu: 'Нельзя покинуть государство, будучи главой' }
+            data: { statusMessageRu: 'Нельзя покинуть государство, будучи главой' },
         });
     }
 
@@ -647,7 +633,7 @@ export async function leaveState(stateUuid: string, playerUuid: string): Promise
         throw createError({
             statusCode: 404,
             statusMessage: 'Player not found in state',
-            data: { statusMessageRu: 'Игрок не найден в государстве' }
+            data: { statusMessageRu: 'Игрок не найден в государстве' },
         });
     }
 
@@ -665,9 +651,7 @@ export async function leaveState(stateUuid: string, playerUuid: string): Promise
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to leave state',
-            data: { statusMessageRu: 'Не удалось выйти из государства' }
+            data: { statusMessageRu: 'Не удалось выйти из государства' },
         });
     }
 }
-
-
