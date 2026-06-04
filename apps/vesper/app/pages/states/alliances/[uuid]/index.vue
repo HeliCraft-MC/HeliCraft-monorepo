@@ -9,14 +9,14 @@ import StateCard from '~/components/states/StateCard.vue';
 import { type IAlliance, type IAllianceMember, AlliencePurpose } from '~/types/diplomacy.types';
 import type { IState } from '~/types/state.types';
 
-definePageMeta({ auth: false });
+
 
 const route = useRoute();
 const router = useRouter();
 const allianceUuid = route.params.uuid as string;
 
 /* ──────────────────────────────── Session ─────────────────────────────── */
-const { data: session } = useAuth();
+const { user: session } = useAuthSystem()
 const userUuid = computed(() => session.value?.uuid ?? null);
 
 /* ──────────────────────────────── Refs ─────────────────────────────── */

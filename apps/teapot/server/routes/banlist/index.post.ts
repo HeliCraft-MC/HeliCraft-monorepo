@@ -1,6 +1,6 @@
-import { createBan } from "~/utils/banlist.utils";
-import { resolveUuid, getUserByUUID, isUserAdmin } from "~/utils/user.utils";
-import { CreateBanDto, BanEntryPublic } from "~/interfaces/banlist.types";
+import type { BanEntryPublic, CreateBanDto } from '~/interfaces/banlist.types';
+import { createBan } from '~/utils/banlist.utils';
+import { getUserByUUID, isUserAdmin, resolveUuid } from '~/utils/user.utils';
 
 defineRouteMeta({
     openAPI: {
@@ -20,11 +20,11 @@ defineRouteMeta({
                             duration: { type: 'integer', description: 'Длительность в мс (-1 или <=0 для навсегда)' },
                             ip: { type: 'string', description: 'IP адрес (опционально)' },
                             ipBan: { type: 'boolean', description: 'Банить ли по IP' },
-                            silent: { type: 'boolean', description: 'Скрытый бан' }
-                        }
-                    }
-                }
-            }
+                            silent: { type: 'boolean', description: 'Скрытый бан' },
+                        },
+                    },
+                },
+            },
         },
         responses: {
             200: {
@@ -35,18 +35,18 @@ defineRouteMeta({
                             type: 'object',
                             properties: {
                                 success: { type: 'boolean', example: true },
-                                ban: { $ref: '#/components/schemas/BanEntry' }
-                            }
-                        }
-                    }
-                }
+                                ban: { $ref: '#/components/schemas/BanEntry' },
+                            },
+                        },
+                    },
+                },
             },
             401: { description: 'Не авторизован' },
             403: { description: 'Нет прав доступа' },
-            400: { description: 'Ошибка валидации' }
-        }
-    }
-})
+            400: { description: 'Ошибка валидации' },
+        },
+    },
+});
 
 export default defineEventHandler(async (event) => {
     // Авторизация и UUID уже проверены middleware
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 401,
             statusMessage: 'Unauthorized',
-            data: { statusMessageRu: 'Не авторизован' }
+            data: { statusMessageRu: 'Не авторизован' },
         });
     }
 
@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 403,
             statusMessage: 'Forbidden',
-            data: { statusMessageRu: 'Нет прав доступа' }
+            data: { statusMessageRu: 'Нет прав доступа' },
         });
     }
 
@@ -75,7 +75,7 @@ export default defineEventHandler(async (event) => {
         throw createError({
             statusCode: 400,
             statusMessage: 'Missing required fields',
-            data: { statusMessageRu: 'Не заполнены обязательные поля' }
+            data: { statusMessageRu: 'Не заполнены обязательные поля' },
         });
     }
 
@@ -83,14 +83,14 @@ export default defineEventHandler(async (event) => {
     const adminUser = await getUserByUUID(userUuid);
 
     const dto: CreateBanDto = {
-        targetUuid: targetUuid,
+        targetUuid,
         targetIp: body.ip,
         reason: body.reason,
         adminUuid: userUuid,
         adminName: adminUser.NICKNAME || 'Admin',
-        durationMs: parseInt(body.duration),
+        durationMs: Number.parseInt(body.duration),
         isIpBan: body.ipBan || false,
-        silent: body.silent || false
+        silent: body.silent || false,
     };
 
     const ban = await createBan(dto);
@@ -111,11 +111,11 @@ export default defineEventHandler(async (event) => {
         server_scope: ban.server_scope,
         silent: ban.silent,
         ipban: ban.ipban,
-        active: ban.active
+        active: ban.active,
     };
 
     return {
         success: true,
-        ban: publicBan
+        ban: publicBan,
     };
 });

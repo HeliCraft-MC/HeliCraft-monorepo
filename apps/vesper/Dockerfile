@@ -1,60 +1,65 @@
-# Created with Gemini and ChatGPT
-# =====================================================================
-# СТАДИЯ 1 — BUILDER
-# =====================================================================
-FROM node:20-bookworm-slim AS builder
-
-# 1. Системные пакеты, нужные для node-gyp, Nuxt-сборки и tini
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential python3 git tini && \
-    rm -rf /var/lib/apt/lists/*
-
+# === STAGE 1: BUILD (Node.js) ===
+FROM node:20-slim AS build
 WORKDIR /app
 
-# 2. Устанавливаем все зависимости строго по lock-файлу
-COPY package*.json ./
-RUN npm install
+# Install Bun for dependency resolution
+RUN npm install -g bun
 
-# 3. Копируем исходники и собираем Nuxt
+# Copy package.json and specifically bun.lock
+COPY package.json bun.lock ./
+
+# Install dependencies (Sharp works because of Node environment)
+RUN bun install --frozen-lockfile
+
+# Copy source code
 COPY . .
 
-ARG NODE_COMMIT=unknown
-ENV NODE_COMMIT=${NODE_COMMIT}
+# --- BUILD OPTIMIZATIONS ---
 
-ARG ENVIR
-RUN echo "$ENVIR" > /app/.env
+# Disable server minification to prevent hanging
+ENV NITRO_MINIFY=false
+ENV NITRO_SOURCEMAP=false
 
-RUN npm run build
+# Externalize heavy libs
+ENV NITRO_EXTERNALS_TRACE=false
 
-# 4. После сборки удаляем dev-пакеты, чтобы сузить node_modules
-RUN npm prune --omit=dev
+# Set presets for Bun compatibility
+ENV NITRO_PRESET=bun
+ENV NUXT_PRESET=bun
 
-# =====================================================================
-# СТАДИЯ 2 — RUNNER
-# =====================================================================
-FROM node:20-bookworm-slim AS runner
+# 1. Capture commit hash during BUILD phase
+ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
+ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
 
-# 5. Лёгкий набор runtime-lib’ов:
-#    libvips42 — pre-built backend для sharp; tini — корректный PID 1
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libvips42 tini && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
 ENV NODE_ENV=production
 
-# 6. Production-зависимости и артефакты
-COPY --from=builder /app/node_modules   ./node_modules
-COPY --from=builder /app/.output        ./.output
-COPY --from=builder /app/public         ./public
-COPY ecosystem.config.cjs package*.json ./
+# Define URLs for build time
+ARG NUXT_PUBLIC_BACKEND_URL="https://api.helicraft.ru"
+ARG NUXT_PLAN_UPSTREAM_URL="https://analytics.helicraft.ru"
+ENV NUXT_PUBLIC_BACKEND_URL=${NUXT_PUBLIC_BACKEND_URL}
+ENV NUXT_PLAN_UPSTREAM_URL=${NUXT_PLAN_UPSTREAM_URL}
 
-# 7. PM2-Runtime — рекомендованный способ работы PM2 в Docker
-RUN npm install -g pm2@latest
+# Run build using Node.js to avoid memory issues
+RUN npm run build
 
+# === STAGE 2: PRODUCTION (Bun) ===
+FROM oven/bun:1 AS production
+WORKDIR /app
+
+# Runtime env vars
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=3000
+ENV NODE_ENV=production
+
+# 2. IMPORTANT: Re-declare ARG and ENV for Runtime
+# Without this, the variable is lost after Stage 1
+ARG NUXT_PUBLIC_VESPER_COMMIT=unknown
+ENV NUXT_PUBLIC_VESPER_COMMIT=${NUXT_PUBLIC_VESPER_COMMIT}
+
+# Copy build artifacts
+COPY --from=build /app/.output /app
 
 EXPOSE 3000
-CMD ["pm2-runtime", "ecosystem.config.cjs"]
 
+# Start server
+ENTRYPOINT [ "bun", "run", "server/index.mjs" ]

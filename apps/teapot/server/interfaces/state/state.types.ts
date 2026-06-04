@@ -1,4 +1,4 @@
-import { IBaseEntity } from './common.types';
+import type { IBaseEntity } from './common.types';
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Перечисления, описывающие государство и роли                  */
@@ -7,36 +7,36 @@ import { IBaseEntity } from './common.types';
 /** Жизненный цикл государства */
 export enum StateStatus {
     /** Создано, ожидает одобрения админом */
-    PENDING   = 'pending',
+    PENDING = 'pending',
     /** Полностью функционирует */
-    ACTIVE    = 'active',
+    ACTIVE = 'active',
     /** Заявка отклонена */
-    REJECTED  = 'rejected',
+    REJECTED = 'rejected',
     /** Объединено с другим государством */
-    MERGED    = 'merged',
+    MERGED = 'merged',
     /** Распущено / заброшено */
-    DISSOLVED = 'dissolved'
+    DISSOLVED = 'dissolved',
 }
 
 /** Форма правления (ролевая характеристика) */
 export enum GovernmentForm {
-    MONARCHY   = 'monarchy',   // монархия
-    REPUBLIC   = 'republic',   // республика
+    MONARCHY = 'monarchy', // монархия
+    REPUBLIC = 'republic', // республика
     FEDERATION = 'federation', // федерация
-    OLIGARCHY  = 'oligarchy',  // олигархия / совет
-    TRIBAL     = 'tribal',     // племенное устройство
-    OTHER      = 'other'       // иное / смешанное
+    OLIGARCHY = 'oligarchy', // олигархия / совет
+    TRIBAL = 'tribal', // племенное устройство
+    OTHER = 'other', // иное / смешанное
 }
 
 /** Роли граждан внутри государства */
 export enum RolesInState {
-    RULER     = 'ruler',      // глава государства
+    RULER = 'ruler', // глава государства
     VICE_RULER = 'vice_ruler', // заместитель главы - все права, кроме назначения нового главы и роспуска государства
-    MINISTER  = 'minister',   // модератор / министр - может назначать чиновников, выпускать ордера, принимать новых граждан
-    DIPLOMAT = 'diplomat',  // дипломат - может выполнять дипломатические действия
-    OFFICER   = 'officer',    // офицер / военный - может арестовывать игроков и выпускать ордера
-    CITIZEN   = 'citizen',    // полноправный гражданин
-    APPLICANT = 'applicant'   // подавший заявку
+    MINISTER = 'minister', // модератор / министр - может назначать чиновников, выпускать ордера, принимать новых граждан
+    DIPLOMAT = 'diplomat', // дипломат - может выполнять дипломатические действия
+    OFFICER = 'officer', // офицер / военный - может арестовывать игроков и выпускать ордера
+    CITIZEN = 'citizen', // полноправный гражданин
+    APPLICANT = 'applicant', // подавший заявку
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -92,7 +92,6 @@ export interface IState extends IBaseEntity {
     /** URL к файлу флага */
     flag_link: string;
 }
-
 
 /**
  * Выпущенные ордеры на арест/исполнение наказания от государства.

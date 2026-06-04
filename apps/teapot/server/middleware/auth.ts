@@ -2,15 +2,16 @@
 
 /* ---------- правила исключений ---------- */
 interface ExcludeRule {
-    pattern: RegExp
-    methods?: string[]        // UPPER-case
+    pattern: RegExp;
+    methods?: string[]; // UPPER-case
 }
 const exclude: ExcludeRule[] = [
     { pattern: /^\/auth\/login(?:\?.*)?$/ },
+    { pattern: /^\/auth\/register(?:\?.*)?$/ },
     { pattern: /^\/auth\/refresh$/ },
     { pattern: /^\/auth\/logout$/ },
     { pattern: /^\/user\/[^/]+\/skin(?:\/head)?(?:\.png)?$/, methods: ['GET', 'HEAD'] },
-    { pattern: /^\/user\/[^/]$/, methods: ['GET'] }, // /user/UUID
+    { pattern: /^\/user\/[^/]$/, methods: ['GET'] },
     { pattern: /^\/$/ },
     { pattern: /^\/_scalar$/ },
     { pattern: /^\/_swagger$/ },
@@ -21,7 +22,7 @@ const exclude: ExcludeRule[] = [
     { pattern: /^\/flags(\/.*)?$/ },
     { pattern: /^\/state\/[^/]+$/, methods: ['GET'] },
     { pattern: /^\/state\/[^/]+\/some$/, methods: ['GET'] },
-    { pattern: /^\/user\/[^/]+$/, methods: ['GET'] }, // /user/UUID
+    { pattern: /^\/user\/[^/]+$/, methods: ['GET'] },
     { pattern: /^\/order\/list(?:\?.*)?$/, methods: ['GET'] },
     { pattern: /^\/warrant\/list(?:\?.*)?$/, methods: ['GET'] },
     { pattern: /^\/history\/list(?:\?.*)?$/, methods: ['GET'] },
@@ -31,48 +32,89 @@ const exclude: ExcludeRule[] = [
     { pattern: /^\/alliances\/[0-9a-fA-F-]+$/, methods: ['GET'] },
     { pattern: /^\/user\/[^/]+\/(?:head|skin(?:\/head)?)(?:\.png)?$/, methods: ['GET', 'HEAD'] },
     { pattern: /^\/banlist(?:\?.*)?$/, methods: ['GET'] },
-    { pattern: /^\/banlist\/check(?:\?.*)?$/, methods: ['GET'] }
-]
+    { pattern: /^\/banlist\/check(?:\?.*)?$/, methods: ['GET'] },
+    // Gallery public routes
+    { pattern: /^\/gallery(?:\?.*)?$/, methods: ['GET'] },
+    { pattern: /^\/gallery\/ids(?:\?.*)?$/, methods: ['GET'] },
+    { pattern: /^\/gallery\/categories(?:\?.*)?$/, methods: ['GET'] },
+    { pattern: /^\/gallery\/seasons(?:\?.*)?$/, methods: ['GET'] },
+    { pattern: /^\/gallery\/[0-9a-fA-F-]+$/, methods: ['GET'] },
+    { pattern: /^\/gallery\/[0-9a-fA-F-]+\/image$/, methods: ['GET'] },
+    // Forms public routes
+    { pattern: /^\/forms\/user\/[^/]+$/, methods: ['GET'] },
+    // Dev routes (only available in non-production anyway)
+    { pattern: /^\/dev\/.*$/, methods: ['GET'] },
+];
+
+/**
+ * Try to extract and validate token, returns UUID if valid, null otherwise.
+ * Does NOT throw errors.
+ */
+async function tryExtractAuth(event: any): Promise<string | null> {
+    const stripBearerPrefix = (token: string): string => {
+        if (token.startsWith('Bearer ')) {
+            return stripBearerPrefix(token.slice(7));
+        }
+        return token;
+    };
+
+    const authHeader = getHeader(event, 'authorization');
+    let accessToken: string | undefined;
+
+    if (authHeader?.startsWith('Bearer ')) {
+        accessToken = stripBearerPrefix(authHeader);
+    }
+
+    if (!accessToken && (event.method === 'GET' || event.method === 'HEAD')) {
+        const cookies = parseCookies(event);
+        accessToken = cookies.refreshToken;
+    }
+
+    if (!accessToken) {
+        return null;
+    }
+
+    try {
+        const payload = await verifyToken(accessToken);
+        const uuid = (payload as any)?.uuid || (payload as any)?.UUID;
+        if (!uuid)
+            return null;
+
+        await checkAuth(uuid, accessToken);
+        return uuid;
+    }
+    catch {
+        return null;
+    }
+}
 
 export default defineEventHandler(async (event) => {
-    const url    = event.path || event.node.req.url || '/'
-    const method = (event.method || event.node.req.method || 'GET').toUpperCase()
+    const url = event.path || event.node.req.url || '/';
+    const method = (event.method || event.node.req.method || 'GET').toUpperCase();
 
-    /* 1. исключаем public-роуты */
+    // Check if route is excluded from mandatory auth
+    let isExcluded = false;
     for (const rule of exclude) {
-        if (rule.pattern.test(url) &&
-            (!rule.methods || rule.methods.includes(method))) {
-            return
+        if (rule.pattern.test(url)
+            && (!rule.methods || rule.methods.includes(method))) {
+            isExcluded = true;
+            break;
         }
     }
 
-    /* 2. Bearer */
-    // Сначала пробуем получить токен из куки
-    const cookies = parseCookies(event)
-    let accessToken = cookies.refreshToken || cookies['auth.token']
-
-    // Если не найден в куки, пробуем заголовок авторизации
-    if (!accessToken) {
-    const authHeader = getHeader(event, 'authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-        throw createError({ statusCode: 401, statusMessage: 'Missing Bearer' })
-    }
-      accessToken = authHeader.slice(7)
+    // ALWAYS try to populate auth context if token is present
+    const uuid = await tryExtractAuth(event);
+    if (uuid) {
+        event.context.auth = { uuid };
     }
 
-    /* 3. проверяем JWT + БД */
-    let payload: any
-    try {
-        payload = await verifyToken(accessToken)
-    } catch {
-        throw createError({ statusCode: 401, statusMessage: 'Invalid token' })
+    // For excluded routes, we're done (don't throw if no auth)
+    if (isExcluded) {
+        return;
     }
-    const { UUID } = payload ?? {}
-    if (!UUID) {
-        throw createError({ statusCode: 401, statusMessage: 'Invalid payload' })
-    }
-    await checkAuth(UUID, accessToken)
 
-    /* 4. кладём данные в контекст */
-    event.context.auth = { uuid: UUID }
-})
+    // For protected routes, require auth
+    if (!uuid) {
+        throw createError({ statusCode: 401, statusMessage: 'Missing or invalid authentication (MW-level)' });
+    }
+});

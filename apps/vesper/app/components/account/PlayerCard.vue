@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useAuth } from '#imports'
-
-const { data } = useAuth()
+const { user: data } = useAuthSystem()
 const nickname = computed(() => data.value?.nickname ?? '')
 const uuid     = computed(() => data.value?.uuid ?? '')
 

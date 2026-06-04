@@ -1,4 +1,4 @@
-import {listSomeStates} from "~/utils/states/state.utils";
+import { listSomeStates } from '~/utils/states/state.utils';
 
 defineRouteMeta({
     openAPI: {
@@ -10,14 +10,14 @@ defineRouteMeta({
                 description: 'Array of states',
                 content: {
                     'application/json': {
-                        schema: { type: 'array', items: { $ref: '#/components/schemas/IState' } }
-                    }
-                }
-            }
-        }
-    }
-})
+                        schema: { type: 'array', items: { $ref: '#/components/schemas/IState' } },
+                    },
+                },
+            },
+        },
+    },
+});
 
 export default defineEventHandler(async (event) => {
-    return await listSomeStates(3)
-})
+    return await listSomeStates(3);
+});
