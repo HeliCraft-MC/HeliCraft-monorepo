@@ -50,7 +50,7 @@ cd Vesper
 ### 3. Install dependencies
 
 ```bash
-npm install
+bun i
 ```
 
 ### 4. Copy and configure environment variables
@@ -63,13 +63,14 @@ nano .env
 ### 5. Start the development server
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
+* **Bun 1.3** - высокоскоростной движок JavaScript
 * **Nuxt 3** - современный фреймворк на Vue 3
 * **TypeScript** - статическая типизация
 * **Tailwind CSS** - утилитарный CSS

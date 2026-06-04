@@ -9,5 +9,7 @@ dist
 db.sqlite
 skins.sqlite
 states.txt
-uploads
+/uploads
 /package-lock.json
+data
+/public/uploads

@@ -1,33 +1,34 @@
 defineRouteMeta({
-  openAPI: {
-    tags: ['state'],
-    description: 'Search states',
-    parameters: [
-      { in: 'query', name: 'startAt', required: false, schema: { type: 'number' } },
-      { in: 'query', name: 'limit', required: false, schema: { type: 'number' } }
-    ],
-    responses: {
-      200: {
-        description: 'Matching states',
-        content: {
-          'application/json': {
-            schema: { type: 'array', items: { $ref: '#/components/schemas/IState' } }
-          }
-        }
-      }
-    }
-  }
-})
+    openAPI: {
+        tags: ['state'],
+        description: 'Search states',
+        parameters: [
+            { in: 'query', name: 'startAt', required: false, schema: { type: 'number' } },
+            { in: 'query', name: 'limit', required: false, schema: { type: 'number' } },
+        ],
+        responses: {
+            200: {
+                description: 'Matching states',
+                content: {
+                    'application/json': {
+                        schema: { type: 'array', items: { $ref: '#/components/schemas/IState' } },
+                    },
+                },
+            },
+        },
+    },
+});
 
 export default defineEventHandler(async (event) => {
-    const query = getQuery(event)
-    const filters: any = {}
+    const query = getQuery(event);
+    const filters: any = {};
     for (const [key, value] of Object.entries(query)) {
-        if (value !== undefined) filters[key] = value
+        if (value !== undefined)
+            filters[key] = value;
     }
-    const startAt = query.startAt ? Number(query.startAt) : undefined
-    const limit = query.limit ? Number(query.limit) : undefined
-    delete filters.startAt
-    delete filters.limit
-    return await searchStatesByFilters(filters, startAt, limit)
-})
+    const startAt = query.startAt ? Number(query.startAt) : undefined;
+    const limit = query.limit ? Number(query.limit) : undefined;
+    delete filters.startAt;
+    delete filters.limit;
+    return await searchStatesByFilters(filters, startAt, limit);
+});

@@ -168,7 +168,7 @@ useHead({ bodyAttrs: { class: 'bg-black text-white' } });
 
 const route = useRoute();
 const router = useRouter();
-const { data: session } = useAuth();
+const { user: session } = useAuthSystem()
 const currentUserUuid = computed(() => session.value?.uuid);
 
 const uuid = computed(() => route.params.uuid as string);

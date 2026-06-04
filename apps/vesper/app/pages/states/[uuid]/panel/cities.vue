@@ -169,7 +169,7 @@ const accentColor = inject<Ref<string>>('accentColor', ref('#ffffff'))
 const state = inject<Ref<IState | null>>('state', ref(null))
 
 /* ▸ Аутентификация */
-const { data: session } = useAuth()
+const { user: session } = useAuthSystem()
 const currentUserUuid = computed(() => session.value?.uuid)
 
 /* ▸ Локальный стейт */

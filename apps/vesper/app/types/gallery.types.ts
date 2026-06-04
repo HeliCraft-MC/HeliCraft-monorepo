@@ -1,0 +1,119 @@
+/* ────────────────────────────────────────────────────────────── */
+/*  Gallery Types                                                 */
+/* ────────────────────────────────────────────────────────────── */
+
+/** Image approval status */
+export enum GalleryImageStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
+
+/** Public gallery image data returned by API */
+export interface IGalleryImagePublic {
+  /** Unique image ID */
+  id: string
+  /** Owner info */
+  owner: {
+    uuid: string
+    nickname: string
+  }
+  /** Image description */
+  description: string | null
+  /** Image category */
+  category: string | null
+  /** Season name */
+  season: string | null
+  /** X coordinate in game */
+  coord_x: number | null
+  /** Y coordinate in game */
+  coord_y: number | null
+  /** Z coordinate in game */
+  coord_z: number | null
+  /** Involved players with their info */
+  involved_players: IPlayerSearchResult[]
+  /** Approval status */
+  status: GalleryImageStatus
+  /** Number of likes */
+  likes_count: number
+  /** Whether current user has liked (only when authenticated) */
+  is_liked?: boolean
+  /** UNIX-time (seconds) of creation */
+  created_at: number
+  /** UNIX-time (seconds) of last update */
+  updated_at: number
+}
+
+/** Full gallery image data (includes file path, admin only) */
+export interface IGalleryImage extends IGalleryImagePublic {
+  /** Internal file path */
+  file_path?: string
+  /** Original filename */
+  original_filename?: string
+  /** File MIME type */
+  mime_type?: string
+  /** File size in bytes */
+  file_size?: number
+}
+
+/** Paginated response for gallery images */
+export interface IGalleryListResponse {
+  items: IGalleryImagePublic[]
+  total: number
+  page: number
+  perPage: number
+  totalPages: number
+}
+
+/** Paginated response for gallery image IDs only */
+export interface IGalleryIdsResponse {
+  items: string[]
+  total: number
+  page: number
+  perPage: number
+  totalPages: number
+}
+
+/** Response for categories list */
+export interface IGalleryCategoriesResponse {
+  categories: string[]
+}
+
+/** Response for seasons list */
+export interface IGallerySeasonsResponse {
+  seasons: string[]
+}
+
+/** Request body for updating gallery image */
+export interface IGalleryImageUpdateRequest {
+  description?: string
+  category?: string
+  season?: string
+  coord_x?: number
+  coord_y?: number
+  coord_z?: number
+  involved_players?: string
+}
+
+/** Response for upload/approve/reject/delete operations */
+export interface IGalleryActionResponse {
+  ok: boolean
+  image?: IGalleryImagePublic
+  message?: string
+}
+
+/** Response for like/unlike operations */
+export interface IGalleryLikeResponse {
+  ok: boolean
+  liked?: boolean
+  unliked?: boolean
+}
+
+/** Sort options for gallery listing */
+export type GallerySortBy = 'created_at' | 'likes' | 'updated_at'
+
+/** Player search result */
+export interface IPlayerSearchResult {
+  uuid: string
+  nickname: string
+}
