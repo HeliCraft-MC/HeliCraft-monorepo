@@ -28,7 +28,7 @@ const error = ref<string | null>(null);
 const isCreateModalOpen = ref(false); // Состояние для управления модальным окном
 const isSubmitting = ref(false); // Состояние для процесса отправки формы
 const activeTab = ref<'active' | 'archive'>('active');
-const { data: session } = useAuth();
+const { user: session } = useAuthSystem()
 const currentUserUuid = computed(() => session.value?.uuid);
 
 // Реактивный объект для данных нового указа из формы

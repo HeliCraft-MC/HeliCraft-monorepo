@@ -1,8 +1,8 @@
-import { ICity } from "~/interfaces/state/city.types";
-import { v4 as uuidv4 } from 'uuid'
-import { getStateByUuid } from "~/utils/states/state.utils"
-import {useMySQL} from "~/plugins/mySql";
-import type {ResultSetHeader, FieldPacket, RowDataPacket} from 'mysql2';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { ICity } from '~/interfaces/state/city.types';
+import { v4 as uuidv4 } from 'uuid';
+import { useMySQL } from '~/plugins/mySql';
+import { getStateByUuid } from '~/utils/states/state.utils';
 
 export async function createCity(name: string, coordinates: string, stateUuid: string, isCapital: boolean): Promise<void>;
 export async function createCity(name: string, coordinates: string): Promise<void>;
@@ -24,16 +24,16 @@ export async function createCity(name: string, coordinates: string, stateUuid?: 
         name,
         coordinates,
         stateUuid || null,
-        isCapital ? 1 : 0
-    ]
+        isCapital ? 1 : 0,
+    ];
 
-    const [result] = await pool.execute<ResultSetHeader>(sql, values)
+    const [result] = await pool.execute<ResultSetHeader>(sql, values);
 
     if (result.affectedRows === 0) {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to create city',
-            data: { statusMessageRu: 'Не удалось создать город' }
+            data: { statusMessageRu: 'Не удалось создать город' },
         });
     }
 }
@@ -49,7 +49,6 @@ export async function getCityByUuid(uuid: string): Promise<ICity | null> {
     const [rows] = await pool.execute<RowDataPacket[]>(sql, [uuid]);
     const city = rows[0] as ICity;
 
-
     if (!city) {
         return null;
     }
@@ -61,7 +60,7 @@ export async function getCityByUuid(uuid: string): Promise<ICity | null> {
         name: city.name,
         coordinates: city.coordinates,
         state_uuid: city.state_uuid,
-        is_capital: Boolean(city.is_capital)
+        is_capital: Boolean(city.is_capital),
     };
 }
 
@@ -84,10 +83,9 @@ export async function getCitiesByStateUuid(stateUuid: string): Promise<ICity[]> 
         name: city.name,
         coordinates: city.coordinates,
         state_uuid: city.state_uuid,
-        is_capital: Boolean(city.is_capital)
+        is_capital: Boolean(city.is_capital),
     }));
 }
-
 
 export async function updateCity(uuid: string, name?: string, coordinates?: string, stateUuid?: string, isCapital?: boolean): Promise<void> {
     const pool = useMySQL('states');
@@ -116,7 +114,7 @@ export async function updateCity(uuid: string, name?: string, coordinates?: stri
         throw createError({
             statusCode: 400,
             statusMessage: 'No fields to update',
-            data: { statusMessageRu: 'Нет полей для обновления' }
+            data: { statusMessageRu: 'Нет полей для обновления' },
         });
     }
 
@@ -134,11 +132,10 @@ export async function updateCity(uuid: string, name?: string, coordinates?: stri
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to update city',
-            data: { statusMessageRu: 'Не удалось обновить город' }
+            data: { statusMessageRu: 'Не удалось обновить город' },
         });
     }
 }
-
 
 export async function deleteCity(uuid: string): Promise<void> {
     const pool = useMySQL('states');
@@ -155,11 +152,10 @@ export async function deleteCity(uuid: string): Promise<void> {
         throw createError({
             statusCode: 404,
             statusMessage: 'City not found',
-            data: { statusMessageRu: 'Город не найден' }
+            data: { statusMessageRu: 'Город не найден' },
         });
     }
 }
-
 
 export async function attachCityToState(cityUuid: string, stateUuid: string): Promise<void> {
     await getStateByUuid(stateUuid);
@@ -178,11 +174,10 @@ export async function attachCityToState(cityUuid: string, stateUuid: string): Pr
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to attach city to state',
-            data: { statusMessageRu: 'Не удалось прикрепить город к государству' }
+            data: { statusMessageRu: 'Не удалось прикрепить город к государству' },
         });
     }
 }
-
 
 export async function detachCityFromState(cityUuid: string): Promise<void> {
     const pool = useMySQL('states');
@@ -193,7 +188,7 @@ export async function detachCityFromState(cityUuid: string): Promise<void> {
         throw createError({
             statusCode: 400,
             statusMessage: 'Cannot detach capital city from state',
-            data: { statusMessageRu: 'Невозможно открепить столицу от государства' }
+            data: { statusMessageRu: 'Невозможно открепить столицу от государства' },
         });
     }
 
@@ -209,11 +204,10 @@ export async function detachCityFromState(cityUuid: string): Promise<void> {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to detach city from state',
-            data: { statusMessageRu: 'Не удалось открепить город от государства' }
+            data: { statusMessageRu: 'Не удалось открепить город от государства' },
         });
     }
 }
-
 
 export async function isCityCapital(cityUuid: string): Promise<boolean> {
     const pool = useMySQL('states');
@@ -231,13 +225,12 @@ export async function isCityCapital(cityUuid: string): Promise<boolean> {
         throw createError({
             statusCode: 404,
             statusMessage: 'City not found',
-            data: { statusMessageRu: 'Город не найден' }
+            data: { statusMessageRu: 'Город не найден' },
         });
     }
 
     return !!result.is_capital;
 }
-
 
 export async function setCityAsCapital(cityUuid: string): Promise<void> {
     const pool = useMySQL('states');
@@ -247,7 +240,7 @@ export async function setCityAsCapital(cityUuid: string): Promise<void> {
         throw createError({
             statusCode: 400,
             statusMessage: 'City has no state',
-            data: { statusMessageRu: 'Город не принадлежит государству' }
+            data: { statusMessageRu: 'Город не принадлежит государству' },
         });
     }
 
@@ -263,7 +256,7 @@ export async function setCityAsCapital(cityUuid: string): Promise<void> {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to reset previous capital',
-            data: { statusMessageRu: 'Не удалось сбросить предыдущую столицу' }
+            data: { statusMessageRu: 'Не удалось сбросить предыдущую столицу' },
         });
     }
 
@@ -276,11 +269,10 @@ export async function setCityAsCapital(cityUuid: string): Promise<void> {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to set city as capital',
-            data: { statusMessageRu: 'Не удалось установить город столицей' }
+            data: { statusMessageRu: 'Не удалось установить город столицей' },
         });
     }
 }
-
 
 export async function attachPlayerToCity(playerUuid: string, cityUuid: string): Promise<void> {
     const pool = useMySQL('states');
@@ -291,7 +283,7 @@ export async function attachPlayerToCity(playerUuid: string, cityUuid: string): 
         throw createError({
             statusCode: 404,
             statusMessage: 'City not found',
-            data: { statusMessageRu: 'Город не найден' }
+            data: { statusMessageRu: 'Город не найден' },
         });
     }
 
@@ -299,9 +291,10 @@ export async function attachPlayerToCity(playerUuid: string, cityUuid: string): 
         throw createError({
             statusCode: 400,
             statusMessage: 'City has no state',
-            data: { statusMessageRu: 'Город не принадлежит государству' }
+            data: { statusMessageRu: 'Город не принадлежит государству' },
         });
-    } else {
+    }
+    else {
         const sql = 'SELECT `state_uuid` FROM `state_members` WHERE `player_uuid` = ?';
 
         // DEPRECATED, keeping this for info
@@ -315,7 +308,7 @@ export async function attachPlayerToCity(playerUuid: string, cityUuid: string): 
             throw createError({
                 statusCode: 400,
                 statusMessage: 'Player is not in the same state as the city',
-                data: { statusMessageRu: 'Игрок не находится в том же государстве, что и город' }
+                data: { statusMessageRu: 'Игрок не находится в том же государстве, что и город' },
             });
         }
     }
@@ -331,11 +324,10 @@ export async function attachPlayerToCity(playerUuid: string, cityUuid: string): 
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to attach player to city',
-            data: { statusMessageRu: 'Не удалось прикрепить игрока к городу' }
+            data: { statusMessageRu: 'Не удалось прикрепить игрока к городу' },
         });
     }
 }
-
 
 export async function detachPlayerFromCity(playerUuid: string): Promise<void> {
     const pool = useMySQL('states');
@@ -352,11 +344,10 @@ export async function detachPlayerFromCity(playerUuid: string): Promise<void> {
         throw createError({
             statusCode: 500,
             statusMessage: 'Failed to detach player from city',
-            data: { statusMessageRu: 'Не удалось открепить игрока от города' }
+            data: { statusMessageRu: 'Не удалось открепить игрока от города' },
         });
     }
 }
-
 
 export async function listCities(startAt = 0, limit = 100): Promise<ICity[]> {
     const pool = useMySQL('states');
@@ -370,8 +361,6 @@ export async function listCities(startAt = 0, limit = 100): Promise<ICity[]> {
     const [rows] = await pool.execute<RowDataPacket[]>(sql, [limit, startAt]);
     return (rows as ICity[]).map(city => ({
         ...city,
-        is_capital: Boolean(city.is_capital)
+        is_capital: Boolean(city.is_capital),
     }));
 }
-
-

@@ -4,7 +4,7 @@ import type { IState }         from '~/types/state.types'
 
 import StateCard from "~/components/states/StateCard.vue";
 
-const { data } = useAuth()
+const { user: data } = useAuthSystem()
 const states = ref<IState[]>([])
 const loading = ref(true)
 
