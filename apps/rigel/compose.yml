@@ -1,0 +1,3 @@
+name: helicraft-minecraft
+include:
+  - path: ../deneb/compose.yml

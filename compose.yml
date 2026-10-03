@@ -1,0 +1,96 @@
+name: helicraft
+include:
+  - path: infra/compose.services.yml
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/antares/Dockerfile
+    command: [bun, scripts/migrate.ts]
+    environment:
+      DATABASE_URL: postgresql://helicraft:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/helicraft
+    depends_on:
+      postgres: { condition: service_healthy }
+  antares:
+    build:
+      context: .
+      dockerfile: apps/antares/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: '3000'
+      DATABASE_URL: postgresql://helicraft:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/helicraft
+      S3_ENDPOINT: http://storage:8333
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?Set S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-helicraft}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      storage: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          CMD,
+          bun,
+          -e,
+          "fetch('http://localhost:3000/api/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 15s
+      retries: 12
+  vega:
+    build:
+      context: .
+      dockerfile: apps/vega/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: '8080'
+      API_PROXY_TARGET: http://antares:3000
+    ports:
+      - '${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:8080'
+    depends_on:
+      antares: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          CMD,
+          bun,
+          -e,
+          "fetch('http://localhost:8080/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  deneb:
+    build:
+      context: .
+      dockerfile: apps/deneb/Dockerfile
+    restart: unless-stopped
+    environment:
+      ANTARES_URL: http://antares:3000
+      EULA: ${EULA:-false}
+      FORWARDING_SECRET: ${FORWARDING_SECRET:?Set an alphanumeric FORWARDING_SECRET}
+      JAVA_XMX: ${DENEB_MEMORY:-2G}
+    volumes:
+      - deneb-data:/data
+    depends_on:
+      antares: { condition: service_healthy }
+  rigel:
+    build:
+      context: .
+      dockerfile: apps/rigel/Dockerfile
+    restart: unless-stopped
+    environment:
+      ANTARES_URL: http://antares:3000
+      FORWARDING_SECRET: ${FORWARDING_SECRET:?Set an alphanumeric FORWARDING_SECRET}
+      JAVA_XMX: ${RIGEL_MEMORY:-512M}
+    ports:
+      - '${MINECRAFT_BIND:-0.0.0.0}:${MINECRAFT_PORT:-25565}:25565'
+    volumes:
+      - rigel-data:/data
+    depends_on:
+      antares: { condition: service_healthy }
+      deneb: { condition: service_started }
+volumes:
+  deneb-data:
+  rigel-data:

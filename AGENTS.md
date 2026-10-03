@@ -1,62 +1,31 @@
-# HeliCraft Context & Guidelines
+# HeliCraft agent guide
 
-## 1. Project Overview
-This repository is a monorepo for the **HeliCraft Minecraft Server** ecosystem.
+## Repository
 
-## 2. Structure
-- **Root**: Workspace management only. No shared business logic here.
-- **Frontend (`apps/vesper`)**: Project **Vesper**. A Nuxt application.
-- **Backend (`apps/teapot`)**: Project **Teapot**. A Nitro / Node.js application.
+- Active Bun workspaces: `apps/vega`, `apps/antares`, `packages/atria`, `packages/alhena`. Install once at the root; use the root lockfile and `workspace:*` for internal packages.
+- `apps/deneb` and `apps/rigel`: Java 25 Gradle Kotlin DSL plugins, built with the root wrapper. Use JUnit 5.
+- `apps/altair`: documentation only until explicitly requested for implementation.
+- `archive/`: preserved Vesper, Teapot, Soon and old docs. Archived local AGENTS.md apply only there. Do not include archived projects in active builds or rewrite their files without a specific request.
+- Keep README.md and README_RU.md in sync, with language switches at the top. Product roles are in `docs/product-map.md`.
 
-> **NOTE (Backend)**: The backend (`Teapot`) is slated for migration to **Go** in the future. All backend logic must be strictly modular, type-safe, and decoupled to facilitate this future transition.
+## Boundaries
 
-### Frontend (Vesper)
-- **Framework**: Nuxt 4 (Vue 3, Composition API).
-- **Language**: TypeScript (Strict Mode).
-- **Styling**: Tailwind CSS. Prefer utility classes over `<style scoped>`.
-- **Auth**: `@sidebase/nuxt-auth` (Local provider).
-- **UI/Content**: `@nuxt/icon`, `@nuxt/image`. (Check `package.json` for other modules).
+- Only Antares accesses PostgreSQL/PostGIS and S3. Vega and plugins communicate through REST.
+- Do not import application implementation into another application's runtime. Shared UI comes from Atria; TS API consumers use Alhena.
+- Code generation and tests may inspect/import API contracts to export OpenAPI or exercise the real app. No published internal packages are required.
+- Antares is the source of truth for social, political, legal and economic world state. Keep handlers thin and business logic framework-independent.
+- Rigel's custom identity authentication is not implemented. Preserve secure standard authentication until a reviewed identity flow exists.
 
-### Backend (Teapot)
-- **Framework**: Nitro.
-- **Language**: TypeScript.
-- **Database**: MySQL 2 / Better SQLite 3.
+## Code and validation
 
-## 3. Monorepo Boundaries & Constraints
-1. **Strict Isolation**: 
-    - **NEVER** import code across application boundaries (e.g., no importing backend files into frontend).
-    - Communication must occur strictly via REST API.
-2. **Database Access**: 
-    - Only the Backend (`Teapot`) is allowed to access the database directly. The Frontend (`Vesper`) must fetch data via the Backend API.
-
-## 4. Request Boundaries & Instruction Hierarchy
-1. **Rule Hierarchy**: 
-    - Generally, this root `AGENTS.md` is the **SUPREME AUTHORITY**.
-    - **EXCEPTION (Naming & Style)**: For **Naming Conventions** and **Code Style**, the **LOCAL** `AGENTS.md` (in subdirectories) takes precedence over the root file.
-        - *Reasoning*: Different frameworks (e.g., Go vs. Vue) have unique style requirements that must be respected locally.
-    - **Conflict Resolution (Other)**: For architecture and boundaries, the **ROOT rule takes precedence**.
-2. **Scope Limit**: DO NOT modify **multiple** applications per one user request (e.g., do NOT create routes on the backend and pages on the frontend in a single turn).
-3. **Cross-Verification**: You **MUST READ** code from the other application to ensure compatibility.
-    - *Example*: When working on the Frontend, check the Backend route definitions.
-    - **Breaking Change Protocol**: If a breaking change to the API contract is unavoidable or explicitly requested:
-        - You **MUST** explicitly warn the user.
-        - You **MUST** use a highlighted warning block (e.g., `> [!WARNING]`) to explain exactly what will break in the other application.
-
-## 5. Coding Standards
-
-### General TypeScript (Fallback)
-> *Note: Apply these rules unless overridden by a local `AGENTS.md`.*
-
-- **No `any`**: Use explicit interfaces and types.
-- **DTOs**: Define clear Data Transfer Objects for API communication.
-- **Naming**: 
-    - Variables/Functions: `camelCase`
-    - Components/Classes: `PascalCase`
-    - Files: `kebab-case` (except Vue components).
-
-## 6. AI Interaction Rules
-1. **Context Awareness**: Always verify which directory (`apps/vesper` or `apps/teapot`) you are working in before suggesting file paths.
-2. **Conciseness**: Provide code solutions directly. Minimal explanation unless requested.
-3. **Language**: 
-    - Code comments: **English**.
-    - Chat responses: **Russian** (if the user speaks Russian), otherwise English.
+- Explicit TypeScript types and DTOs; no `any` or unchecked casts in authored code. Generated SDK code is generator-owned.
+- Secrets belong in environment variables; never client-visible Vite config or tracked .env files.
+- Use Russian star names in Russian conversation; keep English project identifiers/headings.
+- TS7 is the compiler; TS6 is isolated only for the Alhena generator Compiler API. Do not downgrade project compilers.
+- JS/TS: oxlint with type-aware rules and all categories as errors; oxfmt formatting. Document targeted exceptions. Java: Checkstyle and Spotless/google-java-format, compiler warnings are errors.
+- English code comments. Limit changes to the requested scope.
+- Use Bun for JS scripts/CLIs. Run `build:ts`, `typecheck`, `lint`, `format:check`, `test:unit` for TS changes; relevant Playwright/Testcontainers tests for integration changes.
+- Java changes: build and relevant JUnit tests through Gradle. Continuous build does not reload live plugins.
+- Target database is `helicraft` (PostgreSQL). Review generated SQL and apply migrations; do not run schema push against live databases.
+- Validate root and affected per-app Compose definitions. Never accept Minecraft EULA on the user's behalf.
+- Report unavailable Docker/browser/native tooling separately from code regressions.

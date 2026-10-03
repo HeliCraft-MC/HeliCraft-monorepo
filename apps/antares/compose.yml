@@ -1,0 +1,11 @@
+name: helicraft-antares
+include:
+  - path: ../../infra/compose.services.yml
+services:
+  migrate:
+    extends: { file: ../../compose.yml, service: migrate }
+    build: { context: ../.., dockerfile: apps/antares/Dockerfile }
+  antares:
+    extends: { file: ../../compose.yml, service: antares }
+    build: { context: ../.., dockerfile: apps/antares/Dockerfile }
+    ports: ['127.0.0.1:3000:3000']

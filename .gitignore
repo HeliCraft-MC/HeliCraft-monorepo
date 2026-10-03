@@ -1,13 +1,24 @@
-# Logs
-logs
+# Dependencies and generated build output
+**/node_modules/
+**/dist/
+**/.gradle/
+**/build/
+**/storybook-static/
+**/coverage/
+**/test-results/
+**/playwright-report/
+**/run/
+logs/
 *.log
-
-# Misc
 .DS_Store
-.fleet
-.idea
-
-# Local env files
+.fleet/
+.idea/
 .env
 .env.*
 !.env.example
+# Archived runtime data and caches
+archive/**/.nuxt/
+archive/**/.output/
+archive/**/.data/
+archive/**/*.sqlite*
+archive/**/uploads/

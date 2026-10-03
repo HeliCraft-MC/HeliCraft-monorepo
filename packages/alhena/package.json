@@ -1,0 +1,26 @@
+{
+  "name": "@helicraft/alhena",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./client": "./src/generated/client/index.ts"
+  },
+  "scripts": {
+    "generate": "bunx --bun openapi-ts",
+    "build": "bun build src/index.ts --target=browser --outdir=dist && bun ../../node_modules/typescript/bin/tsc -p tsconfig.build.json",
+    "dev": "bun --watch scripts/watch.ts",
+    "typecheck": "bun ../../node_modules/typescript/bin/tsc --noEmit",
+    "test": "bunx --bun vitest run"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/bun": "1.4.2",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

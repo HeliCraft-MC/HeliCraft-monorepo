@@ -1,0 +1,7 @@
+name: helicraft-vega
+include:
+  - path: ../antares/compose.yml
+services:
+  vega:
+    extends: { file: ../../compose.yml, service: vega }
+    build: { context: ../.., dockerfile: apps/vega/Dockerfile }

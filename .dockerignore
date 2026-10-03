@@ -1,0 +1,14 @@
+archive
+.git
+.agents
+.aws
+.codex
+**/node_modules
+**/dist
+**/build
+**/.gradle
+**/run
+**/.env
+.env
+**/test-results
+**/playwright-report

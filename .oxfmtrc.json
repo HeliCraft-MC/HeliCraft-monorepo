@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "ignorePatterns": [
+    "archive/**",
+    "**/generated/**",
+    "**/routeTree.gen.ts",
+    "**/dist/**",
+    "**/build/**",
+    "**/storybook-static/**",
+    "bun.lock",
+    "gradlew",
+    "gradlew.bat",
+    "apps/antares/openapi.json"
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "react",
+    "react-perf",
+    "jsx-a11y",
+    "import",
+    "promise",
+    "node",
+    "jsdoc",
+    "oxc"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "restriction": "error",
+    "style": "error"
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true,
+    "maxWarnings": 0
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "globals": {
+    "Bun": "readonly"
+  },
+  "ignorePatterns": [
+    "archive/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/storybook-static/**",
+    "**/node_modules/**",
+    "**/generated/**",
+    "**/routeTree.gen.ts"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "sort-keys": "off",
+    "sort-imports": "off",
+    "import/no-named-export": "off",
+    "import/prefer-default-export": "off",
+    "import/no-relative-parent-imports": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "node/no-top-level-await": "off",
+    "no-ternary": "off",
+    "no-void": "off",
+    "unicorn/no-null": "off",
+    "no-undefined": "off",
+    "react/jsx-no-literals": "off",
+    "react/forbid-component-props": "off",
+    "react/jsx-props-no-spreading": "off",
+    "typescript/prefer-readonly-parameter-types": "off",
+    "vitest/no-importing-vitest-globals": "off",
+    "vitest/require-hook": "off",
+    "one-var": ["error", "never"],
+    "func-style": [
+      "error",
+      "declaration",
+      {
+        "allowArrowFunctions": true
+      }
+    ],
+    "id-length": [
+      "error",
+      {
+        "min": 2,
+        "exceptions": ["z", "c", "x", "y"]
+      }
+    ],
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        "extensions": [".tsx"]
+      }
+    ],
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css", "@testing-library/jest-dom/vitest"]
+      }
+    ],
+    "no-magic-numbers": [
+      "error",
+      {
+        "ignore": [0, 1],
+        "ignoreArrayIndexes": true,
+        "ignoreDefaultValues": true
+      }
+    ],
+    "unicorn/max-nested-calls": [
+      "error",
+      {
+        "max": 6
+      }
+    ],
+    "typescript/strict-void-return": "off",
+    "max-statements": ["error", 20],
+    "promise/prefer-await-to-callbacks": "off",
+    "unicorn/numeric-separators-style": [
+      "error",
+      {
+        "minimumDigits": 4
+      }
+    ],
+    "typescript/return-await": ["error", "always"],
+    "no-duplicate-imports": [
+      "error",
+      {
+        "allowSeparateTypeImports": true
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.config.ts",
+        "**/vite.config.ts",
+        "**/vitest*.config.ts",
+        "**/.storybook/*.ts",
+        "**/*.stories.tsx"
+      ],
+      "rules": {
+        "import/no-default-export": "off",
+        "no-magic-numbers": "off",
+        "max-nested-callbacks": "off",
+        "import/exports-last": "off",
+        "import/group-exports": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/tests/setup.ts"],
+      "rules": {
+        "vitest/prefer-lowercase-title": [
+          "error",
+          {
+            "ignore": ["describe"]
+          }
+        ],
+        "vitest/consistent-test-it": [
+          "error",
+          {
+            "fn": "it",
+            "withinDescribe": "it"
+          }
+        ],
+        "no-magic-numbers": "off",
+        "max-lines-per-function": [
+          "error",
+          {
+            "max": 100,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "vitest/require-mock-type-parameters": "error"
+      },
+      "plugins": [
+        "typescript",
+        "unicorn",
+        "react",
+        "react-perf",
+        "jsx-a11y",
+        "import",
+        "promise",
+        "node",
+        "jsdoc",
+        "oxc",
+        "vitest"
+      ]
+    },
+    {
+      "files": [
+        "apps/antares/**/*.ts",
+        "scripts/**/*.ts",
+        "infra/**/*.ts",
+        "tests/e2e/server.ts",
+        "**/scripts/**/*.ts",
+        "playwright.config.ts",
+        "tests/e2e/static-server.ts"
+      ],
+      "rules": {
+        "import/no-nodejs-modules": "off",
+        "no-console": [
+          "error",
+          {
+            "allow": ["info", "warn", "error"]
+          }
+        ],
+        "node/no-process-env": "off",
+        "unicorn/no-process-exit": "off"
+      }
+    },
+    {
+      "files": ["**/vite.config.ts"],
+      "rules": {
+        "node/no-process-env": "off"
+      }
+    },
+    {
+      "files": ["infra/serve-vega.ts"],
+      "rules": {
+        "max-statements": ["error", 25],
+        "no-magic-numbers": "off"
+      }
+    },
+    {
+      "files": ["packages/alhena/scripts/watch.ts"],
+      "rules": {
+        "promise/avoid-new": "off"
+      }
+    }
+  ]
+}

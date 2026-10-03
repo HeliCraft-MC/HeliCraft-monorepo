@@ -1,0 +1,8 @@
+name: helicraft-dev
+include:
+  - path: infra/compose.services.yml
+services:
+  postgres:
+    ports: ['127.0.0.1:5432:5432']
+  storage:
+    ports: ['127.0.0.1:8333:8333']

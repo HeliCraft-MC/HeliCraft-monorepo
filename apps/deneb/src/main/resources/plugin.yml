@@ -1,0 +1,10 @@
+name: Deneb
+version: 0.1.0
+main: io.helicraft.deneb.DenebPlugin
+api-version: '26.2'
+authors: [HeliCraft]
+description: HeliCraft presence in Minecraft
+commands:
+  deneb:
+    description: Say hello to HeliCraft
+    usage: /deneb
