@@ -10,33 +10,370 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as ChronicleRouteImport } from './routes/chronicle'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as RulesRouteImport } from './routes/rules'
+import { Route as StartRouteImport } from './routes/start'
+import { Route as WorldRouteImport } from './routes/world'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminChronicleRouteImport } from './routes/admin.chronicle'
+import { Route as AdminPagesRouteImport } from './routes/admin.pages'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as ChronicleIndexRouteImport } from './routes/chronicle.index'
+import { Route as ChronicleSlugRouteImport } from './routes/chronicle.$slug'
+import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
+import { Route as AdminChronicleIndexRouteImport } from './routes/admin.chronicle.index'
+import { Route as AdminChronicleEntryIdRouteImport } from './routes/admin.chronicle.$entryId'
+import { Route as AdminChronicleNewRouteImport } from './routes/admin.chronicle.new'
+import { Route as AdminPagesIndexRouteImport } from './routes/admin.pages.index'
+import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
+import { Route as AdminPagesNewRouteImport } from './routes/admin.pages.new'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
+import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
+import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
+import { Route as AppSettingsSecurityRouteImport } from './routes/app.settings.security'
+import { Route as AppSettingsSkinRouteImport } from './routes/app.settings.skin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChronicleRoute = ChronicleRouteImport.update({
+  id: '/chronicle',
+  path: '/chronicle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RulesRoute = RulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StartRoute = StartRouteImport.update({
+  id: '/start',
+  path: '/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorldRoute = WorldRouteImport.update({
+  id: '/world',
+  path: '/world',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChronicleRoute = AdminChronicleRouteImport.update({
+  id: '/chronicle',
+  path: '/chronicle',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPagesRoute = AdminPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const ChronicleIndexRoute = ChronicleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChronicleRoute,
+} as any)
+const ChronicleSlugRoute = ChronicleSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ChronicleRoute,
+} as any)
+const PagesSlugRoute = PagesSlugRouteImport.update({
+  id: '/pages/$slug',
+  path: '/pages/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminChronicleIndexRoute = AdminChronicleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminChronicleRoute,
+} as any)
+const AdminChronicleEntryIdRoute = AdminChronicleEntryIdRouteImport.update({
+  id: '/$entryId',
+  path: '/$entryId',
+  getParentRoute: () => AdminChronicleRoute,
+} as any)
+const AdminChronicleNewRoute = AdminChronicleNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminChronicleRoute,
+} as any)
+const AdminPagesIndexRoute = AdminPagesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminPagesRoute,
+} as any)
+const AdminPagesPageIdRoute = AdminPagesPageIdRouteImport.update({
+  id: '/$pageId',
+  path: '/$pageId',
+  getParentRoute: () => AdminPagesRoute,
+} as any)
+const AdminPagesNewRoute = AdminPagesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminPagesRoute,
+} as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
+const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
+const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
+  id: '/settings/profile',
+  path: '/settings/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsSecurityRoute = AppSettingsSecurityRouteImport.update({
+  id: '/settings/security',
+  path: '/settings/security',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsSkinRoute = AppSettingsSkinRouteImport.update({
+  id: '/settings/skin',
+  path: '/settings/skin',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
+  '/chronicle': typeof ChronicleRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/rules': typeof RulesRoute
+  '/start': typeof StartRoute
+  '/world': typeof WorldRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
+  '/chronicle/': typeof ChronicleIndexRoute
+  '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
+  '/admin/chronicle/new': typeof AdminChronicleNewRoute
+  '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
+  '/admin/pages/new': typeof AdminPagesNewRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/security': typeof AppSettingsSecurityRoute
+  '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/admin/chronicle/': typeof AdminChronicleIndexRoute
+  '/admin/pages/': typeof AdminPagesIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/rules': typeof RulesRoute
+  '/start': typeof StartRoute
+  '/world': typeof WorldRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/admin': typeof AdminIndexRoute
+  '/app': typeof AppIndexRoute
+  '/chronicle': typeof ChronicleIndexRoute
+  '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
+  '/admin/chronicle/new': typeof AdminChronicleNewRoute
+  '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
+  '/admin/pages/new': typeof AdminPagesNewRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/security': typeof AppSettingsSecurityRoute
+  '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/admin/chronicle': typeof AdminChronicleIndexRoute
+  '/admin/pages': typeof AdminPagesIndexRoute
+  '/admin/users': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
+  '/chronicle': typeof ChronicleRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/rules': typeof RulesRoute
+  '/start': typeof StartRoute
+  '/world': typeof WorldRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
+  '/chronicle/': typeof ChronicleIndexRoute
+  '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
+  '/admin/chronicle/new': typeof AdminChronicleNewRoute
+  '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
+  '/admin/pages/new': typeof AdminPagesNewRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/security': typeof AppSettingsSecurityRoute
+  '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/admin/chronicle/': typeof AdminChronicleIndexRoute
+  '/admin/pages/': typeof AdminPagesIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/app'
+    | '/chronicle'
+    | '/login'
+    | '/register'
+    | '/rules'
+    | '/start'
+    | '/world'
+    | '/admin/audit'
+    | '/admin/chronicle'
+    | '/admin/pages'
+    | '/admin/users'
+    | '/chronicle/$slug'
+    | '/pages/$slug'
+    | '/admin/'
+    | '/app/'
+    | '/chronicle/'
+    | '/admin/chronicle/$entryId'
+    | '/admin/chronicle/new'
+    | '/admin/pages/$pageId'
+    | '/admin/pages/new'
+    | '/admin/users/$userId'
+    | '/app/settings/profile'
+    | '/app/settings/security'
+    | '/app/settings/skin'
+    | '/admin/chronicle/'
+    | '/admin/pages/'
+    | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/rules'
+    | '/start'
+    | '/world'
+    | '/admin/audit'
+    | '/chronicle/$slug'
+    | '/pages/$slug'
+    | '/admin'
+    | '/app'
+    | '/chronicle'
+    | '/admin/chronicle/$entryId'
+    | '/admin/chronicle/new'
+    | '/admin/pages/$pageId'
+    | '/admin/pages/new'
+    | '/admin/users/$userId'
+    | '/app/settings/profile'
+    | '/app/settings/security'
+    | '/app/settings/skin'
+    | '/admin/chronicle'
+    | '/admin/pages'
+    | '/admin/users'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/app'
+    | '/chronicle'
+    | '/login'
+    | '/register'
+    | '/rules'
+    | '/start'
+    | '/world'
+    | '/admin/audit'
+    | '/admin/chronicle'
+    | '/admin/pages'
+    | '/admin/users'
+    | '/chronicle/$slug'
+    | '/pages/$slug'
+    | '/admin/'
+    | '/app/'
+    | '/chronicle/'
+    | '/admin/chronicle/$entryId'
+    | '/admin/chronicle/new'
+    | '/admin/pages/$pageId'
+    | '/admin/pages/new'
+    | '/admin/users/$userId'
+    | '/app/settings/profile'
+    | '/app/settings/security'
+    | '/app/settings/skin'
+    | '/admin/chronicle/'
+    | '/admin/pages/'
+    | '/admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
+  ChronicleRoute: typeof ChronicleRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  RulesRoute: typeof RulesRoute
+  StartRoute: typeof StartRoute
+  WorldRoute: typeof WorldRoute
+  PagesSlugRoute: typeof PagesSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +385,320 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chronicle': {
+      id: '/chronicle'
+      path: '/chronicle'
+      fullPath: '/chronicle'
+      preLoaderRoute: typeof ChronicleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rules': {
+      id: '/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof RulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/start': {
+      id: '/start'
+      path: '/start'
+      fullPath: '/start'
+      preLoaderRoute: typeof StartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/world': {
+      id: '/world'
+      path: '/world'
+      fullPath: '/world'
+      preLoaderRoute: typeof WorldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chronicle': {
+      id: '/admin/chronicle'
+      path: '/chronicle'
+      fullPath: '/admin/chronicle'
+      preLoaderRoute: typeof AdminChronicleRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pages': {
+      id: '/admin/pages'
+      path: '/pages'
+      fullPath: '/admin/pages'
+      preLoaderRoute: typeof AdminPagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/chronicle/': {
+      id: '/chronicle/'
+      path: '/'
+      fullPath: '/chronicle/'
+      preLoaderRoute: typeof ChronicleIndexRouteImport
+      parentRoute: typeof ChronicleRoute
+    }
+    '/chronicle/$slug': {
+      id: '/chronicle/$slug'
+      path: '/$slug'
+      fullPath: '/chronicle/$slug'
+      preLoaderRoute: typeof ChronicleSlugRouteImport
+      parentRoute: typeof ChronicleRoute
+    }
+    '/pages/$slug': {
+      id: '/pages/$slug'
+      path: '/pages/$slug'
+      fullPath: '/pages/$slug'
+      preLoaderRoute: typeof PagesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/chronicle/': {
+      id: '/admin/chronicle/'
+      path: '/'
+      fullPath: '/admin/chronicle/'
+      preLoaderRoute: typeof AdminChronicleIndexRouteImport
+      parentRoute: typeof AdminChronicleRoute
+    }
+    '/admin/chronicle/$entryId': {
+      id: '/admin/chronicle/$entryId'
+      path: '/$entryId'
+      fullPath: '/admin/chronicle/$entryId'
+      preLoaderRoute: typeof AdminChronicleEntryIdRouteImport
+      parentRoute: typeof AdminChronicleRoute
+    }
+    '/admin/chronicle/new': {
+      id: '/admin/chronicle/new'
+      path: '/new'
+      fullPath: '/admin/chronicle/new'
+      preLoaderRoute: typeof AdminChronicleNewRouteImport
+      parentRoute: typeof AdminChronicleRoute
+    }
+    '/admin/pages/': {
+      id: '/admin/pages/'
+      path: '/'
+      fullPath: '/admin/pages/'
+      preLoaderRoute: typeof AdminPagesIndexRouteImport
+      parentRoute: typeof AdminPagesRoute
+    }
+    '/admin/pages/$pageId': {
+      id: '/admin/pages/$pageId'
+      path: '/$pageId'
+      fullPath: '/admin/pages/$pageId'
+      preLoaderRoute: typeof AdminPagesPageIdRouteImport
+      parentRoute: typeof AdminPagesRoute
+    }
+    '/admin/pages/new': {
+      id: '/admin/pages/new'
+      path: '/new'
+      fullPath: '/admin/pages/new'
+      preLoaderRoute: typeof AdminPagesNewRouteImport
+      parentRoute: typeof AdminPagesRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/admin/users/$userId': {
+      id: '/admin/users/$userId'
+      path: '/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AdminUsersUserIdRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/app/settings/profile': {
+      id: '/app/settings/profile'
+      path: '/settings/profile'
+      fullPath: '/app/settings/profile'
+      preLoaderRoute: typeof AppSettingsProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings/security': {
+      id: '/app/settings/security'
+      path: '/settings/security'
+      fullPath: '/app/settings/security'
+      preLoaderRoute: typeof AppSettingsSecurityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings/skin': {
+      id: '/app/settings/skin'
+      path: '/settings/skin'
+      fullPath: '/app/settings/skin'
+      preLoaderRoute: typeof AppSettingsSkinRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AdminChronicleRouteChildren {
+  AdminChronicleEntryIdRoute: typeof AdminChronicleEntryIdRoute
+  AdminChronicleNewRoute: typeof AdminChronicleNewRoute
+  AdminChronicleIndexRoute: typeof AdminChronicleIndexRoute
+}
+
+const AdminChronicleRouteChildren: AdminChronicleRouteChildren = {
+  AdminChronicleEntryIdRoute: AdminChronicleEntryIdRoute,
+  AdminChronicleNewRoute: AdminChronicleNewRoute,
+  AdminChronicleIndexRoute: AdminChronicleIndexRoute,
+}
+
+const AdminChronicleRouteWithChildren = AdminChronicleRoute._addFileChildren(
+  AdminChronicleRouteChildren,
+)
+
+interface AdminPagesRouteChildren {
+  AdminPagesPageIdRoute: typeof AdminPagesPageIdRoute
+  AdminPagesNewRoute: typeof AdminPagesNewRoute
+  AdminPagesIndexRoute: typeof AdminPagesIndexRoute
+}
+
+const AdminPagesRouteChildren: AdminPagesRouteChildren = {
+  AdminPagesPageIdRoute: AdminPagesPageIdRoute,
+  AdminPagesNewRoute: AdminPagesNewRoute,
+  AdminPagesIndexRoute: AdminPagesIndexRoute,
+}
+
+const AdminPagesRouteWithChildren = AdminPagesRoute._addFileChildren(
+  AdminPagesRouteChildren,
+)
+
+interface AdminUsersRouteChildren {
+  AdminUsersUserIdRoute: typeof AdminUsersUserIdRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersUserIdRoute: AdminUsersUserIdRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminAuditRoute: typeof AdminAuditRoute
+  AdminChronicleRoute: typeof AdminChronicleRouteWithChildren
+  AdminPagesRoute: typeof AdminPagesRouteWithChildren
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditRoute: AdminAuditRoute,
+  AdminChronicleRoute: AdminChronicleRouteWithChildren,
+  AdminPagesRoute: AdminPagesRouteWithChildren,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface AppRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+  AppSettingsProfileRoute: typeof AppSettingsProfileRoute
+  AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
+  AppSettingsSkinRoute: typeof AppSettingsSkinRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+  AppSettingsProfileRoute: AppSettingsProfileRoute,
+  AppSettingsSecurityRoute: AppSettingsSecurityRoute,
+  AppSettingsSkinRoute: AppSettingsSkinRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
+interface ChronicleRouteChildren {
+  ChronicleSlugRoute: typeof ChronicleSlugRoute
+  ChronicleIndexRoute: typeof ChronicleIndexRoute
+}
+
+const ChronicleRouteChildren: ChronicleRouteChildren = {
+  ChronicleSlugRoute: ChronicleSlugRoute,
+  ChronicleIndexRoute: ChronicleIndexRoute,
+}
+
+const ChronicleRouteWithChildren = ChronicleRoute._addFileChildren(
+  ChronicleRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
+  ChronicleRoute: ChronicleRouteWithChildren,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  RulesRoute: RulesRoute,
+  StartRoute: StartRoute,
+  WorldRoute: WorldRoute,
+  PagesSlugRoute: PagesSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

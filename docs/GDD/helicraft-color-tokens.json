@@ -1,0 +1,147 @@
+{
+  "bg": {
+    "base": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.054901960784313725, 0.0392156862745098, 0.023529411764705882],
+        "alpha": 1,
+        "hex": "#0E0A06"
+      }
+    },
+    "elevated": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.08235294117647059, 0.06274509803921569, 0.043137254901960784],
+        "alpha": 1,
+        "hex": "#15100B"
+      }
+    },
+    "panel": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.11372549019607843, 0.09019607843137255, 0.06666666666666667],
+        "alpha": 1,
+        "hex": "#1D1711"
+      }
+    },
+    "hover": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.15294117647058825, 0.12549019607843137, 0.09411764705882353],
+        "alpha": 1,
+        "hex": "#272018"
+      }
+    }
+  },
+  "text": {
+    "primary": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.9490196078431372, 0.9490196078431372, 0.9372549019607843],
+        "alpha": 1,
+        "hex": "#F2F2EF"
+      }
+    },
+    "secondary": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.8470588235294118, 0.8470588235294118, 0.8235294117647058],
+        "alpha": 1,
+        "hex": "#D8D8D2"
+      }
+    },
+    "muted": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.6666666666666666, 0.6549019607843137, 0.6235294117647059],
+        "alpha": 1,
+        "hex": "#AAA79F"
+      }
+    },
+    "disabled": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.48627450980392156, 0.4588235294117647, 0.4196078431372549],
+        "alpha": 1,
+        "hex": "#7C756B"
+      }
+    }
+  },
+  "border": {
+    "subtle": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.17254901960784313, 0.1411764705882353, 0.10588235294117647],
+        "alpha": 1,
+        "hex": "#2C241B"
+      }
+    },
+    "strong": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.2627450980392157, 0.21176470588235294, 0.1568627450980392],
+        "alpha": 1,
+        "hex": "#433628"
+      }
+    }
+  },
+  "primary": {
+    "default": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.8823529411764706, 0.6313725490196078, 0.35294117647058826],
+        "alpha": 1,
+        "hex": "#E1A15A"
+      }
+    },
+    "hover": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.9254901960784314, 0.6901960784313725, 0.43137254901960786],
+        "alpha": 1,
+        "hex": "#ECB06E"
+      }
+    },
+    "deep": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.7254901960784313, 0.47058823529411764, 0.20784313725490197],
+        "alpha": 1,
+        "hex": "#B97835"
+      }
+    }
+  },
+  "accent": {
+    "default": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.7254901960784313, 0.6509803921568628, 0.41568627450980394],
+        "alpha": 1,
+        "hex": "#B9A66A"
+      }
+    },
+    "soft": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.5529411764705883, 0.49411764705882355, 0.3333333333333333],
+        "alpha": 1,
+        "hex": "#8D7E55"
+      }
+    }
+  }
+}

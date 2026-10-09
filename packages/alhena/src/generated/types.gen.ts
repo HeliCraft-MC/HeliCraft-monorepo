@@ -4,6 +4,77 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type Principal = {
+    id: string;
+    username: string;
+    status: 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+    createdAt: string;
+    currentSkinId: string | null;
+    roles: Array<'PLAYER' | 'EDITOR' | 'MODERATOR' | 'ADMIN' | 'OWNER'>;
+    permissions: Array<string>;
+};
+
+export type PlatformError = {
+    message: string;
+    code?: string;
+};
+
+export type Success = {
+    success: true;
+};
+
+export type CurrentSkin = {
+    id: string;
+    model: 'CLASSIC' | 'SLIM';
+    width: number;
+    height: number;
+    createdAt: string;
+    skinUrl: string;
+    avatarUrl: string;
+} | null;
+
+export type PublicContent = {
+    id: string;
+    kind: 'PAGE' | 'CHRONICLE';
+    slug: string;
+    title: string;
+    description: string;
+    html: string;
+    seoTitle: string | null;
+    seoDescription: string | null;
+    category: string;
+    isFeatured: boolean;
+    publishedAt: string | null;
+    updatedAt: string;
+    author: string;
+};
+
+export type AdminContent = PublicContent & {
+    markdown: string;
+    status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+    revision: number;
+    createdBy: string;
+    updatedBy: string;
+};
+
+export type PublicSite = {
+    phase: 'PRELAUNCH' | 'OPEN';
+    registrationEnabled: boolean;
+    minecraftAddress: string | null;
+    canonicalOrigin: string;
+    links: Array<{
+        label: string;
+        url: string;
+    }>;
+};
+
+export type WorldSummary = {
+    phase: 'PRELAUNCH' | 'OPEN';
+    title: string;
+    description: string;
+    roadmap: Array<string>;
+};
+
 export type Health = {
     status: 'ok';
     service: 'antares';
@@ -20,6 +91,2864 @@ export type ApiError = {
 export type Readiness = {
     status: 'ready';
 };
+
+export type RegisterData = {
+    body: {
+        username: string;
+        password: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/register';
+};
+
+export type RegisterErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type RegisterError = RegisterErrors[keyof RegisterErrors];
+
+export type RegisterResponses = {
+    /**
+     * Result
+     */
+    200: Principal;
+};
+
+export type RegisterResponse = RegisterResponses[keyof RegisterResponses];
+
+export type LoginData = {
+    body: {
+        username: string;
+        password: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/login';
+};
+
+export type LoginErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type LoginError = LoginErrors[keyof LoginErrors];
+
+export type LoginResponses = {
+    /**
+     * Result
+     */
+    200: Principal;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type GetMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/me';
+};
+
+export type GetMeErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type GetMeError = GetMeErrors[keyof GetMeErrors];
+
+export type GetMeResponses = {
+    /**
+     * Result
+     */
+    200: Principal;
+};
+
+export type GetMeResponse = GetMeResponses[keyof GetMeResponses];
+
+export type GetAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account';
+};
+
+export type GetAccountErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type GetAccountError = GetAccountErrors[keyof GetAccountErrors];
+
+export type GetAccountResponses = {
+    /**
+     * Result
+     */
+    200: Principal;
+};
+
+export type GetAccountResponse = GetAccountResponses[keyof GetAccountResponses];
+
+export type LogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/logout';
+};
+
+export type LogoutErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type LogoutError = LogoutErrors[keyof LogoutErrors];
+
+export type LogoutResponses = {
+    /**
+     * Result
+     */
+    200: Success;
+};
+
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type LogoutAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/logout-all';
+};
+
+export type LogoutAllErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type LogoutAllError = LogoutAllErrors[keyof LogoutAllErrors];
+
+export type LogoutAllResponses = {
+    /**
+     * Result
+     */
+    200: Success;
+};
+
+export type LogoutAllResponse = LogoutAllResponses[keyof LogoutAllResponses];
+
+export type ChangeUsernameData = {
+    body: {
+        username: string;
+        currentPassword: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/username';
+};
+
+export type ChangeUsernameErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type ChangeUsernameError = ChangeUsernameErrors[keyof ChangeUsernameErrors];
+
+export type ChangeUsernameResponses = {
+    /**
+     * Result
+     */
+    200: Principal;
+};
+
+export type ChangeUsernameResponse = ChangeUsernameResponses[keyof ChangeUsernameResponses];
+
+export type ChangePasswordData = {
+    body: {
+        currentPassword: string;
+        password: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/password';
+};
+
+export type ChangePasswordErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type ChangePasswordError = ChangePasswordErrors[keyof ChangePasswordErrors];
+
+export type ChangePasswordResponses = {
+    /**
+     * Result
+     */
+    200: Success;
+};
+
+export type ChangePasswordResponse = ChangePasswordResponses[keyof ChangePasswordResponses];
+
+export type GetSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/sessions';
+};
+
+export type GetSessionsErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type GetSessionsError = GetSessionsErrors[keyof GetSessionsErrors];
+
+export type GetSessionsResponses = {
+    /**
+     * Result
+     */
+    200: Array<{
+        id: string;
+        createdAt: string;
+        lastSeenAt: string;
+        expiresAt: string;
+        userAgent: string | null;
+        current: boolean;
+    }>;
+};
+
+export type GetSessionsResponse = GetSessionsResponses[keyof GetSessionsResponses];
+
+export type RevokeSessionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/sessions/{id}';
+};
+
+export type RevokeSessionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type RevokeSessionError = RevokeSessionErrors[keyof RevokeSessionErrors];
+
+export type RevokeSessionResponses = {
+    /**
+     * Result
+     */
+    200: Success;
+};
+
+export type RevokeSessionResponse = RevokeSessionResponses[keyof RevokeSessionResponses];
+
+export type ResetSkinData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/skin';
+};
+
+export type ResetSkinErrors = {
+    /**
+     * Invalid PNG
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Unauthorized
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Too large
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Storage unavailable
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ResetSkinError = ResetSkinErrors[keyof ResetSkinErrors];
+
+export type ResetSkinResponses = {
+    /**
+     * Current skin
+     */
+    200: CurrentSkin;
+};
+
+export type ResetSkinResponse = ResetSkinResponses[keyof ResetSkinResponses];
+
+export type GetSkinData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/skin';
+};
+
+export type GetSkinErrors = {
+    /**
+     * Invalid PNG
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Unauthorized
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Too large
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Storage unavailable
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetSkinError = GetSkinErrors[keyof GetSkinErrors];
+
+export type GetSkinResponses = {
+    /**
+     * Current skin
+     */
+    200: CurrentSkin;
+};
+
+export type GetSkinResponse = GetSkinResponses[keyof GetSkinResponses];
+
+export type UploadSkinData = {
+    body: {
+        file: Blob | File;
+        model: 'CLASSIC' | 'SLIM';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/skin';
+};
+
+export type UploadSkinErrors = {
+    /**
+     * Invalid PNG
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Unauthorized
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Too large
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Storage unavailable
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type UploadSkinError = UploadSkinErrors[keyof UploadSkinErrors];
+
+export type UploadSkinResponses = {
+    /**
+     * Current skin
+     */
+    200: CurrentSkin;
+};
+
+export type UploadSkinResponse = UploadSkinResponses[keyof UploadSkinResponses];
+
+export type GetPlayerSkinData = {
+    body?: never;
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/public/players/{uuid}/skin.png';
+};
+
+export type GetPlayerSkinErrors = {
+    /**
+     * Invalid PNG
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Unauthorized
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * No custom skin
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Too large
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Storage unavailable
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetPlayerSkinError = GetPlayerSkinErrors[keyof GetPlayerSkinErrors];
+
+export type GetPlayerSkinResponses = {
+    /**
+     * PNG image
+     */
+    200: Blob | File;
+};
+
+export type GetPlayerSkinResponse = GetPlayerSkinResponses[keyof GetPlayerSkinResponses];
+
+export type GetPlayerAvatarData = {
+    body?: never;
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/public/players/{uuid}/avatar.png';
+};
+
+export type GetPlayerAvatarErrors = {
+    /**
+     * Invalid PNG
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Unauthorized
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * No custom skin
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Too large
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Storage unavailable
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetPlayerAvatarError = GetPlayerAvatarErrors[keyof GetPlayerAvatarErrors];
+
+export type GetPlayerAvatarResponses = {
+    /**
+     * PNG image
+     */
+    200: Blob | File;
+};
+
+export type GetPlayerAvatarResponse = GetPlayerAvatarResponses[keyof GetPlayerAvatarResponses];
+
+export type ListPublicPagesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/public/pages';
+};
+
+export type ListPublicPagesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListPublicPagesError = ListPublicPagesErrors[keyof ListPublicPagesErrors];
+
+export type ListPublicPagesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<PublicContent>;
+        total: number;
+    };
+};
+
+export type ListPublicPagesResponse = ListPublicPagesResponses[keyof ListPublicPagesResponses];
+
+export type GetPublicPageData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/api/v1/public/pages/{slug}';
+};
+
+export type GetPublicPageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetPublicPageError = GetPublicPageErrors[keyof GetPublicPageErrors];
+
+export type GetPublicPageResponses = {
+    /**
+     * Result
+     */
+    200: {
+        document: PublicContent;
+        redirect: boolean;
+    };
+};
+
+export type GetPublicPageResponse = GetPublicPageResponses[keyof GetPublicPageResponses];
+
+export type ListAdminPagesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/admin/pages';
+};
+
+export type ListAdminPagesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListAdminPagesError = ListAdminPagesErrors[keyof ListAdminPagesErrors];
+
+export type ListAdminPagesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<AdminContent>;
+        total: number;
+    };
+};
+
+export type ListAdminPagesResponse = ListAdminPagesResponses[keyof ListAdminPagesResponses];
+
+export type CreatePageData = {
+    body: {
+        slug: string;
+        title: string;
+        description: string;
+        markdown: string;
+        seoTitle?: string | null;
+        seoDescription?: string | null;
+        category?: 'Мир' | 'Сообщество' | 'Строительство' | 'События' | 'Обновления проекта';
+        isFeatured?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/pages';
+};
+
+export type CreatePageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type CreatePageError = CreatePageErrors[keyof CreatePageErrors];
+
+export type CreatePageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type CreatePageResponse = CreatePageResponses[keyof CreatePageResponses];
+
+export type GetAdminPageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}';
+};
+
+export type GetAdminPageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetAdminPageError = GetAdminPageErrors[keyof GetAdminPageErrors];
+
+export type GetAdminPageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type GetAdminPageResponse = GetAdminPageResponses[keyof GetAdminPageResponses];
+
+export type SavePageData = {
+    body: {
+        slug: string;
+        title: string;
+        description: string;
+        markdown: string;
+        seoTitle?: string | null;
+        seoDescription?: string | null;
+        category?: 'Мир' | 'Сообщество' | 'Строительство' | 'События' | 'Обновления проекта';
+        isFeatured?: boolean;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}';
+};
+
+export type SavePageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type SavePageError = SavePageErrors[keyof SavePageErrors];
+
+export type SavePageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type SavePageResponse = SavePageResponses[keyof SavePageResponses];
+
+export type PublishPageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}/publish';
+};
+
+export type PublishPageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type PublishPageError = PublishPageErrors[keyof PublishPageErrors];
+
+export type PublishPageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type PublishPageResponse = PublishPageResponses[keyof PublishPageResponses];
+
+export type UnpublishPageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}/unpublish';
+};
+
+export type UnpublishPageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type UnpublishPageError = UnpublishPageErrors[keyof UnpublishPageErrors];
+
+export type UnpublishPageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type UnpublishPageResponse = UnpublishPageResponses[keyof UnpublishPageResponses];
+
+export type ArchivePageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}/archive';
+};
+
+export type ArchivePageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ArchivePageError = ArchivePageErrors[keyof ArchivePageErrors];
+
+export type ArchivePageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type ArchivePageResponse = ArchivePageResponses[keyof ArchivePageResponses];
+
+export type GetPageRevisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}/revisions';
+};
+
+export type GetPageRevisionsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetPageRevisionsError = GetPageRevisionsErrors[keyof GetPageRevisionsErrors];
+
+export type GetPageRevisionsResponses = {
+    /**
+     * Result
+     */
+    200: Array<{
+        id: string;
+        documentId: string;
+        revision: number;
+        snapshot: {
+            slug: string;
+            title: string;
+            description: string;
+            markdown: string;
+            seoTitle?: string | null;
+            seoDescription?: string | null;
+            category?: 'Мир' | 'Сообщество' | 'Строительство' | 'События' | 'Обновления проекта';
+            isFeatured?: boolean;
+        };
+        editorId: string;
+        createdAt: string;
+    }>;
+};
+
+export type GetPageRevisionsResponse = GetPageRevisionsResponses[keyof GetPageRevisionsResponses];
+
+export type RestorePageData = {
+    body: {
+        revision: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/pages/{id}/restore';
+};
+
+export type RestorePageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type RestorePageError = RestorePageErrors[keyof RestorePageErrors];
+
+export type RestorePageResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type RestorePageResponse = RestorePageResponses[keyof RestorePageResponses];
+
+export type ListChronicleData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/public/chronicle';
+};
+
+export type ListChronicleErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListChronicleError = ListChronicleErrors[keyof ListChronicleErrors];
+
+export type ListChronicleResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<PublicContent>;
+        total: number;
+    };
+};
+
+export type ListChronicleResponse = ListChronicleResponses[keyof ListChronicleResponses];
+
+export type GetChronicleEntryData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/api/v1/public/chronicle/{slug}';
+};
+
+export type GetChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetChronicleEntryError = GetChronicleEntryErrors[keyof GetChronicleEntryErrors];
+
+export type GetChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: {
+        document: PublicContent;
+        redirect: boolean;
+    };
+};
+
+export type GetChronicleEntryResponse = GetChronicleEntryResponses[keyof GetChronicleEntryResponses];
+
+export type ListAdminChronicleEntriesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/admin/chronicle';
+};
+
+export type ListAdminChronicleEntriesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListAdminChronicleEntriesError = ListAdminChronicleEntriesErrors[keyof ListAdminChronicleEntriesErrors];
+
+export type ListAdminChronicleEntriesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<AdminContent>;
+        total: number;
+    };
+};
+
+export type ListAdminChronicleEntriesResponse = ListAdminChronicleEntriesResponses[keyof ListAdminChronicleEntriesResponses];
+
+export type CreateChronicleEntryData = {
+    body: {
+        slug: string;
+        title: string;
+        description: string;
+        markdown: string;
+        seoTitle?: string | null;
+        seoDescription?: string | null;
+        category?: 'Мир' | 'Сообщество' | 'Строительство' | 'События' | 'Обновления проекта';
+        isFeatured?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/chronicle';
+};
+
+export type CreateChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type CreateChronicleEntryError = CreateChronicleEntryErrors[keyof CreateChronicleEntryErrors];
+
+export type CreateChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type CreateChronicleEntryResponse = CreateChronicleEntryResponses[keyof CreateChronicleEntryResponses];
+
+export type GetAdminChronicleEntryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}';
+};
+
+export type GetAdminChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetAdminChronicleEntryError = GetAdminChronicleEntryErrors[keyof GetAdminChronicleEntryErrors];
+
+export type GetAdminChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type GetAdminChronicleEntryResponse = GetAdminChronicleEntryResponses[keyof GetAdminChronicleEntryResponses];
+
+export type SaveChronicleEntryData = {
+    body: {
+        slug: string;
+        title: string;
+        description: string;
+        markdown: string;
+        seoTitle?: string | null;
+        seoDescription?: string | null;
+        category?: 'Мир' | 'Сообщество' | 'Строительство' | 'События' | 'Обновления проекта';
+        isFeatured?: boolean;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}';
+};
+
+export type SaveChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type SaveChronicleEntryError = SaveChronicleEntryErrors[keyof SaveChronicleEntryErrors];
+
+export type SaveChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type SaveChronicleEntryResponse = SaveChronicleEntryResponses[keyof SaveChronicleEntryResponses];
+
+export type PublishChronicleEntryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}/publish';
+};
+
+export type PublishChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type PublishChronicleEntryError = PublishChronicleEntryErrors[keyof PublishChronicleEntryErrors];
+
+export type PublishChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type PublishChronicleEntryResponse = PublishChronicleEntryResponses[keyof PublishChronicleEntryResponses];
+
+export type UnpublishChronicleEntryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}/unpublish';
+};
+
+export type UnpublishChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type UnpublishChronicleEntryError = UnpublishChronicleEntryErrors[keyof UnpublishChronicleEntryErrors];
+
+export type UnpublishChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type UnpublishChronicleEntryResponse = UnpublishChronicleEntryResponses[keyof UnpublishChronicleEntryResponses];
+
+export type ArchiveChronicleEntryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}/archive';
+};
+
+export type ArchiveChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ArchiveChronicleEntryError = ArchiveChronicleEntryErrors[keyof ArchiveChronicleEntryErrors];
+
+export type ArchiveChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type ArchiveChronicleEntryResponse = ArchiveChronicleEntryResponses[keyof ArchiveChronicleEntryResponses];
+
+export type GetChronicleEntryRevisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}/revisions';
+};
+
+export type GetChronicleEntryRevisionsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetChronicleEntryRevisionsError = GetChronicleEntryRevisionsErrors[keyof GetChronicleEntryRevisionsErrors];
+
+export type GetChronicleEntryRevisionsResponses = {
+    /**
+     * Result
+     */
+    200: Array<{
+        id: string;
+        documentId: string;
+        revision: number;
+        snapshot: {
+            slug: string;
+            title: string;
+            description: string;
+            markdown: string;
+            seoTitle?: string | null;
+            seoDescription?: string | null;
+            category?: 'Мир' | 'Сообщество' | 'Строительство' | 'События' | 'Обновления проекта';
+            isFeatured?: boolean;
+        };
+        editorId: string;
+        createdAt: string;
+    }>;
+};
+
+export type GetChronicleEntryRevisionsResponse = GetChronicleEntryRevisionsResponses[keyof GetChronicleEntryRevisionsResponses];
+
+export type RestoreChronicleEntryData = {
+    body: {
+        revision: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/chronicle/{id}/restore';
+};
+
+export type RestoreChronicleEntryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type RestoreChronicleEntryError = RestoreChronicleEntryErrors[keyof RestoreChronicleEntryErrors];
+
+export type RestoreChronicleEntryResponses = {
+    /**
+     * Result
+     */
+    200: AdminContent;
+};
+
+export type RestoreChronicleEntryResponse = RestoreChronicleEntryResponses[keyof RestoreChronicleEntryResponses];
+
+export type PreviewMarkdownData = {
+    body: {
+        markdown: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/content/preview';
+};
+
+export type PreviewMarkdownErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type PreviewMarkdownError = PreviewMarkdownErrors[keyof PreviewMarkdownErrors];
+
+export type PreviewMarkdownResponses = {
+    /**
+     * Result
+     */
+    200: {
+        html: string;
+    };
+};
+
+export type PreviewMarkdownResponse = PreviewMarkdownResponses[keyof PreviewMarkdownResponses];
+
+export type GetSiteData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/site';
+};
+
+export type GetSiteResponses = {
+    /**
+     * Public launch configuration
+     */
+    200: PublicSite;
+};
+
+export type GetSiteResponse = GetSiteResponses[keyof GetSiteResponses];
+
+export type GetWorldSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/world/summary';
+};
+
+export type GetWorldSummaryResponses = {
+    /**
+     * World concept and honest launch state
+     */
+    200: WorldSummary;
+};
+
+export type GetWorldSummaryResponse = GetWorldSummaryResponses[keyof GetWorldSummaryResponses];
+
+export type ListUsersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+        search?: string;
+        role?: 'PLAYER' | 'EDITOR' | 'MODERATOR' | 'ADMIN' | 'OWNER';
+        status?: 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+    };
+    url: '/api/v1/admin/users';
+};
+
+export type ListUsersErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListUsersError = ListUsersErrors[keyof ListUsersErrors];
+
+export type ListUsersResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<Principal>;
+        total: number;
+    };
+};
+
+export type ListUsersResponse = ListUsersResponses[keyof ListUsersResponses];
+
+export type GetUserDetailsData = {
+    body?: never;
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/users/{uuid}';
+};
+
+export type GetUserDetailsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetUserDetailsError = GetUserDetailsErrors[keyof GetUserDetailsErrors];
+
+export type GetUserDetailsResponses = {
+    /**
+     * Result
+     */
+    200: Principal & {
+        lastLoginAt: string | null;
+        history: Array<{
+            oldUsername: string;
+            newUsername: string;
+            changedAt: string;
+        }>;
+    };
+};
+
+export type GetUserDetailsResponse = GetUserDetailsResponses[keyof GetUserDetailsResponses];
+
+export type GetAdminStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/stats';
+};
+
+export type GetAdminStatsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetAdminStatsError = GetAdminStatsErrors[keyof GetAdminStatsErrors];
+
+export type GetAdminStatsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        users: number | null;
+        activeUsers: number | null;
+        publishedPages: number;
+        draftPages: number;
+        publishedChronicle: number;
+    };
+};
+
+export type GetAdminStatsResponse = GetAdminStatsResponses[keyof GetAdminStatsResponses];
+
+export type GetAuditData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+        actor?: string;
+        target?: string;
+        action?: string;
+        from?: string;
+        to?: string;
+    };
+    url: '/api/v1/admin/audit';
+};
+
+export type GetAuditErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetAuditError = GetAuditErrors[keyof GetAuditErrors];
+
+export type GetAuditResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            actorId: string;
+            action: string;
+            targetType: string;
+            targetId: string;
+            occurredAt: string;
+            metadata: {
+                [key: string]: string | number | boolean | Array<string>;
+            };
+        }>;
+        total: number;
+    };
+};
+
+export type GetAuditResponse = GetAuditResponses[keyof GetAuditResponses];
+
+export type ChangeUserStatusData = {
+    body: {
+        status: 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+    };
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/users/{uuid}/status';
+};
+
+export type ChangeUserStatusErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ChangeUserStatusError = ChangeUserStatusErrors[keyof ChangeUserStatusErrors];
+
+export type ChangeUserStatusResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ChangeUserStatusResponse = ChangeUserStatusResponses[keyof ChangeUserStatusResponses];
+
+export type ChangeUserRolesData = {
+    body: {
+        roles: Array<'PLAYER' | 'EDITOR' | 'MODERATOR' | 'ADMIN' | 'OWNER'>;
+    };
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/users/{uuid}/roles';
+};
+
+export type ChangeUserRolesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ChangeUserRolesError = ChangeUserRolesErrors[keyof ChangeUserRolesErrors];
+
+export type ChangeUserRolesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ChangeUserRolesResponse = ChangeUserRolesResponses[keyof ChangeUserRolesResponses];
+
+export type RevokeUserSessionsData = {
+    body?: never;
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/users/{uuid}/revoke-sessions';
+};
+
+export type RevokeUserSessionsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type RevokeUserSessionsError = RevokeUserSessionsErrors[keyof RevokeUserSessionsErrors];
+
+export type RevokeUserSessionsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RevokeUserSessionsResponse = RevokeUserSessionsResponses[keyof RevokeUserSessionsResponses];
 
 export type GetHealthData = {
     body?: never;

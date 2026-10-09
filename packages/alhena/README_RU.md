@@ -31,3 +31,7 @@ console.log(data.message);
 ## Название
 
 Альхена — γ Близнецов, звезда в созвездии Близнецов. [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/).
+
+## Web foundation contract
+
+Generated-клиент включает `/api/v1`: identity, account, sessions, skins, public pages/chronicle/site и admin users/content/audit. Вега использует эти методы с относительным same-origin API в браузере; public SSR использует отдельный server client без cookies. При изменении API запускайте корневой `bun run generate`; generated-файлы не редактируются вручную. DTO и permission checks остаются в Антаресе.

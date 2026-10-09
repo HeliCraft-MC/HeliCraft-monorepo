@@ -87,7 +87,7 @@
     "import/no-unassigned-import": [
       "error",
       {
-        "allow": ["**/*.css", "@testing-library/jest-dom/vitest"]
+        "allow": ["**/*.css", "**/*.scss", "@testing-library/jest-dom/vitest"]
       }
     ],
     "no-magic-numbers": [
@@ -218,6 +218,78 @@
       "files": ["packages/alhena/scripts/watch.ts"],
       "rules": {
         "promise/avoid-new": "off"
+      }
+    },
+    {
+      "files": ["apps/vega/src/**/*.tsx", "packages/atria/src/**/*.tsx"],
+      "rules": {
+        "react/jsx-max-depth": [
+          "error",
+          {
+            "max": 8
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/vega/src/routes/*.tsx"],
+      "rules": {
+        "typescript/only-throw-error": "off"
+      }
+    },
+    {
+      "files": [
+        "apps/antares/src/modules/identity/*routes.ts",
+        "apps/antares/src/modules/content/routes.ts",
+        "apps/antares/src/modules/content/site.ts",
+        "apps/antares/src/modules/skins/routes.ts",
+        "apps/antares/src/modules/administration/routes.ts"
+      ],
+      "rules": {
+        "max-lines-per-function": [
+          "error",
+          {
+            "max": 200,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/vega/src/**/*.tsx"],
+      "rules": {
+        "max-lines-per-function": [
+          "error",
+          {
+            "max": 150,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/*.stories.tsx"],
+      "rules": {
+        "react/no-multi-comp": "off",
+        "react-perf/jsx-no-new-array-as-prop": "off",
+        "react-perf/jsx-no-new-object-as-prop": "off",
+        "react-perf/jsx-no-jsx-as-prop": "off",
+        "import/max-dependencies": "off"
+      }
+    },
+    {
+      "files": ["tests/e2e/*.spec.ts", "apps/antares/tests/browser-server.ts"],
+      "rules": {
+        "no-magic-numbers": "off"
+      }
+    },
+    {
+      "files": ["**/*.integration.test.ts", "tests/e2e/*.spec.ts"],
+      "rules": {
+        "unicorn/no-await-expression-member": "off",
+        "max-statements": ["error", 50]
       }
     }
   ]

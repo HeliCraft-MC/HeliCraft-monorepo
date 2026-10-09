@@ -1,0 +1,42 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-heli-primary);
+    outline-offset: 4px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.primary {
+  background: var(--color-heli-primary);
+  color: var(--color-heli-on-primary);
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-heli-primary-hover);
+    }
+  }
+}
+
+.quiet {
+  background: var(--color-heli-surface);
+  color: var(--color-heli-on-surface);
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-heli-surface-hover);
+    }
+  }
+}

@@ -1,0 +1,422 @@
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  min-height: 48rem;
+  gap: var(--space-8);
+  padding-block: 5rem;
+}
+.heroText {
+  position: relative;
+  z-index: 1;
+  h1 {
+    margin-block: var(--space-6);
+    font-size: clamp(2.75rem, 4.5vw, 4.75rem);
+    letter-spacing: -0.065em;
+    line-height: 1.07;
+    font-weight: 550;
+    span {
+      color: var(--primary);
+    }
+  }
+}
+.eyebrow,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.eyebrow {
+  color: var(--primary);
+}
+.description {
+  max-width: 30rem;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+.actions {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: var(--space-8);
+}
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  text-decoration: none;
+  border-radius: var(--radius-small);
+}
+.primary {
+  padding: 1rem 1.4rem;
+  background: var(--primary);
+  color: var(--bg-base);
+  font-weight: 600;
+  transition: background var(--motion-duration);
+  &:hover {
+    background: var(--primary-hover);
+  }
+}
+.secondary {
+  padding-block: 1rem;
+  color: var(--text-secondary);
+}
+.caption {
+  margin-top: var(--space-6);
+  color: var(--text-muted);
+  font-size: var(--font-small);
+}
+.phase {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: var(--space-6);
+  span {
+    color: var(--accent);
+  }
+}
+.atlas {
+  margin: 0;
+  position: relative;
+  background: radial-gradient(ellipse at center, var(--bg-hover), transparent 65%);
+  figcaption {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+}
+.scene {
+  width: 100%;
+  height: auto;
+  color: var(--border-strong);
+}
+.island {
+  animation: float 9s ease-in-out infinite;
+  transform-origin: center;
+}
+.chapter {
+  padding-block: 6rem;
+  border-top: 1px solid var(--border-subtle);
+  h2 {
+    margin-top: var(--space-4);
+    font-size: var(--font-heading);
+    line-height: 1.15;
+    letter-spacing: -0.045em;
+    font-weight: 500;
+  }
+  h3 {
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 1.35;
+  }
+}
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--space-6);
+  a {
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+}
+.lead {
+  margin-top: var(--space-6);
+  color: var(--text-muted);
+  max-width: 38rem;
+}
+.empty {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+  padding: 4rem;
+  margin-top: var(--space-8);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(110deg, var(--bg-panel), var(--bg-base));
+  h3 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    margin-block: var(--space-4);
+  }
+  p {
+    color: var(--text-muted);
+    max-width: 32rem;
+  }
+  a {
+    display: inline-block;
+    margin-top: var(--space-6);
+    color: var(--primary);
+  }
+}
+.chapterNumber {
+  font-size: 8rem;
+  font-weight: 300;
+  line-height: 1;
+  font-family: var(--font-mono);
+  color: var(--border-strong);
+}
+.editorial {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+  article {
+    padding: var(--space-8);
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    &:first-child {
+      grid-row: span 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      min-height: 22rem;
+      h3 {
+        font-size: 2.5rem;
+      }
+    }
+  }
+  h3 {
+    margin-block: var(--space-4);
+    a {
+      text-decoration: none;
+    }
+  }
+  p {
+    color: var(--text-muted);
+  }
+}
+.twoSides {
+  margin-top: var(--space-12);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  > div {
+    padding: 3rem;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+  }
+  h3 {
+    font-size: 2rem;
+    margin-block: var(--space-6);
+  }
+  p {
+    max-width: 27rem;
+    color: var(--text-muted);
+  }
+}
+.wordmark {
+  display: block;
+  margin-top: var(--space-8);
+  font-size: 3rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-soft);
+}
+.future {
+  margin-top: var(--space-6);
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: var(--font-small);
+}
+.roles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+  article {
+    border-top: 1px solid var(--border-strong);
+    padding-block: var(--space-8);
+  }
+  h3 {
+    margin-block: var(--space-4);
+  }
+  p:last-child {
+    color: var(--text-muted);
+  }
+}
+.roleArt {
+  display: block;
+  height: 9rem;
+  line-height: 1;
+  margin-bottom: var(--space-8);
+  font-size: 4rem;
+  font-family: var(--font-mono);
+  color: var(--accent-soft);
+}
+.memory {
+  h2 span {
+    color: var(--primary);
+  }
+}
+.memoryBody {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 4rem;
+  margin-top: var(--space-12);
+  p {
+    margin-bottom: var(--space-6);
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    max-width: 40rem;
+  }
+  a {
+    color: var(--primary);
+  }
+}
+.timeMark {
+  display: block;
+  font-family: var(--font-mono);
+  line-height: 3;
+  color: var(--text-muted);
+  border-left: 1px solid var(--primary-deep);
+  padding-left: var(--space-8);
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin-block: var(--space-12);
+  article > span {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    color: var(--primary);
+  }
+  h3 {
+    margin-block: var(--space-4);
+  }
+  p {
+    color: var(--text-muted);
+  }
+}
+.faq {
+  max-width: 60rem;
+  margin-inline: auto;
+  h2 {
+    margin-bottom: var(--space-8);
+  }
+  details {
+    border-top: 1px solid var(--border-strong);
+    padding-block: var(--space-6);
+  }
+  summary {
+    cursor: pointer;
+    font-size: 1.125rem;
+  }
+  p {
+    margin-top: var(--space-4);
+    color: var(--text-muted);
+    max-width: 45rem;
+  }
+}
+@keyframes float {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@media (max-width: 64rem) {
+  .hero {
+    min-height: 40rem;
+  }
+  .heroText h1 {
+    font-size: 3.25rem;
+  }
+  .twoSides > div {
+    padding: 2rem;
+  }
+  .chapter {
+    padding-block: 4rem;
+  }
+}
+@media (max-width: 48rem) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    gap: 0;
+    padding-block: 3rem 2rem;
+  }
+  .heroText h1 {
+    font-size: clamp(2.5rem, 9vw, 3.5rem);
+  }
+  .atlas {
+    width: 100%;
+    max-width: 30rem;
+    align-self: center;
+    margin-top: var(--space-8);
+  }
+  .scene {
+    max-height: 24rem;
+  }
+  .actions {
+    gap: var(--space-4);
+  }
+  .primary {
+    padding: 1rem;
+  }
+  .phase {
+    max-width: 18rem;
+    line-height: 1.8;
+  }
+  .chapter {
+    padding-block: 3rem;
+  }
+  .sectionHead {
+    display: block;
+    a {
+      display: inline-block;
+      margin-top: var(--space-4);
+    }
+  }
+  .empty {
+    padding: var(--space-6);
+    gap: var(--space-4);
+  }
+  .chapterNumber {
+    font-size: 4rem;
+  }
+  .editorial,
+  .twoSides,
+  .roles,
+  .steps,
+  .memoryBody {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .twoSides > div {
+    padding: var(--space-6);
+  }
+  .roles article {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    column-gap: var(--space-6);
+  }
+  .roleArt {
+    grid-row: span 3;
+    font-size: 2rem;
+    height: auto;
+    margin: 0;
+  }
+  .roles h3 {
+    font-size: 1.35rem;
+    margin-block: var(--space-3);
+  }
+  .memoryBody {
+    gap: var(--space-6);
+  }
+  .timeMark {
+    font-size: 0.65rem;
+    line-height: 1.8;
+  }
+  .steps {
+    margin-block: var(--space-8);
+  }
+  .editorial article:first-child h3 {
+    font-size: 1.75rem;
+  }
+}

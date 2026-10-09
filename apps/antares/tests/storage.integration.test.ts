@@ -15,17 +15,18 @@ describe('s3 storage', () => {
       })
       .withExposedPorts(8333, 9333)
       .withWaitStrategy(
-        Wait.forAll([Wait.forListeningPorts(), Wait.forHttp('/cluster/status', 9333)]),
+        Wait.forAll([
+          Wait.forListeningPorts(),
+          Wait.forHttp('/cluster/status', 9333),
+          Wait.forLogMessage('All enabled components are running and ready to use:'),
+        ]),
       )
       .start();
     const storage = createStorage({
-      PORT: 3000,
-      DATABASE_URL: 'postgresql://unused',
       S3_ENDPOINT: `http://${container.getHost()}:${container.getMappedPort(8333)}`,
       S3_REGION: 'us-east-1',
       S3_ACCESS_KEY: 'test-access',
       S3_SECRET_KEY: 'test-secret',
-      S3_BUCKET: 'helicraft',
     });
     try {
       await storage.send(new HeadBucketCommand({ Bucket: 'helicraft' }));

@@ -16,7 +16,7 @@ Vega combines React 19.3, Vite 8.3, file-based TanStack Router, TanStack Query c
 
 The PWA has a manifest, icons and static precache. API/OpenAPI paths are excluded from navigation fallback and API responses are not cached by the service worker. Public installation requires HTTPS. [Vite PWA](https://vite-pwa-org.netlify.app/guide/).
 
-Atria uses Tailwind 4's official Vite plugin and Base UI, with explicit library source scanning. Storybook 10.6 uses `react-docgen` to avoid legacy TypeScript Compiler API dependencies. The button preserves keyboard and disabled behavior. [Tailwind Vite](https://tailwindcss.com/docs/installation/using-vite), [Base UI](https://base-ui.com/react/overview/quick-start), [Storybook React/Vite](https://storybook.js.org/docs/get-started/frameworks/react-vite/).
+Atria and Vega use SCSS Modules compiled by Vite with Sass; Atria contains only SCSS styles and uses Base UI. Global tokens and base styles are exported as `@helicraft/atria/styles.scss`. Storybook 10.6 uses `react-docgen` to avoid legacy TypeScript Compiler API dependencies. The button preserves keyboard and disabled behavior. [Vite CSS preprocessors](https://vite.dev/guide/features.html#css-pre-processors), [Base UI](https://base-ui.com/react/overview/quick-start), [Storybook React/Vite](https://storybook.js.org/docs/get-started/frameworks/react-vite/).
 
 Altair remains documentation only. Future implementation will require Rust and platform Tauri prerequisites. [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/), [Tauri Vite](https://v2.tauri.app/start/frontend/vite/).
 
@@ -43,6 +43,7 @@ Velocity retains `online-mode=true`; Paper stays internal with modern forwarding
 The explicit exceptions in `.oxlintrc.json` make the rules consistent with this stack:
 
 - Automatic JSX needs no React namespace import. UI text, standard component props and prop forwarding are permitted.
+- Side-effect imports are allowed for CSS/SCSS global styles and the Vitest DOM matcher setup.
 - Libraries use named exports; default exports are allowed only for configuration and Storybook conventions. Parent-relative imports remain available for application-local code and tooling.
 - Async/await, optional chaining, spread, ternaries, null, undefined, void and Bun top-level await are supported language features. Framework promise callbacks and standard void callback signatures are allowed; unsafe types and lost promises remain checked.
 - Readonly parameter requirements cannot rewrite third-party React/Hono contracts. Own DTOs and readonly fields retain explicit types.

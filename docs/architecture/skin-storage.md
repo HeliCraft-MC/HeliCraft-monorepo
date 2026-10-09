@@ -1,0 +1,11 @@
+[Русский](skin-storage_RU.md) | [Repository](../../README.md)
+
+# Skin storage and rendering
+
+Only Antares accesses S3. Bucket objects remain private; clients receive UUID-based HTTP image endpoints. Custom versions use immutable `skins/<user UUID>/<skin UUID>/skin.png` and `avatar.png` keys. The API accepts PNG up to 2 MiB and verifies signature, decoded dimensions (64×64 or legacy 64×32), one frame, bounded decoded pixels and valid image decoding. It emits a normalized 64×64 PNG with a recorded SHA-256 and CLASSIC/SLIM model. Legacy textures permit CLASSIC only.
+
+Legacy processing mirrors right arm/leg UV regions into left-limb regions rather than stretching the image. Required base-layer pixels are made opaque; unused opaque legacy hat pixels are cleared according to the format. The avatar composites face UV 8,8 over base and outer layer UV 40,8 at native 8×8 resolution before nearest-neighbor enlargement to 128×128. Fixtures assert mirror orientation, outer alpha and transparent base behavior. This is a Minecraft head avatar, never a scaled entire texture.
+
+Both normalized skin and avatar are written and read back from S3 before committing the user's current pointer in a database transaction. Failed storage leaves the old pointer intact and returns a recoverable error. Immutable unused objects can remain after failure; lifecycle cleanup is deferred, and reset only clears the pointer, preserving version records. Unknown UUID image requests return 404; storage outage returns 503 rather than substituting a false successful custom image. Registered users without a custom skin get an original procedurally authored explorer texture and its avatar from the same pipeline.
+
+Vega lazy-loads skinview3d in account settings. It supports rotation/drag and CLASSIC/SLIM; local file previews use object URLs released on cleanup. WebGL failure shows the PNG texture and leaves upload available. Image cache keys include the active version; reset/default URLs are revalidated. Profile, header and user administration use reusable MinecraftAvatar with error fallback. No skin persistence, DB access or credentials exist in Vega. Rigel later consumes validated UUID/model/skin URLs via REST; changing its identity flow is outside this foundation.

@@ -16,7 +16,7 @@ Vega использует React 19.3, Vite 8.3, файловые маршрут�
 
 PWA содержит manifest, иконки и precache статических ресурсов. `/api/*` и OpenAPI исключены из SPA navigation fallback; API не кешируется service worker. Для установки на публичном домене нужен HTTPS. [Vite PWA](https://vite-pwa-org.netlify.app/guide/).
 
-Atria использует Tailwind CSS 4 через официальный Vite-плагин и Base UI. CSS явно сканирует исходники библиотеки. Storybook 10.6 использует `react-docgen`, чтобы не зависеть от прежнего TypeScript Compiler API. Кнопка сохраняет клавиатурную доступность и disabled-состояние. [Tailwind Vite](https://tailwindcss.com/docs/installation/using-vite), [Base UI](https://base-ui.com/react/overview/quick-start), [Storybook React/Vite](https://storybook.js.org/docs/get-started/frameworks/react-vite/).
+Atria и Vega используют SCSS-модули, которые Vite компилирует через Sass; все стили Atria написаны на SCSS, компоненты используют Base UI. Глобальные токены и базовые стили экспортируются как `@helicraft/atria/styles.scss`. Storybook 10.6 использует `react-docgen`, чтобы не зависеть от прежнего TypeScript Compiler API. Кнопка сохраняет клавиатурную доступность и disabled-состояние. [Vite CSS preprocessors](https://vite.dev/guide/features.html#css-pre-processors), [Base UI](https://base-ui.com/react/overview/quick-start), [Storybook React/Vite](https://storybook.js.org/docs/get-started/frameworks/react-vite/).
 
 Altair остаётся документацией. Его будущая сборка потребует Rust и системные компоненты Tauri; это не часть текущего Bun workspace. [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/), [Tauri Vite](https://v2.tauri.app/start/frontend/vite/).
 
@@ -42,6 +42,7 @@ Velocity сохраняет `online-mode=true`. Paper доступен толь�
 
 Максимальная строгость требует согласованного набора правил, поэтому конкретные исключения записаны в `.oxlintrc.json`:
 
+- Импорты ради побочного эффекта разрешены для глобальных CSS/SCSS-стилей и настройки DOM-матчеров Vitest.
 - Современный JSX не требует импорта React; литералы текста, `className`, `onClick` и spread props необходимы для UI-компонентов.
 - Именованные экспорты приняты в библиотечных пакетах. Обязательный default export разрешён только конфигурациям и Storybook. Родительские относительные импорты разрешены внутри приложений и генератора; границы приложений описаны в AGENTS.md.
 - Async/await, optional chaining, rest/spread, ternary, `null`, `undefined`, `void` и top-level await — разрешённые возможности TypeScript/Bun. Promise-callbacks нужны API фреймворков. Правило `strict-void-return` конфликтует с их стандартными callback-сигнатурами; проверки потерянных promises и опасных типов остаются включены.

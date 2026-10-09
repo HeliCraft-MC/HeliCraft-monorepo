@@ -1,0 +1,95 @@
+.trigger,
+.tab,
+.menuItem,
+.tooltipTrigger {
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  cursor: pointer;
+  &[data-disabled] {
+    opacity: 0.5;
+    cursor: default;
+  }
+  &[data-highlighted],
+  &[data-active] {
+    color: var(--primary);
+    background: var(--bg-hover);
+  }
+}
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 65%);
+  z-index: 40;
+}
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(calc(100% - 2rem), 32rem);
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  z-index: 41;
+  display: grid;
+  gap: var(--space-4);
+}
+.tooltip,
+.menu {
+  max-width: min(calc(100vw - 2rem), 24rem);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  padding: var(--space-3);
+  z-index: 50;
+}
+.menu {
+  display: grid;
+  gap: var(--space-2);
+}
+.menuItem {
+  text-align: left;
+  border-color: transparent;
+}
+.tabList {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+}
+.tab {
+  white-space: nowrap;
+  &[data-active] {
+    border-color: var(--primary);
+  }
+}
+.tabPanel {
+  padding-block: var(--space-4);
+}
+.toastViewport {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+  width: min(calc(100vw - 2rem), 24rem);
+  z-index: 60;
+}
+.toast {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-panel);
+}

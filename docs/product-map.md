@@ -2,7 +2,7 @@
 
 # HeliCraft product map
 
-This is the target product model. The current projects provide minimal examples and connections; the gameplay described below remains future work.
+This is the target product model. The implemented web foundation includes SSR pages, identity, server sessions, account/skin settings, CMS, RBAC and UI kit. The game systems described below remain future work.
 
 ## Vega
 

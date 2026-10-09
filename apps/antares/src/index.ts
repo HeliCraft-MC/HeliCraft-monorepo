@@ -9,6 +9,15 @@ const config = readConfig();
 const { pool, db } = createDatabase(config.DATABASE_URL);
 const storage = createStorage(config);
 const app = createApp({
+  db,
+  sitePhase: config.SITE_PHASE,
+  communityLinks: config.COMMUNITY_LINKS,
+  minecraftAddress: config.MINECRAFT_ADDRESS,
+  storage,
+  bucket: config.S3_BUCKET,
+  siteOrigin: config.SITE_ORIGIN,
+  secureCookies: config.SECURE_COOKIES,
+  registrationEnabled: config.REGISTRATION_ENABLED,
   checkReady: async () => {
     await db.execute(sql`select PostGIS_Version()`);
     await storage.send(new HeadBucketCommand({ Bucket: config.S3_BUCKET }));

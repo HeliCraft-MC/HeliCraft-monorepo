@@ -1,24 +1,42 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+  RouterProvider,
+} from '@tanstack/react-router';
 import { Home } from '../src/home';
-import type { loadGreeting } from '../src/api';
+import type { ReactElement } from 'react';
+import type { HomeData } from '../src/home-data';
 
-vi.mock(import('../src/api'), () => ({
-  loadGreeting: vi.fn<typeof loadGreeting>().mockResolvedValue({ message: 'Hello, HeliCraft!' }),
-}));
+const homeData: HomeData = {
+  site: {
+    phase: 'PRELAUNCH',
+    registrationEnabled: false,
+    minecraftAddress: null,
+    canonicalOrigin: 'https://helicraft.test',
+    links: [],
+  },
+  chronicle: { items: [], total: 0 },
+  pages: [],
+};
 
-describe('vega home', () => {
-  it('shows the world greeting from Antares', async () => {
-    expect.assertions(2);
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={client}>
-        <Home />
-      </QueryClientProvider>,
-    );
-    const greeting = await screen.findByText('Hello, HeliCraft!');
-    expect(greeting).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Refresh world' })).toBeEnabled();
-  }, 5000);
+function HonestHome(): ReactElement {
+  return <Home data={homeData} />;
+}
+describe('public home', () => {
+  it('keeps a new world useful without fabricated publications or live statistics', async () => {
+    const root = createRootRoute({ component: HonestHome });
+    const router = createRouter({
+      routeTree: root,
+      history: createMemoryHistory({ initialEntries: ['/'] }),
+    });
+    await router.load();
+    render(<RouterProvider router={router} />);
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Оставь след');
+    expect(screen.getByRole('link', { name: 'Узнать о запуске' })).toBeInTheDocument();
+    expect(screen.getByText('Первая глава ещё пишется.')).toBeInTheDocument();
+    expect(screen.queryByText(/онлайн/u)).not.toBeInTheDocument();
+  });
 });

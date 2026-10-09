@@ -31,3 +31,7 @@ From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: 
 ## Name
 
 γ Geminorum, in the constellation Gemini. [IAU star-name catalogue](https://iauarchive.eso.org/public/themes/naming_stars/).
+
+## Web foundation contract
+
+The generated client covers `/api/v1`: identity, account, sessions, skins, public pages/chronicle/site and admin users/content/audit. Vega uses these methods through a relative same-origin browser API; public SSR uses a separate server client without cookies. After changing the API run root `bun run generate`; never hand-edit generated files. DTO validation and permission enforcement remain in Antares.

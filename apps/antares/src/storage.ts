@@ -3,7 +3,9 @@ import type { Config } from './config';
 
 const REQUEST_TIMEOUT_MS = 5000;
 const MAX_ATTEMPTS = 2;
-export function createStorage(config: Config): S3Client {
+export function createStorage(
+  config: Pick<Config, 'S3_ENDPOINT' | 'S3_REGION' | 'S3_ACCESS_KEY' | 'S3_SECRET_KEY'>,
+): S3Client {
   return new S3Client({
     endpoint: config.S3_ENDPOINT,
     region: config.S3_REGION,

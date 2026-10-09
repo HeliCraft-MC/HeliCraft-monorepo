@@ -1,0 +1,61 @@
+.page {
+  min-height: 65vh;
+  padding-block: 4rem 6rem;
+  h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+    margin-block: var(--space-4) var(--space-8);
+  }
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  color: var(--primary);
+  font-size: var(--font-small);
+}
+.paragraph {
+  color: var(--text-secondary);
+  margin-block: var(--space-6);
+  line-height: 1.8;
+}
+.form {
+  display: grid;
+  gap: var(--space-6);
+}
+.navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+.uuid {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: var(--font-small);
+}
+.section {
+  margin-block: var(--space-8);
+  padding: var(--space-6);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  h2 {
+    margin-bottom: var(--space-4);
+  }
+}
+.preview {
+  width: 100%;
+  min-height: 20rem;
+  display: grid;
+  place-items: center;
+  background: var(--bg-panel);
+  img {
+    image-rendering: pixelated;
+    max-width: 256px;
+  }
+}

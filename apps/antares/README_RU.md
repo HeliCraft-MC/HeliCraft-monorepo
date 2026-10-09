@@ -29,3 +29,9 @@ S3 использует AWS SDK v3 с endpoint и path-style addressing. Инт�
 ## Название
 
 Антарес — α Скорпиона, звезда в созвездии Скорпиона. [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/).
+
+## Web foundation
+
+Домены находятся в `src/modules`: identity, sessions, permissions, administration, skins, content. API v1 обслуживает реальные аккаунты, opaque cookies, RBAC, CMS и изображения. Миграция 0001 добавляет таблицы identity/CMS; 0002 запрещает изменение UUID и переписывание аудита/истории/редакций. Схема world_events остаётся отдельной. Тесты используют временные настоящие PostgreSQL/PostGIS и S3.
+
+[Identity](../../docs/architecture/identity.md) · [Authorization](../../docs/architecture/authorization.md) · [Skins](../../docs/architecture/skin-storage.md) · [Content](../../docs/architecture/content.md)

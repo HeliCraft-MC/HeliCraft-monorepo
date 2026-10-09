@@ -54,7 +54,3 @@ if (target !== 'antares') {
 if (target !== 'vega') {
   start(['bun', 'run', '--cwd', 'apps/antares', 'dev']);
 }
-if (target === 'all') {
-  start(['bun', 'scripts/java.ts', 'dev', 'deneb']);
-  start(['bun', 'scripts/java.ts', 'dev', 'rigel']);
-}

@@ -29,3 +29,9 @@ From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: 
 ## Name
 
 α Scorpii, in the constellation Scorpius. [IAU star-name catalogue](https://iauarchive.eso.org/public/themes/naming_stars/).
+
+## Web foundation
+
+Domains live in `src/modules`: identity, sessions, permissions, administration, skins and content. API v1 serves real accounts, opaque cookies, RBAC, CMS and images. Migration 0001 adds identity/CMS tables; 0002 prevents UUID changes and rewriting audit/history/revisions. world_events remains a separate domain. Tests use disposable real PostgreSQL/PostGIS and S3.
+
+[Identity](../../docs/architecture/identity.md) · [Authorization](../../docs/architecture/authorization.md) · [Skins](../../docs/architecture/skin-storage.md) · [Content](../../docs/architecture/content.md)
