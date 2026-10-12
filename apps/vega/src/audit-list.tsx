@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { getRouteApi } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
@@ -10,6 +11,8 @@ import styles from './account.module.scss';
 const PAGE_SIZE = 20;
 const auditRoute = getRouteApi('/admin/audit');
 export function AuditList(): ReactElement {
+  const { text } = useTranslation();
+
   const search = auditRoute.useSearch();
   const [target, setTarget] = useState(search.target ?? '');
   const [page, setPage] = useState(1);
@@ -58,34 +61,34 @@ export function AuditList(): ReactElement {
   });
   return (
     <>
-      <h1>Аудит</h1>
+      <h1>{text('admin.audit')}</h1>
       <div className={styles.form}>
-        <FormField label="Действие" htmlFor="audit-action">
+        <FormField label={text('audit.action')} htmlFor="audit-action">
           <TextField id="audit-action" value={action} onChange={handleAction} />
         </FormField>
-        <FormField label="UUID объекта" htmlFor="audit-target">
+        <FormField label={text('audit.objectUuid')} htmlFor="audit-target">
           <TextField id="audit-target" value={target} onChange={handleTarget} />
         </FormField>
-        <FormField label="UUID автора" htmlFor="audit-actor">
+        <FormField label={text('audit.authorUuid')} htmlFor="audit-actor">
           <TextField id="audit-actor" value={actor} onChange={handleActor} />
         </FormField>
-        <FormField label="Начиная с" htmlFor="audit-from">
+        <FormField label={text('audit.startDate')} htmlFor="audit-from">
           <TextField id="audit-from" type="datetime-local" value={from} onChange={handleFrom} />
         </FormField>
-        <FormField label="До" htmlFor="audit-to">
+        <FormField label={text('audit.endDate')} htmlFor="audit-to">
           <TextField id="audit-to" type="datetime-local" value={to} onChange={handleTo} />
         </FormField>
       </div>
-      {result.isError ? <Alert tone="danger">Аудит недоступен или фильтр некорректен</Alert> : null}
+      {result.isError ? <Alert tone="danger">{text('audit.unavailable')}</Alert> : null}
       <Table>
-        <caption>Административные действия</caption>
+        <caption>{text('audit.title')}</caption>
         <thead>
           <tr>
-            <th>Время</th>
-            <th>Автор</th>
-            <th>Действие</th>
-            <th>Объект</th>
-            <th>Метаданные</th>
+            <th>{text('audit.time')}</th>
+            <th>{text('common.author')}</th>
+            <th>{text('audit.action')}</th>
+            <th>{text('audit.object')}</th>
+            <th>{text('audit.metadata')}</th>
           </tr>
         </thead>
         <tbody>
@@ -102,7 +105,7 @@ export function AuditList(): ReactElement {
           ))}
         </tbody>
       </Table>
-      {result.data?.items.length === 0 ? <p>Действий пока нет.</p> : null}
+      {result.data?.items.length === 0 ? <p>{text('audit.empty')}</p> : null}
       <Pagination
         page={page}
         pageSize={PAGE_SIZE}

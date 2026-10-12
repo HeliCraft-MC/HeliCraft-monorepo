@@ -1,13 +1,6 @@
-name: helicraft-minecraft
-include:
-  - path: ../antares/compose.yml
+name: helicraft-deneb-build
 services:
   deneb:
-    extends: { file: ../../compose.yml, service: deneb }
-    build: { context: ../.., dockerfile: apps/deneb/Dockerfile }
-  rigel:
-    extends: { file: ../../compose.yml, service: rigel }
-    build: { context: ../.., dockerfile: apps/rigel/Dockerfile }
-volumes:
-  deneb-data:
-  rigel-data:
+    profiles: [plugins]
+    build: { context: ../.., dockerfile: apps/deneb/Dockerfile, target: build }
+    command: ['true']

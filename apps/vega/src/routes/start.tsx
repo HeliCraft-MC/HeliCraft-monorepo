@@ -1,3 +1,5 @@
+import { localizeContent } from '../localized-content';
+import { translate } from '../locales';
 import { HTTP } from '../http-status';
 import { createFileRoute } from '@tanstack/react-router';
 import { InfoPage } from '../info-page';
@@ -12,18 +14,22 @@ export const Route = createFileRoute('/start')({
     }
     return data;
   },
-  head: ({ loaderData }) =>
-    metadata({
+  head: ({ loaderData, match }) => {
+    const original = loaderData?.content?.document;
+    const localized = original ? localizeContent(original, match.context.locale) : undefined;
+    return metadata({
+      locale: match.context.locale,
       title:
-        loaderData?.content?.document.seoTitle ??
-        loaderData?.content?.document.title ??
-        'Как начать',
+        localized?.seoTitle ??
+        localized?.title ??
+        translate('navigation.start', match.context.locale),
       description:
-        loaderData?.content?.document.seoDescription ??
-        loaderData?.content?.document.description ??
-        'Создай аккаунт HeliCraft, получи постоянный UUID и подготовь Minecraft.',
+        localized?.seoDescription ??
+        localized?.description ??
+        translate('seo.start.description', match.context.locale),
       path: '/start',
       origin: loaderData?.site.canonicalOrigin ?? 'http://localhost:5173',
-    }),
+    });
+  },
   component: InfoPage,
 });

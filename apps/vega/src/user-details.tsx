@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { getRouteApi } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
@@ -10,6 +11,8 @@ import { UserDetailsForm } from './user-details-form';
 const detailRoute = getRouteApi('/admin/users/$userId');
 const route = getRouteApi('/admin');
 function UserDetails(): ReactElement {
+  const { text } = useTranslation();
+
   const { userId: uuid } = detailRoute.useParams();
   const { principal } = route.useRouteContext();
   const result = useQuery({
@@ -30,7 +33,7 @@ function UserDetails(): ReactElement {
     return <Spinner />;
   }
   if (result.isError) {
-    return <Alert tone="danger">Пользователь недоступен</Alert>;
+    return <Alert tone="danger">{text('users.unavailable')}</Alert>;
   }
   return (
     <UserDetailsForm

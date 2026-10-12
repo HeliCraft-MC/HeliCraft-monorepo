@@ -1,112 +1,180 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg-base);
   border-bottom: 1px solid var(--border-subtle);
-  background: var(--surface-overlay);
+}
+.homeHeader {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #0e0a0680, transparent);
+  border-color: #ffffff14;
+  backdrop-filter: blur(6px);
+}
+.solid {
+  background: rgba(14, 10, 6, 0.96);
+  border-color: var(--border-strong);
 }
 .headerInner {
-  min-height: 6rem;
+  min-height: 88px;
+  padding: 0 max(6vw, 24px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-6);
+  gap: 32px;
 }
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  font-weight: 650;
-  font-size: 1.4rem;
+  gap: 12px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  font-size: 1.35rem;
   text-decoration: none;
-}
-.logo {
-  color: var(--primary);
-  font-size: 2rem;
+  color: var(--text-primary);
+  img {
+    object-fit: contain;
+  }
 }
 .navigation,
 .accountLinks {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
+  gap: 28px;
   a {
     text-decoration: none;
-    font-size: var(--font-small);
-    color: var(--text-secondary);
+    font-size: 0.8rem;
     &:hover {
       color: var(--primary);
     }
   }
 }
+.accountLinks {
+  gap: 20px;
+  > a:last-child {
+    background: var(--primary);
+    color: var(--bg-base);
+    padding: 12px 20px;
+    min-height: 44px;
+    &:hover {
+      background: var(--primary-hover);
+      color: var(--bg-base);
+    }
+  }
+}
 .cta {
   display: inline-flex;
-  padding: 0.75rem 1.25rem;
+  padding: 12px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-small);
+}
+.menuButton {
+  display: none;
+  min-height: 48px;
+  padding: 10px;
+  font-size: 0.8rem;
 }
 .mobileMenu {
-  display: none;
-  summary {
-    cursor: pointer;
-  }
-  nav {
-    display: grid;
-    gap: var(--space-4);
-    padding-block: var(--space-6);
+  display: grid;
+  padding: 20px 24px 30px;
+  gap: 10px;
+  max-height: calc(100svh - 80px);
+  overflow: auto;
+  border-top: 1px solid var(--border-subtle);
+  a {
+    padding: 12px 0;
+    text-decoration: none;
   }
 }
 .skip {
   position: fixed;
-  left: var(--space-4);
+  left: 24px;
   top: -10rem;
-  z-index: 10;
+  z-index: 30;
   background: var(--bg-panel);
-  padding: var(--space-4);
+  padding: 16px;
   &:focus {
-    top: var(--space-4);
+    top: 16px;
   }
 }
 .footer {
-  padding-block: 4rem;
+  padding: 65px 0;
   border-top: 1px solid var(--border-subtle);
   color: var(--text-muted);
   p {
-    margin-top: var(--space-4);
+    margin-top: 20px;
+    line-height: 1.8;
+    font-size: 0.85rem;
   }
 }
 .footerGrid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--space-8);
+  gap: 48px;
   nav {
-    display: grid;
-    gap: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 8px 24px;
+    a {
+      padding: 8px 0;
+      font-size: 0.85rem;
+      text-decoration: none;
+      &:hover {
+        color: var(--primary);
+      }
+    }
   }
 }
 .small {
-  font-size: var(--font-small);
+  font-size: 0.75rem !important;
 }
-@media (max-width: 64rem) {
+@media (max-width: 1150px) {
   .navigation {
-    gap: var(--space-3);
+    gap: 18px;
+  }
+  .headerInner {
+    gap: 20px;
   }
   .accountLinks {
-    gap: var(--space-3);
+    gap: 12px;
   }
 }
-@media (max-width: 48rem) {
-  .headerInner {
-    min-height: 5rem;
-    flex-wrap: wrap;
-  }
+@media (max-width: 1000px) {
   .navigation,
   .accountLinks {
     display: none;
   }
-  .mobileMenu {
+  .menuButton {
     display: block;
-    &[open] {
-      flex-basis: 100%;
-    }
   }
+  .headerInner {
+    min-height: 80px;
+  }
+}
+@media (max-width: 700px) {
   .footerGrid {
     grid-template-columns: 1fr;
+    gap: 30px;
   }
+  .footer {
+    padding: 48px 0;
+  }
+}
+.navigation a,
+.footerGrid nav a,
+.mobileMenu a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.language {
+  color: var(--text-primary);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  min-height: 44px;
+  padding: 8px;
+  font: inherit;
 }

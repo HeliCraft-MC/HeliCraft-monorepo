@@ -1,3 +1,8 @@
+import {
+  LanguageSchema,
+  ContentTranslationsSchema,
+  PublicTranslationsSchema,
+} from '../translations';
 import { z } from '@hono/zod-openapi';
 
 const MAX_PAGE_SIZE = 50;
@@ -23,6 +28,8 @@ const SlugSchema = z
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u)
   .refine((slug) => !reserved.has(slug));
 const ContentInputSchema = z.strictObject({
+  originalLanguage: LanguageSchema.default('ru'),
+  translations: ContentTranslationsSchema.default({}),
   slug: SlugSchema,
   title: z.string().trim().min(1).max(MAX_TITLE),
   description: z.string().trim().max(MAX_DESCRIPTION),
@@ -36,6 +43,8 @@ const ContentInputSchema = z.strictObject({
 });
 const PublicContentSchema = z
   .object({
+    originalLanguage: LanguageSchema,
+    translations: PublicTranslationsSchema,
     id: z.uuid(),
     kind: z.enum(['PAGE', 'CHRONICLE']),
     slug: z.string(),
@@ -53,6 +62,7 @@ const PublicContentSchema = z
   .openapi('PublicContent');
 const AdminContentSchema = PublicContentSchema.extend({
   markdown: z.string(),
+  translations: ContentTranslationsSchema,
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']),
   revision: z.number().int(),
   createdBy: z.uuid(),

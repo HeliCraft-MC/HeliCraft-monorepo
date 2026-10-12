@@ -16,7 +16,7 @@ bun run dev:rigel
 
 Нужен JDK 25. Артефакт: `apps/rigel/build/libs/rigel.jar`. Velocity API подключён compile-only; annotation processor создаёт `velocity-plugin.json`. JUnit 5 проверяет инварианты идентичности. Continuous build пересобирает jar без hot reload прокси. `ANTARES_URL` задаёт адрес health-запроса.
 
-Продакшен из корня: `docker compose --env-file .env -f apps/rigel/compose.yml up -d --build`. Используется пара Deneb/Rigel; Paper требует принятой Minecraft EULA. Только Velocity публикует 25565. Случайный буквенно-цифровой forwarding secret общий с Paper и хранится в приватном томе. Серверный jar, build и checksum Velocity закреплены в `server-lock.json`. После изменения плагина перезапускайте прокси.
+Сборка в контейнере из корня: `docker compose -f apps/rigel/compose.yml build rigel`. Compose использует только стадию `build` Dockerfile; jar плагина находится в образе по пути `/workspace/apps/rigel/build/libs/rigel.jar`. Minecraft-серверы не скачиваются и не запускаются, зависимости Antares не поднимаются. Установите jar на отдельно управляемый сервер и перезапустите его после изменения плагина.
 
 Будущие способы входа: официальный Minecraft-аккаунт, дополнительные факторы, подтверждение через Vega и необязательный Altair. Поздняя привязка официального аккаунта не должна менять личность HeliCraft, имущество, гражданство и историю. До отключения стандартной проверки аккаунтов нужен identity API Antares и явный безопасный процесс входа.
 

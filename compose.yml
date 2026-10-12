@@ -69,35 +69,16 @@ services:
       timeout: 5s
       retries: 10
   deneb:
+    profiles: [plugins]
     build:
       context: .
       dockerfile: apps/deneb/Dockerfile
-    restart: unless-stopped
-    environment:
-      ANTARES_URL: http://antares:3000
-      EULA: ${EULA:-false}
-      FORWARDING_SECRET: ${FORWARDING_SECRET:?Set an alphanumeric FORWARDING_SECRET}
-      JAVA_XMX: ${DENEB_MEMORY:-2G}
-    volumes:
-      - deneb-data:/data
-    depends_on:
-      antares: { condition: service_healthy }
+      target: build
+    command: ['true']
   rigel:
+    profiles: [plugins]
     build:
       context: .
       dockerfile: apps/rigel/Dockerfile
-    restart: unless-stopped
-    environment:
-      ANTARES_URL: http://antares:3000
-      FORWARDING_SECRET: ${FORWARDING_SECRET:?Set an alphanumeric FORWARDING_SECRET}
-      JAVA_XMX: ${RIGEL_MEMORY:-512M}
-    ports:
-      - '${MINECRAFT_BIND:-0.0.0.0}:${MINECRAFT_PORT:-25565}:25565'
-    volumes:
-      - rigel-data:/data
-    depends_on:
-      antares: { condition: service_healthy }
-      deneb: { condition: service_started }
-volumes:
-  deneb-data:
-  rigel-data:
+      target: build
+    command: ['true']

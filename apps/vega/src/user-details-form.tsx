@@ -1,9 +1,10 @@
+import { useTranslation } from './i18n';
 import { formatDate } from './date-format';
 import { useCallback, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 import { changeUserRoles, changeUserStatus, revokeUserSessions } from '@helicraft/alhena';
 import type { Principal, GetUserDetailsResponse } from '@helicraft/alhena';
-import { Alert, Button, Select, FormField } from '@helicraft/atria';
+import { Icon, Alert, Button, Select, FormField } from '@helicraft/atria';
 import { z } from 'zod';
 import { browserClient, errorMessage } from './account-api';
 import { useCopyText } from './use-copy-text';
@@ -18,6 +19,8 @@ interface UserDetailsFormProps {
   readonly onRefresh: () => Promise<void>;
 }
 function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): ReactElement {
+  const { text, locale } = useTranslation();
+
   const uuid = user.id;
   const [roles, setRoles] = useState<Principal['roles']>(user.roles);
   const [status, setStatus] = useState<Principal['status']>(user.status);
@@ -46,7 +49,7 @@ function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): 
           await revokeUserSessions({ client: browserClient(), path: { uuid }, throwOnError: true });
         }
         await onRefresh();
-        setMessage('Изменения сохранены и записаны в аудит');
+        setMessage('users.saved');
       } catch (error) {
         setMessage(errorMessage(error));
       }
@@ -77,17 +80,19 @@ function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): 
   }, [mutate]);
   return (
     <>
-      <h1>{user.username ?? 'Пользователь'}</h1>
+      <h1>{user.username ?? text('users.user')}</h1>
       <p className={styles.uuid}>{uuid}</p>
       <p className={styles.paragraph}>
-        Регистрация: {formatDate(user.createdAt)} · Последний вход: {formatDate(user.lastLoginAt)}
+        {text('users.registeredAt')} {formatDate(user.createdAt, locale)}
+        {text('users.lastLoginAt')}
+        {formatDate(user.lastLoginAt, locale)}
       </p>
       <Button tone="quiet" onClick={handleCopy}>
-        Копировать UUID
+        {text('profile.copyUuid')}
       </Button>
-      {message === null ? null : <Alert>{message}</Alert>}
+      {message === null ? null : <Alert>{text(message)}</Alert>}
       <section className={styles.section}>
-        <FormField label="Статус" htmlFor="user-status">
+        <FormField label={text('common.status')} htmlFor="user-status">
           <Select id="user-status" value={status} onChange={handleStatusChange}>
             {StatusSchema.options.map((value) => (
               <option key={value}>{value}</option>
@@ -95,12 +100,12 @@ function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): 
           </Select>
         </FormField>
         <Button disabled={busy} onClick={handleStatus}>
-          Сохранить статус
+          {text('users.saveStatus')}
         </Button>
       </section>
       {principal.permissions.includes('users.roles.manage') ? (
         <section className={styles.section}>
-          <h2>Роли</h2>
+          <h2>{text('users.roles')}</h2>
           {availableRoles.map((role) => (
             <RoleCheckbox
               key={role}
@@ -114,24 +119,25 @@ function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): 
             />
           ))}
           <Button disabled={busy} onClick={handleRoles}>
-            Сохранить роли
+            {text('users.saveRoles')}
           </Button>
         </section>
       ) : null}
       <Button tone="quiet" disabled={busy} onClick={handleSessions}>
-        Завершить все сессии пользователя
+        {text('users.endSessions')}
       </Button>
       {principal.permissions.includes('audit.read') ? (
-        <a href={`/admin/audit?target=${uuid}`}>Аудит действий пользователя</a>
+        <a href={`/admin/audit?target=${uuid}`}>{text('users.actionAudit')}</a>
       ) : null}
       <section className={styles.section}>
-        <h2>История ников</h2>
+        <h2>{text('users.usernameHistory')}</h2>
         {user.history.length === 0 ? (
-          <p>Ник не менялся.</p>
+          <p>{text('users.usernameUnchanged')}</p>
         ) : (
           user.history.map((entry) => (
             <p key={entry.changedAt}>
-              {entry.oldUsername} → {entry.newUsername} · {formatDate(entry.changedAt)}
+              {entry.oldUsername} <Icon name="arrowRight" /> {entry.newUsername} ·{' '}
+              {formatDate(entry.changedAt, locale)}
             </p>
           ))
         )}

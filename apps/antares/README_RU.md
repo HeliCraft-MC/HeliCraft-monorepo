@@ -35,3 +35,7 @@ S3 использует AWS SDK v3 с endpoint и path-style addressing. Инт�
 Домены находятся в `src/modules`: identity, sessions, permissions, administration, skins, content. API v1 обслуживает реальные аккаунты, opaque cookies, RBAC, CMS и изображения. Миграция 0001 добавляет таблицы identity/CMS; 0002 запрещает изменение UUID и переписывание аудита/истории/редакций. Схема world_events остаётся отдельной. Тесты используют временные настоящие PostgreSQL/PostGIS и S3.
 
 [Identity](../../docs/architecture/identity.md) · [Authorization](../../docs/architecture/authorization.md) · [Skins](../../docs/architecture/skin-storage.md) · [Content](../../docs/architecture/content.md)
+
+## Gallery foundation
+
+Публичные `/gallery` и `/gallery/:id` используют SSR; `/app/gallery/new` — существующую сессию и CSR. Галерея проходит через Alhena к отдельному домену Antares и private S3/PostgreSQL. [Архитектура галереи](../../docs/architecture/gallery_RU.md). В Atria добавлены StateCard, GalleryTile, PhotoCarousel и ActionLink; каждый компонент расположен в собственной папке `src/components`.

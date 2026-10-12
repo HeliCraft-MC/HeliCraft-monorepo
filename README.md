@@ -32,35 +32,35 @@ bun run db:migrate
 bun run dev
 ```
 
-Vega: http://localhost:5173. Antares: http://localhost:3000. OpenAPI: http://localhost:3000/openapi.json. S3: http://localhost:8333. `dev` runs only the JS/TS packages and web applications. Java builds require explicit `build:java`, `build:deneb`, `build:rigel` or `dev:deneb`/`dev:rigel` commands. Run `bun run storybook` separately for http://localhost:6006.
+Vega: http://localhost:5173. Antares: http://localhost:3000. OpenAPI: http://localhost:3000/openapi.json. S3: http://localhost:8333. `dev` runs only the JS/TS packages and web applications. Java builds require explicit `build:java`, `build:deneb`, `build:rigel` or `dev:deneb`/`dev:rigel` commands. `dev` also starts Storybook at http://localhost:6006. If the API port is occupied, it selects the next free port and connects Vega to it; the selected port is printed at startup. `bun run storybook` remains available separately.
 
 For frontend work only: `bun run dev:vega`. For the backend only: `bun run dev:antares`. The Hello World endpoint works without persistence once Antares has valid environment configuration; `/api/ready` checks PostGIS and the S3 bucket.
 
 ## Commands
 
-| Command                               | Purpose                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------ |
-| `bun run dev`                         | Build internal packages, watch Atria/Alhena, run Vega and Antares        |
-| `bun run dev:vega`                    | Vega with internal package watchers; API must run separately             |
-| `bun run dev:antares`                 | Antares with internal package watchers                                   |
-| `bun run dev:atria` / `dev:alhena`    | Watch and rebuild the selected package                                   |
-| `bun run dev:deneb` / `dev:rigel`     | Gradle continuous build; no automatic plugin reload                      |
-| `bun run storybook`                   | Atria playground on port 6006                                            |
-| `bun run generate`                    | Export OpenAPI and regenerate Alhena                                     |
-| `bun run build`                       | All TS applications/packages                                             |
-| `bun run build:ts` / `build:java`     | Build one ecosystem                                                      |
-| `bun run build:<name>`                | Build a selected project, except the planned Altair                      |
-| `bun run typecheck` / `lint`          | TS7 and strict oxlint checks; Java: `lint:java`                          |
-| `bun run test`                        | Vitest unit/component tests; Java: `test:java`                           |
-| `bun run test:<name>`                 | Tests for one project                                                    |
-| `bun run test:integration`            | Disposable PostGIS and S3 containers; requires Docker                    |
-| `bun run test:e2e`                    | Playwright Chromium, Vega and real Antares with disposable PostgreSQL/S3 |
-| `bun run build:storybook`             | Static Atria documentation                                               |
-| `bun run infra:up` / `infra:down`     | Development PostgreSQL/PostGIS and S3                                    |
-| `bun run db:generate` / `db:migrate`  | Generate/apply Drizzle migrations to `helicraft`                         |
-| `bun run compose:up` / `compose:down` | Build/start the web stack or stop Compose                                |
+| Command                               | Purpose                                                                      |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| `bun run dev`                         | Build internal packages, watch Atria/Alhena, run Vega, Antares and Storybook |
+| `bun run dev:vega`                    | Vega, Storybook and internal package watchers; API runs separately           |
+| `bun run dev:antares`                 | Antares, Storybook and internal package watchers                             |
+| `bun run dev:atria` / `dev:alhena`    | Watch and rebuild the selected package                                       |
+| `bun run dev:deneb` / `dev:rigel`     | Gradle continuous build; no automatic plugin reload                          |
+| `bun run storybook`                   | Atria playground on port 6006                                                |
+| `bun run generate`                    | Export OpenAPI and regenerate Alhena                                         |
+| `bun run build`                       | All TS applications/packages                                                 |
+| `bun run build:ts` / `build:java`     | Build one ecosystem                                                          |
+| `bun run build:<name>`                | Build a selected project, except the planned Altair                          |
+| `bun run typecheck` / `lint`          | TS7 and strict oxlint checks; Java: `lint:java`                              |
+| `bun run test`                        | Vitest unit/component tests; Java: `test:java`                               |
+| `bun run test:<name>`                 | Tests for one project                                                        |
+| `bun run test:integration`            | Disposable PostGIS and S3 containers; requires Docker                        |
+| `bun run test:e2e`                    | Playwright Chromium, Vega and real Antares with disposable PostgreSQL/S3     |
+| `bun run build:storybook`             | Static Atria documentation                                                   |
+| `bun run infra:up` / `infra:down`     | Development PostgreSQL/PostGIS and S3                                        |
+| `bun run db:generate` / `db:migrate`  | Generate/apply Drizzle migrations to `helicraft`                             |
+| `bun run compose:up` / `compose:down` | Build/start the web stack or stop Compose                                    |
 
-Use `bun run` for the package.json scripts (the npm-script convention). CLI tools are invoked with `bunx --bun`; Node.js is not required for the implemented JS workflow. Generic scripts never invoke Gradle; Java formatting uses `format:java` and `format:check:java`. `compose:up` builds only the web stack; start Minecraft explicitly with Docker Compose. Plain `bun test` is not the configured Vitest command. Browser setup: `bunx --bun playwright install chromium` (Linux may also need browser system libraries).
+Use `bun run` for the package.json scripts (the npm-script convention). CLI tools are invoked with `bunx --bun`; Node.js is not required for the implemented JS workflow. Generic scripts never invoke Gradle; Java formatting uses `format:java` and `format:check:java`. `compose:up` builds only the web stack; Compose builds plugins without starting Minecraft servers. Plain `bun test` is not the configured Vitest command. Browser setup: `bunx --bun playwright install chromium` (Linux may also need browser system libraries).
 
 ## Production Compose
 
@@ -71,7 +71,7 @@ cp .env.example .env
 docker compose up -d --build --wait vega
 ```
 
-The default command starts only the web stack. Minecraft is opt-in after explicit EULA acceptance. The full root stack also supports Deneb and Rigel; includes PostGIS and SeaweedFS 4.48; applies migrations before Antares starts; and publishes web port 8080 and Minecraft port 25565. Atria and Alhena are built into Vega. Only Velocity exposes a Minecraft port; Paper remains on the internal network with modern forwarding. Standard online-account authentication stays enabled until Rigel's identity flow exists.
+The root stack starts the web services, includes PostGIS and SeaweedFS 4.48, applies migrations before Antares starts, and publishes web port 8080. Atria and Alhena are built into Vega. Deneb and Rigel use only the Dockerfile build stages in the `plugins` profile; Compose does not start Paper or Velocity. Build both plugins with `docker compose build deneb rigel`.
 
 To run only the web stack without Minecraft/EULA: `docker compose up -d --build vega`. The API and storage dependencies start automatically. Production PWA installation needs HTTPS at your reverse proxy; localhost is sufficient for local testing. The Bun SSR server proxies `/api/*` and `/openapi.json` to Antares; generated clients use the same origin. API responses are not cached by the service worker.
 
@@ -80,10 +80,11 @@ Per-project stacks reuse the same definitions. From the root, for example:
 ```sh
 docker compose --env-file .env -f apps/antares/compose.yml up -d --build
 docker compose --env-file .env -f apps/vega/compose.yml up -d --build
-docker compose --env-file .env -f apps/deneb/compose.yml up -d --build
+docker compose --env-file .env -f apps/deneb/compose.yml build deneb
+docker compose --env-file .env -f apps/rigel/compose.yml build rigel
 ```
 
-Deneb/Rigel Compose runs the paired Minecraft services and Antares dependencies. Antares also has `compose.dev.yml` for external services. Libraries have no runtime containers. Different Compose project names create separate data volumes. `down` keeps data; `down -v` deletes it. Back up PostgreSQL, S3 and Minecraft worlds before upgrades.
+Deneb/Rigel Compose builds only the selected plugin, without Antares dependencies or Minecraft runtime containers. Antares also has `compose.dev.yml` for external services. Libraries have no runtime containers. Different Compose project names create separate data volumes. `down` keeps data; `down -v` deletes it. Back up PostgreSQL and S3 before upgrades.
 
 ## Configuration and boundaries
 
@@ -108,7 +109,7 @@ Docker, Testcontainers and Chromium are available. Web Compose, migrations, Post
 
 Old Vesper, Teapot and Soon were moved to `archive/apps/` with their local changes. Their original instructions and documentation are preserved under `archive/`; they are excluded from the new workspace and Docker contexts. New APIs do not preserve the old contracts and do not migrate old MySQL/SQLite data.
 
-The names refer to stars: Vega (Lyra), Antares (Scorpius), Deneb (Cygnus), Rigel (Orion), Atria (Triangulum Australe), Alhena (Gemini) and Altair (Aquila). [IAU star-name catalogue](https://iauarchive.eso.org/public/themes/naming_stars/). No server logo was present in the original READMEs, so none was added.
+The names refer to stars: Vega (Lyra), Antares (Scorpius), Deneb (Cygnus), Rigel (Orion), Atria (Triangulum Australe), Alhena (Gemini) and Altair (Aquila). [IAU star-name catalogue](https://iauarchive.eso.org/public/themes/naming_stars/). The web shell uses the archived HeliCraft logo copied into active Vega assets.
 
 ## License
 
@@ -119,3 +120,7 @@ The root [LICENSE](LICENSE) is PolyForm Noncommercial 1.0.0. Archived apps retai
 See [rendering](docs/architecture/web-rendering.md), [identity](docs/architecture/identity.md), [authorization](docs/architecture/authorization.md), [skins](docs/architecture/skin-storage.md), [CMS](docs/architecture/content.md), [landing](docs/design/landing-page.md) and [quality](docs/architecture/quality.md).
 
 For local development use SITE_ORIGIN=http://localhost:5173. Before production Compose set SITE_ORIGIN=http://localhost:8080 (or your actual HTTPS origin and SECURE_COOKIES=true). Registration grants only PLAYER. First OWNER: register an account, copy its UUID and run `bun run admin:bootstrap-owner <UUID> --confirm <same UUID>`. PRELAUNCH is the default; Minecraft address is shown only when OPEN and MINECRAFT_ADDRESS is configured. EULA is never accepted automatically.
+
+The public home uses world photographs; `/gallery` and `/gallery/:id` render with SSR, while authenticated players publish and remove their photographs through `/app/gallery/new`. Gallery is a separate Antares PostgreSQL/private S3 domain. Home state/economy previews are labelled local demonstrations. [Gallery architecture](docs/architecture/gallery.md).
+
+`bun run dev` and `dev:antares` apply reviewed database migrations before starting the services. PostgreSQL and S3 must be running (`bun run infra:up`). A failed migration stops startup; `dev:vega` uses an external API and does not migrate its database.

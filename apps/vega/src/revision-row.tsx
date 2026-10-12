@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { Button } from '@helicraft/atria';
@@ -14,14 +15,16 @@ function RevisionRow({
   busy: boolean;
   restore: (revision: number) => void;
 }>): ReactElement {
+  const { text, locale } = useTranslation();
+
   const select = useCallback((): void => {
     restore(revision.revision);
   }, [restore, revision.revision]);
   return (
     <p className={styles.paragraph}>
-      #{revision.revision} · {formatDate(revision.createdAt)}{' '}
+      #{revision.revision} · {formatDate(revision.createdAt, locale)}{' '}
       <Button tone="quiet" disabled={busy} onClick={select}>
-        Восстановить
+        {text('editor.restore')}
       </Button>
     </p>
   );

@@ -1,13 +1,15 @@
+import { useTranslation } from './i18n';
 import { getRouteApi, useRouter } from '@tanstack/react-router';
 import { lazy, Suspense, useMemo, useCallback, useEffect, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getSkin, uploadSkin, resetSkin } from '@helicraft/alhena';
-import { Alert, Button, FormField, MinecraftAvatar } from '@helicraft/atria';
+import { Alert, Button, FileDropzone, FormField, MinecraftAvatar } from '@helicraft/atria';
 import { browserClient, errorMessage } from './account-api';
 
 import styles from './account.module.scss';
 
+const MAX_SKIN_BYTES = 2_097_152;
 const route = getRouteApi('/app');
 
 const Viewer = lazy(async () => {
@@ -19,6 +21,8 @@ async function skinQuery(): Promise<Awaited<ReturnType<typeof getSkin>>['data']>
   return data;
 }
 export function SkinSettings(): ReactElement {
+  const { text } = useTranslation();
+
   const { principal } = route.useRouteContext();
   const router = useRouter();
   const queries = useQueryClient();
@@ -36,8 +40,11 @@ export function SkinSettings(): ReactElement {
     },
     [preview],
   );
-  const handleChoose = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
-    const selected = event.target.files?.[0] ?? null;
+  const handleChoose = useCallback((selected: File | null): void => {
+    if (selected && (selected.type !== 'image/png' || selected.size > MAX_SKIN_BYTES)) {
+      setMessage('skin.invalidFile');
+      return;
+    }
     setFile(selected);
     setPreview(selected === null ? null : URL.createObjectURL(selected));
     setMessage(null);
@@ -60,7 +67,7 @@ export function SkinSettings(): ReactElement {
       await queries.invalidateQueries({ queryKey: ['account'] });
       await skin.refetch();
       await router.invalidate();
-      setMessage('Скин сохранён');
+      setMessage('skin.saved');
     } catch (error) {
       setMessage(errorMessage(error));
     }
@@ -76,7 +83,7 @@ export function SkinSettings(): ReactElement {
       await queries.invalidateQueries({ queryKey: ['account'] });
       await skin.refetch();
       await router.invalidate();
-      setMessage('Кастомный скин сброшен');
+      setMessage('skin.resetSuccess');
     } catch (error) {
       setMessage(errorMessage(error));
     }
@@ -89,17 +96,17 @@ export function SkinSettings(): ReactElement {
     void reset();
   }, [reset]);
   const url = preview ?? skin.data?.skinUrl ?? `/api/v1/public/players/${principal.id}/skin.png`;
-  const loadingPreview = useMemo(() => <p>Загрузка просмотра…</p>, []);
+  const loadingPreview = useMemo(() => <p>{text('skin.loadingPreview')}</p>, [text]);
   return (
     <>
-      <h1>Твой облик</h1>
+      <h1>{text('skin.title')}</h1>
       <div className={styles.profile}>
         <MinecraftAvatar
           name={principal.username}
           src={skin.data?.avatarUrl ?? `/api/v1/public/players/${principal.id}/avatar.png`}
           size={80}
         />
-        <p>{skin.data ? `Текущий скин: ${skin.data.model}` : 'Кастомный скин не установлен'}</p>
+        <p>{skin.data ? `${text('skin.currentSkin')}: ${skin.data.model}` : text('skin.notSet')}</p>
       </div>
       {url ? (
         <Suspense fallback={loadingPreview}>
@@ -107,33 +114,29 @@ export function SkinSettings(): ReactElement {
         </Suspense>
       ) : null}
       <div className={styles.form}>
-        <FormField
-          label="PNG-скин"
-          htmlFor="skin-file"
-          hint="64×64 или 64×32, не больше 2 МиБ. Legacy-скины используют Classic."
-        >
-          <input
-            id="skin-file"
-            type="file"
-            accept="image/png"
-            onChange={handleChoose}
-            aria-describedby="skin-file-hint"
-          />
-        </FormField>
-        <FormField label="Модель" htmlFor="skin-model">
+        <FileDropzone
+          id="skin-file"
+          label={text('skin.file')}
+          hint={`${text('files.dropHint')} · ${text('skin.fileHint')}`}
+          accept="image/png"
+          file={file}
+          onChoose={handleChoose}
+          disabled={busy}
+        />
+        <FormField label={text('skin.model')} htmlFor="skin-model">
           <select id="skin-model" value={model} onChange={handleModel}>
             <option value="CLASSIC">Classic</option>
             <option value="SLIM">Slim</option>
           </select>
         </FormField>
-        {message === null ? null : <Alert>{message}</Alert>}
-        {skin.isError ? <Alert tone="danger">Не удалось загрузить текущий скин</Alert> : null}
+        {message === null ? null : <Alert>{text(message)}</Alert>}
+        {skin.isError ? <Alert tone="danger">{text('skin.loadError')}</Alert> : null}
         <div className={styles.navigation}>
           <Button disabled={!file || busy} onClick={handleSave}>
-            Сохранить скин
+            {text('skin.save')}
           </Button>
           <Button tone="quiet" disabled={!skin.data || busy} onClick={handleReset}>
-            Сбросить скин
+            {text('skin.reset')}
           </Button>
         </div>
       </div>

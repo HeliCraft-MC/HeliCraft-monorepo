@@ -1,4 +1,5 @@
 // oxlint-disable no-await-in-loop -- Responsive assertions resize the same browser page sequentially; concurrent resizing would race.
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 const PASSWORD = 'Browser test password 2026';
@@ -12,14 +13,14 @@ test('public pages render real Russian HTML before JavaScript and fit mobile scr
   const html = await response.text();
   expect(response.ok()).toBe(true);
   expect(html).toContain('<html lang="ru"');
-  expect(html).toContain('Построй не просто дом.');
+  expect(html).toContain('Minecraft, где');
   expect(html).toContain('rel="canonical"');
   const errors: string[] = [];
   page.on('pageerror', (error) => {
     errors.push(error.message);
   });
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Оставь след');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Minecraft, где');
   for (const width of [360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -33,8 +34,7 @@ test('public pages render real Russian HTML before JavaScript and fit mobile scr
 
 test('registration, persistent UUID, account rename and skin lifecycle', async ({ page }) => {
   const username = `p${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`;
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Начать свою историю', exact: false }).click();
+  await page.goto('/register');
   await page.getByLabel('Ник', { exact: true }).fill(username);
   await page.getByLabel('Пароль', { exact: true }).fill(PASSWORD);
   await page.getByLabel('Повтори пароль').fill(PASSWORD);
@@ -77,6 +77,15 @@ test('registration, persistent UUID, account rename and skin lifecycle', async (
   await expect(page).toHaveURL(/\/login/u);
 });
 
+async function translatedDraftSurvivesLanguageChange(page: Page): Promise<void> {
+  await page.getByLabel('Язык текста').selectOption('en');
+  await page.locator('[name="translation:en:title"]').fill('Browser story');
+  await page.locator('[name="translation:en:markdown"]').fill('**English publication**');
+  await page.getByLabel('Язык текста').selectOption('ru');
+  await expect(page.locator('[name="title"]')).toHaveValue('История браузерного теста');
+  await expect(page.locator('[name="translation:en:title"]')).toHaveValue('Browser story');
+}
+
 test('editor publishes sanitized Markdown and guests receive the new SSR article', async ({
   page,
   request,
@@ -87,15 +96,13 @@ test('editor publishes sanitized Markdown and guests receive the new SSR article
   await page.getByLabel('Пароль', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/chronicle\/new$/u);
-  await page.getByLabel('Название', { exact: true }).fill('История браузерного теста');
+  await page.locator('[name="title"]').fill('История браузерного теста');
   await page.getByLabel('Адрес страницы').fill(slug);
-  await page.getByLabel('Краткое описание').fill('Проверка публикации без пересборки.');
+  await page.locator('[name="description"]').fill('Проверка публикации без пересборки.');
   await page
-    .getByLabel('Markdown', { exact: true })
+    .locator('[name="markdown"]')
     .fill('# История\n\n**Настоящий текст**\n\n<script>window.pwned=true</script>');
-  page.on('dialog', async (dialog) => {
-    await dialog.accept();
-  });
+  await translatedDraftSurvivesLanguageChange(page);
   await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/chronicle\/[\da-f-]+$/u);
   await page.getByRole('button', { name: 'Опубликовать', exact: true }).click();
@@ -104,6 +111,9 @@ test('editor publishes sanitized Markdown and guests receive the new SSR article
   expect(published.ok()).toBe(true);
   const html = await published.text();
   expect(html).toContain('<strong>Настоящий текст</strong>');
+  const english = await request.get(`/chronicle/${slug}?lang=en`);
+  expect(await english.text()).toContain('<strong>English publication</strong>');
+  await expect(page.locator('[name="translation:en:title"]')).toHaveValue('Browser story');
   expect(html).not.toContain('<script>window.pwned=true</script>');
   await page.getByLabel('Адрес страницы').fill(`${slug}-renamed`);
   await page.getByRole('button', { name: 'Сохранить', exact: true }).click();

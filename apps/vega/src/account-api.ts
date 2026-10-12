@@ -1,3 +1,4 @@
+import { parsePrincipal } from './principal-schema';
 import { createClient, getMe } from '@helicraft/alhena';
 import type { Principal } from '@helicraft/alhena';
 import { z } from 'zod';
@@ -8,11 +9,11 @@ function browserClient(): ReturnType<typeof createClient> {
 }
 async function currentAccount(): Promise<Principal> {
   const { data } = await getMe({ client: browserClient(), throwOnError: true });
-  return data;
+  return parsePrincipal(data);
 }
 function errorMessage(error: unknown): string {
   const parsed = ErrorSchema.safeParse(error);
-  return parsed.success ? parsed.data.message : 'Не удалось выполнить запрос. Попробуйте ещё раз.';
+  return parsed.success ? parsed.data.message : 'errors.requestFailed';
 }
 function safeReturn(value: unknown): string {
   return typeof value === 'string' &&

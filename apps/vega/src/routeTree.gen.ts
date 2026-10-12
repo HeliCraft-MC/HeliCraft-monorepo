@@ -26,6 +26,8 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as ChronicleIndexRouteImport } from './routes/chronicle.index'
 import { Route as ChronicleSlugRouteImport } from './routes/chronicle.$slug'
+import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
+import { Route as GalleryIdRouteImport } from './routes/gallery.$id'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as AdminChronicleIndexRouteImport } from './routes/admin.chronicle.index'
 import { Route as AdminChronicleEntryIdRouteImport } from './routes/admin.chronicle.$entryId'
@@ -35,6 +37,8 @@ import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$page
 import { Route as AdminPagesNewRouteImport } from './routes/admin.pages.new'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
+import { Route as AppGalleryNewRouteImport } from './routes/app.gallery.new'
+import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsSecurityRouteImport } from './routes/app.settings.security'
 import { Route as AppSettingsSkinRouteImport } from './routes/app.settings.skin'
@@ -124,6 +128,16 @@ const ChronicleSlugRoute = ChronicleSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ChronicleRoute,
 } as any)
+const GalleryIndexRoute = GalleryIndexRouteImport.update({
+  id: '/gallery/',
+  path: '/gallery/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryIdRoute = GalleryIdRouteImport.update({
+  id: '/gallery/$id',
+  path: '/gallery/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagesSlugRoute = PagesSlugRouteImport.update({
   id: '/pages/$slug',
   path: '/pages/$slug',
@@ -169,6 +183,16 @@ const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
   path: '/$userId',
   getParentRoute: () => AdminUsersRoute,
 } as any)
+const AppGalleryNewRoute = AppGalleryNewRouteImport.update({
+  id: '/gallery/new',
+  path: '/gallery/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
   id: '/settings/profile',
   path: '/settings/profile',
@@ -200,21 +224,25 @@ export interface FileRoutesByFullPath {
   '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
+  '/gallery/': typeof GalleryIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
   '/admin/pages/': typeof AdminPagesIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -225,21 +253,25 @@ export interface FileRoutesByTo {
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/chronicle': typeof ChronicleIndexRoute
+  '/gallery': typeof GalleryIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
   '/admin/chronicle': typeof AdminChronicleIndexRoute
   '/admin/pages': typeof AdminPagesIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/app/settings': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -257,21 +289,25 @@ export interface FileRoutesById {
   '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
+  '/gallery/': typeof GalleryIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
   '/admin/pages/': typeof AdminPagesIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -290,21 +326,25 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/users'
     | '/chronicle/$slug'
+    | '/gallery/$id'
     | '/pages/$slug'
     | '/admin/'
     | '/app/'
     | '/chronicle/'
+    | '/gallery/'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
     | '/admin/chronicle/'
     | '/admin/pages/'
     | '/admin/users/'
+    | '/app/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -315,21 +355,25 @@ export interface FileRouteTypes {
     | '/world'
     | '/admin/audit'
     | '/chronicle/$slug'
+    | '/gallery/$id'
     | '/pages/$slug'
     | '/admin'
     | '/app'
     | '/chronicle'
+    | '/gallery'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
     | '/admin/chronicle'
     | '/admin/pages'
     | '/admin/users'
+    | '/app/settings'
   id:
     | '__root__'
     | '/'
@@ -346,21 +390,25 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/users'
     | '/chronicle/$slug'
+    | '/gallery/$id'
     | '/pages/$slug'
     | '/admin/'
     | '/app/'
     | '/chronicle/'
+    | '/gallery/'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
     | '/admin/pages/new'
     | '/admin/users/$userId'
+    | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
     | '/admin/chronicle/'
     | '/admin/pages/'
     | '/admin/users/'
+    | '/app/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -373,7 +421,9 @@ export interface RootRouteChildren {
   RulesRoute: typeof RulesRoute
   StartRoute: typeof StartRoute
   WorldRoute: typeof WorldRoute
+  GalleryIdRoute: typeof GalleryIdRoute
   PagesSlugRoute: typeof PagesSlugRoute
+  GalleryIndexRoute: typeof GalleryIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -497,6 +547,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChronicleSlugRouteImport
       parentRoute: typeof ChronicleRoute
     }
+    '/gallery/': {
+      id: '/gallery/'
+      path: '/gallery'
+      fullPath: '/gallery/'
+      preLoaderRoute: typeof GalleryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery/$id': {
+      id: '/gallery/$id'
+      path: '/gallery/$id'
+      fullPath: '/gallery/$id'
+      preLoaderRoute: typeof GalleryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pages/$slug': {
       id: '/pages/$slug'
       path: '/pages/$slug'
@@ -559,6 +623,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/users/$userId'
       preLoaderRoute: typeof AdminUsersUserIdRouteImport
       parentRoute: typeof AdminUsersRoute
+    }
+    '/app/gallery/new': {
+      id: '/app/gallery/new'
+      path: '/gallery/new'
+      fullPath: '/app/gallery/new'
+      preLoaderRoute: typeof AppGalleryNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings/': {
+      id: '/app/settings/'
+      path: '/settings'
+      fullPath: '/app/settings/'
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/settings/profile': {
       id: '/app/settings/profile'
@@ -650,16 +728,20 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppGalleryNewRoute: typeof AppGalleryNewRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
   AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
   AppSettingsSkinRoute: typeof AppSettingsSkinRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppGalleryNewRoute: AppGalleryNewRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
   AppSettingsSecurityRoute: AppSettingsSecurityRoute,
   AppSettingsSkinRoute: AppSettingsSkinRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -688,7 +770,9 @@ const rootRouteChildren: RootRouteChildren = {
   RulesRoute: RulesRoute,
   StartRoute: StartRoute,
   WorldRoute: WorldRoute,
+  GalleryIdRoute: GalleryIdRoute,
   PagesSlugRoute: PagesSlugRoute,
+  GalleryIndexRoute: GalleryIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

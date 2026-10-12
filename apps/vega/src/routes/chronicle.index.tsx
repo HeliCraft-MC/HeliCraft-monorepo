@@ -1,3 +1,4 @@
+import { translate } from '../locales';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChronicleList } from '../chronicle-list';
 import { loadChronicle } from '../chronicle-data';
@@ -8,10 +9,11 @@ export const Route = createFileRoute('/chronicle/')({
   validateSearch: z.object({ page: z.coerce.number().int().positive().default(1) }),
   loaderDeps: ({ search }) => ({ page: search.page }),
   loader: async ({ deps }) => await loadChronicle({ data: deps }),
-  head: ({ loaderData }) =>
+  head: ({ loaderData, match }) =>
     metadata({
-      title: 'Летопись',
-      description: 'Истории HeliCraft, сообщество и новости разработки.',
+      locale: match.context.locale,
+      title: translate('admin.chronicle', match.context.locale),
+      description: translate('seo.chronicle.description', match.context.locale),
       path: '/chronicle',
       origin: loaderData?.site.canonicalOrigin ?? 'http://localhost:5173',
     }),

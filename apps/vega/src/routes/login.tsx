@@ -1,3 +1,4 @@
+import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
 import { AuthPage } from '../auth-page';
@@ -20,8 +21,11 @@ export const Route = createFileRoute('/login')({
       throw redirect({ to: '/app' });
     }
   },
-  head: () => ({
-    meta: [{ title: 'Вход · HeliCraft' }, { name: 'robots', content: 'noindex, nofollow' }],
+  head: ({ match }) => ({
+    meta: [
+      { title: translate('seo.login.title', match.context.locale) },
+      { name: 'robots', content: 'noindex, nofollow' },
+    ],
   }),
   component: AuthPage,
 });

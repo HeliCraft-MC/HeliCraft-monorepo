@@ -36,6 +36,7 @@ test('OWNER manages real user roles/status and sees audit evidence', async ({
       return details;
     })
     .toMatchObject({ roles: ['PLAYER', 'EDITOR'] });
+  await expect(page.getByRole('button', { name: 'Сохранить роли', exact: true })).toBeEnabled();
   await page.getByLabel('Статус', { exact: true }).selectOption('SUSPENDED');
   await page.getByRole('button', { name: 'Сохранить статус', exact: true }).click();
   await expect

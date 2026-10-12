@@ -1,3 +1,4 @@
+import type { ContentTranslations, GalleryTranslations } from '../modules/translations';
 import { sql } from 'drizzle-orm';
 import {
   check,
@@ -131,6 +132,8 @@ const contentDocuments = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     kind: contentKind('kind').notNull(),
     slug: text('slug').notNull(),
+    originalLanguage: text('original_language').notNull().default('ru'),
+    translations: jsonb('translations').$type<ContentTranslations>().notNull().default({}),
     title: text('title').notNull(),
     description: text('description').notNull(),
     markdown: text('markdown').notNull(),
@@ -171,6 +174,8 @@ const contentRevisions = pgTable(
     revision: integer('revision').notNull(),
     snapshot: jsonb('snapshot')
       .$type<{
+        originalLanguage?: string;
+        translations?: ContentTranslations;
         title: string;
         slug: string;
         description: string;
@@ -220,7 +225,41 @@ const adminAuditLog = pgTable(
   (table) => [index('audit_time').on(table.occurredAt), index('audit_target').on(table.targetId)],
 );
 
+const galleryImages = pgTable(
+  'gallery_images',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    originalLanguage: text('original_language').notNull().default('ru'),
+    translations: jsonb('translations').$type<GalleryTranslations>().notNull().default({}),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    alt: text('alt').notNull(),
+    place: text('place').notNull().default(''),
+    location: jsonb('location').$type<{
+      x: number;
+      y: number;
+      z: number;
+      dimension: 'overworld' | 'nether' | 'end';
+    }>(),
+    playerIds: jsonb('player_ids').$type<string[]>().notNull().default([]),
+    storageKey: text('storage_key').notNull().unique(),
+    thumbnailKey: text('thumbnail_key').notNull().unique(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    createdAt: time('created_at').notNull().defaultNow(),
+    deletedAt: time('deleted_at'),
+  },
+  (table) => [
+    index('gallery_publication').on(table.deletedAt, table.createdAt),
+    index('gallery_owner').on(table.ownerId),
+  ],
+);
+
 export {
+  galleryImages,
   userStatus,
   roleName,
   skinModel,

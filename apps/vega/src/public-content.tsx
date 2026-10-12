@@ -1,18 +1,18 @@
-import { formatDate } from './date-format';
+import { localizeContent } from './localized-content';
+import { useTranslation } from './i18n';
 import { useLoaderData } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
 import { MarkdownContent, PageContainer } from '@helicraft/atria';
 import styles from './account.module.scss';
 
 export function PublicContent(): ReactElement {
+  const { locale } = useTranslation();
   const data = useLoaderData({ strict: false });
-  const content = data && 'content' in data ? data.content?.document : null;
+  const original = data && 'content' in data ? data.content?.document : null;
+  const content = original ? localizeContent(original, locale) : null;
   return (
     <main id="main-content" className={styles.page}>
       <PageContainer narrow>
-        <p className={styles.eyebrow}>
-          {content?.category} / {formatDate(content?.publishedAt)}
-        </p>
         <h1>{content?.title}</h1>
         <p className={styles.paragraph}>{content?.description}</p>
         {content ? <MarkdownContent html={content.html} /> : null}

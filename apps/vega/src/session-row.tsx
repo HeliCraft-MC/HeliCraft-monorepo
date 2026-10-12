@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { Button } from '@helicraft/atria';
@@ -10,16 +11,20 @@ interface SessionRowProps {
   readonly onRevoke: (id: string, current: boolean) => Promise<void>;
 }
 function SessionRow({ session, onRevoke }: SessionRowProps): ReactElement {
+  const { text, locale } = useTranslation();
+
   const { id, current } = session;
   const handleRevoke = useCallback((): void => {
     void onRevoke(id, current);
   }, [onRevoke, id, current]);
   return (
     <p className={styles.paragraph}>
-      {session.current ? 'Это устройство' : (session.userAgent ?? 'Другое устройство')} ·{' '}
-      {formatDate(session.lastSeenAt)}{' '}
+      {session.current
+        ? text('security.currentDevice')
+        : (session.userAgent ?? text('security.otherDevice'))}{' '}
+      · {formatDate(session.lastSeenAt, locale)}{' '}
       <Button tone="quiet" onClick={handleRevoke}>
-        Завершить
+        {text('security.endSession')}
       </Button>
     </p>
   );

@@ -1,49 +1,23 @@
-import { Link, Outlet, getRouteApi } from '@tanstack/react-router';
+import { useTranslation } from './i18n';
+import { Link, Outlet, getRouteApi, useRouterState } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
 import { PageContainer } from '@helicraft/atria';
-import { AccountLinks } from './account-links';
+import { SiteHeader } from './site-header';
 import styles from './site.module.scss';
 
 const rootRoute = getRouteApi('__root__');
 
 export function SiteLayout(): ReactElement {
+  const { text } = useTranslation();
+
   const navigation = rootRoute.useLoaderData();
+  const home = useRouterState({ select: (state) => state.location.pathname === '/' });
   return (
     <>
       <a className={styles.skip} href="#main-content">
-        Перейти к содержимому
+        {text('navigation.skipContent')}
       </a>
-      <header className={styles.header}>
-        <PageContainer>
-          <div className={styles.headerInner}>
-            <Link className={styles.brand} to="/" aria-label="HeliCraft — главная">
-              <span className={styles.logo} aria-hidden="true">
-                ✳
-              </span>{' '}
-              HeliCraft
-            </Link>
-            <nav className={styles.navigation} aria-label="Основная навигация">
-              <Link to="/world">Мир</Link>
-              <Link to="/chronicle">Летопись</Link>
-              <Link to="/start">Как начать</Link>
-              <Link to="/rules">Правила</Link>
-            </nav>
-            <div className={styles.accountLinks}>
-              <AccountLinks registrationEnabled={navigation.site?.registrationEnabled ?? false} />
-            </div>
-            <details className={styles.mobileMenu}>
-              <summary>Меню</summary>
-              <nav aria-label="Мобильная навигация">
-                <Link to="/world">Мир</Link>
-                <Link to="/chronicle">Летопись</Link>
-                <Link to="/start">Как начать</Link>
-                <Link to="/rules">Правила</Link>
-                <AccountLinks registrationEnabled={navigation.site?.registrationEnabled ?? false} />
-              </nav>
-            </details>
-          </div>
-        </PageContainer>
-      </header>
+      <SiteHeader key={home ? 'home' : 'inner'} home={home} />
       <Outlet />
       <footer className={styles.footer}>
         <PageContainer>
@@ -53,16 +27,20 @@ export function SiteLayout(): ReactElement {
                 HeliCraft
               </Link>
               <p>
-                Обычный Minecraft.
+                {text('footer.tagline')}
                 <br />
-                Необычные возможности.
+                {text('footer.description')}
               </p>
             </div>
-            <nav aria-label="Навигация в подвале">
-              <Link to="/world">Мир</Link>
-              <Link to="/chronicle">Летопись</Link>
-              <Link to="/start">Как начать</Link>
-              <Link to="/rules">Правила</Link>
+            <nav aria-label={text('navigation.footerLabel')}>
+              <Link to="/world">{text('navigation.world')}</Link>
+              <Link to="/chronicle">{text('navigation.chronicle')}</Link>
+              <a href="/gallery">{text('navigation.gallery')}</a>
+              <a href="https://github.com/HeliCraft-MC" rel="noopener noreferrer">
+                GitHub
+              </a>
+              <Link to="/start">{text('navigation.start')}</Link>
+              <Link to="/rules">{text('navigation.rules')}</Link>
               {navigation.pages
                 .filter((page) => page.slug !== 'rules' && page.slug !== 'start')
                 .map((page) => (
@@ -77,9 +55,9 @@ export function SiteLayout(): ReactElement {
               ))}
             </nav>
             <p className={styles.small}>
-              Независимый проект сообщества.
+              {text('footer.communityProject')}
               <br />
-              Не является официальным продуктом Minecraft и не связан с Mojang или Microsoft.
+              {text('footer.minecraftDisclaimer')}
             </p>
           </div>
         </PageContainer>

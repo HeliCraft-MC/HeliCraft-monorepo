@@ -1,0 +1,39 @@
+.zone {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+  &[data-dragging='true'] {
+    border-color: var(--primary);
+    background: var(--bg-elevated);
+  }
+  &[data-disabled='true'] {
+    opacity: 0.6;
+  }
+}
+.trigger {
+  display: grid;
+  gap: var(--space-3);
+  place-items: center;
+  width: 100%;
+  padding: var(--space-8) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+  }
+  &:disabled {
+    cursor: default;
+  }
+}
+.hint {
+  color: var(--text-secondary);
+  font-size: var(--font-small);
+}
+.filename {
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}

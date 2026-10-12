@@ -1,0 +1,41 @@
+.tile {
+  display: block;
+  text-decoration: none;
+  min-width: 0;
+  break-inside: avoid;
+  margin-bottom: 42px;
+  &:hover img {
+    transform: scale(1.025);
+  }
+  &:hover h2 {
+    color: var(--primary);
+  }
+  > p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+}
+.image {
+  overflow: hidden;
+  background: var(--bg-panel);
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+    object-fit: cover;
+    transition: transform 500ms;
+  }
+}
+.caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 18px 0 8px;
+    overflow-wrap: anywhere;
+  }
+}

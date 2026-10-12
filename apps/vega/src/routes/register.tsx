@@ -1,3 +1,4 @@
+import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
 import { RegistrationPage } from '../registration-page';
@@ -22,8 +23,11 @@ export const Route = createFileRoute('/register')({
     }
   },
   loader: async () => await loadPublicSite(),
-  head: () => ({
-    meta: [{ title: 'Регистрация · HeliCraft' }, { name: 'robots', content: 'noindex, nofollow' }],
+  head: ({ match }) => ({
+    meta: [
+      { title: translate('seo.register.title', match.context.locale) },
+      { name: 'robots', content: 'noindex, nofollow' },
+    ],
   }),
   component: RegistrationPage,
 });

@@ -3,9 +3,9 @@ import { useCallback } from 'react';
 async function copy(value: string, onMessage: (message: string) => void): Promise<void> {
   try {
     await navigator.clipboard.writeText(value);
-    onMessage('UUID скопирован');
+    onMessage('profile.uuidCopied');
   } catch {
-    onMessage('Копирование недоступно. Выдели UUID и скопируй вручную.');
+    onMessage('profile.copyUuidFailed');
   }
 }
 function useCopyText(value: string, onMessage: (message: string) => void): () => void {

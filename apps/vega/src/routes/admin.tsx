@@ -1,3 +1,4 @@
+import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { currentAccount } from '../account-api';
 import { AdminLayout } from '../admin-layout';
@@ -19,9 +20,9 @@ export const Route = createFileRoute('/admin')({
     }
     return { principal };
   },
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
-      { title: 'Администрация · HeliCraft' },
+      { title: translate('seo.admin.title', match.context.locale) },
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),

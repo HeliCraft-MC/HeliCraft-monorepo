@@ -5,6 +5,8 @@ import type { ContentInput } from './editor-api';
 const categories = ['Мир', 'Сообщество', 'Строительство', 'События', 'Обновления проекта'] as const;
 const categorySchema = z.enum(categories);
 const initial: ContentInput = {
+  originalLanguage: 'ru',
+  translations: {},
   title: '',
   slug: '',
   description: '',
@@ -18,6 +20,8 @@ function inputFrom(record: AdminContent | undefined): ContentInput {
   return record === undefined
     ? initial
     : {
+        originalLanguage: record.originalLanguage,
+        translations: record.translations,
         title: record.title,
         slug: record.slug,
         description: record.description,
@@ -28,4 +32,12 @@ function inputFrom(record: AdminContent | undefined): ContentInput {
         isFeatured: record.isFeatured,
       };
 }
-export { categories, categorySchema, inputFrom };
+
+const categoryKeys = {
+  Мир: 'navigation.world',
+  Сообщество: 'content.categories.community',
+  Строительство: 'content.categories.construction',
+  События: 'content.categories.events',
+  'Обновления проекта': 'content.categories.projectUpdates',
+} as const;
+export { categories, categorySchema, inputFrom, categoryKeys };

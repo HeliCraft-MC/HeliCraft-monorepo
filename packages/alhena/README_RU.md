@@ -35,3 +35,7 @@ console.log(data.message);
 ## Web foundation contract
 
 Generated-клиент включает `/api/v1`: identity, account, sessions, skins, public pages/chronicle/site и admin users/content/audit. Вега использует эти методы с относительным same-origin API в браузере; public SSR использует отдельный server client без cookies. При изменении API запускайте корневой `bun run generate`; generated-файлы не редактируются вручную. DTO и permission checks остаются в Антаресе.
+
+## Gallery foundation
+
+Публичные `/gallery` и `/gallery/:id` используют SSR; `/app/gallery/new` — существующую сессию и CSR. Галерея проходит через Alhena к отдельному домену Antares и private S3/PostgreSQL. [Архитектура галереи](../../docs/architecture/gallery_RU.md). В Atria добавлены StateCard, GalleryTile, PhotoCarousel и ActionLink; каждый компонент расположен в собственной папке `src/components`.

@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
+  galleryImages,
   worldEvents,
   users,
   userCredentials,
@@ -16,6 +17,7 @@ import {
 } from './schema';
 
 const schema = {
+  galleryImages,
   worldEvents,
   users,
   userCredentials,

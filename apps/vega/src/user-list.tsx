@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { formatDate } from './date-format';
 import { CopyUuid } from './copy-uuid';
 import { useCallback, useState } from 'react';
@@ -22,6 +23,8 @@ const PAGE_SIZE = 20;
 const Status = z.enum(['ACTIVE', 'SUSPENDED', 'BANNED']);
 const Role = z.enum(['PLAYER', 'EDITOR', 'MODERATOR', 'ADMIN', 'OWNER']);
 export function UserList(): ReactElement {
+  const { text, locale } = useTranslation();
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<z.infer<typeof Status> | undefined>();
@@ -51,38 +54,38 @@ export function UserList(): ReactElement {
   });
   return (
     <>
-      <h1>Пользователи</h1>
+      <h1>{text('admin.users')}</h1>
       <div className={styles.form}>
-        <FormField label="Ник или UUID" htmlFor="user-search">
+        <FormField label={text('users.searchLabel')} htmlFor="user-search">
           <TextField id="user-search" type="search" value={search} onChange={handleSearch} />
         </FormField>
-        <FormField label="Статус" htmlFor="user-status">
+        <FormField label={text('common.status')} htmlFor="user-status">
           <Select id="user-status" value={status ?? ''} onChange={handleStatus}>
-            <option value="">Все статусы</option>
+            <option value="">{text('users.allStatuses')}</option>
             {Status.options.map((value) => (
               <option key={value}>{value}</option>
             ))}
           </Select>
         </FormField>
-        <FormField label="Роль" htmlFor="user-role">
+        <FormField label={text('users.role')} htmlFor="user-role">
           <Select id="user-role" value={role ?? ''} onChange={handleRole}>
-            <option value="">Все роли</option>
+            <option value="">{text('users.allRoles')}</option>
             {Role.options.map((value) => (
               <option key={value}>{value}</option>
             ))}
           </Select>
         </FormField>
       </div>
-      {result.isError ? <Alert tone="danger">Нет доступа или сервис недоступен</Alert> : null}
+      {result.isError ? <Alert tone="danger">{text('errors.accessDenied')}</Alert> : null}
       <Table>
-        <caption>Зарегистрированные аккаунты</caption>
+        <caption>{text('users.registeredAccounts')}</caption>
         <thead>
           <tr>
-            <th>Игрок</th>
+            <th>{text('users.player')}</th>
             <th>UUID</th>
-            <th>Статус</th>
-            <th>Роли</th>
-            <th>Регистрация</th>
+            <th>{text('common.status')}</th>
+            <th>{text('users.roles')}</th>
+            <th>{text('users.registration')}</th>
           </tr>
         </thead>
         <tbody>
@@ -101,12 +104,12 @@ export function UserList(): ReactElement {
               </td>
               <td>{user.status}</td>
               <td>{user.roles.join(', ')}</td>
-              <td>{formatDate(user.createdAt)}</td>
+              <td>{formatDate(user.createdAt, locale)}</td>
             </tr>
           ))}
         </tbody>
       </Table>
-      {result.data?.items.length === 0 ? <p>Пользователи не найдены.</p> : null}
+      {result.data?.items.length === 0 ? <p>{text('users.empty')}</p> : null}
       <Pagination
         page={page}
         pageSize={PAGE_SIZE}

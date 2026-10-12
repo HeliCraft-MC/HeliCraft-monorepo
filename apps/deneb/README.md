@@ -16,7 +16,7 @@ bun run dev:deneb
 
 JDK 25 is required. Artifact: `apps/deneb/build/libs/deneb.jar`. Gradle continuous mode rebuilds on source changes; it does not reload a running plugin. Paper API and Adventure are compile-only; JTS/Caffeine are bundled and relocated by Shadow. JUnit 5 tests the spatial primitive. Coordinates here are the Minecraft x/z plane, distinct from the sample PostGIS SRID 4326.
 
-Production from root: `docker compose --env-file .env -f apps/deneb/compose.yml up -d --build`. This starts Deneb, Rigel and the API dependencies. Read/accept the Minecraft EULA yourself and set `EULA=true`; use a random alphanumeric `FORWARDING_SECRET` shared by Paper/Velocity. Paper has no published host port. Players enter via Velocity on 25565; modern forwarding protects the offline-mode backend. Server jars are pinned in `server-lock.json` and verified by SHA-256 during image build. The bootstrap regenerates forwarding configuration on startup; persistent world/server settings live in the volume. Restart/rebuild containers after changing plugin code.
+Container build from root: `docker compose -f apps/deneb/compose.yml build deneb`. Compose uses only the Dockerfile `build` stage to build the plugin jar at `/workspace/apps/deneb/build/libs/deneb.jar` inside the image. It does not download or start Minecraft servers and does not start Antares dependencies. Deploy the jar to your separately managed server and restart it after plugin changes.
 
 Future scope: borders, jurisdictions, protected property, physical institutions, geology, deposits and market goods. Gameplay should remain ordinary Minecraft rather than becoming a collection of menus.
 

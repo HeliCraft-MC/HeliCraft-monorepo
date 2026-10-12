@@ -1,3 +1,4 @@
+import { renderTranslations } from './translations';
 import { and, count, desc, eq } from 'drizzle-orm';
 import type { Database } from '../../db';
 import { contentDocuments, contentRedirects, users } from '../../db/schema';
@@ -15,6 +16,8 @@ interface DocumentWithAuthor {
 async function publicDto(row: DocumentWithAuthor): Promise<PublicContent> {
   const { document } = row;
   return {
+    originalLanguage: document.originalLanguage,
+    translations: await renderTranslations(document.translations),
     id: document.id,
     kind: document.kind,
     slug: document.slug,
@@ -34,6 +37,7 @@ async function adminDto(row: DocumentWithAuthor): Promise<AdminContent> {
   return {
     ...(await publicDto(row)),
     markdown: row.document.markdown,
+    translations: row.document.translations,
     status: row.document.status,
     revision: row.document.revision,
     createdBy: row.document.createdBy,

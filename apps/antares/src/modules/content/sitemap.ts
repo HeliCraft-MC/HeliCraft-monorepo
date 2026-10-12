@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import type { Database } from '../../db';
-import { contentDocuments } from '../../db/schema';
+import { contentDocuments, galleryImages } from '../../db/schema';
 import { DomainError, HTTP } from '../errors';
 
 function xml(value: string): string {
@@ -35,7 +35,7 @@ function sitemapRoutes(db: Database['db'] | undefined, origin: string): OpenAPIH
       })
       .from(contentDocuments)
       .where(eq(contentDocuments.status, 'PUBLISHED'));
-    const staticPages = ['/', '/world', '/start', '/rules', '/chronicle'].map(
+    const staticPages = ['/', '/world', '/start', '/rules', '/chronicle', '/gallery'].map(
       (path) => `<url><loc>${xml(new URL(path, origin).href)}</loc></url>`,
     );
     const publications = documents
@@ -44,9 +44,17 @@ function sitemapRoutes(db: Database['db'] | undefined, origin: string): OpenAPIH
         (document) =>
           `<url><loc>${xml(new URL(`/${document.kind === 'PAGE' ? 'pages' : 'chronicle'}/${document.slug}`, origin).href)}</loc><lastmod>${document.updatedAt.toISOString()}</lastmod></url>`,
       );
+    const photos = await db
+      .select({ id: galleryImages.id, createdAt: galleryImages.createdAt })
+      .from(galleryImages)
+      .where(isNull(galleryImages.deletedAt));
+    const gallery = photos.map(
+      (photo) =>
+        `<url><loc>${xml(new URL(`/gallery/${photo.id}`, origin).href)}</loc><lastmod>${photo.createdAt.toISOString()}</lastmod></url>`,
+    );
     context.header('Content-Type', 'application/xml; charset=utf-8');
     return context.body(
-      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticPages, ...publications].join('')}</urlset>`,
+      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticPages, ...publications, ...gallery].join('')}</urlset>`,
     );
   });
   return app;

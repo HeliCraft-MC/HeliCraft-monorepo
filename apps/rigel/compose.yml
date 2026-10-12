@@ -1,3 +1,6 @@
-name: helicraft-minecraft
-include:
-  - path: ../deneb/compose.yml
+name: helicraft-rigel-build
+services:
+  rigel:
+    profiles: [plugins]
+    build: { context: ../.., dockerfile: apps/rigel/Dockerfile, target: build }
+    command: ['true']

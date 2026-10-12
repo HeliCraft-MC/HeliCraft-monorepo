@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { useLocation } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
@@ -7,6 +8,8 @@ import type { Kind } from './editor-api';
 import { ContentEditorForm } from './content-editor-form';
 
 function ContentEditor(): ReactElement {
+  const { text } = useTranslation();
+
   const { pathname } = useLocation();
   const kind: Kind = pathname.startsWith('/admin/pages') ? 'PAGE' : 'CHRONICLE';
   const [last] = pathname.split('/').toReversed();
@@ -25,7 +28,7 @@ function ContentEditor(): ReactElement {
     return <Spinner />;
   }
   if (result.isError) {
-    return <Alert tone="danger">Документ недоступен</Alert>;
+    return <Alert tone="danger">{text('content.unavailable')}</Alert>;
   }
   return (
     <ContentEditorForm

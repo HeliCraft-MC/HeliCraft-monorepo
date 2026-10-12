@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { SkinViewer } from 'skinview3d';
@@ -8,6 +9,8 @@ interface SkinViewerProps {
   readonly model: 'CLASSIC' | 'SLIM';
 }
 export function SkinPreview({ url, model }: SkinViewerProps): ReactElement {
+  const { text } = useTranslation();
+
   const canvas = useRef<HTMLCanvasElement>(null);
   const [failed, setFailed] = useState(false);
   useEffect((): (() => void) | undefined => {
@@ -40,11 +43,11 @@ export function SkinPreview({ url, model }: SkinViewerProps): ReactElement {
     <div className={styles.preview}>
       {failed ? (
         <>
-          <img src={url} alt="Текстура скина — 3D-просмотр недоступен" width={256} height={256} />
-          <p>WebGL недоступен. Скин можно сохранить по текстуре.</p>
+          <img src={url} alt={text('skin.textureFallback')} width={256} height={256} />
+          <p>{text('skin.webglFallback')}</p>
         </>
       ) : (
-        <canvas ref={canvas} aria-label="3D-просмотр скина: перетаскивайте для вращения" />
+        <canvas ref={canvas} aria-label={text('skin.viewerLabel')} />
       )}
     </div>
   );

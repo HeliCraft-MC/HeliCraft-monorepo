@@ -15,6 +15,8 @@ function proxyConfig(target: string): Record<string, string | ProxyOptions> {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '../..', '');
+  const apiTarget = process.env.API_PROXY_TARGET ?? env.API_PROXY_TARGET ?? 'http://localhost:3000';
+  process.env.API_PROXY_TARGET = apiTarget;
   return {
     envDir: '../..',
     optimizeDeps: {
@@ -55,9 +57,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       strictPort: true,
-      proxy: proxyConfig(
-        process.env.API_PROXY_TARGET ?? env.API_PROXY_TARGET ?? 'http://localhost:3000',
-      ),
+      proxy: proxyConfig(apiTarget),
     },
   };
 });

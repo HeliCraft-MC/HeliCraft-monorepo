@@ -1,6 +1,6 @@
 // oxlint-disable node/no-process-env -- Environment access is confined to createServerFn handlers and stripped from the client bundle.
 import { createServerFn } from '@tanstack/react-start';
-import { createClient, getSite, listChronicle, listPublicPages } from '@helicraft/alhena';
+import { createClient, getSite, listGallery, listPublicPages } from '@helicraft/alhena';
 
 const loadPublicHome = createServerFn({ method: 'GET' }).handler(async () => {
   const client = createClient({
@@ -8,17 +8,12 @@ const loadPublicHome = createServerFn({ method: 'GET' }).handler(async () => {
     credentials: 'omit',
   });
   const { data: site } = await getSite({ client, throwOnError: true });
-  const chronicle = await listChronicle({
+  const gallery = await listGallery({
     client,
-    query: { page: 1, pageSize: 4 },
+    query: { page: 1, pageSize: 6 },
     throwOnError: false,
-  });
-  const pages = await listPublicPages({
-    client,
-    query: { page: 1, pageSize: 50 },
-    throwOnError: false,
-  });
-  return { site, chronicle: chronicle.data ?? null, pages: pages.data?.items ?? [] };
+  }).catch(() => null);
+  return { site, gallery: gallery?.data ?? null };
 });
 
 const loadPublicSite = createServerFn({ method: 'GET' }).handler(async () => {

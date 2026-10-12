@@ -35,3 +35,7 @@ From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: 
 Domains live in `src/modules`: identity, sessions, permissions, administration, skins and content. API v1 serves real accounts, opaque cookies, RBAC, CMS and images. Migration 0001 adds identity/CMS tables; 0002 prevents UUID changes and rewriting audit/history/revisions. world_events remains a separate domain. Tests use disposable real PostgreSQL/PostGIS and S3.
 
 [Identity](../../docs/architecture/identity.md) · [Authorization](../../docs/architecture/authorization.md) · [Skins](../../docs/architecture/skin-storage.md) · [Content](../../docs/architecture/content.md)
+
+## Gallery foundation
+
+Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing sessions and CSR. Gallery flows through Alhena to a separate Antares private S3/PostgreSQL domain. [Gallery architecture](../../docs/architecture/gallery.md). Atria adds StateCard, GalleryTile, PhotoCarousel and ActionLink; each component has its own `src/components` folder.

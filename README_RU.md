@@ -32,7 +32,7 @@ bun run db:migrate
 bun run dev
 ```
 
-Vega: http://localhost:5173. Antares: http://localhost:3000. OpenAPI: http://localhost:3000/openapi.json. S3: http://localhost:8333. `dev` запускает только JS/TS-пакеты и веб-приложения. Для сборки Java явно вызывайте `build:java`, `build:deneb`, `build:rigel` или `dev:deneb`/`dev:rigel`. Для Storybook отдельно выполните `bun run storybook`, адрес http://localhost:6006.
+Vega: http://localhost:5173. Antares: http://localhost:3000. OpenAPI: http://localhost:3000/openapi.json. S3: http://localhost:8333. `dev` запускает только JS/TS-пакеты и веб-приложения. Для сборки Java явно вызывайте `build:java`, `build:deneb`, `build:rigel` или `dev:deneb`/`dev:rigel`. `dev` также запускает Storybook на http://localhost:6006. Если порт API занят, скрипт выбирает следующий свободный порт и подключает к нему Вегу; выбранный порт выводится при запуске. Storybook можно запустить отдельно через `bun run storybook`.
 
 Только фронтенд: `bun run dev:vega`. Только бэкенд: `bun run dev:antares`. Приветствие работает без сохранения данных при корректном окружении Antares; `/api/ready` проверяет PostGIS и S3-бакет.
 
@@ -40,9 +40,9 @@ Vega: http://localhost:5173. Antares: http://localhost:3000. OpenAPI: http://loc
 
 | Команда                               | Назначение                                                                              |
 | ------------------------------------- | --------------------------------------------------------------------------------------- |
-| `bun run dev`                         | Сборка пакетов, watch Atria/Alhena, dev-серверы Vega и Antares                          |
-| `bun run dev:vega`                    | Vega и watch внутренних пакетов; API запускается отдельно                               |
-| `bun run dev:antares`                 | Antares и watch внутренних пакетов                                                      |
+| `bun run dev`                         | Сборка пакетов, watch Atria/Alhena, dev-серверы Vega и Antares, Storybook               |
+| `bun run dev:vega`                    | Vega, Storybook и watch внутренних пакетов; API запускается отдельно                    |
+| `bun run dev:antares`                 | Antares, Storybook и watch внутренних пакетов                                           |
 | `bun run dev:atria` / `dev:alhena`    | Watch и пересборка выбранного пакета                                                    |
 | `bun run dev:deneb` / `dev:rigel`     | Непрерывная сборка Gradle; без автоматической перезагрузки плагина                      |
 | `bun run storybook`                   | Каталог компонентов Atria на порту 6006                                                 |
@@ -60,7 +60,7 @@ Vega: http://localhost:5173. Antares: http://localhost:3000. OpenAPI: http://loc
 | `bun run db:generate` / `db:migrate`  | Генерация/применение миграций Drizzle к БД `helicraft`                                  |
 | `bun run compose:up` / `compose:down` | Сборка/запуск веб-стека или остановка Compose                                           |
 
-Используйте `bun run` для скриптов package.json в обычном формате npm scripts. CLI-инструменты запускаются через `bunx --bun`; Node.js для реализованного JS-процесса не нужен. Общие скрипты не вызывают Gradle; форматирование Java запускается через `format:java` и `format:check:java`. `compose:up` собирает только веб-стек; Minecraft запускается явно через Docker Compose. `bun test` не является настроенной командой Vitest. Установка браузера: `bunx --bun playwright install chromium` (Linux также могут понадобиться системные библиотеки браузера).
+Используйте `bun run` для скриптов package.json в обычном формате npm scripts. CLI-инструменты запускаются через `bunx --bun`; Node.js для реализованного JS-процесса не нужен. Общие скрипты не вызывают Gradle; форматирование Java запускается через `format:java` и `format:check:java`. `compose:up` собирает только веб-стек; Compose собирает плагины без запуска Minecraft-серверов. `bun test` не является настроенной командой Vitest. Установка браузера: `bunx --bun playwright install chromium` (Linux также могут понадобиться системные библиотеки браузера).
 
 ## Продакшен через Compose
 
@@ -71,7 +71,7 @@ cp .env.example .env
 docker compose up -d --build --wait vega
 ```
 
-Команда выше запускает только web-стек. Minecraft подключается отдельно после явного принятия EULA. Полный корневой стек также поддерживает Deneb и Rigel; включает PostGIS и SeaweedFS 4.48; применяет миграции до запуска Antares; публикует веб на 8080 и Minecraft на 25565. Atria и Alhena входят в сборку Vega. Minecraft-порт открыт только у Velocity; Paper работает во внутренней сети с modern forwarding. Стандартная проверка официальных аккаунтов включена до реализации собственной идентичности Rigel.
+Корневой стек запускает веб-сервисы, включает PostGIS и SeaweedFS 4.48, применяет миграции до запуска Antares и публикует веб на 8080. Atria и Alhena входят в сборку Vega. Денеб и Ригель используют только сборочные стадии Dockerfile в профиле `plugins`; Compose не запускает Paper и Velocity. Сборка обоих плагинов: `docker compose build deneb rigel`.
 
 Только веб без Minecraft/EULA: `docker compose up -d --build vega`. API и зависимости запускаются автоматически. Для установки PWA в продакшене нужен HTTPS на reverse proxy; локально достаточно localhost. Bun-сервер статики проксирует `/api/*` и `/openapi.json` к Antares, клиент обращается к текущему origin. Service worker не кеширует ответы API.
 
@@ -80,10 +80,11 @@ Compose отдельных приложений использует общие 
 ```sh
 docker compose --env-file .env -f apps/antares/compose.yml up -d --build
 docker compose --env-file .env -f apps/vega/compose.yml up -d --build
-docker compose --env-file .env -f apps/deneb/compose.yml up -d --build
+docker compose --env-file .env -f apps/deneb/compose.yml build deneb
+docker compose --env-file .env -f apps/rigel/compose.yml build rigel
 ```
 
-Compose Deneb/Rigel запускает пару Minecraft-сервисов и зависимости Antares. У Antares есть `compose.dev.yml` для внешних сервисов. Библиотекам отдельные контейнеры не нужны. Разные имена Compose-проектов создают разные тома. `down` сохраняет данные, `down -v` удаляет их. Перед обновлениями сохраняйте PostgreSQL, S3 и Minecraft-миры.
+Compose Денеба/Ригеля собирает только выбранный плагин, без зависимостей Antares и контейнеров Minecraft-серверов. У Antares есть `compose.dev.yml` для внешних сервисов. Библиотекам отдельные контейнеры не нужны. Разные имена Compose-проектов создают разные тома. `down` сохраняет данные, `down -v` удаляет их. Перед обновлениями сохраняйте PostgreSQL и S3.
 
 ## Окружение и границы
 
@@ -108,7 +109,7 @@ Docker, Testcontainers и Chromium доступны. Web Compose, миграци
 
 Vesper, Teapot и Soon перенесены в `archive/apps/` вместе с локальными изменениями. Старые инструкции и документация сохранены в `archive/`; архив исключён из нового workspace и Docker-контекста. Новый API не сохраняет старые контракты и не переносит данные MySQL/SQLite автоматически.
 
-Названия связаны со звёздами: Vega (Лира), Antares (Скорпион), Deneb (Лебедь), Rigel (Орион), Atria (Южный Треугольник), Alhena (Близнецы), Altair (Орёл). [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/). В исходных README логотипа сервера не было, поэтому он не добавлен.
+Названия связаны со звёздами: Vega (Лира), Antares (Скорпион), Deneb (Лебедь), Rigel (Орион), Atria (Южный Треугольник), Alhena (Близнецы), Altair (Орёл). [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/). Веб-интерфейс использует архивный логотип HeliCraft, скопированный в активные assets Vega.
 
 ## Лицензия
 
@@ -119,3 +120,7 @@ Vesper, Teapot и Soon перенесены в `archive/apps/` вместе с �
 См. [rendering](docs/architecture/web-rendering_RU.md), [identity](docs/architecture/identity_RU.md), [authorization](docs/architecture/authorization_RU.md), [skins](docs/architecture/skin-storage_RU.md), [CMS](docs/architecture/content_RU.md), [landing](docs/design/landing-page_RU.md) и [quality](docs/architecture/quality.md).
 
 Для локальной разработки SITE_ORIGIN=http://localhost:5173. Перед production Compose установите SITE_ORIGIN=http://localhost:8080 (или настоящий HTTPS origin и SECURE_COOKIES=true). Регистрация создаёт только PLAYER. Первый OWNER: зарегистрируйте аккаунт, скопируйте UUID и выполните `bun run admin:bootstrap-owner <UUID> --confirm <тот же UUID>`. По умолчанию PRELAUNCH; адрес Minecraft показывается только в OPEN и при заданном MINECRAFT_ADDRESS. Не принимаем EULA автоматически.
+
+Публичная главная использует фотографии мира; `/gallery` и `/gallery/:id` отображаются через SSR, а авторизованные игроки публикуют и удаляют свои снимки через `/app/gallery/new`. Галерея хранится отдельным доменом Antares в PostgreSQL/private S3. Данные государств и экономики на главной — подписанные локальные демонстрационные примеры. [Архитектура галереи](docs/architecture/gallery_RU.md).
+
+`bun run dev` и `dev:antares` применяют миграции базы перед запуском сервисов. PostgreSQL и S3 должны работать (`bun run infra:up`). Ошибка миграции останавливает запуск; `dev:vega` использует внешний API и не применяет миграции его базы.

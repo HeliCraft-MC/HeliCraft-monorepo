@@ -2,6 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "include": ["src", "*.ts", ".storybook"],
   "compilerOptions": {
-    "types": ["vite/client"]
+    "types": ["vite/client", "@testing-library/jest-dom"]
   }
 }

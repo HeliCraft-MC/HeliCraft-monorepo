@@ -16,7 +16,7 @@ bun run dev:deneb
 
 Нужен JDK 25. Артефакт: `apps/deneb/build/libs/deneb.jar`. Continuous mode Gradle пересобирает исходники, но не перезагружает работающий плагин. Paper API и Adventure — compile-only; JTS/Caffeine включаются и изолируются через Shadow. JUnit 5 проверяет пространственный примитив. Координаты здесь лежат в плоскости x/z Minecraft, в отличие от примерного SRID 4326 в PostGIS.
 
-Продакшен из корня: `docker compose --env-file .env -f apps/deneb/compose.yml up -d --build`. Запускаются Deneb, Rigel и зависимости API. Самостоятельно прочтите/примите Minecraft EULA и задайте `EULA=true`; используйте общий случайный буквенно-цифровой `FORWARDING_SECRET` для Paper/Velocity. Paper не публикует порт наружу: вход через Velocity на 25565, modern forwarding защищает backend в offline mode. Серверные jar закреплены в `server-lock.json` и проверяются SHA-256 при сборке образа. Bootstrap обновляет forwarding-конфигурацию при запуске; мир и постоянные настройки сервера находятся в томе. После изменения плагина пересобирайте и перезапускайте контейнеры.
+Сборка в контейнере из корня: `docker compose -f apps/deneb/compose.yml build deneb`. Compose использует только стадию `build` Dockerfile; jar плагина находится в образе по пути `/workspace/apps/deneb/build/libs/deneb.jar`. Minecraft-серверы не скачиваются и не запускаются, зависимости Antares не поднимаются. Установите jar на отдельно управляемый сервер и перезапустите его после изменения плагина.
 
 Будущие задачи: границы, юрисдикции, защищённая собственность, физические учреждения, геология, залежи и реальные товары. Игровой процесс должен оставаться обычным Minecraft, а не набором меню.
 

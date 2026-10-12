@@ -1,12 +1,16 @@
+import { Icon, MinecraftAvatar } from '@helicraft/atria';
+import { useTranslation } from './i18n';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
-import { MinecraftAvatar } from '@helicraft/atria';
 
+import { formatDate } from './date-format';
 import styles from './account.module.scss';
 
 const route = getRouteApi('/app');
 
 export function AccountHome(): ReactElement {
+  const { text, locale } = useTranslation();
+
   const { principal } = route.useRouteContext();
   return (
     <>
@@ -17,21 +21,41 @@ export function AccountHome(): ReactElement {
           size={80}
         />
         <div>
-          <p className={styles.eyebrow}>Твоя постоянная идентичность</p>
-          <h1>Привет, {principal.username}.</h1>
-          <p className={styles.uuid}>{principal.id}</p>
+          <h1>
+            {text('account.greeting')} {principal.username}.
+          </h1>
+          <p className={styles.paragraph}>
+            {text('profile.registeredAt')} {formatDate(principal.createdAt, locale)}
+          </p>
         </div>
       </div>
-      <div className={styles.section}>
-        <h2>Первая глава ещё впереди.</h2>
-        <p>Твой аккаунт готов. Выбери скин, сохрани пароль и следи за разработкой мира.</p>
-        <p className={styles.paragraph}>
-          <Link to="/chronicle">Читать летопись →</Link>
-        </p>
+      <div className={styles.actionGrid}>
+        <Link className={styles.actionCard} to="/app/settings/profile">
+          <h2>{text('account.profile')}</h2>
+          <p>{text('account.profileHint')}</p>
+          <Icon name="arrowRight" />
+        </Link>
+        <Link className={styles.actionCard} to="/app/settings/skin">
+          <h2>{text('account.skin')}</h2>
+          <p>{text('account.skinHint')}</p>
+          <Icon name="arrowRight" />
+        </Link>
+        <Link className={styles.actionCard} to="/app/gallery/new">
+          <h2>{text('gallery.upload.title')}</h2>
+          <p>{text('account.galleryHint')}</p>
+          <Icon name="arrowRight" />
+        </Link>
+        <Link className={styles.actionCard} to="/app/settings/security">
+          <h2>{text('account.security')}</h2>
+          <p>{text('account.securityHint')}</p>
+          <Icon name="arrowRight" />
+        </Link>
       </div>
       {principal.permissions.includes('content.read') ||
       principal.permissions.includes('users.read') ? (
-        <Link to="/admin">Открыть администрацию →</Link>
+        <Link to="/admin">
+          {text('common.openAdministration')} <Icon name="arrowRight" />
+        </Link>
       ) : null}
     </>
   );

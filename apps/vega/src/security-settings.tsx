@@ -1,3 +1,4 @@
+import { useTranslation } from './i18n';
 import { useCallback, useState } from 'react';
 import type { SubmitEvent, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -12,6 +13,8 @@ async function sessionsQuery(): Promise<Awaited<ReturnType<typeof getSessions>>[
   return data;
 }
 export function SecuritySettings(): ReactElement {
+  const { text } = useTranslation();
+
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const sessions = useQuery({ queryKey: ['sessions'], queryFn: sessionsQuery });
@@ -24,7 +27,7 @@ export function SecuritySettings(): ReactElement {
       return;
     }
     if (data.get('confirmation') !== password) {
-      setMessage('Пароли не совпадают');
+      setMessage('auth.passwordMismatch');
       return;
     }
     setBusy(true);
@@ -79,12 +82,10 @@ export function SecuritySettings(): ReactElement {
   }, [leave]);
   return (
     <>
-      <h1>Безопасность</h1>
-      <p className={styles.paragraph}>
-        После смены пароля все сессии будут завершены. Войди снова с новым паролем.
-      </p>
+      <h1>{text('account.security')}</h1>
+      <p className={styles.paragraph}>{text('security.passwordChangeHint')}</p>
       <form method="post" className={styles.form} onSubmit={handleSubmit}>
-        <FormField label="Текущий пароль" htmlFor="current-password">
+        <FormField label={text('auth.currentPassword')} htmlFor="current-password">
           <PasswordField
             id="current-password"
             name="currentPassword"
@@ -92,7 +93,7 @@ export function SecuritySettings(): ReactElement {
             autoComplete="current-password"
           />
         </FormField>
-        <FormField label="Новый пароль" htmlFor="new-password">
+        <FormField label={text('security.newPassword')} htmlFor="new-password">
           <PasswordField
             id="new-password"
             name="password"
@@ -102,7 +103,7 @@ export function SecuritySettings(): ReactElement {
             autoComplete="new-password"
           />
         </FormField>
-        <FormField label="Повтори пароль" htmlFor="password-confirmation">
+        <FormField label={text('auth.confirmPassword')} htmlFor="password-confirmation">
           <PasswordField
             id="password-confirmation"
             name="confirmation"
@@ -110,23 +111,25 @@ export function SecuritySettings(): ReactElement {
             autoComplete="new-password"
           />
         </FormField>
-        {message === null ? null : <Alert>{message}</Alert>}
+        {message === null ? null : <Alert>{text(message)}</Alert>}
         <Button type="submit" disabled={busy}>
-          Изменить пароль
+          {text('security.changePassword')}
         </Button>
       </form>
       <section className={styles.section}>
-        <h2>Активные сессии</h2>
+        <h2>{text('security.activeSessions')}</h2>
         {sessions.data?.map((session) => (
           <SessionRow key={session.id} session={session} onRevoke={revoke} />
         ))}
-        {sessions.isError ? <Alert tone="danger">Не удалось загрузить сессии</Alert> : null}
+        {sessions.isError ? (
+          <Alert tone="danger">{text('security.sessionsUnavailable')}</Alert>
+        ) : null}
         <div className={styles.navigation}>
           <Button tone="quiet" onClick={handleLogout}>
-            Выйти
+            {text('auth.signOut')}
           </Button>
           <Button tone="quiet" onClick={handleLogoutAll}>
-            Выйти на всех устройствах
+            {text('security.signOutEverywhere')}
           </Button>
         </div>
       </section>

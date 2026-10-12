@@ -1,3 +1,5 @@
+import { parsePrincipal } from './principal-schema';
+import { useTranslation } from './i18n';
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
@@ -19,23 +21,26 @@ async function leave(): Promise<void> {
 function AccountLinks({
   registrationEnabled,
 }: Readonly<{ registrationEnabled: boolean }>): ReactElement {
+  const { text } = useTranslation();
+
   const hydrated = useHydrated();
   const account = useQuery({
     queryKey: ['account'],
     queryFn: currentAccount,
+    select: parsePrincipal,
     enabled: hydrated,
     retry: false,
   });
   const signOut = useCallback((): void => {
     void leave();
   }, []);
-  if (account.data === undefined) {
+  if (account.isError || account.data === undefined) {
     return (
       <>
-        <Link to="/login">Войти</Link>
+        <Link to="/login">{text('auth.signIn')}</Link>
         {registrationEnabled ? (
           <Link className={styles.cta} to="/register">
-            Создать аккаунт
+            {text('auth.createAccount')}
           </Link>
         ) : null}
       </>
@@ -52,9 +57,9 @@ function AccountLinks({
         />{' '}
         {principal.username}
       </Link>
-      {principal.permissions.length === 0 ? null : <Link to="/admin">Администрация</Link>}
+      {principal.permissions.length === 0 ? null : <Link to="/admin">{text('admin.title')}</Link>}
       <Button tone="quiet" onClick={signOut}>
-        Выйти
+        {text('auth.signOut')}
       </Button>
     </>
   );

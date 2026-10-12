@@ -15,7 +15,7 @@ bun run test:vega
 bun run test:e2e
 ```
 
-Для данных API запустите Antares отдельно либо используйте `bun run dev`. `dev:vega` готовит пакеты Atria/Alhena и запускает watch. Продакшен из корня: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` (с API и хранилищами). Маршруты и генерируемый `routeTree.gen.ts` находятся в `src/`. Будущие функции: карта мира, управление государством, законы, голосования, рынки, история, уведомления ; безопасность аккаунта реализована.
+Для данных API запустите Antares отдельно либо используйте `bun run dev`. `dev:vega` готовит пакеты Atria/Alhena, запускает watch и Storybook. Продакшен из корня: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` (с API и хранилищами). Маршруты и генерируемый `routeTree.gen.ts` находятся в `src/`. Будущие функции: карта мира, управление государством, законы, голосования, рынки, история, уведомления ; безопасность аккаунта реализована.
 
 Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/setup-research_RU.md).
 
@@ -30,3 +30,9 @@ bun run test:e2e
 [Rendering](../../docs/architecture/web-rendering.md) · [Identity](../../docs/architecture/identity.md) · [Design](../../docs/design/landing-page.md)
 
 Перед Compose выставьте SITE_ORIGIN под адрес браузера (локально http://localhost:8080), для HTTPS — SECURE_COOKIES=true.
+
+## Gallery foundation
+
+Публичные `/gallery` и `/gallery/:id` используют SSR; `/app/gallery/new` — существующую сессию и CSR. Галерея проходит через Alhena к отдельному домену Antares и private S3/PostgreSQL. [Архитектура галереи](../../docs/architecture/gallery_RU.md). В Atria добавлены StateCard, GalleryTile, PhotoCarousel и ActionLink; каждый компонент расположен в собственной папке `src/components`.
+
+Переводы интерфейса находятся в `src/locales/ru.ts` и `src/locales/en.ts`; ключи семантические, на английском (`navigation.gallery`). Новый полный словарь регистрируется в `src/locales/index.ts`; формы CMS и галереи берут список языков из этого реестра. Хранятся язык оригинала и необязательные переводы полей. Подписи и очищенный HTML публикаций выбираются для каждого поля в порядке язык клиента → EN → язык оригинала. Смена языка работает через клиентскую навигацию без перезагрузки документа и потери черновика формы. Публичный SSR использует адреса `?lang=ru/en`, canonical/hreflang и переведённые метаданные; cookie сохраняет выбор при навигации.

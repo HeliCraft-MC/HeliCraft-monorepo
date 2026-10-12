@@ -15,7 +15,7 @@ bun run test:vega
 bun run test:e2e
 ```
 
-For API data, start Antares separately or use `bun run dev`. `bun run dev:vega` prepares and watches Atria/Alhena. Production: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` from the root (starts Antares and persistence too). Routes and generated `routeTree.gen.ts` are in `src/`; add routes there. The planned features include the world map, state management, laws, votes, markets, history, notifications; account security is implemented.
+For API data, start Antares separately or use `bun run dev`. `bun run dev:vega` prepares and watches Atria/Alhena and starts Storybook. Production: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` from the root (starts Antares and persistence too). Routes and generated `routeTree.gen.ts` are in `src/`; add routes there. The planned features include the world map, state management, laws, votes, markets, history, notifications; account security is implemented.
 
 From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
 
@@ -30,3 +30,9 @@ From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: 
 [Rendering](../../docs/architecture/web-rendering.md) · [Identity](../../docs/architecture/identity.md) · [Design](../../docs/design/landing-page.md)
 
 Before Compose set SITE_ORIGIN to the browser origin (locally http://localhost:8080); HTTPS requires SECURE_COOKIES=true.
+
+## Gallery foundation
+
+Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing sessions and CSR. Gallery flows through Alhena to a separate Antares private S3/PostgreSQL domain. [Gallery architecture](../../docs/architecture/gallery.md). Atria adds StateCard, GalleryTile, PhotoCarousel and ActionLink; each component has its own `src/components` folder.
+
+Interface translations live in `src/locales/ru.ts` and `src/locales/en.ts`, using semantic English keys (`navigation.gallery`). Add a complete dictionary and register it in `src/locales/index.ts`; CMS and gallery forms derive available languages from this registry. The source language is stored alongside optional per-language fields. Public captions and sanitized CMS bodies resolve each field in client-language → EN → original-language order. Switching uses client navigation without reloading the document or discarding form drafts. Public SSR uses `?lang=ru/en` URLs, language-specific canonical/hreflang links and translated metadata; the cookie keeps the preference across navigation.

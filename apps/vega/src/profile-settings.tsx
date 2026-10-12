@@ -1,10 +1,18 @@
+import { useTranslation } from './i18n';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from './date-format';
 import { getRouteApi, useRouter } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import type { SubmitEvent, ReactElement } from 'react';
 import { changeUsername } from '@helicraft/alhena';
-import { Alert, Button, FormField, PasswordField, TextField } from '@helicraft/atria';
+import {
+  Alert,
+  Button,
+  FormField,
+  MinecraftAvatar,
+  PasswordField,
+  TextField,
+} from '@helicraft/atria';
 
 import { browserClient, errorMessage } from './account-api';
 import { useCopyText } from './use-copy-text';
@@ -13,6 +21,8 @@ import styles from './account.module.scss';
 const route = getRouteApi('/app');
 
 export function ProfileSettings(): ReactElement {
+  const { text, locale } = useTranslation();
+
   const { principal } = route.useRouteContext();
   const router = useRouter();
   const queries = useQueryClient();
@@ -37,7 +47,7 @@ export function ProfileSettings(): ReactElement {
         });
         await queries.invalidateQueries({ queryKey: ['account'] });
         await router.invalidate();
-        setMessage('Ник изменён. UUID сохранился.');
+        setMessage('profile.usernameChanged');
       } catch (error) {
         setMessage(errorMessage(error));
       }
@@ -55,14 +65,33 @@ export function ProfileSettings(): ReactElement {
   const handleCopy = useCopyText(principal.id, setMessage);
   return (
     <>
-      <h1>Профиль</h1>
-      <p className={styles.uuid}>{principal.id}</p>
-      <Button tone="quiet" onClick={handleCopy}>
-        Копировать UUID
-      </Button>
-      <p className={styles.paragraph}>Зарегистрирован: {formatDate(principal.createdAt)}</p>
+      <h1>{text('account.profile')}</h1>
+      <section className={styles.section}>
+        <div className={styles.profile}>
+          <MinecraftAvatar
+            name={principal.username}
+            src={`/api/v1/public/players/${principal.id}/avatar.png?v=${principal.currentSkinId ?? 'default'}`}
+            size={80}
+          />
+          <div>
+            <h2>{principal.username}</h2>
+            <p className={styles.paragraph}>
+              {text('profile.registeredAt')} {formatDate(principal.createdAt, locale)}
+            </p>
+          </div>
+        </div>
+        <details>
+          <summary>{text('profile.identifier')}</summary>
+          <p className={styles.uuid}>{principal.id}</p>
+          <Button tone="quiet" onClick={handleCopy}>
+            {text('profile.copyUuid')}
+          </Button>
+        </details>
+      </section>
+      <h2>{text('profile.changeUsername')}</h2>
+      <p className={styles.paragraph}>{text('profile.changeUsernameHint')}</p>
       <form method="post" className={styles.form} onSubmit={handleSubmit}>
-        <FormField label="Новый ник" htmlFor="new-username">
+        <FormField label={text('profile.newUsername')} htmlFor="new-username">
           <TextField
             id="new-username"
             name="username"
@@ -74,7 +103,7 @@ export function ProfileSettings(): ReactElement {
             autoComplete="username"
           />
         </FormField>
-        <FormField label="Текущий пароль" htmlFor="current-password">
+        <FormField label={text('auth.currentPassword')} htmlFor="current-password">
           <PasswordField
             id="current-password"
             name="currentPassword"
@@ -82,9 +111,9 @@ export function ProfileSettings(): ReactElement {
             autoComplete="current-password"
           />
         </FormField>
-        {message === null ? null : <Alert>{message}</Alert>}
+        {message === null ? null : <Alert>{text(message)}</Alert>}
         <Button type="submit" disabled={busy}>
-          Сохранить ник
+          {text('profile.saveUsername')}
         </Button>
       </form>
     </>

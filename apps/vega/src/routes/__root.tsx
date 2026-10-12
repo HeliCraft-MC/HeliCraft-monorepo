@@ -1,3 +1,7 @@
+import { isLocale } from '../locales';
+import { loadLocale } from '../locale-server';
+import { ErrorPage } from '../error-page';
+import type { Locale } from '../locales';
 import { createRootRouteWithContext } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { SiteLayout } from '../site-layout';
@@ -7,15 +11,22 @@ import { loadPublicNavigation } from '../public-data';
 
 interface RouterContext {
   readonly queryClient: QueryClient;
+  readonly locale?: Locale;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  validateSearch: (input: Record<string, unknown>): { lang?: Locale } =>
+    isLocale(input.lang) ? { lang: input.lang } : {},
+  beforeLoad: async ({ location }) => ({
+    locale: await loadLocale({ data: new URLSearchParams(location.searchStr).get('lang') }),
+  }),
+  errorComponent: ErrorPage,
   loader: async () => await loadPublicNavigation(),
   head: () => ({
     meta: [
       { charSet: 'utf8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'HeliCraft — мир, который помнит' },
+      { title: 'HeliCraft' },
     ],
     links: [{ rel: 'manifest', href: '/manifest.webmanifest' }],
   }),

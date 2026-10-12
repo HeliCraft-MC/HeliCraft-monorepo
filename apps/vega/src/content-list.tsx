@@ -1,15 +1,18 @@
+import { Icon, Alert, Pagination, Table } from '@helicraft/atria';
+import { useTranslation } from './i18n';
 import { formatDate } from './date-format';
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { listAdminPages, listAdminChronicleEntries } from '@helicraft/alhena';
-import { Alert, Pagination, Table } from '@helicraft/atria';
 import { browserClient } from './account-api';
 import styles from './account.module.scss';
 
 const PAGE_SIZE = 20;
 export function ContentList(): ReactElement {
+  const { text, locale } = useTranslation();
+
   const location = useLocation();
   const pages = location.pathname.startsWith('/admin/pages');
   const [page, setPage] = useState(1);
@@ -26,24 +29,30 @@ export function ContentList(): ReactElement {
   });
   return (
     <>
-      <h1>{pages ? 'Страницы' : 'Летопись'}</h1>
+      <h1>{pages ? text('admin.pages') : text('admin.chronicle')}</h1>
       <div className={styles.navigation}>
         {pages ? (
-          <Link to="/admin/pages/new">Создать страницу →</Link>
+          <Link to="/admin/pages/new">
+            {text('content.createPage')} <Icon name="arrowRight" />
+          </Link>
         ) : (
-          <Link to="/admin/chronicle/new">Написать публикацию →</Link>
+          <Link to="/admin/chronicle/new">
+            {text('content.createPublication')} <Icon name="arrowRight" />
+          </Link>
         )}
       </div>
-      {result.isError ? <Alert tone="danger">Не удалось загрузить документы</Alert> : null}
-      {result.data?.items.length === 0 ? <p>Документов пока нет. Создай первую главу.</p> : null}
+      {result.isError ? <Alert tone="danger">{text('content.loadError')}</Alert> : null}
+      {result.data?.items.length === 0 ? <p>{text('content.empty')}</p> : null}
       <Table>
-        <caption>{pages ? 'Редакционные страницы' : 'Редакционная летопись'}</caption>
+        <caption>
+          {pages ? text('content.editorialPages') : text('content.editorialChronicle')}
+        </caption>
         <thead>
           <tr>
-            <th>Название</th>
-            <th>Статус</th>
-            <th>Автор</th>
-            <th>Обновлено</th>
+            <th>{text('common.title')}</th>
+            <th>{text('common.status')}</th>
+            <th>{text('common.author')}</th>
+            <th>{text('common.updatedAt')}</th>
           </tr>
         </thead>
         <tbody>
@@ -58,7 +67,7 @@ export function ContentList(): ReactElement {
               </td>
               <td>{entry.status}</td>
               <td>{entry.author}</td>
-              <td>{formatDate(entry.updatedAt)}</td>
+              <td>{formatDate(entry.updatedAt, locale)}</td>
             </tr>
           ))}
         </tbody>

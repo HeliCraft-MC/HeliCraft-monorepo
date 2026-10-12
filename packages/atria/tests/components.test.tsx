@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PasswordField } from '../src/password-field';
-import { FormField } from '../src/form-field';
-import { MinecraftAvatar } from '../src/minecraft-avatar';
-import { Dialog } from '../src/dialog';
+import { PasswordField } from '../src/components/PasswordField/password-field';
+import { FormField } from '../src/components/FormField/form-field';
+import { MinecraftAvatar } from '../src/components/MinecraftAvatar/minecraft-avatar';
+import { Dialog } from '../src/components/Dialog/dialog';
 
 describe('accessible foundation components', () => {
   it('reveals a password while retaining its field name and password-manager hint', async () => {

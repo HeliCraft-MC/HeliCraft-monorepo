@@ -33,7 +33,53 @@ export type CurrentSkin = {
     avatarUrl: string;
 } | null;
 
+export type GalleryItem = {
+    originalLanguage?: string;
+    translations?: {
+        [key: string]: {
+            title?: string;
+            description?: string;
+            alt?: string;
+            place?: string;
+        };
+    };
+    title: string;
+    description?: string;
+    alt: string;
+    place?: string;
+    location?: {
+        x: number;
+        y: number;
+        z: number;
+        dimension: 'overworld' | 'nether' | 'end';
+    } | null;
+    id: string;
+    author: {
+        id: string;
+        name: string;
+    };
+    players: Array<{
+        id: string;
+        name: string;
+    }>;
+    width: number;
+    height: number;
+    createdAt: string;
+    imageUrl: string;
+    thumbnailUrl: string;
+};
+
 export type PublicContent = {
+    originalLanguage: string;
+    translations: {
+        [key: string]: {
+            title?: string;
+            description?: string;
+            seoTitle?: string | null;
+            seoDescription?: string | null;
+            html?: string;
+        };
+    };
     id: string;
     kind: 'PAGE' | 'CHRONICLE';
     slug: string;
@@ -50,6 +96,15 @@ export type PublicContent = {
 };
 
 export type AdminContent = PublicContent & {
+    translations?: {
+        [key: string]: {
+            title?: string;
+            description?: string;
+            markdown?: string;
+            seoTitle?: string | null;
+            seoDescription?: string | null;
+        };
+    };
     markdown: string;
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     revision: number;
@@ -829,6 +884,559 @@ export type GetPlayerAvatarResponses = {
 
 export type GetPlayerAvatarResponse = GetPlayerAvatarResponses[keyof GetPlayerAvatarResponses];
 
+export type ListGalleryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/public/gallery';
+};
+
+export type ListGalleryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListGalleryError = ListGalleryErrors[keyof ListGalleryErrors];
+
+export type ListGalleryResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<GalleryItem>;
+        total: number;
+    };
+};
+
+export type ListGalleryResponse = ListGalleryResponses[keyof ListGalleryResponses];
+
+export type GetGalleryItemData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/gallery/{id}';
+};
+
+export type GetGalleryItemErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetGalleryItemError = GetGalleryItemErrors[keyof GetGalleryItemErrors];
+
+export type GetGalleryItemResponses = {
+    /**
+     * Result
+     */
+    200: GalleryItem;
+};
+
+export type GetGalleryItemResponse = GetGalleryItemResponses[keyof GetGalleryItemResponses];
+
+export type GetGalleryImageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/gallery/{id}/image';
+};
+
+export type GetGalleryImageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetGalleryImageError = GetGalleryImageErrors[keyof GetGalleryImageErrors];
+
+export type GetGalleryImageResponses = {
+    /**
+     * Normalized WebP
+     */
+    200: Blob | File;
+};
+
+export type GetGalleryImageResponse = GetGalleryImageResponses[keyof GetGalleryImageResponses];
+
+export type GetGalleryThumbnailData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/gallery/{id}/thumbnail';
+};
+
+export type GetGalleryThumbnailErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetGalleryThumbnailError = GetGalleryThumbnailErrors[keyof GetGalleryThumbnailErrors];
+
+export type GetGalleryThumbnailResponses = {
+    /**
+     * Normalized WebP
+     */
+    200: Blob | File;
+};
+
+export type GetGalleryThumbnailResponse = GetGalleryThumbnailResponses[keyof GetGalleryThumbnailResponses];
+
+export type SearchGalleryPlayersData = {
+    body?: never;
+    path?: never;
+    query: {
+        query: string;
+    };
+    url: '/api/v1/account/gallery/players';
+};
+
+export type SearchGalleryPlayersErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type SearchGalleryPlayersError = SearchGalleryPlayersErrors[keyof SearchGalleryPlayersErrors];
+
+export type SearchGalleryPlayersResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            name: string;
+        }>;
+    };
+};
+
+export type SearchGalleryPlayersResponse = SearchGalleryPlayersResponses[keyof SearchGalleryPlayersResponses];
+
+export type UploadGalleryImageData = {
+    body: {
+        file: Blob | File;
+        metadata: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/gallery';
+};
+
+export type UploadGalleryImageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type UploadGalleryImageError = UploadGalleryImageErrors[keyof UploadGalleryImageErrors];
+
+export type UploadGalleryImageResponses = {
+    /**
+     * Result
+     */
+    200: GalleryItem;
+};
+
+export type UploadGalleryImageResponse = UploadGalleryImageResponses[keyof UploadGalleryImageResponses];
+
+export type DeleteGalleryImageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/gallery/{id}';
+};
+
+export type DeleteGalleryImageErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type DeleteGalleryImageError = DeleteGalleryImageErrors[keyof DeleteGalleryImageErrors];
+
+export type DeleteGalleryImageResponses = {
+    /**
+     * Result
+     */
+    200: {
+        deleted: true;
+    };
+};
+
+export type DeleteGalleryImageResponse = DeleteGalleryImageResponses[keyof DeleteGalleryImageResponses];
+
+export type UpdateGalleryMetadataData = {
+    body: {
+        originalLanguage?: string;
+        translations?: {
+            [key: string]: {
+                title?: string;
+                description?: string;
+                alt?: string;
+                place?: string;
+            };
+        };
+        title: string;
+        description?: string;
+        alt: string;
+        place?: string;
+        location?: {
+            x: number;
+            y: number;
+            z: number;
+            dimension: 'overworld' | 'nether' | 'end';
+        } | null;
+        players?: Array<string>;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/gallery/{id}';
+};
+
+export type UpdateGalleryMetadataErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type UpdateGalleryMetadataError = UpdateGalleryMetadataErrors[keyof UpdateGalleryMetadataErrors];
+
+export type UpdateGalleryMetadataResponses = {
+    /**
+     * Result
+     */
+    200: GalleryItem;
+};
+
+export type UpdateGalleryMetadataResponse = UpdateGalleryMetadataResponses[keyof UpdateGalleryMetadataResponses];
+
 export type ListPublicPagesData = {
     body?: never;
     path?: never;
@@ -1037,6 +1645,16 @@ export type ListAdminPagesResponse = ListAdminPagesResponses[keyof ListAdminPage
 
 export type CreatePageData = {
     body: {
+        originalLanguage?: string;
+        translations?: {
+            [key: string]: {
+                title?: string;
+                description?: string;
+                markdown?: string;
+                seoTitle?: string | null;
+                seoDescription?: string | null;
+            };
+        };
         slug: string;
         title: string;
         description: string;
@@ -1174,6 +1792,16 @@ export type GetAdminPageResponse = GetAdminPageResponses[keyof GetAdminPageRespo
 
 export type SavePageData = {
     body: {
+        originalLanguage?: string;
+        translations?: {
+            [key: string]: {
+                title?: string;
+                description?: string;
+                markdown?: string;
+                seoTitle?: string | null;
+                seoDescription?: string | null;
+            };
+        };
         slug: string;
         title: string;
         description: string;
@@ -1506,6 +2134,16 @@ export type GetPageRevisionsResponses = {
         documentId: string;
         revision: number;
         snapshot: {
+            originalLanguage?: string;
+            translations?: {
+                [key: string]: {
+                    title?: string;
+                    description?: string;
+                    markdown?: string;
+                    seoTitle?: string | null;
+                    seoDescription?: string | null;
+                };
+            };
             slug: string;
             title: string;
             description: string;
@@ -1797,6 +2435,16 @@ export type ListAdminChronicleEntriesResponse = ListAdminChronicleEntriesRespons
 
 export type CreateChronicleEntryData = {
     body: {
+        originalLanguage?: string;
+        translations?: {
+            [key: string]: {
+                title?: string;
+                description?: string;
+                markdown?: string;
+                seoTitle?: string | null;
+                seoDescription?: string | null;
+            };
+        };
         slug: string;
         title: string;
         description: string;
@@ -1934,6 +2582,16 @@ export type GetAdminChronicleEntryResponse = GetAdminChronicleEntryResponses[key
 
 export type SaveChronicleEntryData = {
     body: {
+        originalLanguage?: string;
+        translations?: {
+            [key: string]: {
+                title?: string;
+                description?: string;
+                markdown?: string;
+                seoTitle?: string | null;
+                seoDescription?: string | null;
+            };
+        };
         slug: string;
         title: string;
         description: string;
@@ -2266,6 +2924,16 @@ export type GetChronicleEntryRevisionsResponses = {
         documentId: string;
         revision: number;
         snapshot: {
+            originalLanguage?: string;
+            translations?: {
+                [key: string]: {
+                    title?: string;
+                    description?: string;
+                    markdown?: string;
+                    seoTitle?: string | null;
+                    seoDescription?: string | null;
+                };
+            };
             slug: string;
             title: string;
             description: string;

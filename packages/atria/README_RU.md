@@ -6,7 +6,7 @@
 
 React · TypeScript · SCSS Modules · Base UI · Storybook
 
-Приватный UI-пакет с экспортом исходников для Vega и будущего Altair. `Button` оборачивает доступный примитив Base UI: стили primary/quiet, disabled и управление клавиатурой. Все стили написаны на SCSS: `button.module.scss` изолирует классы компонента, а `@helicraft/atria/styles.scss` содержит общие цветовые токены и базовые стили. Vite компилирует SCSS и SCSS-модули через dev-зависимость `sass`, без дополнительного плагина. React остаётся peer dependency.
+Приватный UI-пакет с экспортом исходников для Vega и будущего Altair. `Button` оборачивает доступный примитив Base UI: стили primary/quiet, disabled и управление клавиатурой. Все стили написаны на SCSS: `components/Button/button.module.scss` изолирует классы компонента, а `@helicraft/atria/styles.scss` содержит общие цветовые токены и базовые стили. Vite компилирует SCSS и SCSS-модули через dev-зависимость `sass`, без дополнительного плагина. React остаётся peer dependency.
 
 ```sh
 bun run dev:atria
@@ -31,3 +31,11 @@ Storybook на localhost:6006 содержит состояния primary, quiet
 `Button`, `IconButton`, `TextField`, `PasswordField`, `FormField`, `Textarea`, `Select`, `Checkbox`, `Card`, `Badge`, `Alert`, `ToastProvider`/`useToast`, `Dialog`, `DropdownMenu`, `Tabs`, `Tooltip`, `Skeleton`, `Spinner`, `EmptyState`, `Avatar`, `MinecraftAvatar`, `Table`, `Pagination`, `Breadcrumbs`, `MarkdownContent`, `PageContainer`.
 
 MarkdownContent принимает только очищенный HTML Антареса. MinecraftAvatar принимает URL головы, а не полную текстуру. Не добавляйте предметную логику приложения в Атрия.
+
+## Gallery foundation
+
+Публичные `/gallery` и `/gallery/:id` используют SSR; `/app/gallery/new` — существующую сессию и CSR. Галерея проходит через Alhena к отдельному домену Antares и private S3/PostgreSQL. [Архитектура галереи](../../docs/architecture/gallery_RU.md). В Atria добавлены StateCard, GalleryTile, PhotoCarousel и ActionLink; каждый компонент расположен в собственной папке `src/components`.
+
+`CompanyCard` показывает изображение компании, декоративный логотип, отрасль, описание и именованные факты в той же раскладке, что и `StateCard`. Тексты передаёт приложение; компонент не запрашивает и не создаёт данные компаний. В Storybook есть обычное состояние, длинное название и английский вариант.
+
+`FileDropzone` — доступная с клавиатуры зона выбора и перетаскивания файла с именем выбранного файла и состоянием блокировки. Проверка формата и размера, URL предпросмотра и запрос загрузки принадлежат приложению. Компонент принимает один файл за раз. Storybook содержит пустое, заполненное, заблокированное и англоязычное состояния.

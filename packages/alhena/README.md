@@ -35,3 +35,7 @@ From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: 
 ## Web foundation contract
 
 The generated client covers `/api/v1`: identity, account, sessions, skins, public pages/chronicle/site and admin users/content/audit. Vega uses these methods through a relative same-origin browser API; public SSR uses a separate server client without cookies. After changing the API run root `bun run generate`; never hand-edit generated files. DTO validation and permission enforcement remain in Antares.
+
+## Gallery foundation
+
+Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing sessions and CSR. Gallery flows through Alhena to a separate Antares private S3/PostgreSQL domain. [Gallery architecture](../../docs/architecture/gallery.md). Atria adds StateCard, GalleryTile, PhotoCarousel and ActionLink; each component has its own `src/components` folder.

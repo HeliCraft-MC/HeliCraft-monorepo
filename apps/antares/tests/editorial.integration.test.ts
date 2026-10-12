@@ -62,18 +62,33 @@ describe('editorial persistence and authorization', () => {
     const { principal } = await account('EDITOR');
     const service = new ContentService(persistence().db);
     const slug = `story-${crypto.randomUUID()}`;
-    const draft = await service.create('CHRONICLE', document(slug), principal);
+    const draft = await service.create(
+      'CHRONICLE',
+      {
+        ...document(slug),
+        originalLanguage: 'ru',
+        translations: {
+          en: { title: 'Story', markdown: '**English**\n\n<script>alert(1)</script>' },
+        },
+      },
+      principal,
+    );
     await expect(service.publicDocument('CHRONICLE', slug)).rejects.toThrow('не найдена');
     await service.publish(draft.id, true, principal);
     const published = await service.publicDocument('CHRONICLE', slug);
     expect(published.document.html).toContain('<strong>Текст</strong>');
     expect(published.document.html).not.toContain('<script>');
+    expect(published.document.translations.en?.html).toContain('<strong>English</strong>');
+    expect(published.document.translations.en?.html).not.toContain('<script>');
+    expect(published.document.translations.en).not.toHaveProperty('markdown');
     await service.save(draft.id, document(`${slug}-changed`, 'Новая редакция'), principal);
     const redirect = await service.publicDocument('CHRONICLE', slug);
     expect(redirect.redirect).toBe(true);
     expect(redirect.document.slug).toBe(`${slug}-changed`);
     await expect(service.create('CHRONICLE', document(slug), principal)).rejects.toThrow('адрес');
     const restored = await service.restore(draft.id, 1, principal);
+    expect(restored.translations.en?.title).toBe('Story');
+    expect(restored.translations.en?.markdown).toContain('**English**');
     expect(restored.revision).toBe(3);
     expect(restored.slug).toBe(slug);
     expect(await service.revisions(draft.id, principal)).toHaveLength(3);

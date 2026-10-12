@@ -2,6 +2,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { bodyLimit } from 'hono/body-limit';
+import { except } from 'hono/combine';
 import type { Database } from './db';
 import { identityRoutes } from './modules/identity/routes';
 import { validateBrowserMutation } from './modules/sessions/security';
@@ -9,6 +10,7 @@ import { DomainError } from './modules/errors';
 import { siteRoutes } from './modules/content/site';
 import { administrationRoutes } from './modules/administration/routes';
 import { contentRoutes } from './modules/content/routes';
+import { galleryRoutes } from './modules/gallery/routes';
 import { skinRoutes } from './modules/skins/routes';
 import type { S3Client } from '@aws-sdk/client-s3';
 
@@ -75,7 +77,8 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   });
   const siteOrigin = dependencies.siteOrigin ?? 'http://localhost:5173';
   app.use('/api/*', cors({ origin: siteOrigin, credentials: true }));
-  app.use('/api/v1/*', bodyLimit({ maxSize: 2_200_000 }));
+  app.use('/api/v1/account/gallery', bodyLimit({ maxSize: 10_600_000 }));
+  app.use('/api/v1/*', except('/api/v1/account/gallery', bodyLimit({ maxSize: 2_200_000 })));
   app.use('/api/*', async (context, next) => {
     context.header('Cache-Control', 'no-store');
     context.header('X-Content-Type-Options', 'nosniff');
@@ -94,6 +97,15 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   app.route(
     '/api/v1',
     skinRoutes({
+      db: dependencies.db,
+      storage: dependencies.storage,
+      bucket: dependencies.bucket,
+      secureCookies: dependencies.secureCookies ?? false,
+    }),
+  );
+  app.route(
+    '/api/v1',
+    galleryRoutes({
       db: dependencies.db,
       storage: dependencies.storage,
       bucket: dependencies.bucket,

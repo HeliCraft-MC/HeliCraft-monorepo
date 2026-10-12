@@ -1,4 +1,6 @@
 // oxlint-disable no-alert, max-statements -- Native navigation confirmations cover document unload; this hook composes bounded actions and state, with API work in editor-api.ts.
+import { z } from 'zod';
+import { useTranslation } from './i18n';
 import { useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useBlocker, useNavigate } from '@tanstack/react-router';
@@ -34,6 +36,7 @@ interface EditorModel {
 }
 // oxlint-disable-next-line max-lines-per-function -- This hook composes independently bounded editor actions and queries; API calls live in editor-api.ts.
 function useContentEditor(kind: Kind, document: AdminContent | undefined): EditorModel {
+  const { text } = useTranslation();
   const id = document?.id ?? null;
   const [savedInput, setSavedInput] = useState(() => JSON.stringify(inputFrom(document)));
   const [input, setInput] = useState<ContentInput>(() => inputFrom(document));
@@ -51,9 +54,10 @@ function useContentEditor(kind: Kind, document: AdminContent | undefined): Edito
   });
   // Native confirmation is deliberate: it also works for document-level unloads.
   useBlocker({
-    shouldBlockFn: () =>
+    shouldBlockFn: ({ current, next }) =>
+      current.pathname !== next.pathname &&
       JSON.stringify(input) !== saved.current &&
-      !globalThis.confirm('Есть несохранённые изменения. Покинуть редактор?'),
+      !globalThis.confirm(text('editor.confirmLeave')),
     enableBeforeUnload: dirty,
   });
   async function refresh(): Promise<void> {
@@ -67,7 +71,7 @@ function useContentEditor(kind: Kind, document: AdminContent | undefined): Edito
       const result = await writeDocument(kind, id, input);
       saved.current = JSON.stringify(input);
       setSavedInput(saved.current);
-      setMessage('Сохранено');
+      setMessage('editor.saved');
       if (id !== null) {
         await refresh();
       } else if (kind === 'PAGE') {
@@ -89,24 +93,21 @@ function useContentEditor(kind: Kind, document: AdminContent | undefined): Edito
   }
   async function transition(state: 'publish' | 'unpublish' | 'archive'): Promise<void> {
     if (id === null || dirty) {
-      setMessage('Сначала сохрани изменения');
+      setMessage('editor.saveFirst');
       return;
     }
     setBusy(true);
     try {
       await transitionDocument(kind, id, state);
       await refresh();
-      setMessage('Статус публикации изменён');
+      setMessage('editor.statusChanged');
     } catch (error) {
       setMessage(errorMessage(error));
     }
     setBusy(false);
   }
   async function restoring(revision: number): Promise<void> {
-    if (
-      id === null ||
-      (dirty && !globalThis.confirm('Заменить несохранённые изменения предыдущей редакцией?'))
-    ) {
+    if (id === null || (dirty && !globalThis.confirm(text('editor.confirmRestore')))) {
       return;
     }
     setBusy(true);
@@ -123,7 +124,22 @@ function useContentEditor(kind: Kind, document: AdminContent | undefined): Edito
   ): void {
     const { target } = event;
     const { name } = target;
-    if (name === 'isFeatured' && target instanceof HTMLInputElement) {
+    if (name.startsWith('translation:')) {
+      const [, language, rawField] = name.split(':');
+      const field = z
+        .enum(['title', 'description', 'markdown', 'seoTitle', 'seoDescription'])
+        .parse(rawField);
+      if (language === undefined) {
+        return;
+      }
+      setInput({
+        ...input,
+        translations: {
+          ...input.translations,
+          [language]: { ...input.translations?.[language], [field]: target.value },
+        },
+      });
+    } else if (name === 'isFeatured' && target instanceof HTMLInputElement) {
       setInput({ ...input, isFeatured: target.checked });
     } else if (name === 'category') {
       setInput({ ...input, category: categorySchema.parse(target.value) });

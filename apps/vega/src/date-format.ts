@@ -1,5 +1,10 @@
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium', timeZone: 'UTC' });
-function formatDate(value: string | null | undefined): string {
-  return value === null || value === undefined ? '—' : dateFormatter.format(new Date(value));
+import type { Locale } from './locales';
+
+function formatDate(value: string | null | undefined, locale: Locale = 'ru'): string {
+  return value === null || value === undefined
+    ? '—'
+    : new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+        new Date(value),
+      );
 }
 export { formatDate };

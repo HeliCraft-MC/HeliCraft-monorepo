@@ -1,26 +1,26 @@
 import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FormField } from './form-field';
-import { TextField } from './text-field';
-import { PasswordField } from './password-field';
-import { Textarea } from './textarea';
-import { Select } from './select';
-import { Checkbox } from './checkbox';
-import { Alert } from './alert';
-import { Badge, Card, EmptyState, Skeleton, Spinner } from './feedback';
-import { Avatar } from './avatar';
-import { MinecraftAvatar } from './minecraft-avatar';
-import { MarkdownContent } from './markdown-content';
-import { Table } from './table';
-import { Breadcrumbs } from './breadcrumbs';
-import { Dialog } from './dialog';
-import { Tooltip } from './tooltip';
-import { Tabs } from './tabs';
-import { DropdownMenu } from './dropdown-menu';
-import { ToastProvider } from './toast';
+import { FormField } from './components/FormField/form-field';
+import { TextField } from './components/TextField/text-field';
+import { PasswordField } from './components/PasswordField/password-field';
+import { Textarea } from './components/Textarea/textarea';
+import { Select } from './components/Select/select';
+import { Checkbox } from './components/Checkbox/checkbox';
+import { Alert } from './components/Alert/alert';
+import { Badge, Card, EmptyState, Skeleton, Spinner } from './components/Feedback/feedback';
+import { Avatar } from './components/Avatar/avatar';
+import { MinecraftAvatar } from './components/MinecraftAvatar/minecraft-avatar';
+import { MarkdownContent } from './components/MarkdownContent/markdown-content';
+import { Table } from './components/Table/table';
+import { Breadcrumbs } from './components/Breadcrumbs/breadcrumbs';
+import { Dialog } from './components/Dialog/dialog';
+import { Tooltip } from './components/Tooltip/tooltip';
+import { Tabs } from './components/Tabs/tabs';
+import { DropdownMenu } from './components/DropdownMenu/dropdown-menu';
+import { ToastProvider } from './components/Toast/toast';
 import { useToast } from './toast-manager';
-import { Button } from './button';
+import { Button } from './components/Button/button';
 
 function Forms(): ReactElement {
   return (
@@ -81,7 +81,7 @@ function Article(): ReactElement {
   return (
     <Card>
       <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Летопись' }]} />
-      <MarkdownContent html="<h2>Город на берегу</h2><p>Первая <strong>история</strong> сообщества.</p><blockquote>Мир помнит решения игроков.</blockquote><ul><li>Дом</li><li>Мост</li></ul><pre><code>/help</code></pre><table><thead><tr><th>Раздел</th><th>Состояние</th></tr></thead><tbody><tr><td>История</td><td>Опубликована</td></tr></tbody></table>" />
+      <MarkdownContent html="<h2>Город на берегу</h2><p>Первая <strong>история</strong> сообщества.</p><blockquote>Мир помнит решения игроков.</blockquote><ul><li>Дом</li><li>Мост</li></ul><pre><code>/help</code></pre><table><thead><tr><th>Раздел</th><th>Состояние</th></tr></thead><tbody><tr><td>История</td><td>Опубликована</td></tr></tbody></Table>" />
       <Table>
         <caption>Редакторские публикации</caption>
         <thead>
