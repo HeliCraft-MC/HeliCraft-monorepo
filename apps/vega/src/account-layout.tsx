@@ -8,7 +8,8 @@ const exact = { exact: true };
 export function AccountLayout(): ReactElement {
   const { text } = useTranslation();
   const gallery = useLocation({
-    select: (location) => location.pathname.startsWith('/app/gallery/'),
+    select: (location) =>
+      location.pathname.startsWith('/app/gallery/') || location.pathname.startsWith('/app/states/'),
   });
   return (
     <main id="main-content" className={styles.page}>
@@ -22,6 +23,8 @@ export function AccountLayout(): ReactElement {
               <Link to="/app" activeOptions={exact}>
                 {text('common.overview')}
               </Link>
+              <Link to="/app/states/new">{text('states.title')}</Link>
+              <Link to="/app/votings">{text('votings.title')}</Link>
               <Link to="/app/settings/profile">{text('account.profile')}</Link>
               <Link to="/app/settings/skin">{text('account.skin')}</Link>
               <Link to="/app/settings/security">{text('account.security')}</Link>

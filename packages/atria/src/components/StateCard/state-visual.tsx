@@ -12,24 +12,30 @@ function StateVisual({
 }: Pick<StateCardProps, 'name' | 'flag' | 'image' | 'silhouette' | 'flagLabel'>): ReactElement {
   return (
     <div className={styles.visual}>
-      {image !== undefined && image !== '' ? (
-        <img src={image} alt="" loading="lazy" width="800" height="500" />
-      ) : (
-        <div className={styles.territory} aria-hidden="true">
-          {silhouette !== undefined && silhouette !== '' ? (
-            <img src={silhouette} alt="" />
+      {typeof flag === 'string' ? (
+        <>
+          {image !== undefined && image !== '' ? (
+            <img src={image} alt="" loading="lazy" width="800" height="500" />
           ) : (
-            <Icon name="map" size={80} />
+            <div className={styles.territory} aria-hidden="true">
+              {silhouette !== undefined && silhouette !== '' ? (
+                <img src={silhouette} alt="" />
+              ) : (
+                <Icon name="map" size={80} />
+              )}
+            </div>
           )}
-        </div>
+          <img
+            className={styles.flag}
+            src={flag}
+            alt={`${flagLabel}: ${name}`}
+            width="72"
+            height="48"
+          />
+        </>
+      ) : (
+        <div className={styles.flagArtwork}>{flag}</div>
       )}
-      <img
-        className={styles.flag}
-        src={flag}
-        alt={`${flagLabel}: ${name}`}
-        width="72"
-        height="48"
-      />
     </div>
   );
 }

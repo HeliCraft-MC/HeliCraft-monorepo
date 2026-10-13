@@ -1,3 +1,5 @@
+// oxlint-disable import/max-dependencies -- The existing screen also composes the shared player nickname/head component.
+import { PlayerNickname } from './player-nickname';
 import { useTranslation } from './i18n';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from './date-format';
@@ -5,14 +7,7 @@ import { getRouteApi, useRouter } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import type { SubmitEvent, ReactElement } from 'react';
 import { changeUsername } from '@helicraft/alhena';
-import {
-  Alert,
-  Button,
-  FormField,
-  MinecraftAvatar,
-  PasswordField,
-  TextField,
-} from '@helicraft/atria';
+import { Alert, Button, FormField, PasswordField, TextField } from '@helicraft/atria';
 
 import { browserClient, errorMessage } from './account-api';
 import { useCopyText } from './use-copy-text';
@@ -68,13 +63,14 @@ export function ProfileSettings(): ReactElement {
       <h1>{text('account.profile')}</h1>
       <section className={styles.section}>
         <div className={styles.profile}>
-          <MinecraftAvatar
-            name={principal.username}
-            src={`/api/v1/public/players/${principal.id}/avatar.png?v=${principal.currentSkinId ?? 'default'}`}
-            size={80}
-          />
           <div>
-            <h2>{principal.username}</h2>
+            <h2>
+              <PlayerNickname
+                id={principal.id}
+                name={principal.username}
+                skinId={principal.currentSkinId}
+              />
+            </h2>
             <p className={styles.paragraph}>
               {text('profile.registeredAt')} {formatDate(principal.createdAt, locale)}
             </p>

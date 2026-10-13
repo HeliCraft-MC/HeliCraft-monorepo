@@ -58,6 +58,7 @@ const PublicContentSchema = z
     publishedAt: z.iso.datetime().nullable(),
     updatedAt: z.iso.datetime(),
     author: z.string(),
+    authorId: z.uuid(),
   })
   .openapi('PublicContent');
 const AdminContentSchema = PublicContentSchema.extend({

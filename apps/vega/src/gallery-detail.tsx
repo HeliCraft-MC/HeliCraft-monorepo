@@ -1,6 +1,7 @@
+import { PlayerNickname } from './player-nickname';
 import { localizeGallery } from './localized-content';
 import { GalleryMetadataEditor } from './gallery-metadata-editor';
-import { Icon, MinecraftAvatar } from '@helicraft/atria';
+import { Icon } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { getRouteApi } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
@@ -44,7 +45,9 @@ function GalleryDetail(): ReactElement {
         </div>
         <dl>
           <dt>{text('common.author')}</dt>
-          <dd>{item.author.name}</dd>
+          <dd>
+            <PlayerNickname id={item.author.id} name={item.author.name} />
+          </dd>
           <dt>{text('common.publishedAt')}</dt>
           <dd>
             <time dateTime={item.createdAt}>
@@ -66,12 +69,7 @@ function GalleryDetail(): ReactElement {
                 <ul className={styles.people}>
                   {item.players.map((player) => (
                     <li key={player.id}>
-                      <MinecraftAvatar
-                        name={player.name}
-                        src={`/api/v1/public/players/${player.id}/avatar.png`}
-                        size={28}
-                      />
-                      <span>{player.name}</span>
+                      <PlayerNickname id={player.id} name={player.name} size={28} />
                     </li>
                   ))}
                 </ul>

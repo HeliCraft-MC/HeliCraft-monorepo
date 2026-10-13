@@ -1,4 +1,5 @@
 // oxlint-disable max-lines-per-function -- The describe block groups independent short integration cases sharing one disposable database.
+import { operatorScenario } from './operators-integration-scenario';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -80,6 +81,9 @@ afterAll(async () => {
 });
 
 describe('identity and account security', () => {
+  it('applies nickname operators without weakening standard account identity or rename authorization', async () => {
+    await operatorScenario(persistence());
+  });
   it('limits repeated login attempts through the real HTTP boundary', async () => {
     const api = app();
     const name = username();

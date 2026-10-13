@@ -42,6 +42,12 @@
   display: grid;
   gap: var(--space-4);
 }
+.dialogFullscreen {
+  inset: 1rem;
+  transform: none;
+  width: auto;
+  max-height: none;
+}
 .tooltip,
 .menu {
   max-width: min(calc(100vw - 2rem), 24rem);

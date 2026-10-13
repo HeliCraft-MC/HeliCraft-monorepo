@@ -43,6 +43,7 @@ const publication: PublicContent = {
   publishedAt: image.createdAt,
   updatedAt: image.createdAt,
   author: 'Editor',
+  authorId: '11111111-1111-4111-8111-111111111111',
 };
 describe('published translations', () => {
   it('resolves each field through client, English, original, including whitespace and unsupported languages', () => {

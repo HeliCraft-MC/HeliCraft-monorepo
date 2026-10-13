@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { Database } from '../../db';
 import { authSessions, users, userRoles } from '../../db/schema';
+import { effectiveRoles } from '../permissions/operators';
 import { permissionsFor } from '../permissions/policy';
 import type { Principal } from '../identity/contracts';
 import { HTTP, DomainError } from '../errors';
@@ -75,14 +76,18 @@ class SessionService {
         })
         .where(and(eq(authSessions.id, record.session.id), isNull(authSessions.revokedAt)));
     }
+    const effective = effectiveRoles(
+      record.user.username,
+      roles.map((row) => row.role),
+    );
     const principal: Principal = {
       id: record.user.id,
       username: record.user.username,
       status: record.user.status,
       createdAt: record.user.createdAt.toISOString(),
       currentSkinId: record.user.currentSkinId,
-      roles: roles.map((row) => row.role),
-      permissions: permissionsFor(roles.map((row) => row.role)),
+      roles: effective,
+      permissions: permissionsFor(effective),
     };
     return { principal, sessionId: record.session.id };
   }

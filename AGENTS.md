@@ -39,3 +39,11 @@
 - Consult Context7, official documentation and installed sources when framework APIs or compatibility are uncertain.
 - Markdown is rendered and sanitized by Antares. Drafts and protected data must never enter public loaders, sitemaps or service-worker caches.
 - Exercise meaningful identity, authorization, storage, publishing and SSR scenarios. Keep strict oxlint/oxfmt, build and tests mandatory; document narrowly scoped exceptions in `docs/architecture/quality.md`.
+
+## States and shared platform services
+
+- All user entities with display text must support site languages where semantically applicable. Use the shared localized-content mechanism; never add `name_ru`/`name_en`. Resolve client locale → English → remaining `SUPPORTED_LOCALES` in configured order.
+- Governance authority derives from offices, appointment rules, decision policies and voting. Presets only initialize configuration; never derive capabilities from `government_type` or preset metadata.
+- Machine-readable Governance is authoritative. Custom constitution Markdown does not change capabilities. Published governance and constitution revisions are immutable; generated blocks render the governance revision pinned by their constitution revision.
+- Use the generic Voting service for applicable new voting use cases; do not create feature-specific ballot tables.
+- `archive/*` is read-only reference for this architecture. Never introduce legacy runtime dependencies.

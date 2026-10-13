@@ -1,0 +1,123 @@
+.page {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: 2rem;
+  max-width: 72rem;
+  margin-inline: auto;
+}
+.card,
+.localized {
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1rem;
+}
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.editor {
+  display: grid;
+  gap: 1rem;
+}
+.flag {
+  max-width: 16rem;
+  max-height: 12rem;
+  object-fit: contain;
+}
+.preview {
+  width: min(100%, 60rem);
+  margin-inline: auto;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 1rem;
+}
+.heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.hint {
+  color: var(--text-muted);
+}
+
+.dragHandle {
+  justify-self: start;
+  cursor: grab;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  > :nth-child(2) {
+    grid-column: span 3;
+  }
+}
+.directoryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+}
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+@media (max-width: 60rem) {
+  .directoryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 40rem) {
+  .filters,
+  .directoryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .filters > :nth-child(2) {
+    grid-column: auto;
+  }
+  .filters {
+    padding: 1rem;
+  }
+}
+.document {
+  max-width: 52rem;
+  margin-inline: auto;
+  line-height: 1.8;
+}
+.document > h2 {
+  margin-bottom: 2rem;
+}
+.documentBlock {
+  min-width: 0;
+}

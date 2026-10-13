@@ -1,14 +1,14 @@
 import { StateFacts } from './state-facts';
 import { StateVisual } from './state-visual';
 import { Icon } from '../icon';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import styles from './state-card.module.scss';
 
 interface StateCardProps {
   readonly name: string;
   readonly government?: string;
   readonly citizens?: number;
-  readonly flag: string;
+  readonly flag: string | ReactNode;
   readonly image?: string;
   readonly silhouette?: string;
   readonly href?: string;

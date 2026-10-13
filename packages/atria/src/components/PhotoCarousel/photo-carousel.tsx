@@ -1,3 +1,4 @@
+import { PlayerNickname } from '../PlayerNickname/player-nickname';
 import { Icon } from '../icon';
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react';
@@ -9,6 +10,8 @@ interface CarouselPhoto {
   readonly title: string;
   readonly alt: string;
   readonly author?: string;
+  readonly authorHeadUrl?: string;
+  readonly authorHref?: string;
   readonly place?: string;
   readonly href?: string;
 }
@@ -129,7 +132,12 @@ function PhotoCarousel({
           )}
           {current?.author !== undefined && current.author !== '' && (
             <span>
-              {labels.author}: {current.author}
+              {labels.author}:{' '}
+              <PlayerNickname
+                name={current.author}
+                headUrl={current.authorHeadUrl}
+                href={current.authorHref}
+              />
             </span>
           )}
           {current?.place !== undefined && current.place !== '' && <span>{current.place}</span>}

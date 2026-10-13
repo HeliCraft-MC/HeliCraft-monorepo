@@ -1,3 +1,4 @@
+import { isOperatorName } from '../permissions/operators';
 import { randomBytes } from 'node:crypto';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { Database } from '../../db';
@@ -46,6 +47,13 @@ export class IdentityService {
   }
 
   public async register(username: string, password: string, userAgent?: string): Promise<string> {
+    if (isOperatorName(username)) {
+      throw new DomainError(
+        HTTP.forbidden,
+        'OPERATOR_NAME_RESERVED',
+        'Ник оператора зарезервирован; обратитесь к администратору',
+      );
+    }
     const passwordHash = await hashPassword(password);
     const id = crypto.randomUUID();
     const session = newSession(id, userAgent);
@@ -130,6 +138,13 @@ export class IdentityService {
           .where(eq(userCredentials.userId, userId));
         if (!credential || !(await verifyPassword(password, credential.passwordHash))) {
           throw new DomainError(HTTP.forbidden, 'WRONG_PASSWORD', 'Текущий пароль неверен');
+        }
+        if (isOperatorName(username) && user.usernameNormalized !== username.toLowerCase()) {
+          throw new DomainError(
+            HTTP.forbidden,
+            'OPERATOR_NAME_RESERVED',
+            'Нельзя переименоваться в оператора из ops.json',
+          );
         }
         const now = new Date();
         await transaction

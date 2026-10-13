@@ -93,6 +93,7 @@ export type PublicContent = {
     publishedAt: string | null;
     updatedAt: string;
     author: string;
+    authorId: string;
 };
 
 export type AdminContent = PublicContent & {
@@ -128,6 +129,346 @@ export type WorldSummary = {
     title: string;
     description: string;
     roadmap: Array<string>;
+};
+
+export type StateConfiguration = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    slug: string;
+    color: string;
+    verticalBanner: MinecraftBanner;
+    horizontalFlag: {
+        mode: 'BANNER';
+        design: MinecraftBanner;
+    } | {
+        mode: 'PNG';
+        mediaId: string | null;
+    };
+    cofounderIds: Array<string>;
+    citizenship: {
+        entryMode: 'BY_APPLICATION' | 'BY_INVITATION' | 'OPEN';
+        allowMultipleCitizenships: boolean;
+    };
+    governance: StateGovernance;
+    constitution: {
+        title: LocalizedInput;
+        blocks: Array<ConstitutionBlock>;
+    } | null;
+};
+
+export type LocalizedInput = {
+    ru?: string;
+    en?: string;
+};
+
+export type MinecraftBanner = {
+    baseColor: 'white' | 'orange' | 'magenta' | 'light_blue' | 'yellow' | 'lime' | 'pink' | 'gray' | 'light_gray' | 'cyan' | 'purple' | 'blue' | 'brown' | 'green' | 'red' | 'black';
+    layers: Array<{
+        pattern: 'stripe_bottom' | 'stripe_top' | 'stripe_left' | 'stripe_right' | 'stripe_center' | 'stripe_middle' | 'stripe_downright' | 'stripe_downleft' | 'small_stripes' | 'cross' | 'straight_cross' | 'triangle_bottom' | 'triangle_top' | 'triangles_bottom' | 'triangles_top' | 'diagonal_left' | 'diagonal_up_right' | 'diagonal_up_left' | 'diagonal_right' | 'circle' | 'rhombus' | 'half_vertical' | 'half_horizontal' | 'half_vertical_right' | 'half_horizontal_bottom' | 'border' | 'curly_border' | 'gradient' | 'gradient_up' | 'bricks' | 'square_bottom_left' | 'square_bottom_right' | 'square_top_left' | 'square_top_right' | 'creeper' | 'skull' | 'flower' | 'mojang' | 'globe' | 'piglin' | 'flow' | 'guster';
+        color: 'white' | 'orange' | 'magenta' | 'light_blue' | 'yellow' | 'lime' | 'pink' | 'gray' | 'light_gray' | 'cyan' | 'purple' | 'blue' | 'brown' | 'green' | 'red' | 'black';
+    }>;
+};
+
+export type StateGovernance = {
+    offices: Array<StateOffice>;
+    policies: Array<GovernancePolicy>;
+    votingDefaults: GovernanceVotingRules;
+    createdFromPreset: string | null;
+};
+
+export type StateOffice = {
+    id: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    isHeadOfState: boolean;
+    maxHolders: number;
+    required: boolean;
+    initialHolderIds: Array<string>;
+    appointment: 'APPOINTED_BY_OFFICE' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'MANUAL_PROCEDURE';
+    appointingOfficeId: string | null;
+    term: 'INDEFINITE' | 'FIXED_TERM';
+    termDays: number | null;
+    vacancy: 'APPOINTMENT' | 'ELECTION' | 'COUNCIL' | 'MANUAL';
+    inactivityDays: number | null;
+};
+
+export type GovernancePolicy = {
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'SPEND_TREASURY' | 'DECLARE_WAR';
+    mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
+    officeIds: Array<string>;
+    vote: OptionalVotingRules;
+    manualProcedure: LocalizedInput;
+};
+
+export type OptionalVotingRules = {
+    durationHours: number;
+    quorumPercent: number;
+    thresholdPercent: number;
+    thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
+    allowAbstain: boolean;
+} | null;
+
+export type GovernanceVotingRules = {
+    durationHours: number;
+    quorumPercent: number;
+    thresholdPercent: number;
+    thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
+    allowAbstain: boolean;
+};
+
+export type ConstitutionBlock = {
+    id: string;
+    type: 'MARKDOWN';
+    content: LocalizedInput;
+} | {
+    id: string;
+    type: 'GENERATED';
+    kind: 'STATE_IDENTITY' | 'FOUNDERS' | 'CITIZENSHIP_RULES' | 'OFFICES_OVERVIEW' | 'SINGLE_OFFICE' | 'OFFICE_APPOINTMENT_RULE' | 'STATE_DECISION_RULE' | 'VOTING_RULES' | 'GOVERNANCE_SUMMARY';
+    officeId: string | null;
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'SPEND_TREASURY' | 'DECLARE_WAR' | null;
+};
+
+export type ReformProposal = {
+    id: string;
+    draftId: string;
+    ownerId: string;
+    status: 'PENDING' | 'PUBLISHED' | 'SUPERSEDED' | 'DELETED';
+    stateId: string;
+    version: number;
+    configuration: StateConfiguration;
+    founders: Array<{
+        id: string;
+        name: string;
+        type: 'PRIMARY' | 'COFOUNDER';
+    }>;
+    html: Array<{
+        id: string;
+        html: string;
+    }>;
+};
+
+export type PublicPlayerProfile = {
+    id: string;
+    name: string;
+    skinId: string | null;
+    registeredAt: string;
+    states: Array<{
+        id: string;
+        slug: string;
+        name: LocalizedInput;
+        color: string;
+        citizenSince: string | null;
+        founder: boolean;
+        offices: Array<{
+            id: string;
+            name: LocalizedInput;
+            isHeadOfState: boolean;
+        }>;
+    }>;
+};
+
+export type VotingInput = {
+    title: LocalizedInput;
+    description: LocalizedInput;
+    options: Array<{
+        id: string;
+        label: LocalizedInput;
+    }>;
+    opensAt: string;
+    closesAt: string;
+    electorate: {
+        type: 'GLOBAL_USERS';
+    } | {
+        type: 'SPECIFIC_USERS';
+        userIds: Array<string>;
+    } | {
+        type: 'STATE_CITIZENS';
+        stateId: string;
+    } | {
+        type: 'OFFICE_HOLDERS';
+        stateId: string;
+        officeIds: Array<string>;
+    };
+    rules: GovernanceVotingRules;
+    resultVisibility: 'PUBLIC' | 'AFTER_CLOSE' | 'ELIGIBLE_ONLY';
+    maxSelections: number;
+};
+
+export type VotingDetail = {
+    id: string;
+    status: 'DRAFT' | 'SCHEDULED' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    input: VotingInput;
+    eligible: boolean;
+    hasVoted: boolean;
+    result: VotingResult;
+    governanceRevisionId: string | null;
+    subject: OptionalVotingSubject;
+};
+
+export type VotingResult = {
+    eligible: number;
+    participating: number;
+    abstentions: number;
+    quorumMet: boolean;
+    options: Array<{
+        id: string;
+        votes: number;
+        approved: boolean;
+    }>;
+} | null;
+
+export type OptionalVotingSubject = {
+    type: string;
+    id: string;
+    version: number;
+} | null;
+
+export type StateDraft = {
+    id: string;
+    ownerId: string;
+    stateId: string | null;
+    baseRevisionId: string | null;
+    title: string;
+    version: number;
+    step: number;
+    progress: number;
+    configuration: DraftStateConfiguration;
+    updatedAt: string;
+    submittedStateId: string | null;
+    deletedAt: string | null;
+};
+
+export type DraftStateConfiguration = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    slug: string;
+    color: string;
+    verticalBanner: MinecraftBanner;
+    horizontalFlag: {
+        mode: 'BANNER';
+        design: MinecraftBanner;
+    } | {
+        mode: 'PNG';
+        mediaId: string | null;
+    };
+    cofounderIds: Array<string>;
+    citizenship: {
+        entryMode: 'BY_APPLICATION' | 'BY_INVITATION' | 'OPEN';
+        allowMultipleCitizenships: boolean;
+    };
+    governance: DraftGovernance;
+    constitution: {
+        title: LocalizedInput;
+        blocks: Array<ConstitutionBlock>;
+    } | null;
+};
+
+export type DraftGovernance = {
+    offices: Array<DraftOffice>;
+    policies: Array<DraftPolicy>;
+    votingDefaults: DraftVotingRules;
+    createdFromPreset: string | null;
+};
+
+export type DraftOffice = {
+    id: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    isHeadOfState: boolean;
+    maxHolders: number;
+    required: boolean;
+    initialHolderIds: Array<string>;
+    appointment: 'APPOINTED_BY_OFFICE' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'MANUAL_PROCEDURE';
+    appointingOfficeId: string | null;
+    term: 'INDEFINITE' | 'FIXED_TERM';
+    termDays: number | null;
+    vacancy: 'APPOINTMENT' | 'ELECTION' | 'COUNCIL' | 'MANUAL';
+    inactivityDays: number | null;
+};
+
+export type DraftPolicy = {
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'SPEND_TREASURY' | 'DECLARE_WAR';
+    mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
+    officeIds: Array<string>;
+    vote: OptionalDraftVotingRules;
+    manualProcedure: LocalizedInput;
+};
+
+export type OptionalDraftVotingRules = {
+    durationHours: number;
+    quorumPercent: number;
+    thresholdPercent: number;
+    thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
+    allowAbstain: boolean;
+} | null;
+
+export type DraftVotingRules = {
+    durationHours: number;
+    quorumPercent: number;
+    thresholdPercent: number;
+    thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
+    allowAbstain: boolean;
+};
+
+export type StateDetail = {
+    id: string;
+    slug: string;
+    status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+    statusReason: string | null;
+    configuration: StateConfiguration;
+    founders: Array<{
+        id: string;
+        name: string;
+        type: 'PRIMARY' | 'COFOUNDER';
+    }>;
+    citizens: Array<{
+        id: string;
+        name: string;
+    }>;
+    holders: Array<{
+        officeId: string;
+        userId: string;
+        name: string;
+        since: string;
+    }>;
+    governanceRevisionId: string;
+    governanceRevision: number;
+    constitutionRevisionId: string | null;
+    createdAt: string;
+    constitutionHtml: Array<{
+        id: string;
+        html: string;
+    }>;
+};
+
+export type StateDirectory = {
+    items: Array<PublicStateSummary>;
+    total: number;
+    page: number;
+    pageSize: number;
+};
+
+export type PublicStateSummary = {
+    id: string;
+    slug: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    color: string;
+    horizontalFlag: {
+        mode: 'BANNER';
+        design: MinecraftBanner;
+    } | {
+        mode: 'PNG';
+        mediaId: string | null;
+    };
+    citizenship: {
+        entryMode: 'BY_APPLICATION' | 'BY_INVITATION' | 'OPEN';
+        allowMultipleCitizenships: boolean;
+    };
+    citizens: number;
+    officeCount: number;
+    hasConstitution: boolean;
+    createdAt: string;
 };
 
 export type Health = {
@@ -3115,6 +3456,2584 @@ export type GetWorldSummaryResponses = {
 };
 
 export type GetWorldSummaryResponse = GetWorldSummaryResponses[keyof GetWorldSummaryResponses];
+
+export type UploadStateFlagData = {
+    body?: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/state-flags';
+};
+
+export type UploadStateFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type UploadStateFlagError = UploadStateFlagErrors[keyof UploadStateFlagErrors];
+
+export type UploadStateFlagResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+        width: number;
+        height: number;
+    };
+};
+
+export type UploadStateFlagResponse = UploadStateFlagResponses[keyof UploadStateFlagResponses];
+
+export type GetStateFlagData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-flags/{id}';
+};
+
+export type GetStateFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateFlagError = GetStateFlagErrors[keyof GetStateFlagErrors];
+
+export type GetStateFlagResponses = {
+    /**
+     * PNG flag
+     */
+    200: Blob | File;
+};
+
+export type GetStateFlagResponse = GetStateFlagResponses[keyof GetStateFlagResponses];
+
+export type GetPublicStateFlagData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/api/v1/public/states/{slug}/flag';
+};
+
+export type GetPublicStateFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicStateFlagError = GetPublicStateFlagErrors[keyof GetPublicStateFlagErrors];
+
+export type GetPublicStateFlagResponses = {
+    /**
+     * PNG flag
+     */
+    200: Blob | File;
+};
+
+export type GetPublicStateFlagResponse = GetPublicStateFlagResponses[keyof GetPublicStateFlagResponses];
+
+export type GetAdminStateFlagData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        revisionId?: string;
+    };
+    url: '/api/v1/admin/states/{id}/flag';
+};
+
+export type GetAdminStateFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetAdminStateFlagError = GetAdminStateFlagErrors[keyof GetAdminStateFlagErrors];
+
+export type GetAdminStateFlagResponses = {
+    /**
+     * PNG flag
+     */
+    200: Blob | File;
+};
+
+export type GetAdminStateFlagResponse = GetAdminStateFlagResponses[keyof GetAdminStateFlagResponses];
+
+export type GetOwnedStateFlagData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        revisionId?: string;
+    };
+    url: '/api/v1/account/states/{id}/flag';
+};
+
+export type GetOwnedStateFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetOwnedStateFlagError = GetOwnedStateFlagErrors[keyof GetOwnedStateFlagErrors];
+
+export type GetOwnedStateFlagResponses = {
+    /**
+     * PNG flag
+     */
+    200: Blob | File;
+};
+
+export type GetOwnedStateFlagResponse = GetOwnedStateFlagResponses[keyof GetOwnedStateFlagResponses];
+
+export type GetStateReformProposalFlagData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-reform-votes/{id}/flag';
+};
+
+export type GetStateReformProposalFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateReformProposalFlagError = GetStateReformProposalFlagErrors[keyof GetStateReformProposalFlagErrors];
+
+export type GetStateReformProposalFlagResponses = {
+    /**
+     * PNG proposal flag
+     */
+    200: Blob | File;
+};
+
+export type GetStateReformProposalFlagResponse = GetStateReformProposalFlagResponses[keyof GetStateReformProposalFlagResponses];
+
+export type GetStateProposalFlagData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-reform-proposals/{id}/flag';
+};
+
+export type GetStateProposalFlagErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateProposalFlagError = GetStateProposalFlagErrors[keyof GetStateProposalFlagErrors];
+
+export type GetStateProposalFlagResponses = {
+    /**
+     * PNG proposal flag
+     */
+    200: Blob | File;
+};
+
+export type GetStateProposalFlagResponse = GetStateProposalFlagResponses[keyof GetStateProposalFlagResponses];
+
+export type CreateStateReformDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{id}/drafts';
+};
+
+export type CreateStateReformDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateStateReformDraftError = CreateStateReformDraftErrors[keyof CreateStateReformDraftErrors];
+
+export type CreateStateReformDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        draftId: string;
+    };
+};
+
+export type CreateStateReformDraftResponse = CreateStateReformDraftResponses[keyof CreateStateReformDraftResponses];
+
+export type StartStateReformVoteData = {
+    body?: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}/vote';
+};
+
+export type StartStateReformVoteErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type StartStateReformVoteError = StartStateReformVoteErrors[keyof StartStateReformVoteErrors];
+
+export type StartStateReformVoteResponses = {
+    /**
+     * Result
+     */
+    200: {
+        votingId: string;
+    };
+};
+
+export type StartStateReformVoteResponse = StartStateReformVoteResponses[keyof StartStateReformVoteResponses];
+
+export type ApproveStateReformOfficeData = {
+    body?: {
+        version: number;
+        ownerId: string;
+        officeId: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}/approve-office';
+};
+
+export type ApproveStateReformOfficeErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApproveStateReformOfficeError = ApproveStateReformOfficeErrors[keyof ApproveStateReformOfficeErrors];
+
+export type ApproveStateReformOfficeResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApproveStateReformOfficeResponse = ApproveStateReformOfficeResponses[keyof ApproveStateReformOfficeResponses];
+
+export type PublishStateReformData = {
+    body?: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}/publish';
+};
+
+export type PublishStateReformErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type PublishStateReformError = PublishStateReformErrors[keyof PublishStateReformErrors];
+
+export type PublishStateReformResponses = {
+    /**
+     * Result
+     */
+    200: {
+        revisionId: string;
+    };
+};
+
+export type PublishStateReformResponse = PublishStateReformResponses[keyof PublishStateReformResponses];
+
+export type AdminOverrideStateData = {
+    body?: {
+        configuration: StateConfiguration;
+        reason: string;
+        baseRevisionId: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/states/{id}/revision';
+};
+
+export type AdminOverrideStateErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type AdminOverrideStateError = AdminOverrideStateErrors[keyof AdminOverrideStateErrors];
+
+export type AdminOverrideStateResponses = {
+    /**
+     * Result
+     */
+    200: {
+        revisionId: string;
+    };
+};
+
+export type AdminOverrideStateResponse = AdminOverrideStateResponses[keyof AdminOverrideStateResponses];
+
+export type GetStateReformProposalData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+    };
+    url: '/api/v1/account/state-reform-votes/{id}/proposal';
+};
+
+export type GetStateReformProposalErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateReformProposalError = GetStateReformProposalErrors[keyof GetStateReformProposalErrors];
+
+export type GetStateReformProposalResponses = {
+    /**
+     * Result
+     */
+    200: ReformProposal;
+};
+
+export type GetStateReformProposalResponse = GetStateReformProposalResponses[keyof GetStateReformProposalResponses];
+
+export type ProposeStateReformData = {
+    body?: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}/propose';
+};
+
+export type ProposeStateReformErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ProposeStateReformError = ProposeStateReformErrors[keyof ProposeStateReformErrors];
+
+export type ProposeStateReformResponses = {
+    /**
+     * Result
+     */
+    200: {
+        proposalId: string;
+    };
+};
+
+export type ProposeStateReformResponse = ProposeStateReformResponses[keyof ProposeStateReformResponses];
+
+export type ListStateReformProposalsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{id}/proposals';
+};
+
+export type ListStateReformProposalsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStateReformProposalsError = ListStateReformProposalsErrors[keyof ListStateReformProposalsErrors];
+
+export type ListStateReformProposalsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            version: number;
+            createdAt: string;
+        }>;
+    };
+};
+
+export type ListStateReformProposalsResponse = ListStateReformProposalsResponses[keyof ListStateReformProposalsResponses];
+
+export type GetStateReformProposalByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+    };
+    url: '/api/v1/account/state-reform-proposals/{id}';
+};
+
+export type GetStateReformProposalByIdErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateReformProposalByIdError = GetStateReformProposalByIdErrors[keyof GetStateReformProposalByIdErrors];
+
+export type GetStateReformProposalByIdResponses = {
+    /**
+     * Result
+     */
+    200: ReformProposal;
+};
+
+export type GetStateReformProposalByIdResponse = GetStateReformProposalByIdResponses[keyof GetStateReformProposalByIdResponses];
+
+export type GetPublicPlayerProfileData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/players/{id}';
+};
+
+export type GetPublicPlayerProfileErrors = {
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicPlayerProfileError = GetPublicPlayerProfileErrors[keyof GetPublicPlayerProfileErrors];
+
+export type GetPublicPlayerProfileResponses = {
+    /**
+     * Result
+     */
+    200: PublicPlayerProfile;
+};
+
+export type GetPublicPlayerProfileResponse = GetPublicPlayerProfileResponses[keyof GetPublicPlayerProfileResponses];
+
+export type SearchPlayersData = {
+    body?: never;
+    path?: never;
+    query: {
+        query: string;
+    };
+    url: '/api/v1/account/players/search';
+};
+
+export type SearchPlayersResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            name: string;
+        }>;
+    };
+};
+
+export type SearchPlayersResponse = SearchPlayersResponses[keyof SearchPlayersResponses];
+
+export type LookupPlayersData = {
+    body?: {
+        ids: Array<string>;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/players/lookup';
+};
+
+export type LookupPlayersResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            name: string;
+        }>;
+    };
+};
+
+export type LookupPlayersResponse = LookupPlayersResponses[keyof LookupPlayersResponses];
+
+export type ListAdminVotingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/votings';
+};
+
+export type ListAdminVotingsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListAdminVotingsError = ListAdminVotingsErrors[keyof ListAdminVotingsErrors];
+
+export type ListAdminVotingsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        ids: Array<string>;
+    };
+};
+
+export type ListAdminVotingsResponse = ListAdminVotingsResponses[keyof ListAdminVotingsResponses];
+
+export type CreateVotingData = {
+    body?: VotingInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/votings';
+};
+
+export type CreateVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateVotingError = CreateVotingErrors[keyof CreateVotingErrors];
+
+export type CreateVotingResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type CreateVotingResponse = CreateVotingResponses[keyof CreateVotingResponses];
+
+export type PublishVotingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}/publish';
+};
+
+export type PublishVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type PublishVotingError = PublishVotingErrors[keyof PublishVotingErrors];
+
+export type PublishVotingResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type PublishVotingResponse = PublishVotingResponses[keyof PublishVotingResponses];
+
+export type CancelVotingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}/cancel';
+};
+
+export type CancelVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CancelVotingError = CancelVotingErrors[keyof CancelVotingErrors];
+
+export type CancelVotingResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type CancelVotingResponse = CancelVotingResponses[keyof CancelVotingResponses];
+
+export type GetAdminVotingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}';
+};
+
+export type GetAdminVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetAdminVotingError = GetAdminVotingErrors[keyof GetAdminVotingErrors];
+
+export type GetAdminVotingResponses = {
+    /**
+     * Result
+     */
+    200: VotingDetail;
+};
+
+export type GetAdminVotingResponse = GetAdminVotingResponses[keyof GetAdminVotingResponses];
+
+export type ListVotingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/votings';
+};
+
+export type ListVotingsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListVotingsError = ListVotingsErrors[keyof ListVotingsErrors];
+
+export type ListVotingsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        ids: Array<string>;
+    };
+};
+
+export type ListVotingsResponse = ListVotingsResponses[keyof ListVotingsResponses];
+
+export type GetVotingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/votings/{id}';
+};
+
+export type GetVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetVotingError = GetVotingErrors[keyof GetVotingErrors];
+
+export type GetVotingResponses = {
+    /**
+     * Result
+     */
+    200: VotingDetail;
+};
+
+export type GetVotingResponse = GetVotingResponses[keyof GetVotingResponses];
+
+export type CastVotingBallotData = {
+    body?: {
+        choices: Array<string>;
+        abstain: boolean;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/votings/{id}/ballot';
+};
+
+export type CastVotingBallotErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CastVotingBallotError = CastVotingBallotErrors[keyof CastVotingBallotErrors];
+
+export type CastVotingBallotResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type CastVotingBallotResponse = CastVotingBallotResponses[keyof CastVotingBallotResponses];
+
+export type ListMyStatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/states';
+};
+
+export type ListMyStatesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListMyStatesError = ListMyStatesErrors[keyof ListMyStatesErrors];
+
+export type ListMyStatesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            slug: string;
+            status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+            name: LocalizedInput;
+        }>;
+    };
+};
+
+export type ListMyStatesResponse = ListMyStatesResponses[keyof ListMyStatesResponses];
+
+export type ListStateDraftsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/state-drafts';
+};
+
+export type ListStateDraftsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStateDraftsError = ListStateDraftsErrors[keyof ListStateDraftsErrors];
+
+export type ListStateDraftsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<StateDraft>;
+    };
+};
+
+export type ListStateDraftsResponse = ListStateDraftsResponses[keyof ListStateDraftsResponses];
+
+export type CreateStateDraftData = {
+    body?: {
+        title?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/state-drafts';
+};
+
+export type CreateStateDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateStateDraftError = CreateStateDraftErrors[keyof CreateStateDraftErrors];
+
+export type CreateStateDraftResponses = {
+    /**
+     * Result
+     */
+    200: StateDraft;
+};
+
+export type CreateStateDraftResponse = CreateStateDraftResponses[keyof CreateStateDraftResponses];
+
+export type DeleteStateDraftData = {
+    body?: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}';
+};
+
+export type DeleteStateDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type DeleteStateDraftError = DeleteStateDraftErrors[keyof DeleteStateDraftErrors];
+
+export type DeleteStateDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type DeleteStateDraftResponse = DeleteStateDraftResponses[keyof DeleteStateDraftResponses];
+
+export type GetStateDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}';
+};
+
+export type GetStateDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateDraftError = GetStateDraftErrors[keyof GetStateDraftErrors];
+
+export type GetStateDraftResponses = {
+    /**
+     * Result
+     */
+    200: StateDraft;
+};
+
+export type GetStateDraftResponse = GetStateDraftResponses[keyof GetStateDraftResponses];
+
+export type SaveStateDraftData = {
+    body?: {
+        version: number;
+        title: string;
+        step: number;
+        configuration: DraftStateConfiguration;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}';
+};
+
+export type SaveStateDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type SaveStateDraftError = SaveStateDraftErrors[keyof SaveStateDraftErrors];
+
+export type SaveStateDraftResponses = {
+    /**
+     * Result
+     */
+    200: StateDraft;
+};
+
+export type SaveStateDraftResponse = SaveStateDraftResponses[keyof SaveStateDraftResponses];
+
+export type ValidateStateDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}/validation';
+};
+
+export type ValidateStateDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ValidateStateDraftError = ValidateStateDraftErrors[keyof ValidateStateDraftErrors];
+
+export type ValidateStateDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        issues: Array<{
+            severity: 'ERROR' | 'WARNING';
+            path: string;
+            message: string;
+        }>;
+    };
+};
+
+export type ValidateStateDraftResponse = ValidateStateDraftResponses[keyof ValidateStateDraftResponses];
+
+export type SubmitStateDraftData = {
+    body?: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/state-drafts/{id}/submit';
+};
+
+export type SubmitStateDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type SubmitStateDraftError = SubmitStateDraftErrors[keyof SubmitStateDraftErrors];
+
+export type SubmitStateDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        stateId: string;
+    };
+};
+
+export type SubmitStateDraftResponse = SubmitStateDraftResponses[keyof SubmitStateDraftResponses];
+
+export type GetStatePresetData = {
+    body?: never;
+    path: {
+        preset: 'AUTOCRACY' | 'CONSTITUTIONAL_MONARCHY' | 'PRESIDENTIAL_REPUBLIC' | 'COUNCIL_REPUBLIC' | 'DIRECT_DEMOCRACY' | 'CUSTOM';
+    };
+    query?: never;
+    url: '/api/v1/account/state-presets/{preset}';
+};
+
+export type GetStatePresetErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStatePresetError = GetStatePresetErrors[keyof GetStatePresetErrors];
+
+export type GetStatePresetResponses = {
+    /**
+     * Result
+     */
+    200: StateGovernance;
+};
+
+export type GetStatePresetResponse = GetStatePresetResponses[keyof GetStatePresetResponses];
+
+export type GetOwnedStateData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+        revisionId?: string;
+    };
+    url: '/api/v1/account/states/{id}';
+};
+
+export type GetOwnedStateErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetOwnedStateError = GetOwnedStateErrors[keyof GetOwnedStateErrors];
+
+export type GetOwnedStateResponses = {
+    /**
+     * Result
+     */
+    200: StateDetail;
+};
+
+export type GetOwnedStateResponse = GetOwnedStateResponses[keyof GetOwnedStateResponses];
+
+export type ListStateRevisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{id}/revisions';
+};
+
+export type ListStateRevisionsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStateRevisionsError = ListStateRevisionsErrors[keyof ListStateRevisionsErrors];
+
+export type ListStateRevisionsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            number: number;
+            previousRevisionId: string | null;
+            actorId: string;
+            adminOverride: boolean;
+            reason: string | null;
+            createdAt: string;
+        }>;
+    };
+};
+
+export type ListStateRevisionsResponse = ListStateRevisionsResponses[keyof ListStateRevisionsResponses];
+
+export type PreviewStateConstitutionData = {
+    body?: {
+        configuration: StateConfiguration;
+        locale: 'ru' | 'en';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/states/constitution-preview';
+};
+
+export type PreviewStateConstitutionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type PreviewStateConstitutionError = PreviewStateConstitutionErrors[keyof PreviewStateConstitutionErrors];
+
+export type PreviewStateConstitutionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        html: Array<{
+            id: string;
+            html: string;
+        }>;
+        warnings: Array<string>;
+    };
+};
+
+export type PreviewStateConstitutionResponse = PreviewStateConstitutionResponses[keyof PreviewStateConstitutionResponses];
+
+export type ListStatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        search?: string;
+        entryMode?: 'ALL' | 'OPEN' | 'BY_APPLICATION' | 'BY_INVITATION';
+        constitution?: 'ALL' | 'YES' | 'NO';
+        sort?: 'NEWEST' | 'NAME' | 'POPULATION';
+        locale?: 'ru' | 'en';
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/public/states';
+};
+
+export type ListStatesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStatesError = ListStatesErrors[keyof ListStatesErrors];
+
+export type ListStatesResponses = {
+    /**
+     * Result
+     */
+    200: StateDirectory;
+};
+
+export type ListStatesResponse = ListStatesResponses[keyof ListStatesResponses];
+
+export type GetPublicStateData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+    };
+    url: '/api/v1/public/states/{slug}';
+};
+
+export type GetPublicStateErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicStateError = GetPublicStateErrors[keyof GetPublicStateErrors];
+
+export type GetPublicStateResponses = {
+    /**
+     * Result
+     */
+    200: StateDetail;
+};
+
+export type GetPublicStateResponse = GetPublicStateResponses[keyof GetPublicStateResponses];
+
+export type ListAdminStatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        status?: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+    };
+    url: '/api/v1/admin/states';
+};
+
+export type ListAdminStatesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListAdminStatesError = ListAdminStatesErrors[keyof ListAdminStatesErrors];
+
+export type ListAdminStatesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            slug: string;
+            status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+            name: LocalizedInput;
+        }>;
+    };
+};
+
+export type ListAdminStatesResponse = ListAdminStatesResponses[keyof ListAdminStatesResponses];
+
+export type GetAdminStateData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+        revisionId?: string;
+    };
+    url: '/api/v1/admin/states/{id}';
+};
+
+export type GetAdminStateErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetAdminStateError = GetAdminStateErrors[keyof GetAdminStateErrors];
+
+export type GetAdminStateResponses = {
+    /**
+     * Result
+     */
+    200: StateDetail;
+};
+
+export type GetAdminStateResponse = GetAdminStateResponses[keyof GetAdminStateResponses];
+
+export type ChangeStateStatusData = {
+    body?: {
+        status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+        reason: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/states/{id}/status';
+};
+
+export type ChangeStateStatusErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ChangeStateStatusError = ChangeStateStatusErrors[keyof ChangeStateStatusErrors];
+
+export type ChangeStateStatusResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ChangeStateStatusResponse = ChangeStateStatusResponses[keyof ChangeStateStatusResponses];
 
 export type ListUsersData = {
     body?: never;

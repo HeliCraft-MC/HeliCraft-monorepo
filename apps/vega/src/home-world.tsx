@@ -1,5 +1,7 @@
-import { useMemo } from 'react';
-import { Icon, StateCard } from '@helicraft/atria';
+import { Icon } from '@helicraft/atria';
+import { PublicStateCard } from './states/public-card';
+import type { HomeData } from './home-data';
+import { uiText } from './states/text';
 import { useTranslation } from './i18n';
 import type { ReactElement } from 'react';
 import styles from './home.module.scss';
@@ -22,30 +24,8 @@ const principles = [
     text: 'home.principles.chronicleDescription',
   },
 ];
-function HomeWorld(): ReactElement {
-  const { text } = useTranslation();
-  const facts0 = useMemo(
-    () => [
-      { label: text('home.states.decisions'), value: text('home.states.republicDecisions') },
-      { label: text('home.states.foundation'), value: text('home.states.republicFoundation') },
-    ],
-    [text],
-  );
-  const facts1 = useMemo(
-    () => [
-      { label: text('home.states.decisions'), value: text('home.states.monarchyDecisions') },
-      { label: text('home.states.foundation'), value: text('home.states.monarchyFoundation') },
-    ],
-    [text],
-  );
-  const facts2 = useMemo(
-    () => [
-      { label: text('home.states.decisions'), value: text('home.states.democracyDecisions') },
-      { label: text('home.states.foundation'), value: text('home.states.democracyFoundation') },
-    ],
-    [text],
-  );
-
+function HomeWorld({ states }: Readonly<{ states: HomeData['states'] }>): ReactElement {
+  const { text, locale } = useTranslation();
   return (
     <>
       <section id="about" className={styles.chapter}>
@@ -70,38 +50,41 @@ function HomeWorld(): ReactElement {
             <h2>{text('home.states.title')}</h2>
             <p className={styles.note}>{text('home.states.description')}</p>
           </div>
-          <a href="/world">
+          <a href="/states">
             {text('home.states.readMore')} <Icon name="arrowRight" />
           </a>
         </div>
         <div className={styles.states}>
-          <StateCard
-            flagLabel={text('home.states.flagLabel')}
-            name={text('home.states.republicTitle')}
-            flag="/world/flags/aurora.svg"
-            government={text('home.states.republicGovernment')}
-            image="/world/town-small.webp"
-            description={text('home.states.republicDescription')}
-            facts={facts0}
-          />
-          <StateCard
-            flagLabel={text('home.states.flagLabel')}
-            name={text('home.states.monarchyTitle')}
-            flag="/world/flags/veloria.svg"
-            government={text('home.states.monarchyGovernment')}
-            image="/world/castle-small.webp"
-            description={text('home.states.monarchyDescription')}
-            facts={facts1}
-          />
-          <StateCard
-            flagLabel={text('home.states.flagLabel')}
-            name={text('home.states.democracyTitle')}
-            flag="/world/flags/lor.svg"
-            government={text('home.states.democracyGovernment')}
-            description={text('home.states.democracyDescription')}
-            facts={facts2}
-          />
+          {states?.items.map((state) => (
+            <PublicStateCard key={state.id} state={state} />
+          ))}
         </div>
+        {states === null && (
+          <output>
+            {uiText(
+              locale,
+              'Государства временно недоступны. Попробуйте позже.',
+              'States are temporarily unavailable. Please try again later.',
+            )}
+          </output>
+        )}
+        {states !== null && states.total === 0 && (
+          <p>
+            {uiText(
+              locale,
+              'Пока нет одобренных государств. Станьте основателем первого.',
+              'No approved states yet. Become the founder of the first one.',
+            )}
+          </p>
+        )}
+        {states !== null && states.total > 0 && (
+          <p className={styles.note}>
+            {uiText(locale, 'Государств в каталоге:', 'States in the directory:')} {states.total}
+          </p>
+        )}
+        <a href="/app/states/new">
+          {uiText(locale, 'Создать государство', 'Create a state')} <Icon name="arrowUpRight" />
+        </a>
       </section>
     </>
   );

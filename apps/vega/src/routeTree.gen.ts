@@ -23,18 +23,26 @@ import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminChronicleRouteImport } from './routes/admin.chronicle'
 import { Route as AdminPagesRouteImport } from './routes/admin.pages'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppVotingsRouteImport } from './routes/app.votings'
 import { Route as ChronicleIndexRouteImport } from './routes/chronicle.index'
 import { Route as ChronicleSlugRouteImport } from './routes/chronicle.$slug'
 import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
 import { Route as GalleryIdRouteImport } from './routes/gallery.$id'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
+import { Route as PlayersPlayerIdRouteImport } from './routes/players.$playerId'
+import { Route as StatesIndexRouteImport } from './routes/states.index'
+import { Route as StatesSlugRouteImport } from './routes/states.$slug'
+import { Route as StatesNewRouteImport } from './routes/states.new'
 import { Route as AdminChronicleIndexRouteImport } from './routes/admin.chronicle.index'
 import { Route as AdminChronicleEntryIdRouteImport } from './routes/admin.chronicle.$entryId'
 import { Route as AdminChronicleNewRouteImport } from './routes/admin.chronicle.new'
 import { Route as AdminPagesIndexRouteImport } from './routes/admin.pages.index'
 import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
 import { Route as AdminPagesNewRouteImport } from './routes/admin.pages.new'
+import { Route as AdminStatesIndexRouteImport } from './routes/admin.states.index'
+import { Route as AdminStatesStateIdRouteImport } from './routes/admin.states.$stateId'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
 import { Route as AppGalleryNewRouteImport } from './routes/app.gallery.new'
@@ -42,6 +50,10 @@ import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.inde
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsSecurityRouteImport } from './routes/app.settings.security'
 import { Route as AppSettingsSkinRouteImport } from './routes/app.settings.skin'
+import { Route as AppStatesStateIdRouteImport } from './routes/app.states.$stateId'
+import { Route as AppStatesNewRouteImport } from './routes/app.states.new'
+import { Route as AppStatesDraftsDraftIdRouteImport } from './routes/app.states.drafts.$draftId'
+import { Route as AppStatesStateIdProposalsRouteImport } from './routes/app.states_.$stateId.proposals'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -113,9 +125,19 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminVotingsRoute = AdminVotingsRouteImport.update({
+  id: '/votings',
+  path: '/votings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppVotingsRoute = AppVotingsRouteImport.update({
+  id: '/votings',
+  path: '/votings',
   getParentRoute: () => AppRoute,
 } as any)
 const ChronicleIndexRoute = ChronicleIndexRouteImport.update({
@@ -141,6 +163,26 @@ const GalleryIdRoute = GalleryIdRouteImport.update({
 const PagesSlugRoute = PagesSlugRouteImport.update({
   id: '/pages/$slug',
   path: '/pages/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayersPlayerIdRoute = PlayersPlayerIdRouteImport.update({
+  id: '/players/$playerId',
+  path: '/players/$playerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatesIndexRoute = StatesIndexRouteImport.update({
+  id: '/states/',
+  path: '/states/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatesSlugRoute = StatesSlugRouteImport.update({
+  id: '/states/$slug',
+  path: '/states/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatesNewRoute = StatesNewRouteImport.update({
+  id: '/states/new',
+  path: '/states/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminChronicleIndexRoute = AdminChronicleIndexRouteImport.update({
@@ -172,6 +214,16 @@ const AdminPagesNewRoute = AdminPagesNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => AdminPagesRoute,
+} as any)
+const AdminStatesIndexRoute = AdminStatesIndexRouteImport.update({
+  id: '/states/',
+  path: '/states/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStatesStateIdRoute = AdminStatesStateIdRouteImport.update({
+  id: '/states/$stateId',
+  path: '/states/$stateId',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/',
@@ -208,6 +260,27 @@ const AppSettingsSkinRoute = AppSettingsSkinRouteImport.update({
   path: '/settings/skin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStatesStateIdRoute = AppStatesStateIdRouteImport.update({
+  id: '/states/$stateId',
+  path: '/states/$stateId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStatesNewRoute = AppStatesNewRouteImport.update({
+  id: '/states/new',
+  path: '/states/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStatesDraftsDraftIdRoute = AppStatesDraftsDraftIdRouteImport.update({
+  id: '/states/drafts/$draftId',
+  path: '/states/drafts/$draftId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStatesStateIdProposalsRoute =
+  AppStatesStateIdProposalsRouteImport.update({
+    id: '/states_/$stateId/proposals',
+    path: '/states/$stateId/proposals',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -223,26 +296,38 @@ export interface FileRoutesByFullPath {
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
   '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/users': typeof AdminUsersRouteWithChildren
+  '/admin/votings': typeof AdminVotingsRoute
+  '/app/votings': typeof AppVotingsRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/players/$playerId': typeof PlayersPlayerIdRoute
+  '/states/$slug': typeof StatesSlugRoute
+  '/states/new': typeof StatesNewRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
   '/gallery/': typeof GalleryIndexRoute
+  '/states/': typeof StatesIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/pages/new': typeof AdminPagesNewRoute
+  '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/app/states/$stateId': typeof AppStatesStateIdRoute
+  '/app/states/new': typeof AppStatesNewRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
   '/admin/pages/': typeof AdminPagesIndexRoute
+  '/admin/states/': typeof AdminStatesIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
+  '/app/states/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -252,26 +337,38 @@ export interface FileRoutesByTo {
   '/start': typeof StartRoute
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/votings': typeof AdminVotingsRoute
+  '/app/votings': typeof AppVotingsRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/players/$playerId': typeof PlayersPlayerIdRoute
+  '/states/$slug': typeof StatesSlugRoute
+  '/states/new': typeof StatesNewRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/chronicle': typeof ChronicleIndexRoute
   '/gallery': typeof GalleryIndexRoute
+  '/states': typeof StatesIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/pages/new': typeof AdminPagesNewRoute
+  '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/app/states/$stateId': typeof AppStatesStateIdRoute
+  '/app/states/new': typeof AppStatesNewRoute
   '/admin/chronicle': typeof AdminChronicleIndexRoute
   '/admin/pages': typeof AdminPagesIndexRoute
+  '/admin/states': typeof AdminStatesIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
+  '/app/states/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -288,26 +385,38 @@ export interface FileRoutesById {
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
   '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/users': typeof AdminUsersRouteWithChildren
+  '/admin/votings': typeof AdminVotingsRoute
+  '/app/votings': typeof AppVotingsRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
+  '/players/$playerId': typeof PlayersPlayerIdRoute
+  '/states/$slug': typeof StatesSlugRoute
+  '/states/new': typeof StatesNewRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
   '/gallery/': typeof GalleryIndexRoute
+  '/states/': typeof StatesIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/pages/new': typeof AdminPagesNewRoute
+  '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/app/states/$stateId': typeof AppStatesStateIdRoute
+  '/app/states/new': typeof AppStatesNewRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
   '/admin/pages/': typeof AdminPagesIndexRoute
+  '/admin/states/': typeof AdminStatesIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
+  '/app/states_/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -325,26 +434,38 @@ export interface FileRouteTypes {
     | '/admin/chronicle'
     | '/admin/pages'
     | '/admin/users'
+    | '/admin/votings'
+    | '/app/votings'
     | '/chronicle/$slug'
     | '/gallery/$id'
     | '/pages/$slug'
+    | '/players/$playerId'
+    | '/states/$slug'
+    | '/states/new'
     | '/admin/'
     | '/app/'
     | '/chronicle/'
     | '/gallery/'
+    | '/states/'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
     | '/admin/pages/new'
+    | '/admin/states/$stateId'
     | '/admin/users/$userId'
     | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
+    | '/app/states/$stateId'
+    | '/app/states/new'
     | '/admin/chronicle/'
     | '/admin/pages/'
+    | '/admin/states/'
     | '/admin/users/'
     | '/app/settings/'
+    | '/app/states/drafts/$draftId'
+    | '/app/states/$stateId/proposals'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -354,26 +475,38 @@ export interface FileRouteTypes {
     | '/start'
     | '/world'
     | '/admin/audit'
+    | '/admin/votings'
+    | '/app/votings'
     | '/chronicle/$slug'
     | '/gallery/$id'
     | '/pages/$slug'
+    | '/players/$playerId'
+    | '/states/$slug'
+    | '/states/new'
     | '/admin'
     | '/app'
     | '/chronicle'
     | '/gallery'
+    | '/states'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
     | '/admin/pages/new'
+    | '/admin/states/$stateId'
     | '/admin/users/$userId'
     | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
+    | '/app/states/$stateId'
+    | '/app/states/new'
     | '/admin/chronicle'
     | '/admin/pages'
+    | '/admin/states'
     | '/admin/users'
     | '/app/settings'
+    | '/app/states/drafts/$draftId'
+    | '/app/states/$stateId/proposals'
   id:
     | '__root__'
     | '/'
@@ -389,26 +522,38 @@ export interface FileRouteTypes {
     | '/admin/chronicle'
     | '/admin/pages'
     | '/admin/users'
+    | '/admin/votings'
+    | '/app/votings'
     | '/chronicle/$slug'
     | '/gallery/$id'
     | '/pages/$slug'
+    | '/players/$playerId'
+    | '/states/$slug'
+    | '/states/new'
     | '/admin/'
     | '/app/'
     | '/chronicle/'
     | '/gallery/'
+    | '/states/'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
     | '/admin/pages/new'
+    | '/admin/states/$stateId'
     | '/admin/users/$userId'
     | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
+    | '/app/states/$stateId'
+    | '/app/states/new'
     | '/admin/chronicle/'
     | '/admin/pages/'
+    | '/admin/states/'
     | '/admin/users/'
     | '/app/settings/'
+    | '/app/states/drafts/$draftId'
+    | '/app/states_/$stateId/proposals'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -423,7 +568,11 @@ export interface RootRouteChildren {
   WorldRoute: typeof WorldRoute
   GalleryIdRoute: typeof GalleryIdRoute
   PagesSlugRoute: typeof PagesSlugRoute
+  PlayersPlayerIdRoute: typeof PlayersPlayerIdRoute
+  StatesSlugRoute: typeof StatesSlugRoute
+  StatesNewRoute: typeof StatesNewRoute
   GalleryIndexRoute: typeof GalleryIndexRoute
+  StatesIndexRoute: typeof StatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -526,11 +675,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/votings': {
+      id: '/admin/votings'
+      path: '/votings'
+      fullPath: '/admin/votings'
+      preLoaderRoute: typeof AdminVotingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/votings': {
+      id: '/app/votings'
+      path: '/votings'
+      fullPath: '/app/votings'
+      preLoaderRoute: typeof AppVotingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/chronicle/': {
@@ -566,6 +729,34 @@ declare module '@tanstack/react-router' {
       path: '/pages/$slug'
       fullPath: '/pages/$slug'
       preLoaderRoute: typeof PagesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/players/$playerId': {
+      id: '/players/$playerId'
+      path: '/players/$playerId'
+      fullPath: '/players/$playerId'
+      preLoaderRoute: typeof PlayersPlayerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/states/': {
+      id: '/states/'
+      path: '/states'
+      fullPath: '/states/'
+      preLoaderRoute: typeof StatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/states/$slug': {
+      id: '/states/$slug'
+      path: '/states/$slug'
+      fullPath: '/states/$slug'
+      preLoaderRoute: typeof StatesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/states/new': {
+      id: '/states/new'
+      path: '/states/new'
+      fullPath: '/states/new'
+      preLoaderRoute: typeof StatesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/chronicle/': {
@@ -609,6 +800,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/pages/new'
       preLoaderRoute: typeof AdminPagesNewRouteImport
       parentRoute: typeof AdminPagesRoute
+    }
+    '/admin/states/': {
+      id: '/admin/states/'
+      path: '/states'
+      fullPath: '/admin/states/'
+      preLoaderRoute: typeof AdminStatesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/states/$stateId': {
+      id: '/admin/states/$stateId'
+      path: '/states/$stateId'
+      fullPath: '/admin/states/$stateId'
+      preLoaderRoute: typeof AdminStatesStateIdRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/users/': {
       id: '/admin/users/'
@@ -657,6 +862,34 @@ declare module '@tanstack/react-router' {
       path: '/settings/skin'
       fullPath: '/app/settings/skin'
       preLoaderRoute: typeof AppSettingsSkinRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/states/$stateId': {
+      id: '/app/states/$stateId'
+      path: '/states/$stateId'
+      fullPath: '/app/states/$stateId'
+      preLoaderRoute: typeof AppStatesStateIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/states/new': {
+      id: '/app/states/new'
+      path: '/states/new'
+      fullPath: '/app/states/new'
+      preLoaderRoute: typeof AppStatesNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/states/drafts/$draftId': {
+      id: '/app/states/drafts/$draftId'
+      path: '/states/drafts/$draftId'
+      fullPath: '/app/states/drafts/$draftId'
+      preLoaderRoute: typeof AppStatesDraftsDraftIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/states_/$stateId/proposals': {
+      id: '/app/states_/$stateId/proposals'
+      path: '/states/$stateId/proposals'
+      fullPath: '/app/states/$stateId/proposals'
+      preLoaderRoute: typeof AppStatesStateIdProposalsRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -713,7 +946,10 @@ interface AdminRouteChildren {
   AdminChronicleRoute: typeof AdminChronicleRouteWithChildren
   AdminPagesRoute: typeof AdminPagesRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
+  AdminVotingsRoute: typeof AdminVotingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminStatesStateIdRoute: typeof AdminStatesStateIdRoute
+  AdminStatesIndexRoute: typeof AdminStatesIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -721,27 +957,40 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminChronicleRoute: AdminChronicleRouteWithChildren,
   AdminPagesRoute: AdminPagesRouteWithChildren,
   AdminUsersRoute: AdminUsersRouteWithChildren,
+  AdminVotingsRoute: AdminVotingsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminStatesStateIdRoute: AdminStatesStateIdRoute,
+  AdminStatesIndexRoute: AdminStatesIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
+  AppVotingsRoute: typeof AppVotingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppGalleryNewRoute: typeof AppGalleryNewRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
   AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
   AppSettingsSkinRoute: typeof AppSettingsSkinRoute
+  AppStatesStateIdRoute: typeof AppStatesStateIdRoute
+  AppStatesNewRoute: typeof AppStatesNewRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+  AppStatesDraftsDraftIdRoute: typeof AppStatesDraftsDraftIdRoute
+  AppStatesStateIdProposalsRoute: typeof AppStatesStateIdProposalsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppVotingsRoute: AppVotingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppGalleryNewRoute: AppGalleryNewRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
   AppSettingsSecurityRoute: AppSettingsSecurityRoute,
   AppSettingsSkinRoute: AppSettingsSkinRoute,
+  AppStatesStateIdRoute: AppStatesStateIdRoute,
+  AppStatesNewRoute: AppStatesNewRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
+  AppStatesDraftsDraftIdRoute: AppStatesDraftsDraftIdRoute,
+  AppStatesStateIdProposalsRoute: AppStatesStateIdProposalsRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -772,7 +1021,11 @@ const rootRouteChildren: RootRouteChildren = {
   WorldRoute: WorldRoute,
   GalleryIdRoute: GalleryIdRoute,
   PagesSlugRoute: PagesSlugRoute,
+  PlayersPlayerIdRoute: PlayersPlayerIdRoute,
+  StatesSlugRoute: StatesSlugRoute,
+  StatesNewRoute: StatesNewRoute,
   GalleryIndexRoute: GalleryIndexRoute,
+  StatesIndexRoute: StatesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

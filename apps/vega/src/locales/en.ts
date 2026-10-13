@@ -2,6 +2,8 @@
 import type { ru } from './ru';
 
 const en = {
+  'states.title': 'States',
+  'votings.title': 'Voting',
   'home.final.title': 'Find your place',
   'home.final.titleSuffix': 'in HeliCraft.',
   'home.final.description': 'Start with a home, a workshop',
@@ -100,6 +102,7 @@ const en = {
   'chronicle.unavailable': 'The chronicle is unavailable',
   'chronicle.empty': 'No publications',
   'chronicle.description': 'Read news, event stories and community project reports.',
+  'users.manage': 'Manage',
   'admin.title': 'Administration',
   'admin.pages': 'Pages',
   'admin.chronicle': 'Chronicle',
@@ -204,7 +207,7 @@ const en = {
     'State borders define jurisdiction. Private plots define who owns the land and who can build on it.',
   'navigation.states': 'States',
   'home.principles.statesDescription':
-    'The constitution defines government, citizens’ rights and how laws are passed. Players choose how to govern their community.',
+    'Players define offices, entry rules and decision procedures. Governance is required; a formal constitution document is optional.',
   'home.principles.economyTitle': 'Economy',
   'home.principles.economyDescription':
     'Companies produce goods and provide services. States define currency issuance rules, and participants agree on payment.',
@@ -213,30 +216,10 @@ const en = {
     'Community publications record events, agreements and construction projects. Photographs complement stories about the world.',
   'home.about.title': 'Building, trading and self-government',
   'home.about.description': 'Play independently, join a community or bring together your own team.',
-  'home.states.title': 'How states work',
+  'home.states.title': 'HeliCraft states',
   'home.states.description':
-    'Examples of government: each community has its own laws and rules for participation.',
-  'home.states.readMore': 'About the world',
-  'home.states.republicTitle': 'Republic',
-  'home.states.republicGovernment': 'Elected government',
-  'home.states.republicDescription':
-    'Citizens elect representatives who pass laws and allocate shared resources.',
-  'home.states.decisions': 'Decisions',
-  'home.states.republicDecisions': 'Representative voting',
-  'home.states.foundation': 'Foundation',
-  'home.states.republicFoundation': 'Constitution and elections',
-  'home.states.monarchyTitle': 'Constitutional monarchy',
-  'home.states.monarchyGovernment': 'Monarch and representative body',
-  'home.states.monarchyDescription':
-    'The constitution divides authority between the head of state and citizens’ representatives.',
-  'home.states.monarchyDecisions': 'Within assigned powers',
-  'home.states.monarchyFoundation': 'Constitution and laws',
-  'home.states.democracyTitle': 'Direct democracy',
-  'home.states.democracyGovernment': 'Citizens’ assembly',
-  'home.states.democracyDescription':
-    'Citizens discuss proposals and vote directly on community matters.',
-  'home.states.democracyDecisions': 'Citizen voting',
-  'home.states.democracyFoundation': 'Assembly rules',
+    'Approved player states: actual flags, entry rules and current citizens.',
+  'home.states.readMore': 'All states',
   'home.atlas.title': 'Towns and buildings',
   'home.atlas.titleSuffix': 'in players’ photographs.',
   'home.atlas.description': 'Browse community photographs and share your own.',
@@ -337,7 +320,6 @@ const en = {
   'gallery.delete.submit': 'Yes, delete',
   'common.cancel': 'Cancel',
   'gallery.delete.ownPhoto': 'Delete my photograph',
-  'home.states.flagLabel': 'Flag',
   'skin.currentSkin': 'Current skin',
   'home.carousel.label': 'HeliCraft in photographs',
   'home.carousel.resume': 'Resume slideshow',

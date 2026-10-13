@@ -31,6 +31,7 @@ async function publicDto(row: DocumentWithAuthor): Promise<PublicContent> {
     publishedAt: document.publishedAt?.toISOString() ?? null,
     updatedAt: document.updatedAt.toISOString(),
     author: row.author,
+    authorId: document.createdBy,
   };
 }
 async function adminDto(row: DocumentWithAuthor): Promise<AdminContent> {

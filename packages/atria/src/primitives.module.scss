@@ -240,3 +240,20 @@
     margin-right: var(--space-2);
   }
 }
+.markdown {
+  ul,
+  ol {
+    padding-inline-start: 2rem;
+  }
+  li > p {
+    margin-block: 0.35rem;
+  }
+  img[src*='/avatar.png'] {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+    image-rendering: pixelated;
+    vertical-align: middle;
+    display: inline-block;
+  }
+}

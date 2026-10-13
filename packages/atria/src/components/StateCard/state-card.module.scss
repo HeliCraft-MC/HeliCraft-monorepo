@@ -88,3 +88,24 @@ a.card:hover {
     line-height: 1.6;
   }
 }
+
+.flagArtwork {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  background: radial-gradient(ellipse at center, var(--bg-hover), transparent 75%);
+  > img,
+  > svg {
+    width: 72%;
+    height: auto;
+    max-height: 75%;
+    object-fit: contain;
+    border: 0;
+    box-shadow: 0 8px 28px #0003;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .visual > img:first-child:not(.flag) {
+    transition: none;
+  }
+}

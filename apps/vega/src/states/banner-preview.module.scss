@@ -1,0 +1,13 @@
+.banner {
+  display: block;
+  flex: none;
+  width: 6rem;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: 1 / 2;
+  image-rendering: pixelated;
+}
+.horizontal {
+  width: 12rem;
+  aspect-ratio: 2 / 1;
+}

@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { createApp } from './app';
 import { readConfig } from './config';
 import { createDatabase } from './db';
+import { VotingService } from './modules/voting/service';
 import { createStorage } from './storage';
 
 const config = readConfig();
@@ -25,7 +26,27 @@ const app = createApp({
 });
 const server = Bun.serve({ port: config.PORT, fetch: app.fetch });
 console.info(`Antares listening on ${server.url}`);
+const VOTING_TICK_MS = 15_000;
+const voting = new VotingService(db);
+let votingTickRunning = false;
+async function runVotingTick(): Promise<void> {
+  if (votingTickRunning) {
+    return;
+  }
+  votingTickRunning = true;
+  try {
+    await voting.tick();
+  } catch (error) {
+    console.error('Voting scheduler failed', error instanceof Error ? error.name : 'Unknown');
+  } finally {
+    votingTickRunning = false;
+  }
+}
+const votingTimer = setInterval(() => {
+  void runVotingTick();
+}, VOTING_TICK_MS);
 async function shutdown(): Promise<void> {
+  clearInterval(votingTimer);
   await server.stop();
   await pool.end();
   storage.destroy();

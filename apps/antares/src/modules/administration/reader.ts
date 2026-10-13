@@ -11,6 +11,7 @@ import type { Principal } from '../identity/contracts';
 import { permissionsFor, requirePermission } from '../permissions/policy';
 import type { Role } from '../permissions/policy';
 
+import { effectiveRoles, operatorNames } from '../permissions/operators';
 import { DomainError, HTTP } from '../errors';
 
 type AuditRecord = Omit<typeof adminAuditLog.$inferSelect, 'occurredAt'> & { occurredAt: string };
@@ -47,7 +48,12 @@ class AdministrationReader {
           )
         : undefined,
       query.status ? eq(users.status, query.status) : undefined,
-      roleIds ? inArray(users.id, roleIds) : undefined,
+      roleIds
+        ? or(
+            inArray(users.id, roleIds),
+            query.role === 'ADMIN' ? inArray(users.usernameNormalized, operatorNames()) : undefined,
+          )
+        : undefined,
     );
     const records = await this.db
       .select()
@@ -73,8 +79,16 @@ class AdministrationReader {
       status: user.status,
       currentSkinId: user.currentSkinId,
       createdAt: user.createdAt.toISOString(),
-      roles: roles.map((row) => row.role),
-      permissions: permissionsFor(roles.map((row) => row.role)),
+      roles: effectiveRoles(
+        user.username,
+        roles.map((row) => row.role),
+      ),
+      permissions: permissionsFor(
+        effectiveRoles(
+          user.username,
+          roles.map((row) => row.role),
+        ),
+      ),
     };
   }
   public async details(
@@ -107,8 +121,16 @@ class AdministrationReader {
       currentSkinId: user.currentSkinId,
       createdAt: user.createdAt.toISOString(),
       lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
-      roles: roles.map((row) => row.role),
-      permissions: permissionsFor(roles.map((row) => row.role)),
+      roles: effectiveRoles(
+        user.username,
+        roles.map((row) => row.role),
+      ),
+      permissions: permissionsFor(
+        effectiveRoles(
+          user.username,
+          roles.map((row) => row.role),
+        ),
+      ),
       history: history.map((row) => ({
         oldUsername: row.oldUsername,
         newUsername: row.newUsername,

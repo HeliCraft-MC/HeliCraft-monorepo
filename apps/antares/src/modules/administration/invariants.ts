@@ -1,3 +1,4 @@
+import { effectiveRoles } from '../permissions/operators';
 import { and, eq } from 'drizzle-orm';
 import { userRoles, users } from '../../db/schema';
 import type { Role } from '../permissions/policy';
@@ -16,6 +17,13 @@ async function targetRoles(transaction: Transaction, id: string): Promise<Role[]
     .select({ role: userRoles.role })
     .from(userRoles)
     .where(eq(userRoles.userId, id));
-  return rows.map((row) => row.role);
+  const [user] = await transaction
+    .select({ name: users.username })
+    .from(users)
+    .where(eq(users.id, id));
+  return effectiveRoles(
+    user?.name ?? '',
+    rows.map((row) => row.role),
+  );
 }
 export { activeOwners, targetRoles };

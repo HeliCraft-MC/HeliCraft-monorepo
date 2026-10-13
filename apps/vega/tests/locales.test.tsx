@@ -16,6 +16,7 @@ const data: HomeData = {
     links: [],
   },
   gallery: null,
+  states: { items: [], total: 0, page: 1, pageSize: 3 },
 };
 describe('languages', () => {
   it('keeps complete dictionaries and rejects unsupported or inherited language names', () => {
@@ -37,6 +38,8 @@ describe('languages', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Minecraft for');
     expect(screen.getByRole('heading', { name: 'Northway' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next photograph' })).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Flag: Republic' })).toBeInTheDocument();
+    expect(
+      screen.getByText('No approved states yet. Become the founder of the first one.'),
+    ).toBeInTheDocument();
   });
 });

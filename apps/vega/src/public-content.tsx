@@ -1,3 +1,4 @@
+import { PlayerNickname } from './player-nickname';
 import { localizeContent } from './localized-content';
 import { useTranslation } from './i18n';
 import { useLoaderData } from '@tanstack/react-router';
@@ -15,6 +16,11 @@ export function PublicContent(): ReactElement {
       <PageContainer narrow>
         <h1>{content?.title}</h1>
         <p className={styles.paragraph}>{content?.description}</p>
+        {content?.kind === 'CHRONICLE' && (
+          <p>
+            <PlayerNickname id={content.authorId} name={content.author} />
+          </p>
+        )}
         {content ? <MarkdownContent html={content.html} /> : null}
       </PageContainer>
     </main>

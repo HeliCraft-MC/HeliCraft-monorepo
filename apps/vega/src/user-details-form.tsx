@@ -1,3 +1,5 @@
+// oxlint-disable import/max-dependencies -- The existing screen also composes the shared player nickname/head component.
+import { PlayerNickname } from './player-nickname';
 import { useTranslation } from './i18n';
 import { formatDate } from './date-format';
 import { useCallback, useState } from 'react';
@@ -80,7 +82,9 @@ function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): 
   }, [mutate]);
   return (
     <>
-      <h1>{user.username ?? text('users.user')}</h1>
+      <h1>
+        <PlayerNickname id={user.id} name={user.username} skinId={user.currentSkinId} />
+      </h1>
       <p className={styles.uuid}>{uuid}</p>
       <p className={styles.paragraph}>
         {text('users.registeredAt')} {formatDate(user.createdAt, locale)}
@@ -136,7 +140,8 @@ function UserDetailsForm({ user, principal, onRefresh }: UserDetailsFormProps): 
         ) : (
           user.history.map((entry) => (
             <p key={entry.changedAt}>
-              {entry.oldUsername} <Icon name="arrowRight" /> {entry.newUsername} ·{' '}
+              <PlayerNickname id={user.id} name={entry.oldUsername} /> <Icon name="arrowRight" />{' '}
+              <PlayerNickname id={user.id} name={entry.newUsername} /> ·{' '}
               {formatDate(entry.changedAt, locale)}
             </p>
           ))

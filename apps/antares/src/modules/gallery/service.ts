@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNull } from 'drizzle-orm';
 import type { Database } from '../../db';
 import { galleryImages, users } from '../../db/schema';
 import { GalleryMetadataSchema } from './contracts';
@@ -7,7 +7,8 @@ import { processGalleryImage } from './process';
 import type { GalleryObjects } from './objects';
 import { DomainError, HTTP } from '../errors';
 
-const PLAYER_SEARCH_LIMIT = 10;
+import { searchPlayers } from '../players/service';
+
 type GalleryRecord = typeof galleryImages.$inferSelect;
 class GalleryService {
   private readonly db: Database['db'];
@@ -17,17 +18,7 @@ class GalleryService {
     this.objects = objects;
   }
   public async searchPlayers(query: string): Promise<{ id: string; name: string }[]> {
-    return await this.db
-      .select({ id: users.id, name: users.username })
-      .from(users)
-      .where(
-        and(
-          eq(users.status, 'ACTIVE'),
-          sql`starts_with(${users.usernameNormalized}, ${query.toLowerCase()})`,
-        ),
-      )
-      .orderBy(asc(users.usernameNormalized))
-      .limit(PLAYER_SEARCH_LIMIT);
+    return await searchPlayers(this.db, query);
   }
   private async describe(record: GalleryRecord): Promise<GalleryItem> {
     const people = await this.db

@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { ArchiveChronicleEntryData, ArchiveChronicleEntryErrors, ArchiveChronicleEntryResponses, ArchivePageData, ArchivePageErrors, ArchivePageResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ChangeUsernameData, ChangeUsernameErrors, ChangeUsernameResponses, ChangeUserRolesData, ChangeUserRolesErrors, ChangeUserRolesResponses, ChangeUserStatusData, ChangeUserStatusErrors, ChangeUserStatusResponses, CreateChronicleEntryData, CreateChronicleEntryErrors, CreateChronicleEntryResponses, CreatePageData, CreatePageErrors, CreatePageResponses, DeleteGalleryImageData, DeleteGalleryImageErrors, DeleteGalleryImageResponses, GetAccountData, GetAccountErrors, GetAccountResponses, GetAdminChronicleEntryData, GetAdminChronicleEntryErrors, GetAdminChronicleEntryResponses, GetAdminPageData, GetAdminPageErrors, GetAdminPageResponses, GetAdminStatsData, GetAdminStatsErrors, GetAdminStatsResponses, GetAuditData, GetAuditErrors, GetAuditResponses, GetChronicleEntryData, GetChronicleEntryErrors, GetChronicleEntryResponses, GetChronicleEntryRevisionsData, GetChronicleEntryRevisionsErrors, GetChronicleEntryRevisionsResponses, GetGalleryImageData, GetGalleryImageErrors, GetGalleryImageResponses, GetGalleryItemData, GetGalleryItemErrors, GetGalleryItemResponses, GetGalleryThumbnailData, GetGalleryThumbnailErrors, GetGalleryThumbnailResponses, GetHealthData, GetHealthResponses, GetHelloData, GetHelloErrors, GetHelloResponses, GetMeData, GetMeErrors, GetMeResponses, GetPageRevisionsData, GetPageRevisionsErrors, GetPageRevisionsResponses, GetPlayerAvatarData, GetPlayerAvatarErrors, GetPlayerAvatarResponses, GetPlayerSkinData, GetPlayerSkinErrors, GetPlayerSkinResponses, GetPublicPageData, GetPublicPageErrors, GetPublicPageResponses, GetReadyData, GetReadyErrors, GetReadyResponses, GetSessionsData, GetSessionsErrors, GetSessionsResponses, GetSiteData, GetSiteResponses, GetSkinData, GetSkinErrors, GetSkinResponses, GetUserDetailsData, GetUserDetailsErrors, GetUserDetailsResponses, GetWorldSummaryData, GetWorldSummaryResponses, ListAdminChronicleEntriesData, ListAdminChronicleEntriesErrors, ListAdminChronicleEntriesResponses, ListAdminPagesData, ListAdminPagesErrors, ListAdminPagesResponses, ListChronicleData, ListChronicleErrors, ListChronicleResponses, ListGalleryData, ListGalleryErrors, ListGalleryResponses, ListPublicPagesData, ListPublicPagesErrors, ListPublicPagesResponses, ListUsersData, ListUsersErrors, ListUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, PreviewMarkdownData, PreviewMarkdownErrors, PreviewMarkdownResponses, PublishChronicleEntryData, PublishChronicleEntryErrors, PublishChronicleEntryResponses, PublishPageData, PublishPageErrors, PublishPageResponses, RegisterData, RegisterErrors, RegisterResponses, ResetSkinData, ResetSkinErrors, ResetSkinResponses, RestoreChronicleEntryData, RestoreChronicleEntryErrors, RestoreChronicleEntryResponses, RestorePageData, RestorePageErrors, RestorePageResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SaveChronicleEntryData, SaveChronicleEntryErrors, SaveChronicleEntryResponses, SavePageData, SavePageErrors, SavePageResponses, SearchGalleryPlayersData, SearchGalleryPlayersErrors, SearchGalleryPlayersResponses, UnpublishChronicleEntryData, UnpublishChronicleEntryErrors, UnpublishChronicleEntryResponses, UnpublishPageData, UnpublishPageErrors, UnpublishPageResponses, UpdateGalleryMetadataData, UpdateGalleryMetadataErrors, UpdateGalleryMetadataResponses, UploadGalleryImageData, UploadGalleryImageErrors, UploadGalleryImageResponses, UploadSkinData, UploadSkinErrors, UploadSkinResponses } from './types.gen';
+import type { AdminOverrideStateData, AdminOverrideStateErrors, AdminOverrideStateResponses, ApproveStateReformOfficeData, ApproveStateReformOfficeErrors, ApproveStateReformOfficeResponses, ArchiveChronicleEntryData, ArchiveChronicleEntryErrors, ArchiveChronicleEntryResponses, ArchivePageData, ArchivePageErrors, ArchivePageResponses, CancelVotingData, CancelVotingErrors, CancelVotingResponses, CastVotingBallotData, CastVotingBallotErrors, CastVotingBallotResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ChangeStateStatusData, ChangeStateStatusErrors, ChangeStateStatusResponses, ChangeUsernameData, ChangeUsernameErrors, ChangeUsernameResponses, ChangeUserRolesData, ChangeUserRolesErrors, ChangeUserRolesResponses, ChangeUserStatusData, ChangeUserStatusErrors, ChangeUserStatusResponses, CreateChronicleEntryData, CreateChronicleEntryErrors, CreateChronicleEntryResponses, CreatePageData, CreatePageErrors, CreatePageResponses, CreateStateDraftData, CreateStateDraftErrors, CreateStateDraftResponses, CreateStateReformDraftData, CreateStateReformDraftErrors, CreateStateReformDraftResponses, CreateVotingData, CreateVotingErrors, CreateVotingResponses, DeleteGalleryImageData, DeleteGalleryImageErrors, DeleteGalleryImageResponses, DeleteStateDraftData, DeleteStateDraftErrors, DeleteStateDraftResponses, GetAccountData, GetAccountErrors, GetAccountResponses, GetAdminChronicleEntryData, GetAdminChronicleEntryErrors, GetAdminChronicleEntryResponses, GetAdminPageData, GetAdminPageErrors, GetAdminPageResponses, GetAdminStateData, GetAdminStateErrors, GetAdminStateFlagData, GetAdminStateFlagErrors, GetAdminStateFlagResponses, GetAdminStateResponses, GetAdminStatsData, GetAdminStatsErrors, GetAdminStatsResponses, GetAdminVotingData, GetAdminVotingErrors, GetAdminVotingResponses, GetAuditData, GetAuditErrors, GetAuditResponses, GetChronicleEntryData, GetChronicleEntryErrors, GetChronicleEntryResponses, GetChronicleEntryRevisionsData, GetChronicleEntryRevisionsErrors, GetChronicleEntryRevisionsResponses, GetGalleryImageData, GetGalleryImageErrors, GetGalleryImageResponses, GetGalleryItemData, GetGalleryItemErrors, GetGalleryItemResponses, GetGalleryThumbnailData, GetGalleryThumbnailErrors, GetGalleryThumbnailResponses, GetHealthData, GetHealthResponses, GetHelloData, GetHelloErrors, GetHelloResponses, GetMeData, GetMeErrors, GetMeResponses, GetOwnedStateData, GetOwnedStateErrors, GetOwnedStateFlagData, GetOwnedStateFlagErrors, GetOwnedStateFlagResponses, GetOwnedStateResponses, GetPageRevisionsData, GetPageRevisionsErrors, GetPageRevisionsResponses, GetPlayerAvatarData, GetPlayerAvatarErrors, GetPlayerAvatarResponses, GetPlayerSkinData, GetPlayerSkinErrors, GetPlayerSkinResponses, GetPublicPageData, GetPublicPageErrors, GetPublicPageResponses, GetPublicPlayerProfileData, GetPublicPlayerProfileErrors, GetPublicPlayerProfileResponses, GetPublicStateData, GetPublicStateErrors, GetPublicStateFlagData, GetPublicStateFlagErrors, GetPublicStateFlagResponses, GetPublicStateResponses, GetReadyData, GetReadyErrors, GetReadyResponses, GetSessionsData, GetSessionsErrors, GetSessionsResponses, GetSiteData, GetSiteResponses, GetSkinData, GetSkinErrors, GetSkinResponses, GetStateDraftData, GetStateDraftErrors, GetStateDraftResponses, GetStateFlagData, GetStateFlagErrors, GetStateFlagResponses, GetStatePresetData, GetStatePresetErrors, GetStatePresetResponses, GetStateProposalFlagData, GetStateProposalFlagErrors, GetStateProposalFlagResponses, GetStateReformProposalByIdData, GetStateReformProposalByIdErrors, GetStateReformProposalByIdResponses, GetStateReformProposalData, GetStateReformProposalErrors, GetStateReformProposalFlagData, GetStateReformProposalFlagErrors, GetStateReformProposalFlagResponses, GetStateReformProposalResponses, GetUserDetailsData, GetUserDetailsErrors, GetUserDetailsResponses, GetVotingData, GetVotingErrors, GetVotingResponses, GetWorldSummaryData, GetWorldSummaryResponses, ListAdminChronicleEntriesData, ListAdminChronicleEntriesErrors, ListAdminChronicleEntriesResponses, ListAdminPagesData, ListAdminPagesErrors, ListAdminPagesResponses, ListAdminStatesData, ListAdminStatesErrors, ListAdminStatesResponses, ListAdminVotingsData, ListAdminVotingsErrors, ListAdminVotingsResponses, ListChronicleData, ListChronicleErrors, ListChronicleResponses, ListGalleryData, ListGalleryErrors, ListGalleryResponses, ListMyStatesData, ListMyStatesErrors, ListMyStatesResponses, ListPublicPagesData, ListPublicPagesErrors, ListPublicPagesResponses, ListStateDraftsData, ListStateDraftsErrors, ListStateDraftsResponses, ListStateReformProposalsData, ListStateReformProposalsErrors, ListStateReformProposalsResponses, ListStateRevisionsData, ListStateRevisionsErrors, ListStateRevisionsResponses, ListStatesData, ListStatesErrors, ListStatesResponses, ListUsersData, ListUsersErrors, ListUsersResponses, ListVotingsData, ListVotingsErrors, ListVotingsResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, LookupPlayersData, LookupPlayersResponses, PreviewMarkdownData, PreviewMarkdownErrors, PreviewMarkdownResponses, PreviewStateConstitutionData, PreviewStateConstitutionErrors, PreviewStateConstitutionResponses, ProposeStateReformData, ProposeStateReformErrors, ProposeStateReformResponses, PublishChronicleEntryData, PublishChronicleEntryErrors, PublishChronicleEntryResponses, PublishPageData, PublishPageErrors, PublishPageResponses, PublishStateReformData, PublishStateReformErrors, PublishStateReformResponses, PublishVotingData, PublishVotingErrors, PublishVotingResponses, RegisterData, RegisterErrors, RegisterResponses, ResetSkinData, ResetSkinErrors, ResetSkinResponses, RestoreChronicleEntryData, RestoreChronicleEntryErrors, RestoreChronicleEntryResponses, RestorePageData, RestorePageErrors, RestorePageResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SaveChronicleEntryData, SaveChronicleEntryErrors, SaveChronicleEntryResponses, SavePageData, SavePageErrors, SavePageResponses, SaveStateDraftData, SaveStateDraftErrors, SaveStateDraftResponses, SearchGalleryPlayersData, SearchGalleryPlayersErrors, SearchGalleryPlayersResponses, SearchPlayersData, SearchPlayersResponses, StartStateReformVoteData, StartStateReformVoteErrors, StartStateReformVoteResponses, SubmitStateDraftData, SubmitStateDraftErrors, SubmitStateDraftResponses, UnpublishChronicleEntryData, UnpublishChronicleEntryErrors, UnpublishChronicleEntryResponses, UnpublishPageData, UnpublishPageErrors, UnpublishPageResponses, UpdateGalleryMetadataData, UpdateGalleryMetadataErrors, UpdateGalleryMetadataResponses, UploadGalleryImageData, UploadGalleryImageErrors, UploadGalleryImageResponses, UploadSkinData, UploadSkinErrors, UploadSkinResponses, UploadStateFlagData, UploadStateFlagErrors, UploadStateFlagResponses, ValidateStateDraftData, ValidateStateDraftErrors, ValidateStateDraftResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -213,6 +213,200 @@ export const previewMarkdown = <ThrowOnError extends boolean = false>(options: O
 export const getSite = <ThrowOnError extends boolean = false>(options?: Options<GetSiteData, ThrowOnError>): RequestResult<GetSiteResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetSiteResponses, unknown, ThrowOnError>({ url: '/api/v1/public/site', ...options });
 
 export const getWorldSummary = <ThrowOnError extends boolean = false>(options?: Options<GetWorldSummaryData, ThrowOnError>): RequestResult<GetWorldSummaryResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetWorldSummaryResponses, unknown, ThrowOnError>({ url: '/api/v1/public/world/summary', ...options });
+
+export const uploadStateFlag = <ThrowOnError extends boolean = false>(options?: Options<UploadStateFlagData, ThrowOnError>): RequestResult<UploadStateFlagResponses, UploadStateFlagErrors, ThrowOnError> => (options?.client ?? client).post<UploadStateFlagResponses, UploadStateFlagErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    url: '/api/v1/account/state-flags',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options?.headers
+    }
+});
+
+export const getStateFlag = <ThrowOnError extends boolean = false>(options: Options<GetStateFlagData, ThrowOnError>): RequestResult<GetStateFlagResponses, GetStateFlagErrors, ThrowOnError> => (options.client ?? client).get<GetStateFlagResponses, GetStateFlagErrors, ThrowOnError>({ url: '/api/v1/account/state-flags/{id}', ...options });
+
+export const getPublicStateFlag = <ThrowOnError extends boolean = false>(options: Options<GetPublicStateFlagData, ThrowOnError>): RequestResult<GetPublicStateFlagResponses, GetPublicStateFlagErrors, ThrowOnError> => (options.client ?? client).get<GetPublicStateFlagResponses, GetPublicStateFlagErrors, ThrowOnError>({ url: '/api/v1/public/states/{slug}/flag', ...options });
+
+export const getAdminStateFlag = <ThrowOnError extends boolean = false>(options: Options<GetAdminStateFlagData, ThrowOnError>): RequestResult<GetAdminStateFlagResponses, GetAdminStateFlagErrors, ThrowOnError> => (options.client ?? client).get<GetAdminStateFlagResponses, GetAdminStateFlagErrors, ThrowOnError>({ url: '/api/v1/admin/states/{id}/flag', ...options });
+
+export const getOwnedStateFlag = <ThrowOnError extends boolean = false>(options: Options<GetOwnedStateFlagData, ThrowOnError>): RequestResult<GetOwnedStateFlagResponses, GetOwnedStateFlagErrors, ThrowOnError> => (options.client ?? client).get<GetOwnedStateFlagResponses, GetOwnedStateFlagErrors, ThrowOnError>({ url: '/api/v1/account/states/{id}/flag', ...options });
+
+export const getStateReformProposalFlag = <ThrowOnError extends boolean = false>(options: Options<GetStateReformProposalFlagData, ThrowOnError>): RequestResult<GetStateReformProposalFlagResponses, GetStateReformProposalFlagErrors, ThrowOnError> => (options.client ?? client).get<GetStateReformProposalFlagResponses, GetStateReformProposalFlagErrors, ThrowOnError>({ url: '/api/v1/account/state-reform-votes/{id}/flag', ...options });
+
+export const getStateProposalFlag = <ThrowOnError extends boolean = false>(options: Options<GetStateProposalFlagData, ThrowOnError>): RequestResult<GetStateProposalFlagResponses, GetStateProposalFlagErrors, ThrowOnError> => (options.client ?? client).get<GetStateProposalFlagResponses, GetStateProposalFlagErrors, ThrowOnError>({ url: '/api/v1/account/state-reform-proposals/{id}/flag', ...options });
+
+export const createStateReformDraft = <ThrowOnError extends boolean = false>(options: Options<CreateStateReformDraftData, ThrowOnError>): RequestResult<CreateStateReformDraftResponses, CreateStateReformDraftErrors, ThrowOnError> => (options.client ?? client).post<CreateStateReformDraftResponses, CreateStateReformDraftErrors, ThrowOnError>({ url: '/api/v1/account/states/{id}/drafts', ...options });
+
+export const startStateReformVote = <ThrowOnError extends boolean = false>(options: Options<StartStateReformVoteData, ThrowOnError>): RequestResult<StartStateReformVoteResponses, StartStateReformVoteErrors, ThrowOnError> => (options.client ?? client).post<StartStateReformVoteResponses, StartStateReformVoteErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}/vote',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const approveStateReformOffice = <ThrowOnError extends boolean = false>(options: Options<ApproveStateReformOfficeData, ThrowOnError>): RequestResult<ApproveStateReformOfficeResponses, ApproveStateReformOfficeErrors, ThrowOnError> => (options.client ?? client).post<ApproveStateReformOfficeResponses, ApproveStateReformOfficeErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}/approve-office',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const publishStateReform = <ThrowOnError extends boolean = false>(options: Options<PublishStateReformData, ThrowOnError>): RequestResult<PublishStateReformResponses, PublishStateReformErrors, ThrowOnError> => (options.client ?? client).post<PublishStateReformResponses, PublishStateReformErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}/publish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const adminOverrideState = <ThrowOnError extends boolean = false>(options: Options<AdminOverrideStateData, ThrowOnError>): RequestResult<AdminOverrideStateResponses, AdminOverrideStateErrors, ThrowOnError> => (options.client ?? client).post<AdminOverrideStateResponses, AdminOverrideStateErrors, ThrowOnError>({
+    url: '/api/v1/admin/states/{id}/revision',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getStateReformProposal = <ThrowOnError extends boolean = false>(options: Options<GetStateReformProposalData, ThrowOnError>): RequestResult<GetStateReformProposalResponses, GetStateReformProposalErrors, ThrowOnError> => (options.client ?? client).get<GetStateReformProposalResponses, GetStateReformProposalErrors, ThrowOnError>({ url: '/api/v1/account/state-reform-votes/{id}/proposal', ...options });
+
+export const proposeStateReform = <ThrowOnError extends boolean = false>(options: Options<ProposeStateReformData, ThrowOnError>): RequestResult<ProposeStateReformResponses, ProposeStateReformErrors, ThrowOnError> => (options.client ?? client).post<ProposeStateReformResponses, ProposeStateReformErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}/propose',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listStateReformProposals = <ThrowOnError extends boolean = false>(options: Options<ListStateReformProposalsData, ThrowOnError>): RequestResult<ListStateReformProposalsResponses, ListStateReformProposalsErrors, ThrowOnError> => (options.client ?? client).get<ListStateReformProposalsResponses, ListStateReformProposalsErrors, ThrowOnError>({ url: '/api/v1/account/states/{id}/proposals', ...options });
+
+export const getStateReformProposalById = <ThrowOnError extends boolean = false>(options: Options<GetStateReformProposalByIdData, ThrowOnError>): RequestResult<GetStateReformProposalByIdResponses, GetStateReformProposalByIdErrors, ThrowOnError> => (options.client ?? client).get<GetStateReformProposalByIdResponses, GetStateReformProposalByIdErrors, ThrowOnError>({ url: '/api/v1/account/state-reform-proposals/{id}', ...options });
+
+export const getPublicPlayerProfile = <ThrowOnError extends boolean = false>(options: Options<GetPublicPlayerProfileData, ThrowOnError>): RequestResult<GetPublicPlayerProfileResponses, GetPublicPlayerProfileErrors, ThrowOnError> => (options.client ?? client).get<GetPublicPlayerProfileResponses, GetPublicPlayerProfileErrors, ThrowOnError>({ url: '/api/v1/public/players/{id}', ...options });
+
+export const searchPlayers = <ThrowOnError extends boolean = false>(options: Options<SearchPlayersData, ThrowOnError>): RequestResult<SearchPlayersResponses, unknown, ThrowOnError> => (options.client ?? client).get<SearchPlayersResponses, unknown, ThrowOnError>({ url: '/api/v1/account/players/search', ...options });
+
+export const lookupPlayers = <ThrowOnError extends boolean = false>(options?: Options<LookupPlayersData, ThrowOnError>): RequestResult<LookupPlayersResponses, unknown, ThrowOnError> => (options?.client ?? client).post<LookupPlayersResponses, unknown, ThrowOnError>({
+    url: '/api/v1/account/players/lookup',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const listAdminVotings = <ThrowOnError extends boolean = false>(options?: Options<ListAdminVotingsData, ThrowOnError>): RequestResult<ListAdminVotingsResponses, ListAdminVotingsErrors, ThrowOnError> => (options?.client ?? client).get<ListAdminVotingsResponses, ListAdminVotingsErrors, ThrowOnError>({ url: '/api/v1/admin/votings', ...options });
+
+export const createVoting = <ThrowOnError extends boolean = false>(options?: Options<CreateVotingData, ThrowOnError>): RequestResult<CreateVotingResponses, CreateVotingErrors, ThrowOnError> => (options?.client ?? client).post<CreateVotingResponses, CreateVotingErrors, ThrowOnError>({
+    url: '/api/v1/admin/votings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const publishVoting = <ThrowOnError extends boolean = false>(options: Options<PublishVotingData, ThrowOnError>): RequestResult<PublishVotingResponses, PublishVotingErrors, ThrowOnError> => (options.client ?? client).post<PublishVotingResponses, PublishVotingErrors, ThrowOnError>({ url: '/api/v1/admin/votings/{id}/publish', ...options });
+
+export const cancelVoting = <ThrowOnError extends boolean = false>(options: Options<CancelVotingData, ThrowOnError>): RequestResult<CancelVotingResponses, CancelVotingErrors, ThrowOnError> => (options.client ?? client).post<CancelVotingResponses, CancelVotingErrors, ThrowOnError>({ url: '/api/v1/admin/votings/{id}/cancel', ...options });
+
+export const getAdminVoting = <ThrowOnError extends boolean = false>(options: Options<GetAdminVotingData, ThrowOnError>): RequestResult<GetAdminVotingResponses, GetAdminVotingErrors, ThrowOnError> => (options.client ?? client).get<GetAdminVotingResponses, GetAdminVotingErrors, ThrowOnError>({ url: '/api/v1/admin/votings/{id}', ...options });
+
+export const listVotings = <ThrowOnError extends boolean = false>(options?: Options<ListVotingsData, ThrowOnError>): RequestResult<ListVotingsResponses, ListVotingsErrors, ThrowOnError> => (options?.client ?? client).get<ListVotingsResponses, ListVotingsErrors, ThrowOnError>({ url: '/api/v1/account/votings', ...options });
+
+export const getVoting = <ThrowOnError extends boolean = false>(options: Options<GetVotingData, ThrowOnError>): RequestResult<GetVotingResponses, GetVotingErrors, ThrowOnError> => (options.client ?? client).get<GetVotingResponses, GetVotingErrors, ThrowOnError>({ url: '/api/v1/account/votings/{id}', ...options });
+
+export const castVotingBallot = <ThrowOnError extends boolean = false>(options: Options<CastVotingBallotData, ThrowOnError>): RequestResult<CastVotingBallotResponses, CastVotingBallotErrors, ThrowOnError> => (options.client ?? client).post<CastVotingBallotResponses, CastVotingBallotErrors, ThrowOnError>({
+    url: '/api/v1/account/votings/{id}/ballot',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listMyStates = <ThrowOnError extends boolean = false>(options?: Options<ListMyStatesData, ThrowOnError>): RequestResult<ListMyStatesResponses, ListMyStatesErrors, ThrowOnError> => (options?.client ?? client).get<ListMyStatesResponses, ListMyStatesErrors, ThrowOnError>({ url: '/api/v1/account/states', ...options });
+
+export const listStateDrafts = <ThrowOnError extends boolean = false>(options?: Options<ListStateDraftsData, ThrowOnError>): RequestResult<ListStateDraftsResponses, ListStateDraftsErrors, ThrowOnError> => (options?.client ?? client).get<ListStateDraftsResponses, ListStateDraftsErrors, ThrowOnError>({ url: '/api/v1/account/state-drafts', ...options });
+
+export const createStateDraft = <ThrowOnError extends boolean = false>(options?: Options<CreateStateDraftData, ThrowOnError>): RequestResult<CreateStateDraftResponses, CreateStateDraftErrors, ThrowOnError> => (options?.client ?? client).post<CreateStateDraftResponses, CreateStateDraftErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const deleteStateDraft = <ThrowOnError extends boolean = false>(options: Options<DeleteStateDraftData, ThrowOnError>): RequestResult<DeleteStateDraftResponses, DeleteStateDraftErrors, ThrowOnError> => (options.client ?? client).delete<DeleteStateDraftResponses, DeleteStateDraftErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getStateDraft = <ThrowOnError extends boolean = false>(options: Options<GetStateDraftData, ThrowOnError>): RequestResult<GetStateDraftResponses, GetStateDraftErrors, ThrowOnError> => (options.client ?? client).get<GetStateDraftResponses, GetStateDraftErrors, ThrowOnError>({ url: '/api/v1/account/state-drafts/{id}', ...options });
+
+export const saveStateDraft = <ThrowOnError extends boolean = false>(options: Options<SaveStateDraftData, ThrowOnError>): RequestResult<SaveStateDraftResponses, SaveStateDraftErrors, ThrowOnError> => (options.client ?? client).put<SaveStateDraftResponses, SaveStateDraftErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const validateStateDraft = <ThrowOnError extends boolean = false>(options: Options<ValidateStateDraftData, ThrowOnError>): RequestResult<ValidateStateDraftResponses, ValidateStateDraftErrors, ThrowOnError> => (options.client ?? client).get<ValidateStateDraftResponses, ValidateStateDraftErrors, ThrowOnError>({ url: '/api/v1/account/state-drafts/{id}/validation', ...options });
+
+export const submitStateDraft = <ThrowOnError extends boolean = false>(options: Options<SubmitStateDraftData, ThrowOnError>): RequestResult<SubmitStateDraftResponses, SubmitStateDraftErrors, ThrowOnError> => (options.client ?? client).post<SubmitStateDraftResponses, SubmitStateDraftErrors, ThrowOnError>({
+    url: '/api/v1/account/state-drafts/{id}/submit',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getStatePreset = <ThrowOnError extends boolean = false>(options: Options<GetStatePresetData, ThrowOnError>): RequestResult<GetStatePresetResponses, GetStatePresetErrors, ThrowOnError> => (options.client ?? client).get<GetStatePresetResponses, GetStatePresetErrors, ThrowOnError>({ url: '/api/v1/account/state-presets/{preset}', ...options });
+
+export const getOwnedState = <ThrowOnError extends boolean = false>(options: Options<GetOwnedStateData, ThrowOnError>): RequestResult<GetOwnedStateResponses, GetOwnedStateErrors, ThrowOnError> => (options.client ?? client).get<GetOwnedStateResponses, GetOwnedStateErrors, ThrowOnError>({ url: '/api/v1/account/states/{id}', ...options });
+
+export const listStateRevisions = <ThrowOnError extends boolean = false>(options: Options<ListStateRevisionsData, ThrowOnError>): RequestResult<ListStateRevisionsResponses, ListStateRevisionsErrors, ThrowOnError> => (options.client ?? client).get<ListStateRevisionsResponses, ListStateRevisionsErrors, ThrowOnError>({ url: '/api/v1/account/states/{id}/revisions', ...options });
+
+export const previewStateConstitution = <ThrowOnError extends boolean = false>(options?: Options<PreviewStateConstitutionData, ThrowOnError>): RequestResult<PreviewStateConstitutionResponses, PreviewStateConstitutionErrors, ThrowOnError> => (options?.client ?? client).post<PreviewStateConstitutionResponses, PreviewStateConstitutionErrors, ThrowOnError>({
+    url: '/api/v1/account/states/constitution-preview',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
+
+export const listStates = <ThrowOnError extends boolean = false>(options?: Options<ListStatesData, ThrowOnError>): RequestResult<ListStatesResponses, ListStatesErrors, ThrowOnError> => (options?.client ?? client).get<ListStatesResponses, ListStatesErrors, ThrowOnError>({ url: '/api/v1/public/states', ...options });
+
+export const getPublicState = <ThrowOnError extends boolean = false>(options: Options<GetPublicStateData, ThrowOnError>): RequestResult<GetPublicStateResponses, GetPublicStateErrors, ThrowOnError> => (options.client ?? client).get<GetPublicStateResponses, GetPublicStateErrors, ThrowOnError>({ url: '/api/v1/public/states/{slug}', ...options });
+
+export const listAdminStates = <ThrowOnError extends boolean = false>(options?: Options<ListAdminStatesData, ThrowOnError>): RequestResult<ListAdminStatesResponses, ListAdminStatesErrors, ThrowOnError> => (options?.client ?? client).get<ListAdminStatesResponses, ListAdminStatesErrors, ThrowOnError>({ url: '/api/v1/admin/states', ...options });
+
+export const getAdminState = <ThrowOnError extends boolean = false>(options: Options<GetAdminStateData, ThrowOnError>): RequestResult<GetAdminStateResponses, GetAdminStateErrors, ThrowOnError> => (options.client ?? client).get<GetAdminStateResponses, GetAdminStateErrors, ThrowOnError>({ url: '/api/v1/admin/states/{id}', ...options });
+
+export const changeStateStatus = <ThrowOnError extends boolean = false>(options: Options<ChangeStateStatusData, ThrowOnError>): RequestResult<ChangeStateStatusResponses, ChangeStateStatusErrors, ThrowOnError> => (options.client ?? client).post<ChangeStateStatusResponses, ChangeStateStatusErrors, ThrowOnError>({
+    url: '/api/v1/admin/states/{id}/status',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 export const listUsers = <ThrowOnError extends boolean = false>(options?: Options<ListUsersData, ThrowOnError>): RequestResult<ListUsersResponses, ListUsersErrors, ThrowOnError> => (options?.client ?? client).get<ListUsersResponses, ListUsersErrors, ThrowOnError>({ url: '/api/v1/admin/users', ...options });
 

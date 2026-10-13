@@ -1,4 +1,5 @@
-import { Icon, MinecraftAvatar } from '@helicraft/atria';
+import { PlayerNickname } from './player-nickname';
+import { Icon } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
@@ -15,14 +16,15 @@ export function AccountHome(): ReactElement {
   return (
     <>
       <div className={styles.profile}>
-        <MinecraftAvatar
-          name={principal.username}
-          src={`/api/v1/public/players/${principal.id}/avatar.png?v=${principal.currentSkinId ?? 'default'}`}
-          size={80}
-        />
         <div>
           <h1>
-            {text('account.greeting')} {principal.username}.
+            {text('account.greeting')}{' '}
+            <PlayerNickname
+              id={principal.id}
+              name={principal.username}
+              skinId={principal.currentSkinId}
+            />
+            .
           </h1>
           <p className={styles.paragraph}>
             {text('profile.registeredAt')} {formatDate(principal.createdAt, locale)}

@@ -14,6 +14,7 @@ const homeData: HomeData = {
     links: [],
   },
   gallery: null,
+  states: { items: [], total: 0, page: 1, pageSize: 3 },
 };
 const item: GalleryItem = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -50,7 +51,7 @@ describe('public home', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Minecraft, где');
     expect(
       screen.getByText(
-        'Примеры форм правления: у каждого сообщества свои законы и порядок участия.',
+        'Одобренные государства игроков: настоящие флаги, правила вступления и действующие граждане.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Базальт' })).toBeInTheDocument();

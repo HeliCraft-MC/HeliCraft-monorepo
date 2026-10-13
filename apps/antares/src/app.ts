@@ -12,6 +12,11 @@ import { administrationRoutes } from './modules/administration/routes';
 import { contentRoutes } from './modules/content/routes';
 import { galleryRoutes } from './modules/gallery/routes';
 import { skinRoutes } from './modules/skins/routes';
+import { playerRoutes } from './modules/players/routes';
+import { stateReformRoutes } from './modules/states/reform-routes';
+import { stateMediaRoutes } from './modules/states/media-routes';
+import { votingRoutes } from './modules/voting/routes';
+import { stateRoutes } from './modules/states/routes';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 interface Dependencies {
@@ -69,7 +74,7 @@ const readinessRoute = createRoute({
   },
 });
 
-// oxlint-disable-next-line max-lines-per-function -- Application composition keeps security middleware before every mounted route.
+// oxlint-disable-next-line max-lines-per-function, max-statements -- This composition keeps one atomic workflow or bounded declarative editor together.
 function createApp(dependencies: Dependencies): OpenAPIHono {
   const app = new OpenAPIHono({
     defaultHook: (result, context): Response | undefined =>
@@ -126,6 +131,19 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
       minecraftAddress: dependencies.minecraftAddress,
     }),
   );
+  app.route(
+    '/api/v1',
+    stateMediaRoutes({
+      db: dependencies.db,
+      storage: dependencies.storage,
+      bucket: dependencies.bucket,
+      secureCookies: dependencies.secureCookies ?? false,
+    }),
+  );
+  app.route('/api/v1', stateReformRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', playerRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', votingRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', stateRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', administrationRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.openapi(healthRoute, (context) =>
     context.json({ status: 'ok' as const, service: 'antares' as const }, HTTP.ok),

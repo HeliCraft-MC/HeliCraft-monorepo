@@ -24,7 +24,7 @@ function Home({ data }: Readonly<{ data: HomeData }>): ReactElement {
     <main id="main-content">
       <HomeHero data={data} onPhotoChange={changedPhoto} />
       <div className={styles.page}>
-        <HomeWorld />
+        <HomeWorld states={data.states} />
         {photo && <HomeAtlas photo={photo} />}
         <HomeEconomy />
       </div>

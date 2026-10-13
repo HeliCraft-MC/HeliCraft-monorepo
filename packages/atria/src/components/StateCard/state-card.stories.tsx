@@ -48,3 +48,17 @@ export const English: Story = {
     facts: [{ label: 'Decisions', value: 'Representative voting' }],
   },
 };
+
+export const CustomFlagArtwork: Story = {
+  args: {
+    flag: (
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- An inline SVG flag needs an image role.
+      <svg role="img" aria-label="Flag: Example" viewBox="0 0 40 20">
+        <rect width="40" height="20" fill="#365b90" />
+        <path d="M0 10h40" stroke="#e9c571" strokeWidth="4" />
+      </svg>
+    ),
+    government: '2 offices',
+    href: '#state',
+  },
+};

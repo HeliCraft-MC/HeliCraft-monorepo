@@ -1,4 +1,17 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+
+async function openUserManagement(page: Page, username: string, uuid: string): Promise<void> {
+  await expect(page.getByRole('link', { name: username, exact: true })).toHaveAttribute(
+    'href',
+    `/players/${uuid}`,
+  );
+  await page
+    .getByRole('row')
+    .filter({ hasText: username })
+    .getByRole('link', { name: 'Управлять', exact: true })
+    .click();
+}
 
 const PASSWORD = 'Browser test password 2026';
 test('OWNER manages real user roles/status and sees audit evidence', async ({
@@ -26,7 +39,7 @@ test('OWNER manages real user roles/status and sees audit evidence', async ({
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/users$/u);
   await page.getByLabel('Ник или UUID').fill(uuid);
-  await page.getByRole('link', { name: username, exact: true }).click();
+  await openUserManagement(page, username, uuid);
   await page.getByRole('checkbox', { name: 'EDITOR', exact: true }).check();
   await page.getByRole('button', { name: 'Сохранить роли', exact: true }).click();
   await expect

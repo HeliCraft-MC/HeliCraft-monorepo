@@ -9,7 +9,9 @@ import { userRoles } from '../src/db/schema';
 import { SessionService } from '../src/modules/sessions/service';
 
 // Disposable persistence and privileged accounts exist only in the browser test process.
-const postgres = await new PostgreSqlContainer('postgis/postgis:18-3.6').start();
+const postgres = await new PostgreSqlContainer('postgis/postgis:18-3.6')
+  .withDatabase('helicraft')
+  .start();
 const database = createDatabase(postgres.getConnectionUri());
 const objectStore = await new GenericContainer('chrislusf/seaweedfs:4.48')
   .withCommand(['mini', '-dir=/data', '-s3.port=8333'])

@@ -8,4 +8,5 @@ services:
   antares:
     extends: { file: ../../compose.yml, service: antares }
     build: { context: ../.., dockerfile: apps/antares/Dockerfile }
+    volumes: ['../../ops.json:/workspace/ops.json:ro']
     ports: ['127.0.0.1:3000:3000']

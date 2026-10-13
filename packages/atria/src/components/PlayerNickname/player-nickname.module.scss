@@ -1,0 +1,31 @@
+.nickname {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  vertical-align: middle;
+  line-height: 1.3;
+}
+.nickname > span:first-child {
+  flex: none;
+  display: inline-flex;
+}
+.nickname > span:last-child {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.nickname img {
+  image-rendering: pixelated;
+}
+a.nickname {
+  color: inherit;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 4px;
+    border-radius: 0.25rem;
+  }
+}

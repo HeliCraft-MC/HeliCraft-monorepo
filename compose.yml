@@ -16,6 +16,7 @@ services:
       context: .
       dockerfile: apps/antares/Dockerfile
     restart: unless-stopped
+    volumes: ['./ops.json:/workspace/ops.json:ro']
     environment:
       PORT: '3000'
       DATABASE_URL: postgresql://helicraft:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/helicraft

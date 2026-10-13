@@ -1,8 +1,8 @@
-import type { InputHTMLAttributes, ReactElement } from 'react';
+import type { InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 import styles from '../../primitives.module.scss';
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  readonly label: string;
+  readonly label: ReactNode;
 }
 function Checkbox({ label, ...props }: CheckboxProps): ReactElement {
   return (

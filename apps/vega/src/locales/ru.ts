@@ -1,5 +1,7 @@
 // oxlint-disable max-lines -- Each language keeps its complete message catalog in one file.
 const ru = {
+  'states.title': 'Государства',
+  'votings.title': 'Голосования',
   'home.final.title': 'Найдите своё место',
   'home.final.titleSuffix': 'в HeliCraft.',
   'home.final.description': 'Начните с дома, мастерской',
@@ -99,6 +101,7 @@ const ru = {
   'chronicle.unavailable': 'Летопись временно недоступна',
   'chronicle.empty': 'Нет публикаций',
   'chronicle.description': 'Читайте новости, рассказы о событиях и обзоры проектов сообщества.',
+  'users.manage': 'Управлять',
   'admin.title': 'Администрация',
   'admin.pages': 'Страницы',
   'admin.chronicle': 'Летопись',
@@ -203,7 +206,7 @@ const ru = {
     'Государственные границы определяют юрисдикцию. Частные участки определяют, кому принадлежит земля и кто может на ней строить.',
   'navigation.states': 'Государства',
   'home.principles.statesDescription':
-    'Конституция закрепляет форму правления, права граждан и порядок принятия законов. Игроки выбирают, как управлять своим сообществом.',
+    'Игроки определяют должности, правила вступления и порядок принятия решений. Государственное устройство обязательно, а документ Конституции — по желанию.',
   'home.principles.economyTitle': 'Экономика',
   'home.principles.economyDescription':
     'Компании производят товары и оказывают услуги. Государства определяют правила выпуска валют, а участники договариваются об оплате.',
@@ -213,30 +216,10 @@ const ru = {
   'home.about.title': 'Строительство, торговля и самоуправление',
   'home.about.description':
     'Можно играть самостоятельно, присоединиться к сообществу или собрать свою команду.',
-  'home.states.title': 'Как устроены государства',
+  'home.states.title': 'Государства HeliCraft',
   'home.states.description':
-    'Примеры форм правления: у каждого сообщества свои законы и порядок участия.',
-  'home.states.readMore': 'Об устройстве мира',
-  'home.states.republicTitle': 'Республика',
-  'home.states.republicGovernment': 'Выборные органы власти',
-  'home.states.republicDescription':
-    'Граждане выбирают представителей, которые принимают законы и распределяют общие ресурсы.',
-  'home.states.decisions': 'Решения',
-  'home.states.republicDecisions': 'Голосование представителей',
-  'home.states.foundation': 'Основа',
-  'home.states.republicFoundation': 'Конституция и выборы',
-  'home.states.monarchyTitle': 'Конституционная монархия',
-  'home.states.monarchyGovernment': 'Монарх и представительный орган',
-  'home.states.monarchyDescription':
-    'Конституция разделяет полномочия главы государства и представителей граждан.',
-  'home.states.monarchyDecisions': 'В пределах полномочий',
-  'home.states.monarchyFoundation': 'Конституция и законы',
-  'home.states.democracyTitle': 'Прямая демократия',
-  'home.states.democracyGovernment': 'Общее собрание граждан',
-  'home.states.democracyDescription':
-    'Граждане напрямую обсуждают предложения и голосуют по вопросам своего сообщества.',
-  'home.states.democracyDecisions': 'Голосование граждан',
-  'home.states.democracyFoundation': 'Правила общего собрания',
+    'Одобренные государства игроков: настоящие флаги, правила вступления и действующие граждане.',
+  'home.states.readMore': 'Все государства',
   'home.atlas.title': 'Города и постройки',
   'home.atlas.titleSuffix': 'на фотографиях игроков.',
   'home.atlas.description': 'Смотрите снимки сообщества и делитесь своими.',
@@ -337,7 +320,6 @@ const ru = {
   'gallery.delete.submit': 'Да, удалить',
   'common.cancel': 'Отмена',
   'gallery.delete.ownPhoto': 'Удалить мой снимок',
-  'home.states.flagLabel': 'Флаг',
   'skin.currentSkin': 'Текущий скин',
   'home.carousel.label': 'Мир HeliCraft в фотографиях',
   'home.carousel.resume': 'Продолжить смену фотографий',

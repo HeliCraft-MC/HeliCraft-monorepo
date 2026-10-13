@@ -36,6 +36,8 @@ function GalleryGrid({
             alt={item.alt}
             title={item.title}
             author={item.author.name}
+            authorHref={`/players/${item.author.id}`}
+            authorHeadUrl={`/api/v1/public/players/${item.author.id}/avatar.png`}
             date={item.createdAt}
             width={item.width}
             height={item.height}

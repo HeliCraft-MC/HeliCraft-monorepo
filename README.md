@@ -6,6 +6,10 @@ HeliCraft is a persistent social, political and economic Minecraft world. Minecr
 
 The repository contains a working web foundation: public SSR pages, UUID accounts and server sessions, account/skin settings, a Markdown CMS, role-based administration and a shared UI kit. Game systems from the GDD, economy, territories, World Engine and custom Rigel game login remain future work.
 
+The state system includes resumable server drafts, multilingual content, independent Minecraft banners/PNG flags, cofounders, configurable governance, immutable revisions, optional block constitutions, generic voting and administrative review. See [States](docs/states/overview.md), [Governance](docs/states/governance.md), [Constitution](docs/states/constitution.md), [Creation flow](docs/states/creation-flow.md), [Localized content](docs/platform/localized-content.md) and [Voting](docs/platform/voting.md).
+
+Public state pages present flags, founders, citizenship, current offices, decision procedures and the Constitution in a responsive layout. Player nicknames link to public profiles at `/players/<UUID>`, showing registration date and affiliations with active states. Profiles never expose sessions, account roles or private state drafts.
+
 ## Projects
 
 | Product                             | Directory         | Stack                                                                     |
@@ -121,6 +125,8 @@ See [rendering](docs/architecture/web-rendering.md), [identity](docs/architectur
 
 For local development use SITE_ORIGIN=http://localhost:5173. Before production Compose set SITE_ORIGIN=http://localhost:8080 (or your actual HTTPS origin and SECURE_COOKIES=true). Registration grants only PLAYER. First OWNER: register an account, copy its UUID and run `bun run admin:bootstrap-owner <UUID> --confirm <same UUID>`. PRELAUNCH is the default; Minecraft address is shown only when OPEN and MINECRAFT_ADDRESS is configured. EULA is never accepted automatically.
 
-The public home uses world photographs; `/gallery` and `/gallery/:id` render with SSR, while authenticated players publish and remove their photographs through `/app/gallery/new`. Gallery is a separate Antares PostgreSQL/private S3 domain. Home state/economy previews are labelled local demonstrations. [Gallery architecture](docs/architecture/gallery.md).
+The public home uses world photographs; `/gallery` and `/gallery/:id` render with SSR, while authenticated players publish and remove their photographs through `/app/gallery/new`. Gallery is a separate Antares PostgreSQL/private S3 domain. The homepage shows real approved states and links to `/states`, with search, citizenship/constitution filters and sorting. Economy previews remain labelled local demonstrations. [Gallery architecture](docs/architecture/gallery.md).
 
 `bun run dev` and `dev:antares` apply reviewed database migrations before starting the services. PostgreSQL and S3 must be running (`bun run infra:up`). A failed migration stops startup; `dev:vega` uses an external API and does not migrate its database.
+
+Operators are listed by nickname in root `ops.json` (`ms0ur` initially). They receive ADMIN through standard authenticated sessions; names are reserved against registration/rename takeover. File changes apply at the next authorization check. [Operator policy](docs/architecture/operators.md).

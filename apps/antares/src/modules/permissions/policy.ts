@@ -10,7 +10,9 @@ type Permission =
   | 'content.read'
   | 'content.write'
   | 'content.publish'
-  | 'audit.read';
+  | 'audit.read'
+  | 'states.manage'
+  | 'voting.manage';
 const editorial: readonly Permission[] = ['content.read', 'content.write', 'content.publish'];
 const moderation: readonly Permission[] = [
   'users.read',
@@ -21,8 +23,22 @@ const grants: Record<Role, readonly Permission[]> = {
   PLAYER: [],
   EDITOR: editorial,
   MODERATOR: moderation,
-  ADMIN: [...editorial, ...moderation, 'users.roles.manage', 'audit.read'],
-  OWNER: [...editorial, ...moderation, 'users.roles.manage', 'audit.read'],
+  ADMIN: [
+    ...editorial,
+    ...moderation,
+    'users.roles.manage',
+    'audit.read',
+    'states.manage',
+    'voting.manage',
+  ],
+  OWNER: [
+    ...editorial,
+    ...moderation,
+    'users.roles.manage',
+    'audit.read',
+    'states.manage',
+    'voting.manage',
+  ],
 };
 function permissionsFor(roles: readonly Role[]): Permission[] {
   return [...new Set(roles.flatMap((role) => grants[role]))];

@@ -1,3 +1,5 @@
+// oxlint-disable import/max-dependencies -- The existing screen also composes the shared player nickname/head component.
+import { PlayerNickname } from './player-nickname';
 import { useTranslation } from './i18n';
 import { formatDate } from './date-format';
 import { CopyUuid } from './copy-uuid';
@@ -6,15 +8,7 @@ import type { ChangeEvent, ReactElement } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { listUsers } from '@helicraft/alhena';
-import {
-  Alert,
-  MinecraftAvatar,
-  Pagination,
-  Table,
-  TextField,
-  Select,
-  FormField,
-} from '@helicraft/atria';
+import { Alert, Pagination, Table, TextField, Select, FormField } from '@helicraft/atria';
 import { z } from 'zod';
 import { browserClient } from './account-api';
 import styles from './account.module.scss';
@@ -92,12 +86,15 @@ export function UserList(): ReactElement {
           {result.data?.items.map((user) => (
             <tr key={user.id}>
               <td>
-                <MinecraftAvatar
+                <PlayerNickname
+                  id={user.id}
                   name={user.username}
-                  src={`/api/v1/public/players/${user.id}/avatar.png?v=${user.currentSkinId ?? 'default'}`}
+                  skinId={user.currentSkinId}
                   size={32}
-                />{' '}
-                <a href={`/admin/users/${user.id}`}>{user.username}</a>
+                />
+                <a className={styles.managePlayer} href={`/admin/users/${user.id}`}>
+                  {text('users.manage')}
+                </a>
               </td>
               <td>
                 <CopyUuid uuid={user.id} />

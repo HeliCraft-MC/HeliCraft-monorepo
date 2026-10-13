@@ -28,6 +28,12 @@ export function AdminLayout(): ReactElement {
           {principal.permissions.includes('audit.read') ? (
             <Link to="/admin/audit">{text('admin.audit')}</Link>
           ) : null}
+          {principal.permissions.includes('states.manage') && (
+            <Link to="/admin/states">{text('states.title')}</Link>
+          )}
+          {principal.permissions.includes('voting.manage') && (
+            <Link to="/admin/votings">{text('votings.title')}</Link>
+          )}
           <Link to="/app">{text('account.myAccount')}</Link>
         </nav>
         <Outlet />

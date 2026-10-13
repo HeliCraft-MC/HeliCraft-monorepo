@@ -1,0 +1,99 @@
+.editor {
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  min-width: 0;
+}
+.modes,
+.toolbar,
+.snippets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-panel);
+}
+.modes button[aria-pressed='true'],
+.toolbar button[aria-pressed='true'] {
+  background: var(--primary);
+  color: var(--bg-base);
+}
+.toolbar button {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+}
+.snippets select {
+  flex: 1;
+  min-width: 12rem;
+  width: auto;
+}
+.source {
+  min-height: 32rem;
+  width: 100%;
+  resize: vertical;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  tab-size: 4;
+  line-height: 1.8;
+  padding: 1.5rem;
+}
+.content :global(.tiptap) {
+  min-height: 32rem;
+  padding: 1.5rem;
+  outline: none;
+  color: var(--text-primary);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  p {
+    margin: 0.75rem 0;
+  }
+  > :first-child {
+    margin-top: 0;
+  }
+  ul,
+  ol {
+    padding-left: 2rem;
+  }
+  li > p {
+    margin: 0.25rem 0;
+  }
+  blockquote {
+    margin-left: 0;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--primary);
+  }
+  pre {
+    padding: 1rem;
+    background: var(--bg-panel);
+    overflow: auto;
+  }
+  table {
+    border-collapse: collapse;
+    max-width: 100%;
+  }
+  td,
+  th {
+    border: 1px solid var(--border-strong);
+    padding: 0.5rem;
+  }
+  :global(.is-editor-empty):first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--text-muted);
+    pointer-events: none;
+    height: 0;
+  }
+}
+.content :global(.tiptap):focus {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+@media (max-width: 40rem) {
+  .content :global(.tiptap),
+  .source {
+    padding: 1rem;
+    min-height: 24rem;
+  }
+}

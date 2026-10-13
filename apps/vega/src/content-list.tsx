@@ -1,3 +1,4 @@
+import { PlayerNickname } from './player-nickname';
 import { Icon, Alert, Pagination, Table } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { formatDate } from './date-format';
@@ -66,7 +67,9 @@ export function ContentList(): ReactElement {
                 )}
               </td>
               <td>{entry.status}</td>
-              <td>{entry.author}</td>
+              <td>
+                <PlayerNickname id={entry.authorId} name={entry.author} />
+              </td>
               <td>{formatDate(entry.updatedAt, locale)}</td>
             </tr>
           ))}

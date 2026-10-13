@@ -1,10 +1,12 @@
+// oxlint-disable import/max-dependencies -- The existing screen also composes the shared player nickname/head component.
+import { PlayerNickname } from './player-nickname';
 import { parsePrincipal } from './principal-schema';
 import { useTranslation } from './i18n';
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
-import { Button, MinecraftAvatar } from '@helicraft/atria';
+import { Button } from '@helicraft/atria';
 import { logout } from '@helicraft/alhena';
 import { browserClient, currentAccount } from './account-api';
 import { useHydrated } from './use-hydrated';
@@ -49,14 +51,13 @@ function AccountLinks({
   const principal = account.data;
   return (
     <>
-      <Link to="/app">
-        <MinecraftAvatar
-          name={principal.username}
-          src={`/api/v1/public/players/${principal.id}/avatar.png?v=${principal.currentSkinId ?? 'default'}`}
-          size={32}
-        />{' '}
-        {principal.username}
-      </Link>
+      <PlayerNickname
+        id={principal.id}
+        name={principal.username}
+        skinId={principal.currentSkinId}
+        size={32}
+      />
+      <Link to="/app">{text('account.title')}</Link>
       {principal.permissions.length === 0 ? null : <Link to="/admin">{text('admin.title')}</Link>}
       <Button tone="quiet" onClick={signOut}>
         {text('auth.signOut')}

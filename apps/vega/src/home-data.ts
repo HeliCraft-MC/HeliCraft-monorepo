@@ -27,6 +27,8 @@ function homePhotos(
           title: item.title,
           alt: item.alt,
           author: item.author.name,
+          authorHref: `/players/${item.author.id}`,
+          authorHeadUrl: `/api/v1/public/players/${item.author.id}/avatar.png`,
           place: item.place === '' ? item.description : item.place,
           href: `/gallery/${item.id}`,
         }))
