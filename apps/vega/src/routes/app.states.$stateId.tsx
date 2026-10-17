@@ -1,9 +1,8 @@
-import { createFileRoute, getRouteApi, useNavigate } from '@tanstack/react-router';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { createFileRoute, getRouteApi } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { getOwnedState, createStateReformDraft } from '@helicraft/alhena';
-import { Alert, Button, ActionLink } from '@helicraft/atria';
+import { getOwnedState } from '@helicraft/alhena';
+import { Alert, ActionLink } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { StateDetailView } from '../states/detail';
 import { useTranslation } from '../i18n';
@@ -12,7 +11,6 @@ const routeApi = getRouteApi('/app/states/$stateId');
 function Page(): ReactElement {
   const { stateId } = routeApi.useParams();
   const { locale } = useTranslation();
-  const navigate = useNavigate();
   const state = useQuery({
     queryKey: ['owned-state', stateId, locale],
     queryFn: async () => {
@@ -25,23 +23,6 @@ function Page(): ReactElement {
       return result.data;
     },
   });
-  const reform = useMutation({
-    mutationFn: async () => {
-      const result = await createStateReformDraft({
-        client: browserClient(),
-        path: { id: stateId },
-        throwOnError: true,
-      });
-      await navigate({
-        to: '/app/states/drafts/$draftId',
-        params: { draftId: result.data.draftId },
-      });
-    },
-  });
-  const { mutate: startReform } = reform;
-  const handleReform = useCallback(() => {
-    startReform();
-  }, [startReform]);
   return (
     <>
       {state.data && (
@@ -54,17 +35,10 @@ function Page(): ReactElement {
               {locale === 'ru' ? 'Открыть публичную страницу' : 'Open public page'}
             </ActionLink>
           )}
-          {state.data.status === 'ACTIVE' && (
-            <Button onClick={handleReform}>
-              {locale === 'ru' ? 'Создать черновик реформы' : 'Create reform draft'}
-            </Button>
-          )}
         </StateDetailView>
       )}
       {state.isPending && <p>{locale === 'ru' ? 'Загрузка…' : 'Loading…'}</p>}
-      {(state.error ?? reform.error) !== null && (
-        <Alert tone="danger">{errorMessage(state.error ?? reform.error)}</Alert>
-      )}
+      {state.error !== null && <Alert tone="danger">{errorMessage(state.error)}</Alert>}
     </>
   );
 }

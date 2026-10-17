@@ -1,3 +1,5 @@
+// oxlint-disable import/max-dependencies -- Editorial list composition includes shared identity, localized explanation and pagination controls.
+import { uiText } from './states/text';
 import { PlayerNickname } from './player-nickname';
 import { Icon, Alert, Pagination, Table } from '@helicraft/atria';
 import { useTranslation } from './i18n';
@@ -31,6 +33,13 @@ export function ContentList(): ReactElement {
   return (
     <>
       <h1>{pages ? text('admin.pages') : text('admin.chronicle')}</h1>
+      <p className={styles.paragraph}>
+        {uiText(
+          locale,
+          'Здесь собраны черновики и опубликованные материалы. Откройте материал для редактирования, переводов и проверки перед публикацией.',
+          'Drafts and published content appear here. Open an item to edit, translate and review it before publication.',
+        )}
+      </p>
       <div className={styles.navigation}>
         {pages ? (
           <Link to="/admin/pages/new">

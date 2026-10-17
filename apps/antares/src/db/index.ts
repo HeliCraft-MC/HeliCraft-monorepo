@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   galleryImages,
+  galleryStateLinks,
   worldEvents,
   users,
   userCredentials,
@@ -33,7 +34,12 @@ import {
   stateReformProposals,
   stateReformProposalTexts,
   votings,
+  stateOfficeAssignments,
+  stateOfficeAssignmentApprovals,
+  stateOfficeAssignmentVotes,
   votingOptions,
+  votingQuestions,
+  votingSurveyTexts,
   votingEligibleVoters,
   votingBallots,
   votingBallotChoices,
@@ -41,6 +47,7 @@ import {
 
 const schema = {
   galleryImages,
+  galleryStateLinks,
   worldEvents,
   users,
   userCredentials,
@@ -71,7 +78,12 @@ const schema = {
   stateReformProposals,
   stateReformProposalTexts,
   votings,
+  stateOfficeAssignments,
+  stateOfficeAssignmentApprovals,
+  stateOfficeAssignmentVotes,
   votingOptions,
+  votingQuestions,
+  votingSurveyTexts,
   votingEligibleVoters,
   votingBallots,
   votingBallotChoices,

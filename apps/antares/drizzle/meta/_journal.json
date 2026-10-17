@@ -71,6 +71,27 @@
       "when": 1791852853503,
       "tag": "0009_slimy_steel_serpent",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791931793099,
+      "tag": "0010_modern_mandroid",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791992733712,
+      "tag": "0011_closed_lifeguard",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792240274956,
+      "tag": "0012_glamorous_synch",
+      "breakpoints": true
     }
   ]
 }

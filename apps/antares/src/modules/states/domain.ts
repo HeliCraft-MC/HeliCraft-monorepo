@@ -33,6 +33,7 @@ function emptyConfiguration(): StateConfiguration {
 function validateConfiguration(
   configuration: Readonly<StateConfiguration>,
   ownerId: string,
+  eligibleHolderIds?: readonly string[],
 ): Issue[] {
   const parsed = StateConfigurationSchema.safeParse(configuration);
   if (!parsed.success) {
@@ -43,7 +44,7 @@ function validateConfiguration(
     }));
   }
   const founders = [ownerId, ...configuration.cofounderIds];
-  const issues = validateGovernance(configuration.governance, founders);
+  const issues = validateGovernance(configuration.governance, eligibleHolderIds ?? founders);
   function error(path: string, message: string): void {
     issues.push({ severity: 'ERROR', path, message });
   }

@@ -11,7 +11,7 @@ function StateVisual({
   flagLabel,
 }: Pick<StateCardProps, 'name' | 'flag' | 'image' | 'silhouette' | 'flagLabel'>): ReactElement {
   return (
-    <div className={styles.visual}>
+    <div className={styles.visual} data-symbol-only={flag === null || undefined}>
       {typeof flag === 'string' ? (
         <>
           {image !== undefined && image !== '' ? (
@@ -34,7 +34,9 @@ function StateVisual({
           />
         </>
       ) : (
-        <div className={styles.flagArtwork}>{flag}</div>
+        <div className={styles.flagArtwork}>
+          {flag ?? <span aria-hidden="true">{name.slice(0, 1)}</span>}
+        </div>
       )}
     </div>
   );

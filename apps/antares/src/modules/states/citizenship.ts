@@ -1,0 +1,107 @@
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import type { Database } from '../../db';
+import { stateMemberships, stateOfficeHolders } from '../../db/schema';
+import { DomainError, HTTP } from '../errors';
+import { audit, stateRecord } from './persistence';
+import { readRevision } from './revisions';
+import { holderHasAuthority } from './office-authority';
+
+// oxlint-disable-next-line max-lines-per-function -- Voluntary departure locks the state, checks succession and closes membership/holder intervals atomically.
+async function leaveState(db: Database['db'], stateId: string, actorId: string): Promise<void> {
+  // oxlint-disable-next-line max-lines-per-function -- Succession checks and both interval closures must share the locked transaction.
+  await db.transaction(async (transaction) => {
+    const state = await stateRecord(transaction, stateId);
+    if (!['ACTIVE', 'SUSPENDED'].includes(state.status) || state.currentRevisionId === null) {
+      throw new DomainError(
+        HTTP.conflict,
+        'STATE_INACTIVE',
+        'Выход из этого государства сейчас недоступен',
+      );
+    }
+    const [membership] = await transaction
+      .select()
+      .from(stateMemberships)
+      .where(
+        and(
+          eq(stateMemberships.stateId, stateId),
+          eq(stateMemberships.userId, actorId),
+          isNull(stateMemberships.endedAt),
+        ),
+      )
+      .for('update');
+    if (!membership) {
+      throw new DomainError(
+        HTTP.notFound,
+        'CITIZENSHIP_NOT_FOUND',
+        'У вас нет действующего гражданства этого государства',
+      );
+    }
+    const { configuration } = await readRevision(transaction, state.currentRevisionId);
+    const officeIds = configuration.governance.offices.map((office) => office.id);
+    const holders =
+      officeIds.length === 0
+        ? []
+        : await transaction
+            .select()
+            .from(stateOfficeHolders)
+            .where(
+              and(
+                inArray(stateOfficeHolders.officeId, officeIds),
+                isNull(stateOfficeHolders.until),
+              ),
+            );
+    const now = new Date();
+    const wouldVacate = configuration.governance.offices.some(
+      (office) =>
+        office.required &&
+        holders.some(
+          (holder) =>
+            holder.officeId === office.id &&
+            holder.userId === actorId &&
+            holderHasAuthority(office, holder.since, now),
+        ) &&
+        !holders.some(
+          (holder) =>
+            holder.officeId === office.id &&
+            holder.userId !== actorId &&
+            holderHasAuthority(office, holder.since, now),
+        ),
+    );
+    if (wouldVacate) {
+      throw new DomainError(
+        HTTP.conflict,
+        'SUCCESSOR_REQUIRED',
+        'Сначала назначьте преемника на обязательную должность по действующей процедуре',
+      );
+    }
+    await transaction
+      .update(stateMemberships)
+      .set({ endedAt: sql`transaction_timestamp()` })
+      .where(
+        and(
+          eq(stateMemberships.stateId, stateId),
+          eq(stateMemberships.userId, actorId),
+          isNull(stateMemberships.endedAt),
+        ),
+      );
+    if (officeIds.length > 0) {
+      await transaction
+        .update(stateOfficeHolders)
+        .set({ until: sql`transaction_timestamp()` })
+        .where(
+          and(
+            inArray(stateOfficeHolders.officeId, officeIds),
+            eq(stateOfficeHolders.userId, actorId),
+            isNull(stateOfficeHolders.until),
+          ),
+        );
+    }
+    await audit(transaction, {
+      actorId,
+      targetId: stateId,
+      action: 'state.citizenship.left',
+      reason: 'Voluntary departure',
+    });
+  });
+}
+export { leaveState };

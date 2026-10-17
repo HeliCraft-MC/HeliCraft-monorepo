@@ -1,0 +1,98 @@
+.editor {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+.block {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--border-subtle, #ffffff25);
+  border-top: 3px solid var(--accent, #d65757);
+  border-radius: 1rem;
+  background: var(--surface, #15151b);
+  min-width: 0;
+}
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+}
+.thumbnail {
+  display: block;
+  width: 100%;
+  max-width: 12rem;
+  height: 8rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+.images {
+  display: grid;
+  gap: 1rem;
+}
+.images img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+.images figure {
+  min-width: 0;
+  margin: 0;
+}
+.text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.table {
+  overflow: auto;
+  max-width: 100%;
+}
+.table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.table th,
+.table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ffffff25;
+  min-width: 9rem;
+  max-width: 25rem;
+  overflow-wrap: anywhere;
+}
+.chart {
+  display: grid;
+  gap: 0.5rem;
+}
+.chart meter {
+  width: 100%;
+}
+.decoration {
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+.decoration[data-style='INFO'] {
+  background: #6688cc22;
+}
+.decoration[data-style='WARNING'] {
+  background: #cc993322;
+  border-left: 3px solid #cc9933;
+}
+.decoration[data-style='SUCCESS'] {
+  background: #44aa7722;
+}
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+.radio input {
+  accent-color: var(--accent, #d65757);
+}

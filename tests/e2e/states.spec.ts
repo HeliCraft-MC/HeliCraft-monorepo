@@ -1,8 +1,13 @@
-import { assertPublicProfilePages } from './state-public-pages';
+import { assertOfficeAssignmentPages } from './office-assignments';
+import {
+  assertPublicProfilePages,
+  assertManagementPage,
+  assertStateFits,
+} from './state-public-pages';
 import { expect, test } from '@playwright/test';
 import { DraftSchema } from '../../apps/antares/src/modules/states/contracts';
 
-// oxlint-disable max-lines-per-function, max-statements -- This sequential real-browser lifecycle covers a resumable wizard, admin review and JavaScript-free SSR.
+// oxlint-disable max-lines, max-lines-per-function, max-statements -- This sequential real-browser lifecycle covers a resumable wizard, admin review and JavaScript-free SSR.
 const PASSWORD = 'Browser test password 2026';
 test('resumes a multilingual state draft, edits governance and constitution, then receives admin approval and public SSR', async ({
   page,
@@ -35,12 +40,12 @@ test('resumes a multilingual state draft, edits governance and constitution, the
   if (draftId === undefined) {
     throw new Error('Missing draft id');
   }
-  await page.getByLabel('Название государства · RU', { exact: true }).fill(`Аврора ${suffix}`);
+  await page.getByLabel('Название государства · Русский', { exact: true }).fill(`Аврора ${suffix}`);
   const localizedName = page
-    .getByLabel('Название государства · RU', { exact: true })
+    .getByLabel('Название государства · Русский', { exact: true })
     .locator('xpath=ancestor::fieldset[1]');
-  await localizedName.getByRole('button', { name: 'English —' }).click();
-  await page.getByLabel('Название государства · EN', { exact: true }).fill(`Aurora ${suffix}`);
+  await localizedName.getByRole('combobox', { name: 'Язык перевода' }).selectOption('en');
+  await page.getByLabel('Название государства · English', { exact: true }).fill(`Aurora ${suffix}`);
   await page.getByLabel('Адрес государства', { exact: true }).fill(slug);
   await page.getByRole('button', { name: '2. Флаги', exact: true }).click();
   await page.getByRole('button', { name: 'Крипер', exact: true }).click();
@@ -112,7 +117,7 @@ test('resumes a multilingual state draft, edits governance and constitution, the
   await page.getByRole('button', { name: '5. Шаблон и режим', exact: true }).click();
   await page.getByRole('button', { name: 'Автократия', exact: true }).click();
   await page.getByRole('button', { name: '6. Должности', exact: true }).click();
-  await page.getByLabel('Название должности · RU', { exact: true }).fill('Правитель Авроры');
+  await page.getByLabel('Название должности · Русский', { exact: true }).fill('Правитель Авроры');
   await page.getByRole('button', { name: '9. Государственные решения', exact: true }).click();
   const law = page
     .getByRole('heading', { name: 'Принятие законов', exact: true })
@@ -120,7 +125,9 @@ test('resumes a multilingual state draft, edits governance and constitution, the
   await law.getByLabel('Кто принимает решение?', { exact: true }).selectOption('ANY_OF_OFFICES');
   await page.getByRole('button', { name: '11. Конституция', exact: true }).click();
   await page.getByLabel('Формальная Конституция', { exact: true }).selectOption('YES');
-  await page.getByLabel('Название Конституции · RU', { exact: true }).fill('Конституция Авроры');
+  await page
+    .getByLabel('Название Конституции · Русский', { exact: true })
+    .fill('Конституция Авроры');
   await page.getByRole('button', { name: 'Начать с шаблона', exact: true }).click();
   await page.getByRole('button', { name: 'Исходный Markdown', exact: true }).click();
   const constitutionSource =
@@ -161,7 +168,7 @@ test('resumes a multilingual state draft, edits governance and constitution, the
     .toContain('**Общее благо**');
   await page.goto('/app/states/new');
   await page.getByRole('link', { name: 'Новое государство', exact: true }).click();
-  await expect(page.getByLabel('Название Конституции · RU', { exact: true })).toHaveValue(
+  await expect(page.getByLabel('Название Конституции · Русский', { exact: true })).toHaveValue(
     'Конституция Авроры',
   );
   await page.setViewportSize({ width: 1000, height: 1100 });
@@ -220,6 +227,7 @@ test('resumes a multilingual state draft, edits governance and constitution, the
     ).toBeVisible();
     await page.getByRole('link', { name: 'Вернуться к государству', exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/app/states/${stateId}$`, 'u'));
+    await assertManagementPage(page, stateId, testInfo.project.name);
     await expect(admin.getByText('Активно', { exact: true })).toBeVisible();
     await expect(admin.getByText('Конфигурация проверена', { exact: true })).toBeVisible();
     const publicContext = await browser.newContext({
@@ -248,11 +256,7 @@ test('resumes a multilingual state draft, edits governance and constitution, the
       await expect(
         publicPage.getByRole('heading', { name: `Аврора ${suffix}`, exact: true }),
       ).toBeVisible();
-      expect(
-        await publicPage.evaluate(
-          () => document.documentElement.scrollWidth <= globalThis.innerWidth,
-        ),
-      ).toBe(true);
+      await assertStateFits(publicPage);
       await publicPage.screenshot({
         path: `/tmp/helicraft-state-directory-mobile-${test.info().project.name}.png`,
         fullPage: true,
@@ -277,21 +281,25 @@ test('resumes a multilingual state draft, edits governance and constitution, the
               .evaluate((image) => image instanceof HTMLImageElement && image.naturalWidth === 64),
         )
         .toBe(true);
-      expect(
-        await publicPage.evaluate(
-          () => document.documentElement.scrollWidth <= globalThis.innerWidth,
-        ),
-      ).toBe(true);
+      await assertStateFits(publicPage);
       await expect(
         publicPage.getByRole('heading', { name: `Аврора ${suffix}`, exact: true }).first(),
       ).toBeVisible();
+      await publicPage.getByRole('link', { name: 'Читать конституцию', exact: true }).click();
       await expect(
         publicPage.getByRole('heading', { name: 'Права граждан', exact: true }),
       ).toBeVisible();
+      await publicPage.goto(`/states/${slug}`);
       await assertPublicProfilePages(publicPage, { username, suffix }, testInfo.project.name);
     } finally {
       await publicContext.close();
     }
+    await assertOfficeAssignmentPages(page, admin, {
+      stateId,
+      founderName: username,
+      successorName: cofounder,
+      projectName: testInfo.project.name,
+    });
   } finally {
     await adminContext.close();
   }

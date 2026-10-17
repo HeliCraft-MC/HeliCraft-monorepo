@@ -227,3 +227,61 @@
     gap: 10px;
   }
 }
+
+.detailImage {
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+.details {
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 1fr);
+  > dl {
+    align-content: start;
+    padding: 1.5rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+  }
+}
+.metadataEditor {
+  margin-block: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  background: var(--bg-panel);
+  summary {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    font-weight: 550;
+    min-height: 2.75rem;
+  }
+  form {
+    display: grid;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    > button {
+      justify-self: start;
+    }
+  }
+}
+.statePicker {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+}
+.statePicker .playerResults {
+  max-height: 15rem;
+  overflow-y: auto;
+}
+.upload form > button {
+  justify-self: start;
+}
+@media (max-width: 50rem) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,3 +1,4 @@
+import { uiText } from './states/text';
 import { useTranslation } from './i18n';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
@@ -15,7 +16,7 @@ async function statsQuery(): Promise<Awaited<ReturnType<typeof getAdminStats>>['
   return data;
 }
 export function AdminHome(): ReactElement {
-  const { text } = useTranslation();
+  const { text, locale } = useTranslation();
 
   const { principal } = route.useRouteContext();
   const stats = useQuery({
@@ -26,35 +27,115 @@ export function AdminHome(): ReactElement {
   return (
     <>
       <h1>{text('admin.workspace')}</h1>
+      <p className={styles.paragraph}>
+        {uiText(
+          locale,
+          'Рабочее пространство для публикаций, игроков и государственных решений. Выберите раздел; доступные действия зависят от ваших полномочий.',
+          'Manage publications, players and state decisions. Choose a section; available actions follow your permissions.',
+        )}
+      </p>
       {stats.data ? (
-        <dl className={styles.section}>
+        <dl className={styles.metrics}>
           {stats.data.users === null ? null : (
             <>
-              <dt>{text('admin.stats.users')}</dt>
-              <dd>{stats.data.users}</dd>
-              <dt>{text('admin.stats.activeAccounts')}</dt>
-              <dd>{stats.data.activeUsers}</dd>
+              <div>
+                <dt>{text('admin.stats.users')}</dt>
+                <dd>{stats.data.users}</dd>
+              </div>
+              <div>
+                <dt>{text('admin.stats.activeAccounts')}</dt>
+                <dd>{stats.data.activeUsers}</dd>
+              </div>
             </>
           )}
-          <dt>{text('admin.stats.publishedPages')}</dt>
-          <dd>{stats.data.publishedPages}</dd>
-          <dt>{text('admin.stats.pageDrafts')}</dt>
-          <dd>{stats.data.draftPages}</dd>
-          <dt>{text('admin.stats.stories')}</dt>
-          <dd>{stats.data.publishedChronicle}</dd>
+          <div>
+            <dt>{text('admin.stats.publishedPages')}</dt>
+            <dd>{stats.data.publishedPages}</dd>
+          </div>
+          <div>
+            <dt>{text('admin.stats.pageDrafts')}</dt>
+            <dd>{stats.data.draftPages}</dd>
+          </div>
+          <div>
+            <dt>{text('admin.stats.stories')}</dt>
+            <dd>{stats.data.publishedChronicle}</dd>
+          </div>
         </dl>
       ) : null}
       {stats.isError ? <Alert tone="danger">{text('admin.stats.unavailable')}</Alert> : null}
-      <div className={styles.navigation}>
-        {principal.permissions.includes('content.write') ? (
-          <>
-            <Link to="/admin/pages/new">{text('content.createPage')}</Link>
-            <Link to="/admin/chronicle/new">{text('content.createPublication')}</Link>
-          </>
-        ) : null}
-        {principal.permissions.includes('users.read') ? (
-          <Link to="/admin/users">{text('admin.viewUsers')}</Link>
-        ) : null}
+      <div className={styles.actionGrid}>
+        {principal.permissions.includes('content.read') && (
+          <Link className={styles.actionCard} to="/admin/pages">
+            <h2>{text('admin.pages')}</h2>
+            <p>
+              {uiText(
+                locale,
+                'Редактирование, переводы и публикация страниц.',
+                'Edit, translate and publish pages.',
+              )}
+            </p>
+          </Link>
+        )}
+        {principal.permissions.includes('content.read') && (
+          <Link className={styles.actionCard} to="/admin/chronicle">
+            <h2>{text('admin.chronicle')}</h2>
+            <p>
+              {uiText(
+                locale,
+                'Публикации хроники и история редакций.',
+                'Chronicle publications and revision history.',
+              )}
+            </p>
+          </Link>
+        )}
+        {principal.permissions.includes('users.read') && (
+          <Link className={styles.actionCard} to="/admin/users">
+            <h2>{text('admin.users')}</h2>
+            <p>
+              {uiText(
+                locale,
+                'Поиск игроков, статусы и полномочия.',
+                'Player search, account status and permissions.',
+              )}
+            </p>
+          </Link>
+        )}
+        {principal.permissions.includes('states.manage') && (
+          <Link className={styles.actionCard} to="/admin/states">
+            <h2>{text('states.title')}</h2>
+            <p>
+              {uiText(
+                locale,
+                'Проверка государств и государственных изменений.',
+                'Review states and governance changes.',
+              )}
+            </p>
+          </Link>
+        )}
+        {principal.permissions.includes('voting.manage') && (
+          <Link className={styles.actionCard} to="/admin/votings">
+            <h2>{text('votings.title')}</h2>
+            <p>
+              {uiText(
+                locale,
+                'Опросы с одним или несколькими вопросами.',
+                'Polls with one or more questions.',
+              )}
+            </p>
+          </Link>
+        )}
+        {principal.permissions.includes('audit.read') && (
+          <Link className={styles.actionCard} to="/admin/audit">
+            <h2>{text('admin.audit')}</h2>
+            <p>
+              {uiText(
+                locale,
+                'Проверка действий и истории изменений.',
+                'Review actions and change history.',
+              )}
+            </p>
+          </Link>
+        )}
       </div>
     </>
   );

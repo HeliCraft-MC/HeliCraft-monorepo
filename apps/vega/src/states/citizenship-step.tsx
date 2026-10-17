@@ -28,6 +28,11 @@ function CitizenshipStep(props: StateWizardStepProps): ReactElement {
       <FormField
         htmlFor={`${id}-entry`}
         label={uiText(locale, 'Как получают гражданство?', 'How do players obtain citizenship?')}
+        help={uiText(
+          locale,
+          'По заявке — кандидат обращается в государство; по приглашению — инициатива исходит от государства; закрытый режим не предполагает свободного вступления. Решение регулируется полномочиями по гражданству.',
+          'Application means the candidate asks to join; invitation means the state initiates admission; closed entry prevents open joining. Citizenship decision rules determine approval.',
+        )}
       >
         <Select
           id={`${id}-entry`}

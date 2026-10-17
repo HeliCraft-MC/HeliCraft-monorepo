@@ -45,6 +45,7 @@ function PublicStateCard({ state }: Readonly<{ state: PublicStateSummary }>): Re
   );
   return (
     <StateCard
+      color={state.color}
       name={name}
       href={`/states/${state.slug}`}
       flag={flag}

@@ -33,14 +33,24 @@ export {
   stateConstitutionRevisions,
   stateConstitutionBlocks,
   stateMedia,
+  galleryStateLinks,
   stateReformApprovals,
   stateReformVotes,
 } from './state-schema';
 export {
   votings,
   votingOptions,
+  votingQuestions,
   votingEligibleVoters,
   votingBallots,
   votingBallotChoices,
 } from './voting-schema';
 export { stateReformProposals, stateReformProposalTexts } from './state-schema';
+
+export {
+  stateOfficeAssignments,
+  stateOfficeAssignmentApprovals,
+  stateOfficeAssignmentVotes,
+} from './office-assignment-schema';
+
+export { votingSurveyTexts } from './voting-schema';

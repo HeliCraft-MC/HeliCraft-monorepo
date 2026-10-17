@@ -1,0 +1,39 @@
+.trigger {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.2rem;
+  &:hover,
+  &[data-popup-open] {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+.popup {
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-medium);
+  color: var(--text-primary);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+  line-height: 1.65;
+  z-index: 55;
+  p {
+    margin: 0.5rem 0 0;
+  }
+}
+.title {
+  font-size: 1rem;
+  margin: 0;
+}

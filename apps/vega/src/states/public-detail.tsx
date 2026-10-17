@@ -1,10 +1,13 @@
+// oxlint-disable import/max-dependencies -- Public state composition connects shared presentation and document navigation; domain logic stays in services.
 import { useMemo } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
-import { PlayerNickname } from '../player-nickname';
+import { ActionLink, Dialog } from '@helicraft/atria';
+import { StateCitizens } from './citizens';
 import { uiText } from './text';
 import { StateOverview } from './state-overview';
+import { StateManagementLink } from './management-link';
 import { StateHero } from './state-hero';
 import { PublicGovernment } from './public-government';
 import { ConstitutionDocument } from './constitution';
@@ -46,6 +49,9 @@ function PublicStateDetail({
           )}
       </a>
       <StateHero state={state} publicView={publicView} flagUrl={flagUrl} />
+      <div className={styles.toolbar}>
+        <StateManagementLink state={state} />
+      </div>
       {children !== undefined && <div className={styles.toolbar}>{children}</div>}
       <nav
         className={styles.navigation}
@@ -86,13 +92,7 @@ function PublicStateDetail({
             {uiText(locale, 'В государстве пока нет граждан.', 'This state has no citizens yet.')}
           </p>
         ) : (
-          <ul className={`${styles.people} ${styles.citizens}`}>
-            {state.citizens.map((citizen) => (
-              <li key={citizen.id}>
-                <PlayerNickname id={citizen.id} name={citizen.name} size={40} />
-              </li>
-            ))}
-          </ul>
+          <StateCitizens citizens={state.citizens} />
         )}
       </section>
       <section id="state-constitution" className={styles.section}>
@@ -100,14 +100,32 @@ function PublicStateDetail({
           <span className={styles.eyebrow}>04 / {uiText(locale, 'Документ', 'Document')}</span>
           <h2>{uiText(locale, 'Конституция', 'Constitution')}</h2>
         </div>
-        <div className={styles.paper}>
-          <ConstitutionDocument
-            configuration={configuration}
-            founders={state.founders}
-            html={state.constitutionHtml}
-            showGovernanceWhenAbsent={false}
-          />
-        </div>
+        <p className={styles.muted}>
+          {uiText(
+            locale,
+            'Полный документ открывается отдельно, чтобы длинная конституция не мешала знакомству с государством.',
+            'Open the full document separately to read a long constitution comfortably.',
+          )}
+        </p>
+        {state.status === 'ACTIVE' ? (
+          <ActionLink href={`/states/${state.slug}/constitution`}>
+            {uiText(locale, 'Читать конституцию', 'Read constitution')}
+          </ActionLink>
+        ) : (
+          <Dialog
+            title={uiText(locale, 'Конституция', 'Constitution')}
+            size="fullscreen"
+            trigger={uiText(locale, 'Читать конституцию', 'Read constitution')}
+            closeLabel={uiText(locale, 'Закрыть', 'Close')}
+          >
+            <ConstitutionDocument
+              configuration={configuration}
+              founders={state.founders}
+              html={state.constitutionHtml}
+              showGovernanceWhenAbsent={false}
+            />
+          </Dialog>
+        )}
       </section>
     </article>
   );

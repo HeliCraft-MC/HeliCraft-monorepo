@@ -1,5 +1,6 @@
 import { LanguageSchema, GalleryTranslationsSchema } from '../translations';
 // oxlint-disable no-magic-numbers -- Schema numbers are explicit product limits and Minecraft coordinate bounds.
+import { LocalizedInputSchema } from '../localized-content/contracts';
 import { z } from '@hono/zod-openapi';
 
 const LocationSchema = z.object({
@@ -7,6 +8,10 @@ const LocationSchema = z.object({
   y: z.number().int().min(-2048).max(2048),
   z: z.number().int().min(-30_000_000).max(30_000_000),
   dimension: z.enum(['overworld', 'nether', 'end']),
+});
+const GalleryStateLinkSchema = z.object({
+  stateId: z.uuid(),
+  role: z.enum(['LOCATION', 'PARTICIPANT', 'RELATED']),
 });
 const GalleryMetadataSchema = z.object({
   originalLanguage: LanguageSchema.default('ru'),
@@ -17,12 +22,22 @@ const GalleryMetadataSchema = z.object({
   place: z.string().trim().max(160).default(''),
   location: LocationSchema.nullable().default(null),
   players: z.array(z.uuid()).max(20).default([]),
+  stateLinks: z.array(GalleryStateLinkSchema).max(20).default([]),
 });
-const GalleryItemSchema = GalleryMetadataSchema.omit({ players: true })
+const GalleryItemSchema = GalleryMetadataSchema.omit({ players: true, stateLinks: true })
   .extend({
     id: z.uuid(),
     author: z.object({ id: z.uuid(), name: z.string() }),
     players: z.array(z.object({ id: z.uuid(), name: z.string() })),
+    states: z.array(
+      z.object({
+        id: z.uuid(),
+        slug: z.string(),
+        name: LocalizedInputSchema,
+        color: z.string(),
+        role: GalleryStateLinkSchema.shape.role,
+      }),
+    ),
     width: z.number().int(),
     height: z.number().int(),
     createdAt: z.iso.datetime(),

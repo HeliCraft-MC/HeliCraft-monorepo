@@ -2,6 +2,7 @@
 import { z } from '@hono/zod-openapi';
 import { LocalizedInputSchema } from '../localized-content/contracts';
 import { VotingRulesSchema } from './rules';
+import { SurveySchema, SurveySummarySchema } from './survey-contracts';
 
 const ElectorateSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('GLOBAL_USERS') }),
@@ -19,8 +20,21 @@ const VotingInputSchema = z
     description: LocalizedInputSchema,
     options: z
       .array(z.object({ id: z.uuid(), label: LocalizedInputSchema }))
-      .min(2)
+      .min(0)
       .max(50),
+    questions: z
+      .array(
+        z.object({
+          id: z.uuid(),
+          title: LocalizedInputSchema,
+          optionIds: z.array(z.uuid()).min(2).max(50),
+          maxSelections: z.number().int().min(1).max(50),
+        }),
+      )
+      .min(1)
+      .max(20)
+      .optional(),
+    survey: SurveySchema.optional(),
     opensAt: z.iso.datetime(),
     closesAt: z.iso.datetime(),
     electorate: ElectorateSchema,
@@ -29,9 +43,17 @@ const VotingInputSchema = z
     maxSelections: z.number().int().min(1).max(50),
   })
   .openapi('VotingInput');
-const VotingStatusSchema = z.enum(['DRAFT', 'SCHEDULED', 'OPEN', 'CLOSED', 'CANCELLED']);
+const VotingStatusSchema = z.enum([
+  'DRAFT',
+  'SCHEDULED',
+  'OPEN',
+  'CLOSED',
+  'CANCELLED',
+  'ARCHIVED',
+]);
 const VotingResultSchema = z
   .object({
+    survey: z.array(SurveySummarySchema).optional(),
     eligible: z.number(),
     participating: z.number(),
     abstentions: z.number(),
@@ -51,6 +73,14 @@ const VotingDetailSchema = z
     hasVoted: z.boolean(),
     result: VotingResultSchema.nullable(),
     governanceRevisionId: z.uuid().nullable(),
+    surveyHtml: z
+      .array(
+        z.object({
+          id: z.uuid(),
+          html: z.object({ ru: z.string().optional(), en: z.string().optional() }),
+        }),
+      )
+      .optional(),
     subject: VotingSubjectSchema.nullable().openapi('OptionalVotingSubject'),
   })
   .openapi('VotingDetail');

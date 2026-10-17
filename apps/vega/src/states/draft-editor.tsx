@@ -85,6 +85,10 @@ function DraftEditor({
       primary === undefined ? principal : { ...principal, id: primary.id, username: primary.name },
     [principal, primary],
   );
+  const existingOfficeIds = useMemo(
+    () => currentState?.configuration.governance.offices.map((office) => office.id),
+    [currentState],
+  );
   const amendment = currentState?.configuration.governance.policies.find(
     (policy) => policy.action === 'AMEND_GOVERNANCE',
   );
@@ -312,6 +316,8 @@ function DraftEditor({
         <StateWizardStep
           step={step}
           configuration={draft.configuration}
+          existingOfficeIds={existingOfficeIds}
+          holderCandidates={currentState?.citizens}
           stableSlug={initial.stateId !== null}
           onStepChange={handleStepChange}
           onChange={handleConfiguration}

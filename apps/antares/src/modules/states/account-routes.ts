@@ -8,6 +8,7 @@ import { json, authenticator } from '../platform/routes';
 import { LocaleSchema } from '../localized-content/contracts';
 import { previewConstitution } from './constitution-preview';
 import { StateDraftService } from './drafts';
+import { leaveState } from './citizenship';
 import { StateService } from './service';
 import { PRESETS, applyPreset } from './presets';
 import {
@@ -64,6 +65,19 @@ function accountStateRoutes(db: Database['db'] | undefined, secureCookies: boole
       const ownerId = await actorId(context);
       const items = await services().states.list(undefined, undefined, ownerId);
       return context.json({ items }, HTTP.ok);
+    },
+  );
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/account/states/{id}/leave',
+      operationId: 'leaveState',
+      request: { params: Id },
+      responses: { 200: json(Success), ...Errors },
+    }),
+    async (context) => {
+      await leaveState(services().db, context.req.valid('param').id, await actorId(context));
+      return context.json({ success: true as const }, HTTP.ok);
     },
   );
   app.openapi(

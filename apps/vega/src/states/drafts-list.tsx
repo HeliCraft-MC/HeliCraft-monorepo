@@ -11,7 +11,7 @@ import {
   listMyStates,
 } from '@helicraft/alhena';
 import type { StateDraft } from '@helicraft/alhena';
-import { Alert, Button, ActionLink } from '@helicraft/atria';
+import { Alert, Button, ActionLink, StateCard, EmptyState } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import styles from './states.module.scss';
@@ -63,23 +63,47 @@ function StateDraftsList(): ReactElement {
     usePropCache<NonNullable<ComponentProps<typeof Button>['onClick']>>(callbackScope1);
   return (
     <section className={styles.page}>
-      {states.data && states.data.length > 0 && (
-        <section>
-          <h2>{uiText(locale, 'Мои государства', 'My states')}</h2>
-          <ul>
-            {states.data.map((state) => (
-              <li key={state.id}>
-                <ActionLink href={`/app/states/${state.id}`}>
-                  {displayText(state.name, locale) || state.slug}
-                </ActionLink>{' '}
-                · {label(state.status, locale)}
-              </li>
-            ))}
-          </ul>
-        </section>
+      <header>
+        <h1>{uiText(locale, 'Мои государства', 'My states')}</h1>
+        <p className={styles.hint}>
+          {uiText(
+            locale,
+            'Все ваши гражданства в одном месте. Откройте государство для голосований, предложений и управления. Возможность нескольких гражданств определяется правилами каждого государства.',
+            'All your citizenships in one place. Open a state for voting, proposals and management. Each state determines whether multiple citizenships are allowed.',
+          )}
+        </p>
+      </header>
+      {states.isPending && (
+        <output>{uiText(locale, 'Загрузка государств…', 'Loading states…')}</output>
       )}
+      {states.data?.length === 0 && (
+        <EmptyState
+          title={uiText(locale, 'Вы пока не состоите в государстве', 'No citizenships yet')}
+        >
+          {uiText(
+            locale,
+            'Посмотрите публичный каталог или подготовьте собственное государство ниже.',
+            'Browse the public directory or prepare your own state below.',
+          )}
+          <ActionLink href="/states">
+            {uiText(locale, 'Каталог государств', 'State directory')}
+          </ActionLink>
+        </EmptyState>
+      )}
+      <div className={styles.grid}>
+        {(states.data ?? []).map((state) => (
+          <StateCard
+            key={state.id}
+            name={displayText(state.name, locale) || state.slug}
+            href={`/app/states/${state.id}`}
+            color={state.color}
+            flag={null}
+            government={label(state.status, locale)}
+          />
+        ))}
+      </div>
       {states.error !== null && <Alert tone="danger">{errorMessage(states.error)}</Alert>}
-      <h1>{uiText(locale, 'Черновики государств', 'State drafts')}</h1>
+      <h2>{uiText(locale, 'Черновики государств', 'State drafts')}</h2>
       <p>
         {uiText(
           locale,

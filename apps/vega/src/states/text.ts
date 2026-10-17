@@ -19,6 +19,7 @@ const labels = {
   VOTING_SCHEDULED: ['Запланировано', 'Scheduled'],
   VOTING_OPEN: ['Идёт голосование', 'Open'],
   VOTING_CLOSED: ['Завершено', 'Closed'],
+  VOTING_ARCHIVED: ['В архиве', 'Archived'],
   VOTING_CANCELLED: ['Отменено', 'Cancelled'],
   CREATE_INSTITUTION: ['Создание учреждений', 'Create institutions'],
   CHANGE_TERRITORY: ['Изменение территории', 'Change territory'],

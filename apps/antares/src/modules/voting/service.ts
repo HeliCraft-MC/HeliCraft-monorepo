@@ -1,5 +1,10 @@
+// oxlint-disable import/max-dependencies -- The shared voting service composes authorization, lifecycle, results and both ballot formats.
 // oxlint-disable no-await-in-loop -- Snapshot, option and scheduler writes are serialized on transaction connections.
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { surveyMarkdown } from './survey-markdown';
+import { summarizeSurvey } from './survey-domain';
+import { castBallot } from './ballots';
+import type { Ballot } from './ballots';
+import { desc, eq, inArray } from 'drizzle-orm';
 import type { Database } from '../../db';
 import {
   votings,
@@ -11,10 +16,16 @@ import {
 } from '../../db/schema';
 import { authorizeMutation } from '../permissions/transaction';
 import { DomainError, HTTP } from '../errors';
-import { assertElectorateAvailable } from './eligibility';
-import { validateVoting, validateBallot, calculateResult } from './domain';
+import { validateVoting, calculateResult } from './domain';
 import type { VotingInput, VotingDetail } from './contracts';
-import { lockedVoting, advance, hydrateInput, persistVoting, publishVoting } from './persistence';
+import {
+  lockedVoting,
+  advance,
+  hydrateInput,
+  persistVoting,
+  publishVoting,
+  replaceVotingInput,
+} from './persistence';
 
 class VotingService {
   private readonly db: Database['db'];
@@ -26,6 +37,28 @@ class VotingService {
     return await this.db.transaction(async (transaction) => {
       await authorizeMutation(transaction, actorId, 'voting.manage');
       return await persistVoting(transaction, actorId, input);
+    });
+  }
+  public async update(id: string, actorId: string, input: Readonly<VotingInput>): Promise<void> {
+    validateVoting(input);
+    await this.db.transaction(async (transaction) => {
+      await authorizeMutation(transaction, actorId, 'voting.manage');
+      const record = await lockedVoting(transaction, id);
+      if (
+        record.status !== 'DRAFT' ||
+        record.governanceRevisionId !== null ||
+        record.subject !== null
+      ) {
+        throw new DomainError(
+          HTTP.conflict,
+          'VOTING_IMMUTABLE',
+          'Редактировать можно только неопубликованный черновик опроса',
+        );
+      }
+      await replaceVotingInput(transaction, id, input);
+      await transaction
+        .insert(adminAuditLog)
+        .values({ actorId, targetId: id, targetType: 'VOTING', action: 'voting.updated' });
     });
   }
   public async publish(id: string, actorId: string): Promise<void> {
@@ -41,7 +74,11 @@ class VotingService {
     await this.db.transaction(async (transaction) => {
       await authorizeMutation(transaction, actorId, 'voting.manage');
       const record = await lockedVoting(transaction, id);
-      if (record.status === 'CLOSED' || record.status === 'CANCELLED') {
+      if (
+        record.status === 'CLOSED' ||
+        record.status === 'CANCELLED' ||
+        record.status === 'ARCHIVED'
+      ) {
         throw new DomainError(HTTP.conflict, 'INVALID_VOTING_STATUS', 'Голосование уже завершено');
       }
       await transaction.update(votings).set({ status: 'CANCELLED' }).where(eq(votings.id, id));
@@ -74,52 +111,8 @@ class VotingService {
       return rows.map((row) => row.id);
     });
   }
-  public async cast(
-    id: string,
-    userId: string,
-    ballot: Readonly<{ choices: readonly string[]; abstain: boolean }>,
-  ): Promise<void> {
-    const { choices, abstain } = ballot;
-    await this.db.transaction(async (transaction) => {
-      const record = await advance(transaction, await lockedVoting(transaction, id), new Date());
-      if (record.status !== 'OPEN') {
-        throw new DomainError(HTTP.conflict, 'VOTING_NOT_OPEN', 'Голосование сейчас закрыто');
-      }
-      await assertElectorateAvailable(transaction, record.configuration.electorate);
-      const [eligible] = await transaction
-        .select()
-        .from(votingEligibleVoters)
-        .where(and(eq(votingEligibleVoters.votingId, id), eq(votingEligibleVoters.userId, userId)));
-      if (!eligible) {
-        throw new DomainError(
-          HTTP.forbidden,
-          'VOTER_INELIGIBLE',
-          'Вы не входите в состав избирателей',
-        );
-      }
-      const [existing] = await transaction
-        .select()
-        .from(votingBallots)
-        .where(and(eq(votingBallots.votingId, id), eq(votingBallots.userId, userId)));
-      if (existing) {
-        throw new DomainError(HTTP.conflict, 'ALREADY_VOTED', 'Ваш голос уже принят');
-      }
-      validateBallot(record.configuration, choices, abstain);
-      const ballotId = crypto.randomUUID();
-      await transaction
-        .insert(votingBallots)
-        .values({ id: ballotId, votingId: id, userId, abstain });
-      const options = await transaction
-        .select()
-        .from(votingOptions)
-        .where(eq(votingOptions.votingId, id));
-      const selected = options.filter((option) => choices.includes(option.optionKey));
-      if (selected.length > 0) {
-        await transaction
-          .insert(votingBallotChoices)
-          .values(selected.map((option) => ({ ballotId, optionId: option.id })));
-      }
-    });
+  public async cast(id: string, userId: string, ballot: Ballot): Promise<void> {
+    await castBallot(this.db, { id, userId, ballot });
   }
   // oxlint-disable-next-line max-lines-per-function -- The locked read advances lifecycle and enforces ballot/result visibility.
   public async detail(id: string, userId: string, admin: boolean): Promise<VotingDetail> {
@@ -129,7 +122,7 @@ class VotingService {
         await authorizeMutation(transaction, userId, 'voting.manage');
       }
       const record = await advance(transaction, await lockedVoting(transaction, id), new Date());
-      if ((record.status === 'DRAFT' || record.status === 'CANCELLED') && !admin) {
+      if (['DRAFT', 'CANCELLED', 'ARCHIVED'].includes(record.status) && !admin) {
         throw new DomainError(HTTP.notFound, 'VOTING_NOT_FOUND', 'Голосование не найдено');
       }
       const input = await hydrateInput(transaction, record);
@@ -166,11 +159,21 @@ class VotingService {
         : null;
       return {
         id,
+        surveyHtml: input.survey ? await surveyMarkdown(input) : undefined,
         status: record.status,
         input,
         eligible,
         hasVoted: ballots.some((ballot) => ballot.userId === userId),
-        result,
+        result:
+          result && input.survey
+            ? {
+                ...result,
+                survey: summarizeSurvey(
+                  input,
+                  ballots.map((ballot) => ballot.answers ?? []),
+                ),
+              }
+            : result,
         governanceRevisionId: record.governanceRevisionId,
         subject: record.subject,
       };

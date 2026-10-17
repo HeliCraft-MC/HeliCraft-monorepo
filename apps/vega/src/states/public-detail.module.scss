@@ -1,7 +1,29 @@
 .page {
   max-width: 76rem;
   margin-inline: auto;
-  padding-block: 2rem 5rem;
+  padding: 2rem clamp(0.75rem, 2vw, 1.5rem) 5rem;
+  border-radius: 1.5rem;
+  background: radial-gradient(
+    ellipse at top right,
+    color-mix(in srgb, var(--state-accent, var(--accent)) 10%, transparent),
+    transparent 70%
+  );
+  --primary-hover: color-mix(in srgb, var(--state-accent, var(--accent)) 15%, var(--text-primary));
+  --accent-soft: color-mix(in srgb, var(--state-accent, var(--accent)) 35%, var(--text-secondary));
+  --color-heli-primary: var(--primary);
+  --color-heli-primary-hover: var(--primary-hover);
+  --color-heli-surface: color-mix(in srgb, var(--state-accent, var(--accent)) 5%, var(--bg-panel));
+  --color-heli-surface-hover: color-mix(
+    in srgb,
+    var(--state-accent, var(--accent)) 8%,
+    var(--bg-hover)
+  );
+  --primary: color-mix(in srgb, var(--state-accent, var(--accent)) 25%, var(--text-primary));
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
 }
 .back {
   display: inline-block;
@@ -16,12 +38,12 @@
   gap: 3rem;
   padding: clamp(1.5rem, 4vw, 3.5rem);
   border: 1px solid var(--border-strong);
-  border-top: 4px solid var(--state-accent);
+
   border-radius: 1.5rem;
   background:
     radial-gradient(
       ellipse at right top,
-      color-mix(in srgb, var(--state-accent) 16%, transparent),
+      color-mix(in srgb, var(--state-accent, var(--accent)) 16%, transparent),
       transparent 65%
     ),
     var(--bg-elevated);
@@ -116,7 +138,7 @@
     border-bottom: 2px solid transparent;
     &:hover,
     &:focus-visible {
-      border-color: var(--state-accent);
+      border-color: var(--state-accent, var(--accent));
       color: var(--text-primary);
     }
   }
@@ -143,7 +165,7 @@
   padding: 1.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: 1.25rem;
-  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--state-accent, var(--accent)) 5%, var(--bg-elevated));
   margin: 0;
   min-width: 0;
   line-height: 1.65;
@@ -209,10 +231,12 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   > section {
+    display: flex;
+    flex-direction: column;
     > span {
       justify-self: start;
     }
-    background: var(--bg-elevated);
+    background: color-mix(in srgb, var(--state-accent, var(--accent)) 5%, var(--bg-elevated));
     border: 1px solid var(--border-subtle);
     border-radius: 1.25rem;
     padding: 1.75rem;
@@ -269,7 +293,7 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   gap: 0.75rem;
   li {
-    background: var(--bg-elevated);
+    background: color-mix(in srgb, var(--state-accent, var(--accent)) 5%, var(--bg-elevated));
     border: 1px solid var(--border-subtle);
     padding: 1rem;
     border-radius: 0.85rem;
@@ -277,7 +301,7 @@
 }
 .paper {
   padding: clamp(1.25rem, 4vw, 3.5rem);
-  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--state-accent, var(--accent)) 5%, var(--bg-elevated));
   border: 1px solid var(--border-strong);
   border-radius: 1.25rem;
   overflow-wrap: anywhere;
@@ -318,5 +342,46 @@
   .panel,
   .offices > section {
     padding: 1.25rem;
+  }
+}
+
+.governmentLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.governmentLayout .offices,
+.governmentLayout .rules {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 0;
+}
+.offices > section > span {
+  align-self: start;
+}
+@media (max-width: 55rem) {
+  .governmentLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.votingFacts {
+  margin: 0;
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-top: 1px solid var(--border-subtle);
+    padding-block: 0.45rem;
+  }
+  dt {
+    display: flex;
+    align-items: center;
+  }
+  dd {
+    margin: 0;
+    text-align: end;
+    font-size: 0.9rem;
   }
 }

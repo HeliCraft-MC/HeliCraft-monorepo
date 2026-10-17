@@ -1,4 +1,5 @@
 // oxlint-disable import/max-dependencies -- This composition module connects typed platform services and reusable UI; domain logic remains in separate modules.
+import { OfficeAssignments } from './office-assignments';
 import { uiText } from './text';
 import { EDIT_STEPS } from './wizard-steps';
 import { useMemo, useState } from 'react';
@@ -259,6 +260,7 @@ function AdminStateEditor({
             {errorMessage(error)}
           </Alert>
         ))}
+      {state.status === 'ACTIVE' && <OfficeAssignments state={state} />}
     </section>
   );
 }

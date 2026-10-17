@@ -7,6 +7,7 @@ import { processGalleryImage } from './process';
 import type { GalleryObjects } from './objects';
 import { DomainError, HTTP } from '../errors';
 
+import { readGalleryStates, saveGalleryStates } from './states';
 import { searchPlayers } from '../players/service';
 
 type GalleryRecord = typeof galleryImages.$inferSelect;
@@ -39,6 +40,7 @@ class GalleryService {
       place: record.place,
       location: record.location,
       author,
+      states: await readGalleryStates(this.db, record.id),
       players: people.filter((person) => record.playerIds.includes(person.id)),
       width: record.width,
       height: record.height,
@@ -131,6 +133,7 @@ class GalleryService {
       if (!created) {
         throw new Error('Gallery insert returned no row');
       }
+      await saveGalleryStates(transaction, id, metadata.stateLinks);
       return created;
     });
     return await this.describe(record);
@@ -173,6 +176,7 @@ class GalleryService {
           'Снимок не найден или принадлежит другому игроку',
         );
       }
+      await saveGalleryStates(transaction, id, metadata.stateLinks);
       return record;
     });
     return await this.describe(changed);

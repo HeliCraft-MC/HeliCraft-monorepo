@@ -74,11 +74,17 @@ afterEach(() => {
 describe('state editor', () => {
   it('keeps translated values while switching languages and editing', () => {
     mount(<LocalizedHarness />);
-    fireEvent.change(screen.getByLabelText('Name · EN'), { target: { value: 'Aurora Republic' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Русский ✓' }));
-    expect(screen.getByLabelText('Name · RU')).toHaveValue('Аврора');
-    fireEvent.click(screen.getByRole('button', { name: 'English ✓' }));
-    expect(screen.getByLabelText('Name · EN')).toHaveValue('Aurora Republic');
+    fireEvent.change(screen.getByLabelText('Name · English'), {
+      target: { value: 'Aurora Republic' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Translation language' }), {
+      target: { value: 'ru' },
+    });
+    expect(screen.getByLabelText('Name · Русский')).toHaveValue('Аврора');
+    fireEvent.change(screen.getByRole('combobox', { name: 'Translation language' }), {
+      target: { value: 'en' },
+    });
+    expect(screen.getByLabelText('Name · English')).toHaveValue('Aurora Republic');
   });
   it('confirms replacement before applying a different governance preset', async () => {
     const fetch = vi

@@ -3,7 +3,7 @@ import type { StateDetail } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
 import { OfficeSummary } from './office-summary';
 import { policyDescription } from './policy-description';
-import { votingDescription } from './voting-description';
+import { VotingSummary } from './voting-summary';
 import { label, uiText } from './text';
 import styles from './public-detail.module.scss';
 
@@ -11,7 +11,7 @@ function PublicGovernment({ state }: Readonly<{ state: StateDetail }>): ReactEle
   const { locale } = useTranslation();
   const { configuration } = state;
   return (
-    <>
+    <div className={styles.governmentLayout}>
       <div className={styles.offices}>
         {configuration.governance.offices.map((office) => (
           <OfficeSummary
@@ -43,10 +43,10 @@ function PublicGovernment({ state }: Readonly<{ state: StateDetail }>): ReactEle
         <section className={styles.panel}>
           <span className={styles.eyebrow}>{uiText(locale, 'Голосование', 'Voting')}</span>
           <h3>{uiText(locale, 'Общие правила', 'Default rules')}</h3>
-          <p>{votingDescription(configuration.governance.votingDefaults, locale)}</p>
+          <VotingSummary rules={configuration.governance.votingDefaults} />
         </section>
       </div>
-    </>
+    </div>
   );
 }
 export { PublicGovernment };

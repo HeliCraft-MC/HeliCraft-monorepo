@@ -1,0 +1,27 @@
+[Repository](../../README.md) | [States](../states/overview.md) | [Voting](../platform/voting.md)
+
+# Account, state and administration workspaces
+
+Account navigation stays visible on every protected page, including state drafts and state management. Administration uses the same workspace rhythm with a permission-filtered sidebar, compact actions, bounded forms and overview cards. Empty, loading and failed lists must explain the next useful action. Administrative player/audit filters use responsive grids; editorial lists explain draft/publication workflows. Audit metadata expands per record rather than dominating the table.
+
+Do not use a rounded side border or inset vertical stripe to identify active navigation or decorate state/profile panels. Use surface fill, font weight, spacing and an explicit current-page marker. State pages have no colored top stripe. Prefer a consistent grid for office cards, aligned content and natural-height actions; never stretch buttons or short text to fill a viewport.
+
+Directory and player-profile state items use Atria StateCard with the state's color. A tinted surface carries identity while text retains theme colors. State detail mixes small proportions of the chosen color into backgrounds; its primary text accent mixes with the theme text instead of using arbitrary raw colors for reading. Raw state color is suitable for decorative marks only.
+
+Constitutions have a separate public SSR document at `/states/:slug/constitution`, retaining the revision-bound, Antares-sanitized document. Pending private records use the bounded fullscreen dialog. Citizen lists render ten people per page with ordinary GET links preserving the current query and language. Pagination works without JavaScript, and malformed or out-of-range page numbers resolve to a valid page. Membership start time and immutable UUID provide deterministic order.
+
+`/app/states/:id/manage` is a protected state workspace with its own section menu: overview/onboarding, identity, offices, constitution, appointments, proposals/voting, citizenship and revision history. All citizens can prepare proposals. Authority to approve/publish is rechecked by Antares against current offices and decision policies. Governance/constitution reforms support identity, office definitions and constitutional content; no independent future law CRUD is implied. Existing offices retain their immutable initial roster in reform drafts. Current holders change through separate office proposals, never by rewriting that roster. New offices may initially select active citizens; state creation still selects founders.
+
+Office proposals join the published appointment/removal policy with the office appointment or vacancy rule. A replacement also requires the removal policy. Required citizen/council decisions use ordinary single-question Voting records. Current office approvals, successful closed votes and any reasoned administrative manual review are required together. Proposals pin the governance revision and vacancy state; stale proposals must be replaced. Applying a decision closes and opens holder intervals atomically. The appointments section explains requirements and gives only currently authorized approval actions.
+
+Voluntary departure closes membership and optional office intervals at one transaction timestamp and records an audit event. It refuses departure by the final serving holder of a required office until succession is resolved. Published revisions, founders and frozen electorates remain historical records.
+
+# Shared controls
+
+Atria FieldHelp supplies field explanations through a hover/tap popover with keyboard opening and Escape dismissal. FormField accepts `help` in addition to always-visible `hint`; give examples and explain denominators or scope for voting parameters. An information button must have a distinct accessible name from the input label.
+
+LocalizableTextInput is a controlled multilingual field with a native selector, explicit completion marks and touch-friendly controls. It supports arbitrary language catalogs, preserves values while switching, and never invents fallback translations. Vega's adapter uses the platform locale catalog. Editorial/gallery forms preserve their existing original-language and translation contracts.
+
+PlayerNickname and StateName link directly to public entities and expose short hover/focus previews. Nickname and state facts are fetched from their public endpoints only when needed, without credentials. State previews show the current public description and citizen/office counts; unavailable public records retain a direct link without private data. Previews never expose private account fields. The preview uses a collision-aware tooltip portal, supports Escape dismissal and stays hoverable. Long descriptions are visually clipped to a compact summary; the linked page contains the full text. The link's accessible name remains the actual entity name; preview text supplies a description. Use non-link nicknames inside interactive controls.
+
+Storybook documents FieldHelp, LocalizableTextInput, PlayerNickname, StateName, StateCard and Dialog, including many languages, very light state colors and fullscreen reading. Respect reduced motion and keyboard navigation.

@@ -39,7 +39,7 @@ function VotingAdminActions({
           {uiText(locale, 'Опубликовать голосование', 'Publish voting')}
         </Button>
       )}
-      {status !== 'CLOSED' && status !== 'CANCELLED' && (
+      {status !== 'CLOSED' && status !== 'CANCELLED' && status !== 'ARCHIVED' && (
         <Button tone="quiet" disabled={action.isPending} onClick={handleCancel}>
           {uiText(locale, 'Отменить голосование', 'Cancel voting')}
         </Button>

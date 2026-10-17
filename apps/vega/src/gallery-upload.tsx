@@ -1,3 +1,6 @@
+// oxlint-disable import/max-dependencies -- Upload composition connects metadata, media selection and relationship pickers.
+import { GalleryStatePicker } from './gallery-state-picker';
+import type { SelectedGalleryState } from './gallery-state-picker';
 import { GalleryPlayerPicker } from './gallery-player-picker';
 import type { GalleryPlayer } from './gallery-player-picker';
 import { TranslationFields, OriginalLanguage } from './translation-fields';
@@ -26,6 +29,7 @@ function GalleryUpload(): ReactElement {
   const handleLanguageChange = useCallback((event: ChangeEvent<HTMLSelectElement>): void => {
     setOriginalLanguage(event.target.value);
   }, []);
+  const [states, setStates] = useState<SelectedGalleryState[]>([]);
   const [players, setPlayers] = useState<GalleryPlayer[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -84,6 +88,7 @@ function GalleryUpload(): ReactElement {
               dimension: form.get('dimension'),
             }
           : null,
+        stateLinks: states.map((state) => ({ stateId: state.stateId, role: state.role })),
         players: players.map((player) => player.id),
       };
       setBusy(true);
@@ -100,7 +105,7 @@ function GalleryUpload(): ReactElement {
         setBusy(false);
       }
     },
-    [file, busy, players],
+    [file, busy, players, states],
   );
   const addSelf = useCallback((): void => {
     setPlayers((current) =>
@@ -165,6 +170,7 @@ function GalleryUpload(): ReactElement {
             <option value="end">{text('gallery.dimensions.end')}</option>
           </select>
         </fieldset>
+        <GalleryStatePicker value={states} onChange={setStates} disabled={busy} />
         <GalleryPlayerPicker players={players} onChange={setPlayers} disabled={busy} />
         <Button
           tone="quiet"

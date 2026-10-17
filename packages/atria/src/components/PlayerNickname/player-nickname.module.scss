@@ -29,3 +29,37 @@ a.nickname {
     border-radius: 0.25rem;
   }
 }
+
+.preview {
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-panel);
+  line-height: 1.65;
+  z-index: 55;
+}
+.previewContent {
+  display: grid;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+  > span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+  }
+  > span,
+  > small {
+    color: var(--text-secondary);
+  }
+}
+.stateMark {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  flex: none;
+}

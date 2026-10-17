@@ -6,6 +6,7 @@ import { DomainError, HTTP } from '../errors';
 import type { Transaction } from '../permissions/transaction';
 
 import { readRevision } from './revisions';
+import { holderValidation } from './holder-validation';
 import { validateConfiguration } from './domain';
 import type { StateConfiguration, Issue } from './contracts';
 
@@ -37,7 +38,11 @@ async function validatePersistent(
   configuration: Readonly<StateConfiguration>,
   context: Readonly<{ primaryFounderId: string; mediaOwnerId: string; stateId: string | null }>,
 ): Promise<Issue[]> {
-  const issues = validateConfiguration(configuration, context.primaryFounderId);
+  const holders = await holderValidation(transaction, configuration, context.stateId);
+  const issues = [
+    ...validateConfiguration(configuration, context.primaryFounderId, holders.allowedIds),
+    ...holders.issues,
+  ];
   const founders = [context.primaryFounderId, ...configuration.cofounderIds];
   const people = await transaction
     .select({ id: users.id })

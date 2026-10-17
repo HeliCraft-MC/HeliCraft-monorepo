@@ -289,6 +289,7 @@ const StateListSchema = z.object({
       id: z.uuid(),
       slug: z.string(),
       status: StateStatusSchema,
+      color: z.string(),
       name: LocalizedInputSchema,
     }),
   ),

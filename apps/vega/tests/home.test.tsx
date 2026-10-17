@@ -25,6 +25,7 @@ const item: GalleryItem = {
   location: null,
   author: { id: '22222222-2222-4222-8222-222222222222', name: 'Builder' },
   players: [],
+  states: [],
   width: 1600,
   height: 900,
   createdAt: '2026-10-10T12:00:00.000Z',

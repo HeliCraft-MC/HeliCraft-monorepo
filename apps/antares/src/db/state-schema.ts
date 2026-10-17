@@ -13,7 +13,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { users } from './core-schema';
+import { users, galleryImages } from './core-schema';
 import type { StateConfiguration, StateStatus } from '../modules/states/contracts';
 
 const time = (name: string): ReturnType<typeof timestamp> =>
@@ -287,6 +287,22 @@ const stateReformProposalTexts = pgTable(
   },
   (table) => [primaryKey({ columns: [table.proposalId, table.path] })],
 );
+const galleryStateLinks = pgTable(
+  'gallery_state_links',
+  {
+    imageId: uuid('image_id')
+      .notNull()
+      .references(() => galleryImages.id),
+    stateId: uuid('state_id')
+      .notNull()
+      .references(() => states.id),
+    role: text('role').$type<'LOCATION' | 'PARTICIPANT' | 'RELATED'>().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.imageId, table.stateId, table.role] }),
+    check('gallery_state_role', sql`${table.role} in ('LOCATION', 'PARTICIPANT', 'RELATED')`),
+  ],
+);
 export {
   localizedTexts,
   localizedTextValues,
@@ -302,6 +318,7 @@ export {
   stateConstitutionRevisions,
   stateConstitutionBlocks,
   stateMedia,
+  galleryStateLinks,
   stateReformApprovals,
   stateReformVotes,
   stateReformProposals,

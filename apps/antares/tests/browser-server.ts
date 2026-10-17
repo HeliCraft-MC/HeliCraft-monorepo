@@ -1,3 +1,4 @@
+import { createPaginationFixture } from './browser-pagination-fixture';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { GenericContainer, Wait } from 'testcontainers';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
@@ -31,15 +32,21 @@ const storage = createStorage({
 });
 await migrate(database.db, { migrationsFolder: 'apps/antares/drizzle' });
 const identity = new IdentityService(database.db);
-await Promise.all(
+const principals = await Promise.all(
   [['E2eOwner', 'OWNER'] as const, ['E2eEditor', 'EDITOR'] as const].map(
     async ([username, role]) => {
       const token = await identity.register(username, 'Browser test password 2026');
       const { principal } = await new SessionService(database.db).authenticate(token);
       await database.db.insert(userRoles).values({ userId: principal.id, role });
+      return principal;
     },
   ),
 );
+const owner = principals.find((principal) => principal.username === 'E2eOwner');
+if (owner === undefined) {
+  throw new Error('Browser fixture owner missing');
+}
+await createPaginationFixture(database.db, owner.id);
 const servers = [
   { port: 3100, siteOrigin: 'http://localhost:5175' },
   { port: 3101, siteOrigin: 'http://localhost:8085' },

@@ -45,6 +45,11 @@ function PolicyEditor({
       <FormField
         htmlFor={id}
         label={uiText(locale, 'Кто принимает решение?', 'Who makes this decision?')}
+        help={uiText(
+          locale,
+          'Укажите должности или избирателей, чьё одобрение требуется. «Любая из должностей» требует одного одобрения; «Несколько должностей» — всех указанных; комбинированное решение также требует голосования граждан.',
+          'Choose the offices or electorate whose approval is required. Any office needs one approval; multiple offices needs all listed offices. Combined decisions also require a citizen vote.',
+        )}
       >
         <Select
           id={id}

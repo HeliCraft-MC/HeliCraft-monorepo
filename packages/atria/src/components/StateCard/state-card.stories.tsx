@@ -6,6 +6,14 @@ const flag =
 const meta = {
   title: 'Atria/state-card',
   component: StateCard,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Shared state card for directories, player profiles and account membership lists. Pass the state color for tinted surfaces; text preserves theme contrast. Use a real flag when available or the null flag variant for a compact initial mark. The whole card is one named state link.',
+      },
+    },
+  },
   tags: ['autodocs'],
   args: { name: 'Аврора', flag, government: 'Советская республика', citizens: 8 },
 } satisfies Meta<typeof StateCard>;
@@ -61,4 +69,9 @@ export const CustomFlagArtwork: Story = {
     government: '2 offices',
     href: '#state',
   },
+};
+
+export const WhiteState: Story = { args: { color: '#ffffff', href: '/states/aurora' } };
+export const ProfileState: Story = {
+  args: { flag: null, color: '#3c44aa', href: '/states/aurora' },
 };

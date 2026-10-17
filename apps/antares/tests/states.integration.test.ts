@@ -1,5 +1,9 @@
 // oxlint-disable import/max-dependencies -- This composition module connects typed platform services and reusable UI; domain logic remains in separate modules.
 // oxlint-disable max-lines-per-function, max-statements, max-lines -- A real PostgreSQL scenario exercises atomic creation, authorization and history together.
+import { assertOfficeAssignments } from './office-assignment-scenario';
+import { assertCitizenshipDeparture } from './citizenship-scenario';
+import { assertHybridSurvey } from './survey-scenario';
+import { assertMultiQuestionPoll } from './multi-question-scenario';
 import { assertPublicProfile } from './player-profile-scenario';
 import { assertDirectory, assertDirectoryOrdering } from './state-directory-scenario';
 import { officeReform, citizenReform, officeIdentityScenario } from './state-reform-scenario';
@@ -341,6 +345,22 @@ describe('states on PostgreSQL', () => {
       await voting.publish(globalId, admin.principal.id);
       await voting.cast(globalId, admin.principal.id, { choices: [yes], abstain: false });
       expect((await voting.detail(globalId, admin.principal.id, false)).hasVoted).toBe(true);
+      await assertMultiQuestionPoll(database.db, {
+        adminId: admin.principal.id,
+        voterId: owner.principal.id,
+        base: input,
+      });
+      await assertHybridSurvey(database.db, {
+        adminId: admin.principal.id,
+        voterId: owner.principal.id,
+        base: input,
+      });
+      await assertOfficeAssignments(database.db, reformScenario);
+      await assertCitizenshipDeparture(database.db, {
+        founderId: owner.principal.id,
+        citizenId: other.principal.id,
+        adminId: admin.principal.id,
+      });
     } finally {
       await database.pool.end();
       await container.stop();

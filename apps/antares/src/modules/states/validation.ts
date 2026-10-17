@@ -31,7 +31,7 @@ function validateOffice(
   }
   if (office.initialHolderIds.some((id) => !context.founders.includes(id))) {
     issues.push(
-      error(`${path}.initialHolderIds`, 'Первые должностные лица выбираются среди основателей'),
+      error(`${path}.initialHolderIds`, 'Назначаемые игроки должны входить в разрешённый состав'),
     );
   }
   const needsAuthority =

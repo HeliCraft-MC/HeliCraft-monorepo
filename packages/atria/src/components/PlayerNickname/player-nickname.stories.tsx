@@ -4,7 +4,16 @@ import { PlayerNickname } from './player-nickname';
 const meta = {
   title: 'Atria/PlayerNickname',
   component: PlayerNickname,
+  tags: ['autodocs'],
   args: { name: 'Builder' },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Player label with a decorative Minecraft head and optional profile link. Pass a factual public preview; onPreview loads it when a pointer enters or the link receives focus. Keep the non-link variant inside buttons and checkboxes.',
+      },
+    },
+  },
 } satisfies Meta<typeof PlayerNickname>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -19,4 +28,15 @@ export const LoadedHead: Story = {
 
 export const ProfileLink: Story = {
   args: { href: '/players/00000000-0000-4000-8000-000000000001' },
+};
+
+export const Preview: Story = {
+  args: {
+    href: '/players/builder',
+    preview: {
+      title: 'Builder',
+      description: 'Joined HeliCraft in October 2026',
+      facts: '2 citizenships · 1 office',
+    },
+  },
 };

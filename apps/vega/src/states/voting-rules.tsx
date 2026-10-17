@@ -35,6 +35,11 @@ function VotingRulesEditor({
         <FormField
           htmlFor={`${id}-duration`}
           label={uiText(locale, 'Продолжительность, часов', 'Duration in hours')}
+          help={uiText(
+            locale,
+            'Сколько часов участники смогут голосовать после открытия. После завершения новые ответы не принимаются.',
+            'How many hours participants can vote after opening. No answers are accepted after closing.',
+          )}
         >
           <TextField
             id={`${id}-duration`}
@@ -48,7 +53,15 @@ function VotingRulesEditor({
           />
         </FormField>
       )}
-      <FormField htmlFor={`${id}-quorum`} label={uiText(locale, 'Кворум, %', 'Quorum, %')}>
+      <FormField
+        htmlFor={`${id}-quorum`}
+        label={uiText(locale, 'Кворум, %', 'Quorum, %')}
+        help={uiText(
+          locale,
+          'Минимальная доля избирателей, которые должны участвовать. Если избирателей 100, а кворум 40%, нужны хотя бы 40 голосов. Воздержавшиеся тоже учитываются. Список избирателей фиксируется при открытии.',
+          'Minimum participation from the electorate frozen at opening. With 100 eligible voters and a 40% quorum, at least 40 must participate. Abstentions also count.',
+        )}
+      >
         <TextField
           id={`${id}-quorum`}
           type="number"
@@ -63,6 +76,11 @@ function VotingRulesEditor({
       <FormField
         htmlFor={`${id}-threshold`}
         label={uiText(locale, 'Порог одобрения, %', 'Approval threshold, %')}
+        help={uiText(
+          locale,
+          'Минимальная доля голосов за вариант среди не воздержавшихся. Например, 60% от 50 таких голосов — не менее 30. Используется только при правиле «Указанный процент».',
+          'Minimum share supporting an option among non-abstaining ballots. For example, 60% of 50 ballots requires at least 30. Used only for the specified percentage rule.',
+        )}
       >
         <TextField
           id={`${id}-threshold`}
@@ -79,6 +97,11 @@ function VotingRulesEditor({
       <FormField
         htmlFor={`${id}-kind`}
         label={uiText(locale, 'Правило одобрения', 'Approval rule')}
+        help={uiText(
+          locale,
+          'Простое большинство — больше половины не воздержавшихся; абсолютное — больше половины всех избирателей; единогласно — все избиратели за. При равенстве голосов большинство не достигнуто.',
+          'Simple majority requires more than half of non-abstaining ballots; absolute majority requires more than half of all eligible voters; unanimity requires every eligible voter to support it. A tie fails.',
+        )}
       >
         <Select
           id={`${id}-kind`}

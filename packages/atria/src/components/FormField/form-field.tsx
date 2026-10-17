@@ -1,17 +1,22 @@
 import type { ReactElement, ReactNode } from 'react';
+import { FieldHelp } from '../FieldHelp/field-help';
 import styles from '../../primitives.module.scss';
 
 interface FormFieldProps {
   readonly label: string;
   readonly htmlFor: string;
   readonly hint?: string;
+  readonly help?: string;
   readonly error?: string;
   readonly children: ReactNode;
 }
-function FormField({ label, htmlFor, hint, error, children }: FormFieldProps): ReactElement {
+function FormField({ label, htmlFor, hint, help, error, children }: FormFieldProps): ReactElement {
   return (
     <div className={styles.field}>
-      <label htmlFor={htmlFor}>{label}</label>
+      <div className={styles.fieldLabel}>
+        <label htmlFor={htmlFor}>{label}</label>
+        {help === undefined ? null : <FieldHelp label={label} content={help} />}
+      </div>
       {children}
       {hint !== undefined && hint.length > 0 ? (
         <p id={`${htmlFor}-hint`} className={styles.hint}>

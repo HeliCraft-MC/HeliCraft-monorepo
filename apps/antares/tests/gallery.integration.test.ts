@@ -1,4 +1,6 @@
+// oxlint-disable import/max-dependencies -- The photo lifecycle adds an independent state-relationship persistence scenario.
 // oxlint-disable max-lines-per-function -- Sequential end-to-end lifecycle intentionally retains its assertions and cleanup in one scenario.
+import { assertGalleryStates } from './gallery-states-scenario';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { GenericContainer, Wait } from 'testcontainers';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
@@ -162,9 +164,9 @@ describe('gallery lifecycle with private S3 and PostgreSQL', () => {
       });
       expect(accepted.status).toBe(200);
       const item = GalleryItemSchema.parse(await accepted.json());
-      expect(item.author.name).toBe('GalleryOwner');
       expect(item.translations.en?.title).toBe('Harbour');
       await verifyCaptionUpdates(app, item, { headers, other });
+      await assertGalleryStates(database.db, app, { item, headers });
       const list = GalleryListSchema.parse(
         await (await app.request('/api/v1/public/gallery')).json(),
       );

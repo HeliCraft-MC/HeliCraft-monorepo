@@ -1,6 +1,10 @@
+import { StateName } from './state-name';
+// oxlint-disable import/max-dependencies -- Photo detail connects public entity references and owner metadata controls.
+import { galleryStateRole } from './gallery-state-labels';
 import { PlayerNickname } from './player-nickname';
 import { localizeGallery } from './localized-content';
 import { GalleryMetadataEditor } from './gallery-metadata-editor';
+import { uiText, displayText } from './states/text';
 import { Icon } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { getRouteApi } from '@tanstack/react-router';
@@ -22,9 +26,12 @@ function GalleryDetail(): ReactElement {
       <a className={styles.back} href="/gallery">
         <Icon name="arrowLeft" /> {text('gallery.allPhotos')}
       </a>
-      <div className={styles.detailHeading}>
+      <header className={styles.detailHeading}>
         <h1>{item.title}</h1>
-      </div>
+        <p className={styles.eyebrow}>
+          {uiText(locale, 'Из мира HeliCraft', 'From the world of HeliCraft')}
+        </p>
+      </header>
       <figure className={styles.detailImage}>
         <img
           src={item.imageUrl}
@@ -36,7 +43,10 @@ function GalleryDetail(): ReactElement {
           fetchPriority="high"
         />
       </figure>
-      <div className={styles.details}>
+      <section
+        className={styles.details}
+        aria-label={uiText(locale, 'О снимке', 'About this photo')}
+      >
         <div>
           {item.description !== '' && <p className={styles.description}>{item.description}</p>}
           {item.place !== '' && <p>{item.place}</p>}
@@ -62,6 +72,27 @@ function GalleryDetail(): ReactElement {
               </dd>
             </>
           )}
+          {item.states.length > 0 && (
+            <>
+              <dt>{uiText(locale, 'Государства', 'States')}</dt>
+              <dd>
+                <ul className={styles.people}>
+                  {item.states.map((state) => (
+                    <li key={`${state.id}:${state.role}`}>
+                      <StateName
+                        name={displayText(state.name, locale) || state.slug}
+                        slug={state.slug}
+                        href={`/states/${state.slug}`}
+                        color={state.color}
+                        facts={galleryStateRole(state.role, locale)}
+                      />
+                      <small>{galleryStateRole(state.role, locale)}</small>
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </>
+          )}
           {item.players.length > 0 && (
             <>
               <dt>{text('gallery.players')}</dt>
@@ -77,7 +108,7 @@ function GalleryDetail(): ReactElement {
             </>
           )}
         </dl>
-      </div>
+      </section>
     </main>
   );
 }

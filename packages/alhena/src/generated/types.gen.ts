@@ -62,11 +62,23 @@ export type GalleryItem = {
         id: string;
         name: string;
     }>;
+    states: Array<{
+        id: string;
+        slug: string;
+        name: LocalizedInput;
+        color: string;
+        role: 'LOCATION' | 'PARTICIPANT' | 'RELATED';
+    }>;
     width: number;
     height: number;
     createdAt: string;
     imageUrl: string;
     thumbnailUrl: string;
+};
+
+export type LocalizedInput = {
+    ru?: string;
+    en?: string;
 };
 
 export type PublicContent = {
@@ -154,11 +166,6 @@ export type StateConfiguration = {
         title: LocalizedInput;
         blocks: Array<ConstitutionBlock>;
     } | null;
-};
-
-export type LocalizedInput = {
-    ru?: string;
-    en?: string;
 };
 
 export type MinecraftBanner = {
@@ -274,6 +281,13 @@ export type VotingInput = {
         id: string;
         label: LocalizedInput;
     }>;
+    questions?: Array<{
+        id: string;
+        title: LocalizedInput;
+        optionIds: Array<string>;
+        maxSelections: number;
+    }>;
+    survey?: Survey;
     opensAt: string;
     closesAt: string;
     electorate: {
@@ -294,18 +308,52 @@ export type VotingInput = {
     maxSelections: number;
 };
 
+export type Survey = {
+    blocks: Array<SurveyBlock>;
+    oneResponsePerUser: boolean;
+    manualClose?: boolean;
+};
+
+export type SurveyBlock = {
+    id: string;
+    type: 'SHORT_TEXT' | 'PARAGRAPH' | 'SINGLE_CHOICE' | 'CHECKBOX' | 'DROPDOWN' | 'TEXT_BLOCK' | 'IMAGE_BLOCK';
+    title: LocalizedInput;
+    description: LocalizedInput;
+    required: boolean;
+    optionIds: Array<string>;
+    maxSelections: number;
+    minLength: number;
+    maxLength: number;
+    content: LocalizedInput;
+    style: 'NORMAL' | 'INFO' | 'WARNING' | 'SUCCESS';
+    images: Array<{
+        id: string;
+        caption: LocalizedInput;
+    }>;
+    displayMode: 'GRID' | 'CAROUSEL' | 'RANDOM' | 'VERTICAL';
+    showCaptions: boolean;
+};
+
 export type VotingDetail = {
     id: string;
-    status: 'DRAFT' | 'SCHEDULED' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    status: 'DRAFT' | 'SCHEDULED' | 'OPEN' | 'CLOSED' | 'CANCELLED' | 'ARCHIVED';
     input: VotingInput;
     eligible: boolean;
     hasVoted: boolean;
     result: VotingResult;
     governanceRevisionId: string | null;
+    surveyHtml?: Array<{
+        id: string;
+        html: {
+            ru?: string;
+            en?: string;
+        };
+    }>;
     subject: OptionalVotingSubject;
 };
 
 export type VotingResult = {
+    survey?: Array<SurveySummary>;
     eligible: number;
     participating: number;
     abstentions: number;
@@ -317,11 +365,102 @@ export type VotingResult = {
     }>;
 } | null;
 
+export type SurveySummary = {
+    questionId: string;
+    answered: number;
+    options: Array<{
+        id: string;
+        count: number;
+    }>;
+};
+
 export type OptionalVotingSubject = {
     type: string;
     id: string;
     version: number;
 } | null;
+
+export type SurveyAnswer = {
+    questionId: string;
+    value: string | Array<string>;
+};
+
+export type SurveyResponses = {
+    items: Array<SurveyResponse>;
+    total: number;
+};
+
+export type SurveyResponse = {
+    id: string;
+    userId: string;
+    username: string;
+    castAt: string;
+    answers: Array<SurveyAnswer>;
+};
+
+export type OfficeAssignmentInput = {
+    officeId: string;
+    userId: string;
+    kind: 'APPOINT' | 'REMOVE';
+    replacedUserId?: string | null;
+};
+
+export type OfficeAssignmentDetail = {
+    id: string;
+    stateId: string;
+    governanceRevisionId: string;
+    kind: 'APPOINT' | 'REMOVE';
+    state: {
+        id: string;
+        slug: string;
+        name: LocalizedInput;
+        color: string;
+    };
+    office: StateOffice;
+    person: {
+        id: string;
+        name: string;
+    };
+    replacedPerson: {
+        id: string;
+        name: string;
+    } | null;
+    createdBy: {
+        id: string;
+        name: string;
+    };
+    status: 'PENDING' | 'APPLIED' | 'CANCELLED';
+    createdAt: string;
+    blockedReason: string | null;
+    stale: boolean;
+    manualRequired: boolean;
+    manualProcedures: Array<LocalizedInput>;
+    ready: boolean;
+    canApply: boolean;
+    canCancel: boolean;
+    approvalGroups: Array<{
+        mode: 'ANY' | 'ALL';
+        officeIds: Array<string>;
+    }>;
+    approvals: Array<{
+        officeId: string;
+        actor: {
+            id: string;
+            name: string;
+        };
+        current: boolean;
+    }>;
+    approvalOffices: Array<{
+        id: string;
+        name: LocalizedInput;
+        canApprove: boolean;
+    }>;
+    votes: Array<{
+        id: string;
+        source: 'OFFICE' | 'POLICY' | 'REMOVAL_POLICY';
+        approved: boolean;
+    }>;
+};
 
 export type StateDraft = {
     id: string;
@@ -1714,6 +1853,10 @@ export type UpdateGalleryMetadataData = {
             dimension: 'overworld' | 'nether' | 'end';
         } | null;
         players?: Array<string>;
+        stateLinks?: Array<{
+            stateId: string;
+            role: 'LOCATION' | 'PARTICIPANT' | 'RELATED';
+        }>;
     };
     path: {
         id: string;
@@ -4602,6 +4745,126 @@ export type CreateVotingResponses = {
 
 export type CreateVotingResponse = CreateVotingResponses[keyof CreateVotingResponses];
 
+export type GetAdminVotingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}';
+};
+
+export type GetAdminVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetAdminVotingError = GetAdminVotingErrors[keyof GetAdminVotingErrors];
+
+export type GetAdminVotingResponses = {
+    /**
+     * Result
+     */
+    200: VotingDetail;
+};
+
+export type GetAdminVotingResponse = GetAdminVotingResponses[keyof GetAdminVotingResponses];
+
+export type UpdateVotingData = {
+    body?: VotingInput;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}';
+};
+
+export type UpdateVotingErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type UpdateVotingError = UpdateVotingErrors[keyof UpdateVotingErrors];
+
+export type UpdateVotingResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type UpdateVotingResponse = UpdateVotingResponses[keyof UpdateVotingResponses];
+
 export type PublishVotingData = {
     body?: never;
     path: {
@@ -4723,65 +4986,6 @@ export type CancelVotingResponses = {
 };
 
 export type CancelVotingResponse = CancelVotingResponses[keyof CancelVotingResponses];
-
-export type GetAdminVotingData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/votings/{id}';
-};
-
-export type GetAdminVotingErrors = {
-    /**
-     * Result
-     */
-    400: {
-        message: string;
-    };
-    /**
-     * Result
-     */
-    401: {
-        message: string;
-    };
-    /**
-     * Result
-     */
-    403: {
-        message: string;
-    };
-    /**
-     * Result
-     */
-    404: {
-        message: string;
-    };
-    /**
-     * Result
-     */
-    409: {
-        message: string;
-    };
-    /**
-     * Result
-     */
-    503: {
-        message: string;
-    };
-};
-
-export type GetAdminVotingError = GetAdminVotingErrors[keyof GetAdminVotingErrors];
-
-export type GetAdminVotingResponses = {
-    /**
-     * Result
-     */
-    200: VotingDetail;
-};
-
-export type GetAdminVotingResponse = GetAdminVotingResponses[keyof GetAdminVotingResponses];
 
 export type ListVotingsData = {
     body?: never;
@@ -4905,6 +5109,7 @@ export type CastVotingBallotData = {
     body?: {
         choices: Array<string>;
         abstain: boolean;
+        answers?: Array<SurveyAnswer>;
     };
     path: {
         id: string;
@@ -4965,6 +5170,686 @@ export type CastVotingBallotResponses = {
 
 export type CastVotingBallotResponse = CastVotingBallotResponses[keyof CastVotingBallotResponses];
 
+export type CloseSurveyData = {
+    body?: {
+        closesAt?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}/survey/close';
+};
+
+export type CloseSurveyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CloseSurveyError = CloseSurveyErrors[keyof CloseSurveyErrors];
+
+export type CloseSurveyResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type CloseSurveyResponse = CloseSurveyResponses[keyof CloseSurveyResponses];
+
+export type ReopenSurveyData = {
+    body?: {
+        closesAt?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}/survey/reopen';
+};
+
+export type ReopenSurveyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ReopenSurveyError = ReopenSurveyErrors[keyof ReopenSurveyErrors];
+
+export type ReopenSurveyResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ReopenSurveyResponse = ReopenSurveyResponses[keyof ReopenSurveyResponses];
+
+export type ArchiveSurveyData = {
+    body?: {
+        closesAt?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}/survey/archive';
+};
+
+export type ArchiveSurveyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ArchiveSurveyError = ArchiveSurveyErrors[keyof ArchiveSurveyErrors];
+
+export type ArchiveSurveyResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ArchiveSurveyResponse = ArchiveSurveyResponses[keyof ArchiveSurveyResponses];
+
+export type ListSurveyResponsesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+        pageSize?: number;
+    };
+    url: '/api/v1/admin/votings/{id}/responses';
+};
+
+export type ListSurveyResponsesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListSurveyResponsesError = ListSurveyResponsesErrors[keyof ListSurveyResponsesErrors];
+
+export type ListSurveyResponsesResponses = {
+    /**
+     * Result
+     */
+    200: SurveyResponses;
+};
+
+export type ListSurveyResponsesResponse = ListSurveyResponsesResponses[keyof ListSurveyResponsesResponses];
+
+export type DeleteSurveyResponseData = {
+    body?: never;
+    path: {
+        id: string;
+        responseId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/votings/{id}/responses/{responseId}';
+};
+
+export type DeleteSurveyResponseErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type DeleteSurveyResponseError = DeleteSurveyResponseErrors[keyof DeleteSurveyResponseErrors];
+
+export type DeleteSurveyResponseResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type DeleteSurveyResponseResponse = DeleteSurveyResponseResponses[keyof DeleteSurveyResponseResponses];
+
+export type ListOfficeAssignmentsData = {
+    body?: never;
+    path: {
+        stateId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/office-assignments';
+};
+
+export type ListOfficeAssignmentsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListOfficeAssignmentsError = ListOfficeAssignmentsErrors[keyof ListOfficeAssignmentsErrors];
+
+export type ListOfficeAssignmentsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        ids: Array<string>;
+    };
+};
+
+export type ListOfficeAssignmentsResponse = ListOfficeAssignmentsResponses[keyof ListOfficeAssignmentsResponses];
+
+export type CreateOfficeAssignmentData = {
+    body?: OfficeAssignmentInput;
+    path: {
+        stateId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/office-assignments';
+};
+
+export type CreateOfficeAssignmentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateOfficeAssignmentError = CreateOfficeAssignmentErrors[keyof CreateOfficeAssignmentErrors];
+
+export type CreateOfficeAssignmentResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type CreateOfficeAssignmentResponse = CreateOfficeAssignmentResponses[keyof CreateOfficeAssignmentResponses];
+
+export type GetOfficeAssignmentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/office-assignments/{id}';
+};
+
+export type GetOfficeAssignmentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetOfficeAssignmentError = GetOfficeAssignmentErrors[keyof GetOfficeAssignmentErrors];
+
+export type GetOfficeAssignmentResponses = {
+    /**
+     * Result
+     */
+    200: OfficeAssignmentDetail;
+};
+
+export type GetOfficeAssignmentResponse = GetOfficeAssignmentResponses[keyof GetOfficeAssignmentResponses];
+
+export type ApproveOfficeAssignmentData = {
+    body?: never;
+    path: {
+        id: string;
+        officeId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/office-assignments/{id}/approve/{officeId}';
+};
+
+export type ApproveOfficeAssignmentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApproveOfficeAssignmentError = ApproveOfficeAssignmentErrors[keyof ApproveOfficeAssignmentErrors];
+
+export type ApproveOfficeAssignmentResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApproveOfficeAssignmentResponse = ApproveOfficeAssignmentResponses[keyof ApproveOfficeAssignmentResponses];
+
+export type ApplyOfficeAssignmentData = {
+    body?: {
+        reason?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/office-assignments/{id}/apply';
+};
+
+export type ApplyOfficeAssignmentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApplyOfficeAssignmentError = ApplyOfficeAssignmentErrors[keyof ApplyOfficeAssignmentErrors];
+
+export type ApplyOfficeAssignmentResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApplyOfficeAssignmentResponse = ApplyOfficeAssignmentResponses[keyof ApplyOfficeAssignmentResponses];
+
+export type CancelOfficeAssignmentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/office-assignments/{id}/cancel';
+};
+
+export type CancelOfficeAssignmentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CancelOfficeAssignmentError = CancelOfficeAssignmentErrors[keyof CancelOfficeAssignmentErrors];
+
+export type CancelOfficeAssignmentResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type CancelOfficeAssignmentResponse = CancelOfficeAssignmentResponses[keyof CancelOfficeAssignmentResponses];
+
 export type ListMyStatesData = {
     body?: never;
     path?: never;
@@ -5022,12 +5907,74 @@ export type ListMyStatesResponses = {
             id: string;
             slug: string;
             status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+            color: string;
             name: LocalizedInput;
         }>;
     };
 };
 
 export type ListMyStatesResponse = ListMyStatesResponses[keyof ListMyStatesResponses];
+
+export type LeaveStateData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{id}/leave';
+};
+
+export type LeaveStateErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type LeaveStateError = LeaveStateErrors[keyof LeaveStateErrors];
+
+export type LeaveStateResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type LeaveStateResponse = LeaveStateResponses[keyof LeaveStateResponses];
 
 export type ListStateDraftsData = {
     body?: never;
@@ -5902,6 +6849,7 @@ export type ListAdminStatesResponses = {
             id: string;
             slug: string;
             status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
+            color: string;
             name: LocalizedInput;
         }>;
     };

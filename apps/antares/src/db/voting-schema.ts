@@ -14,6 +14,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { users } from './core-schema';
 import { localizedTexts, stateGovernanceRevisions } from './state-schema';
+import type { SurveyAnswer } from '../modules/voting/survey-contracts';
 import type { VotingInput, VotingSubject } from '../modules/voting/contracts';
 
 const time = (name: string): ReturnType<typeof timestamp> =>
@@ -26,7 +27,7 @@ const votings = pgTable(
       .notNull()
       .references(() => users.id),
     status: text('status')
-      .$type<'DRAFT' | 'SCHEDULED' | 'OPEN' | 'CLOSED' | 'CANCELLED'>()
+      .$type<'DRAFT' | 'SCHEDULED' | 'OPEN' | 'CLOSED' | 'CANCELLED' | 'ARCHIVED'>()
       .notNull()
       .default('DRAFT'),
     titleTextId: uuid('title_text_id')
@@ -65,6 +66,20 @@ const votingOptions = pgTable(
   },
   (table) => [uniqueIndex('voting_option_key').on(table.votingId, table.optionKey)],
 );
+const votingQuestions = pgTable(
+  'voting_questions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    votingId: uuid('voting_id')
+      .notNull()
+      .references(() => votings.id),
+    questionKey: uuid('question_key').notNull(),
+    titleTextId: uuid('title_text_id')
+      .notNull()
+      .references(() => localizedTexts.id),
+  },
+  (table) => [uniqueIndex('voting_question_key').on(table.votingId, table.questionKey)],
+);
 const votingEligibleVoters = pgTable(
   'voting_eligible_voters',
   {
@@ -91,10 +106,16 @@ const votingBallots = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id),
+    answers: jsonb('answers').$type<SurveyAnswer[]>(),
+    repeatKey: uuid('repeat_key'),
     abstain: boolean('abstain').notNull().default(false),
     castAt: time('cast_at').notNull().defaultNow(),
   },
-  (table) => [uniqueIndex('voting_one_ballot').on(table.votingId, table.userId)],
+  (table) => [
+    uniqueIndex('voting_one_ballot')
+      .on(table.votingId, table.userId)
+      .where(sql`${table.repeatKey} IS NULL`),
+  ],
 );
 const votingBallotChoices = pgTable(
   'voting_ballot_choices',
@@ -109,4 +130,25 @@ const votingBallotChoices = pgTable(
   (table) => [primaryKey({ columns: [table.ballotId, table.optionId] })],
 );
 
-export { votings, votingOptions, votingEligibleVoters, votingBallots, votingBallotChoices };
+const votingSurveyTexts = pgTable(
+  'voting_survey_texts',
+  {
+    votingId: uuid('voting_id')
+      .notNull()
+      .references(() => votings.id),
+    key: text('key').notNull(),
+    textId: uuid('text_id')
+      .notNull()
+      .references(() => localizedTexts.id),
+  },
+  (table) => [primaryKey({ columns: [table.votingId, table.key] })],
+);
+export {
+  votingSurveyTexts,
+  votings,
+  votingQuestions,
+  votingOptions,
+  votingEligibleVoters,
+  votingBallots,
+  votingBallotChoices,
+};

@@ -41,12 +41,17 @@
   z-index: 41;
   display: grid;
   gap: var(--space-4);
+  align-content: start;
+  > button {
+    justify-self: start;
+  }
 }
 .dialogFullscreen {
   inset: 1rem;
   transform: none;
   width: auto;
   max-height: none;
+  padding-inline: max(1.5rem, calc((100% - 64rem) / 2));
 }
 .tooltip,
 .menu {

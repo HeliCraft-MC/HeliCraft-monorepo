@@ -1,24 +1,24 @@
-// oxlint-disable import/max-dependencies -- The voting card composes ballot, result, proposal and administrative controls over the shared SDK.
+// oxlint-disable import/max-dependencies -- The voting card composes the shared voting and survey controls over one SDK read model.
+import { VotingSubjectDetails } from './voting-subject-details';
+import { VotingSummary } from './voting-summary';
+import { VotingResults } from './voting-results';
+import { VotingDraftEditor } from './voting-draft-editor';
 import { VotingAdminActions } from './voting-admin-actions';
-import { ReformProposal } from './reform-proposal';
+import { VotingParticipationPanel } from './voting-participation-panel';
+import { SurveyAdminActions } from '../surveys/admin-actions';
+import { SurveyStatistics } from '../surveys/statistics';
+import { SurveyResponses } from '../surveys/responses';
 import { uiText, displayText, label } from './text';
-import { useMemo, useState } from 'react';
-import type { ComponentProps, ReactElement } from 'react';
-import { usePropCache, rowKey } from './use-prop-cache';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getVoting, getAdminVoting, castVotingBallot } from '@helicraft/alhena';
-
-import { Alert, Button, Checkbox } from '@helicraft/atria';
+import type { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getVoting, getAdminVoting } from '@helicraft/alhena';
+import { Alert, ActionLink } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
-
 import styles from './states.module.scss';
 
 function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): ReactElement {
   const { locale } = useTranslation();
-  const [choices, setChoices] = useState<string[]>([]);
-  const [abstain, setAbstain] = useState(false);
-  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ['voting', id, admin],
     queryFn: async () => {
@@ -30,50 +30,8 @@ function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): Re
       return result.data;
     },
     refetchInterval: 15_000,
+    retry: false,
   });
-  const cast = useMutation({
-    mutationFn: async () => {
-      await castVotingBallot({
-        client: browserClient(),
-        path: { id },
-        body: { choices: abstain ? [] : choices, abstain },
-        throwOnError: true,
-      });
-      await queryClient.invalidateQueries({ queryKey: ['voting', id] });
-    },
-  });
-  const callbackScope2 = useMemo(
-    () => [
-      id,
-      admin,
-      locale,
-      choices,
-      setChoices,
-      abstain,
-      setAbstain,
-      queryClient,
-      query.data,
-      query.error,
-      cast.mutate,
-    ],
-    [
-      id,
-      admin,
-      locale,
-      choices,
-      setChoices,
-      abstain,
-      setAbstain,
-      queryClient,
-      query.data,
-      query.error,
-      cast.mutate,
-    ],
-  );
-  const cacheCheckboxOnChange =
-    usePropCache<NonNullable<ComponentProps<typeof Checkbox>['onChange']>>(callbackScope2);
-  const cacheButtonOnClick =
-    usePropCache<NonNullable<ComponentProps<typeof Button>['onClick']>>(callbackScope2);
   if (query.isPending) {
     return <p>{uiText(locale, 'Загрузка голосования…', 'Loading voting…')}</p>;
   }
@@ -81,6 +39,7 @@ function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): Re
     return <Alert tone="danger">{errorMessage(query.error)}</Alert>;
   }
   const voting = query.data;
+  const survey = voting.input.survey !== undefined;
   return (
     <section className={styles.card}>
       <h2>{displayText(voting.input.title, locale)}</h2>
@@ -91,75 +50,53 @@ function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): Re
           {new Date(voting.input.opensAt).toLocaleString(locale)}
         </time>{' '}
         —{' '}
-        <time dateTime={voting.input.closesAt}>
-          {new Date(voting.input.closesAt).toLocaleString(locale)}
-        </time>
+        {voting.input.survey?.manualClose === true ? (
+          uiText(locale, 'До ручного закрытия', 'Until closed manually')
+        ) : (
+          <time dateTime={voting.input.closesAt}>
+            {new Date(voting.input.closesAt).toLocaleString(locale)}
+          </time>
+        )}
       </p>
-      {admin && <VotingAdminActions id={id} status={voting.status} />}
-      {voting.subject?.type === 'STATE_REFORM' && <ReformProposal votingId={id} />}
-      {voting.hasVoted && (
-        <Alert>{uiText(locale, 'Ваш голос принят', 'Your vote has been recorded')}</Alert>
+      {!survey && (
+        <details>
+          <summary>{uiText(locale, 'Правила голосования', 'Voting rules')}</summary>
+          <VotingSummary rules={voting.input.rules} />
+        </details>
       )}
-      {!admin && voting.status === 'OPEN' && voting.eligible && !voting.hasVoted && (
-        <fieldset disabled={cast.isPending}>
-          <legend>{uiText(locale, 'Ваш голос', 'Your ballot')}</legend>
-          {voting.input.options.map((option) => (
-            <Checkbox
-              key={option.id}
-              label={displayText(option.label, locale)}
-              disabled={abstain}
-              checked={choices.includes(option.id)}
-              onChange={cacheCheckboxOnChange(rowKey('8625', option), (event) => {
-                if (!event.currentTarget.checked) {
-                  setChoices(choices.filter((item) => item !== option.id));
-                } else if (voting.input.maxSelections === 1) {
-                  setChoices([option.id]);
-                } else {
-                  setChoices([...choices, option.id]);
-                }
-              })}
-            />
-          ))}
-          {voting.input.rules.allowAbstain && (
-            <Checkbox
-              label={uiText(locale, 'Воздержаться', 'Abstain')}
-              checked={abstain}
-              onChange={cacheCheckboxOnChange('9179', (event) => {
-                setAbstain(event.currentTarget.checked);
-              })}
-            />
+      {!admin && voting.status === 'OPEN' && !voting.eligible && (
+        <Alert>
+          {uiText(
+            locale,
+            'Вы не входите в список избирателей этого голосования. Список фиксируется при открытии.',
+            'You are not in this vote’s electorate. The list is frozen when voting opens.',
           )}
-          <Button
-            disabled={!abstain && choices.length === 0}
-            onClick={cacheButtonOnClick('9389', () => {
-              cast.mutate();
-            })}
-          >
-            {uiText(locale, 'Проголосовать', 'Vote')}
-          </Button>
-        </fieldset>
+        </Alert>
       )}
-      {voting.result && (
-        <section>
-          <h3>{uiText(locale, 'Результаты', 'Results')}</h3>
-          <p>
-            {uiText(locale, 'Участие', 'Participation')}: {voting.result.participating}/
-            {voting.result.eligible}
-          </p>
-          <ul>
-            {voting.result.options.map((option) => (
-              <li key={option.id}>
-                {displayText(
-                  voting.input.options.find((item) => item.id === option.id)?.label ?? {},
-                  locale,
-                )}
-                : {option.votes} {option.approved ? '✓' : ''}
-              </li>
-            ))}
-          </ul>
-        </section>
+      {admin && <VotingAdminActions id={id} status={voting.status} />}
+      {admin && survey && <SurveyAdminActions voting={voting} />}
+      {!['DRAFT', 'ARCHIVED', 'CANCELLED'].includes(voting.status) && (
+        <ActionLink href={`/app/votings/${id}`}>
+          {uiText(locale, 'Открыть по ссылке', 'Open direct link')}
+        </ActionLink>
       )}
-      {cast.error !== null && <Alert tone="danger">{errorMessage(cast.error)}</Alert>}
+      {admin && voting.status === 'DRAFT' && voting.subject === null && (
+        <VotingDraftEditor id={id} input={voting.input} />
+      )}
+      <VotingSubjectDetails subject={voting.subject} votingId={id} />
+      <VotingParticipationPanel voting={voting} admin={admin} />
+      {voting.result &&
+        (survey ? (
+          <SurveyStatistics voting={voting} />
+        ) : (
+          <VotingResults input={voting.input} result={voting.result} />
+        ))}
+      {admin && survey && (
+        <details>
+          <summary>{uiText(locale, 'Просмотр ответов', 'Review responses')}</summary>
+          <SurveyResponses id={id} input={voting.input} />
+        </details>
+      )}
     </section>
   );
 }

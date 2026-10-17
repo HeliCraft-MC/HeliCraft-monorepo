@@ -28,3 +28,13 @@ Machine configuration is a typed revision snapshot. Display fields are stripped 
 Human-readable policy/generated summaries use the configured threshold kind, including simple/absolute majorities and unanimity, rather than displaying the unused percentage field. Draft reviews distinguish initial office-holder assignments from current published holder intervals.
 
 Historical membership/holder reads compare against the exact PostgreSQL revision timestamp. Holder corrections close and reopen intervals at the same transaction timestamp; JavaScript millisecond rounding must not select the previous assignment at a revision boundary.
+
+New offices in reform proposals may select current active citizens for their initial roster. Existing offices retain their original roster, even when a founder has left; changing existing holders requires the separate office procedure. Initial state creation retains its founder-only rule. Both eligibility and current approval authority are revalidated during publication. Voluntary departure preserves history and requires succession when it would vacate a required office; existing electorate snapshots do not change.
+
+## Office decisions
+
+`state_office_assignments` stores an immutable appointment/removal payload pinned to a governance revision, target office, candidate and optional replaced holder. It has only pending, applied and cancelled lifecycle states. PostgreSQL guards the payload and completed history. The service rechecks active citizenship, office capacity, required-office succession, current revision and the applicable vacancy rule under the state lock before applying. Replacement joins both appointment and removal policies. Preset metadata supplies no authority.
+
+Approvals refer to the proposal and stable office identities. A signature counts only while its signer still holds the same uninterrupted, unexpired office term with an active account. Reappointment cannot revive an earlier signature; the holder must sign again. Any/all policy groups and the appointment authority are conjunctive requirements. Identical electorates and voting rules may share one generic vote; different rules retain separate votes. All elections remain single-question votes with frozen electorates and a subject bound to the immutable proposal. No appointment-specific ballots exist.
+
+Manual procedures require a current administrator with `states.manage`, a recorded reason, and all other structured proofs. Administration cannot bypass a missing vote or office approval through this procedure. Apply closes the previous holder and starts the successor at the exact same PostgreSQL transaction timestamp without rewriting governance history. Cancellation retains the proposal and cancels its unfinished votes.

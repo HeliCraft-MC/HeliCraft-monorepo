@@ -114,7 +114,8 @@ async function readPopulation(
     .select({ id: users.id, name: users.username })
     .from(stateMemberships)
     .innerJoin(users, eq(users.id, stateMemberships.userId))
-    .where(and(eq(stateMemberships.stateId, input.stateId), membershipWindow));
+    .where(and(eq(stateMemberships.stateId, input.stateId), membershipWindow))
+    .orderBy(stateMemberships.joinedAt, users.id);
   const holders = await transaction
     .select({
       officeId: stateOfficeHolders.officeId,

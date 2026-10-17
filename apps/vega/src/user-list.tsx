@@ -1,3 +1,4 @@
+import { uiText } from './states/text';
 // oxlint-disable import/max-dependencies -- The existing screen also composes the shared player nickname/head component.
 import { PlayerNickname } from './player-nickname';
 import { useTranslation } from './i18n';
@@ -49,7 +50,14 @@ export function UserList(): ReactElement {
   return (
     <>
       <h1>{text('admin.users')}</h1>
-      <div className={styles.form}>
+      <p className={styles.paragraph}>
+        {uiText(
+          locale,
+          'Найдите игрока по нику или UUID. Фильтры помогают проверить статусы и роли; управление открывается отдельно для каждого аккаунта.',
+          'Find a player by name or UUID. Filter by status and role, then open an account to manage it.',
+        )}
+      </p>
+      <div className={styles.filters}>
         <FormField label={text('users.searchLabel')} htmlFor="user-search">
           <TextField id="user-search" type="search" value={search} onChange={handleSearch} />
         </FormField>

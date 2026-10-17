@@ -1,3 +1,8 @@
+// oxlint-disable import/max-dependencies -- Photo metadata editing composes shared fields, typed API and relationship pickers.
+import { GalleryStatePicker } from './gallery-state-picker';
+import type { SelectedGalleryState } from './gallery-state-picker';
+import { displayText } from './states/text';
+import styles from './gallery.module.scss';
 import { GalleryPlayerPicker } from './gallery-player-picker';
 import type { GalleryPlayer } from './gallery-player-picker';
 import { useState, useCallback } from 'react';
@@ -18,7 +23,7 @@ function formString(form: FormData, field: string): string {
 }
 const emptyTranslations = {};
 function GalleryMetadataEditor({ item }: Readonly<{ item: GalleryItem }>): ReactElement | null {
-  const { text } = useTranslation();
+  const { text, locale } = useTranslation();
   const account = useQuery({ queryKey: ['account'], queryFn: currentAccount });
   const router = useRouter();
   const [originalLanguage, setOriginalLanguage] = useState(item.originalLanguage ?? 'ru');
@@ -26,6 +31,13 @@ function GalleryMetadataEditor({ item }: Readonly<{ item: GalleryItem }>): React
     setOriginalLanguage(event.target.value);
   }, []);
   const translations = item.translations ?? emptyTranslations;
+  const [states, setStates] = useState<SelectedGalleryState[]>(
+    item.states.map((state) => ({
+      stateId: state.id,
+      role: state.role,
+      name: displayText(state.name, locale) || state.slug,
+    })),
+  );
   const [players, setPlayers] = useState<GalleryPlayer[]>(item.players);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -48,6 +60,7 @@ function GalleryMetadataEditor({ item }: Readonly<{ item: GalleryItem }>): React
             originalLanguage: formString(form, 'originalLanguage'),
             translations: { ...item.translations, ...galleryTranslations(form) },
             location: item.location,
+            stateLinks: states.map((state) => ({ stateId: state.stateId, role: state.role })),
             players: players.map((player) => player.id),
           },
         });
@@ -58,7 +71,7 @@ function GalleryMetadataEditor({ item }: Readonly<{ item: GalleryItem }>): React
       }
       setBusy(false);
     },
-    [item, router, players],
+    [item, router, players, states],
   );
   const handleSubmit = useCallback(
     (event: SubmitEvent<HTMLFormElement>): void => {
@@ -71,7 +84,7 @@ function GalleryMetadataEditor({ item }: Readonly<{ item: GalleryItem }>): React
   }
 
   return (
-    <details>
+    <details className={styles.metadataEditor}>
       <summary>{text('gallery.editCaptions')}</summary>
       <form onSubmit={handleSubmit}>
         <OriginalLanguage value={originalLanguage} onChange={handleLanguageChange} />
@@ -81,6 +94,7 @@ function GalleryMetadataEditor({ item }: Readonly<{ item: GalleryItem }>): React
           values={translations}
           originalLanguage={originalLanguage}
         />
+        <GalleryStatePicker value={states} onChange={setStates} disabled={busy} />
         <GalleryPlayerPicker players={players} onChange={setPlayers} disabled={busy} />
         {message !== null && <Alert>{text(message)}</Alert>}
         <Button type="submit" disabled={busy}>

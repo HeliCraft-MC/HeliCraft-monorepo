@@ -40,6 +40,7 @@ class StateReformService {
         throw new DomainError(HTTP.conflict, 'STATE_INACTIVE', 'Государство не активно');
       }
       const current = await readRevision(transaction, state.currentRevisionId);
+      const { configuration } = current;
       const id = crypto.randomUUID();
       await transaction.insert(stateDrafts).values({
         id,
@@ -47,7 +48,7 @@ class StateReformService {
         stateId,
         baseRevisionId: state.currentRevisionId,
         title: 'Governance reform',
-        configuration: current.configuration,
+        configuration,
       });
       return id;
     });

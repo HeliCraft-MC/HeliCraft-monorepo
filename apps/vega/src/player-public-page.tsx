@@ -1,26 +1,30 @@
 import { useMemo } from 'react';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { PublicPlayerProfile } from '@helicraft/alhena';
-import { MinecraftAvatar } from '@helicraft/atria';
+import { MinecraftAvatar, StateCard } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { displayText, uiText } from './states/text';
 import { formatDate } from './date-format';
 import styles from './player-public-page.module.scss';
 
-interface StateAccent extends CSSProperties {
-  readonly '--state-accent': string;
-}
 function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>): ReactElement {
   const { locale } = useTranslation();
-  const accents = useMemo(
+  const facts = useMemo(
     () =>
       new Map(
-        player.states.map((state): [string, StateAccent] => [
+        player.states.map((state) => [
           state.id,
-          { '--state-accent': state.color },
+          state.offices.map((office) => ({
+            label: displayText(office.name, locale),
+            value: uiText(
+              locale,
+              office.isHeadOfState ? 'Глава государства' : 'Должностное лицо',
+              office.isHeadOfState ? 'Head of state' : 'Office holder',
+            ),
+          })),
         ]),
       ),
-    [player.states],
+    [player.states, locale],
   );
   const citizenships = player.states.filter((state) => state.citizenSince !== null);
   const officeCount = player.states.reduce((total, state) => total + state.offices.length, 0);
@@ -78,37 +82,24 @@ function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>)
         ) : (
           <div className={styles.grid}>
             {player.states.map((state) => (
-              <article key={state.id} className={styles.state} style={accents.get(state.id)}>
-                <h3>
-                  <a href={`/states/${state.slug}`}>{displayText(state.name, locale)} ↗</a>
-                </h3>
-                <div className={styles.badges}>
-                  {state.founder && <span>{uiText(locale, 'Основатель', 'Founder')}</span>}
-                  {state.citizenSince !== null && (
-                    <span>{uiText(locale, 'Гражданин', 'Citizen')}</span>
-                  )}
-                </div>
-                {state.citizenSince !== null && (
-                  <p className={styles.muted}>
-                    {uiText(locale, 'Гражданство с', 'Citizen since')}{' '}
-                    <time dateTime={state.citizenSince}>
-                      {formatDate(state.citizenSince, locale)}
-                    </time>
-                  </p>
+              <StateCard
+                key={state.id}
+                name={displayText(state.name, locale)}
+                color={state.color}
+                href={`/states/${state.slug}`}
+                flag={null}
+                government={uiText(
+                  locale,
+                  state.founder ? 'Основатель' : 'Гражданин',
+                  state.founder ? 'Founder' : 'Citizen',
                 )}
-                {state.offices.length > 0 && (
-                  <ul className={styles.offices}>
-                    {state.offices.map((office) => (
-                      <li key={office.id}>
-                        <strong>{displayText(office.name, locale)}</strong>
-                        {office.isHeadOfState && (
-                          <small>{uiText(locale, 'Глава государства', 'Head of state')}</small>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </article>
+                description={
+                  state.citizenSince === null
+                    ? undefined
+                    : `${uiText(locale, 'Гражданство с', 'Citizen since')} ${formatDate(state.citizenSince, locale)}`
+                }
+                facts={facts.get(state.id)}
+              />
             ))}
           </div>
         )}

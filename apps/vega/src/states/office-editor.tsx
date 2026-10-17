@@ -1,3 +1,4 @@
+// oxlint-disable max-lines -- Office form keeps field explanations beside existing controls; persistence and policy validation remain separate.
 // oxlint-disable import/max-dependencies -- The existing screen also composes the shared player nickname/head component.
 import { PlayerNickname } from '../player-nickname';
 import { uiText, displayText, label } from './text';
@@ -31,6 +32,7 @@ function OfficeEditor({
   onMove,
   position,
   rules = false,
+  existing = false,
 }: Readonly<{
   office: StateOffice;
   offices: readonly StateOffice[];
@@ -40,6 +42,7 @@ function OfficeEditor({
   onMove: (direction: number) => void;
   position: number;
   rules?: boolean;
+  existing?: boolean;
 }>): ReactElement {
   const id = useId();
   const { locale } = useTranslation();
@@ -104,6 +107,11 @@ function OfficeEditor({
         <FormField
           htmlFor={`${id}-seats`}
           label={uiText(locale, 'Количество мест', 'Maximum holders')}
+          help={uiText(
+            locale,
+            'Сколько игроков могут одновременно занимать эту должность. Для единоличной должности укажите 1.',
+            'How many people may hold this office at once. Use 1 for a single holder.',
+          )}
         >
           <TextField
             id={`${id}-seats`}
@@ -146,26 +154,41 @@ function OfficeEditor({
     <section className={styles.card}>
       <h3>{displayText(office.name, locale)}</h3>
       <fieldset>
-        <legend>{uiText(locale, 'Первые должностные лица', 'Initial holders')}</legend>
-        {founders.map((founder) => (
-          <Checkbox
-            key={founder.id}
-            label={holderLabels.get(founder.id)}
-            checked={office.initialHolderIds.includes(founder.id)}
-            onChange={cacheCheckboxOnChange(rowKey('3736', founder), (event) => {
-              onChange({
-                ...office,
-                initialHolderIds: event.currentTarget.checked
-                  ? [...office.initialHolderIds, founder.id]
-                  : office.initialHolderIds.filter((holderId) => holderId !== founder.id),
-              });
-            })}
-          />
-        ))}
+        <legend>{uiText(locale, 'Назначаемые должностные лица', 'Proposed office holders')}</legend>
+        {existing && (
+          <p>
+            {uiText(
+              locale,
+              'Текущие назначения меняются в разделе «Назначения» панели государства. Здесь настраиваются правила должности.',
+              'Change current holders in the state management Appointments section. This editor configures office rules.',
+            )}
+          </p>
+        )}
+        {!existing &&
+          founders.map((founder) => (
+            <Checkbox
+              key={founder.id}
+              label={holderLabels.get(founder.id)}
+              checked={office.initialHolderIds.includes(founder.id)}
+              onChange={cacheCheckboxOnChange(rowKey('3736', founder), (event) => {
+                onChange({
+                  ...office,
+                  initialHolderIds: event.currentTarget.checked
+                    ? [...office.initialHolderIds, founder.id]
+                    : office.initialHolderIds.filter((holderId) => holderId !== founder.id),
+                });
+              })}
+            />
+          ))}
       </fieldset>
       <FormField
         htmlFor={`${id}-appointment`}
         label={uiText(locale, 'Назначение преемника', 'Successor appointment')}
+        help={uiText(
+          locale,
+          'Кто выбирает следующего должностного лица: другая должность, граждане, совет или описанная ручная процедура.',
+          'Who chooses the next holder: another office, citizens, a council, or a documented manual procedure.',
+        )}
       >
         <Select
           id={`${id}-appointment`}
@@ -188,6 +211,11 @@ function OfficeEditor({
         <FormField
           htmlFor={`${id}-authority`}
           label={uiText(locale, 'Назначающая должность', 'Appointing office')}
+          help={uiText(
+            locale,
+            'Держатели этой должности назначают преемника или составляют совет избирателей, в зависимости от выбранного правила.',
+            'Holders of this office appoint the successor or form the voting council, depending on the selected rule.',
+          )}
         >
           <Select
             id={`${id}-authority`}
@@ -205,7 +233,15 @@ function OfficeEditor({
           </Select>
         </FormField>
       )}
-      <FormField htmlFor={`${id}-term`} label={uiText(locale, 'Срок полномочий', 'Term')}>
+      <FormField
+        htmlFor={`${id}-term`}
+        label={uiText(locale, 'Срок полномочий', 'Term')}
+        help={uiText(
+          locale,
+          'Бессрочные полномочия сохраняются до принятого изменения. Срочные полномочия завершаются после указанного числа дней.',
+          'Indefinite authority continues until an adopted change. Fixed terms expire after the specified number of days.',
+        )}
+      >
         <Select
           id={`${id}-term`}
           value={office.term}
@@ -222,7 +258,15 @@ function OfficeEditor({
         </Select>
       </FormField>
       {office.term === 'FIXED_TERM' && (
-        <FormField htmlFor={`${id}-days`} label={uiText(locale, 'Срок, дней', 'Term in days')}>
+        <FormField
+          htmlFor={`${id}-days`}
+          label={uiText(locale, 'Срок, дней', 'Term in days')}
+          help={uiText(
+            locale,
+            'Дни отсчитываются от назначения. Истечение срока прекращает полномочия; само по себе оно не назначает преемника.',
+            'Days are counted from appointment. Expiry ends authority but does not appoint a successor.',
+          )}
+        >
           <TextField
             id={`${id}-days`}
             type="number"
@@ -237,6 +281,11 @@ function OfficeEditor({
       <FormField
         htmlFor={`${id}-vacancy`}
         label={uiText(locale, 'Процедура при вакансии', 'Vacancy procedure')}
+        help={uiText(
+          locale,
+          'Как заполняется свободное место. Эта процедура определяет порядок назначения, а не автоматическую замену игрока.',
+          'How a vacant seat is filled. This defines the appointment procedure rather than automatically replacing a player.',
+        )}
       >
         <Select
           id={`${id}-vacancy`}
@@ -262,7 +311,7 @@ function OfficeEditor({
           'Порог отсутствия, дней (необязательно)',
           'Inactivity threshold in days (optional)',
         )}
-        hint={uiText(
+        help={uiText(
           locale,
           'Позволяет инициировать преемственность; не снимает с должности автоматически.',
           'Allows initiating succession; does not remove a holder automatically.',

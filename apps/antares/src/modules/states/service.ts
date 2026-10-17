@@ -150,7 +150,10 @@ class StateService {
     status?: StateStatus,
     adminActorId?: string,
     memberId?: string,
-  ): Promise<{ id: string; slug: string; status: StateStatus; name: LocalizedInput }[]> {
+  ): Promise<
+    { id: string; slug: string; status: StateStatus; color: string; name: LocalizedInput }[]
+  > {
+    // oxlint-disable-next-line max-lines-per-function -- Authorized list hydrates versioned state identity and color within one transaction.
     return await this.db.transaction(async (transaction) => {
       if (adminActorId !== undefined) {
         await authorizeMutation(transaction, adminActorId, 'states.manage');
@@ -172,8 +175,13 @@ class StateService {
           slug: states.slug,
           status: states.status,
           revisionId: states.currentRevisionId,
+          configuration: stateGovernanceRevisions.configuration,
         })
         .from(states)
+        .leftJoin(
+          stateGovernanceRevisions,
+          eq(stateGovernanceRevisions.id, states.currentRevisionId),
+        )
         .where(filter)
         .orderBy(desc(states.createdAt));
       return await Promise.all(
@@ -194,6 +202,7 @@ class StateService {
             id: record.id,
             slug: record.slug,
             status: record.status,
+            color: record.configuration?.color ?? '#607d8b',
             name: reference === undefined ? {} : await readText(transaction, reference.textId),
           };
         }),

@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { listAdminStates } from '@helicraft/alhena';
 import type { StateDetail } from '@helicraft/alhena';
-import { Alert, FormField, Select, ActionLink } from '@helicraft/atria';
+import { Alert, EmptyState, FormField, Select, ActionLink } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 
@@ -36,6 +36,13 @@ function AdminStates(): ReactElement {
   return (
     <section className={styles.page}>
       <h1>{uiText(locale, 'Управление государствами', 'Manage states')}</h1>
+      <p>
+        {uiText(
+          locale,
+          'Выберите статус для проверки новых государств или работы с действующими. В карточке государства доступны причины решений, редакции и назначения.',
+          'Choose a status to review new states or manage existing ones. Open a state for decision reasons, revisions and office proposals.',
+        )}
+      </p>
       <FormField htmlFor="admin-state-status" label={uiText(locale, 'Статус', 'Status')}>
         <Select
           id="admin-state-status"
@@ -52,6 +59,20 @@ function AdminStates(): ReactElement {
           ))}
         </Select>
       </FormField>
+      {query.isPending && (
+        <output>{uiText(locale, 'Загрузка государств…', 'Loading states…')}</output>
+      )}
+      {query.data?.length === 0 && (
+        <EmptyState
+          title={uiText(locale, 'Государств с таким статусом нет', 'No states with this status')}
+        >
+          {uiText(
+            locale,
+            'Выберите другой статус или все государства.',
+            'Choose another status or all states.',
+          )}
+        </EmptyState>
+      )}
       <ul className={styles.list}>
         {(query.data ?? []).map((state) => (
           <li key={state.id} className={styles.card}>

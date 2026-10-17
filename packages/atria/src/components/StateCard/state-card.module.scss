@@ -2,7 +2,10 @@
   display: block;
   min-width: 0;
   text-decoration: none;
-  border-bottom: 1px solid var(--border-strong);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--state-accent) 7%, var(--bg-panel));
 }
 a.card:hover {
   border-color: var(--primary);
@@ -47,7 +50,7 @@ a.card:hover {
   }
 }
 .body {
-  padding: 26px 0;
+  padding: 1.5rem;
   h3 {
     font-size: clamp(1.4rem, 2vw, 2rem);
     font-weight: 500;
@@ -93,7 +96,11 @@ a.card:hover {
   display: grid;
   place-items: center;
   height: 100%;
-  background: radial-gradient(ellipse at center, var(--bg-hover), transparent 75%);
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--state-accent) 24%, var(--bg-hover)),
+    transparent 75%
+  );
   > img,
   > svg {
     width: 72%;
@@ -107,5 +114,14 @@ a.card:hover {
 @media (prefers-reduced-motion: reduce) {
   .visual > img:first-child:not(.flag) {
     transition: none;
+  }
+}
+
+.visual[data-symbol-only] {
+  height: 8rem;
+  .flagArtwork {
+    font-size: 3rem;
+    font-weight: 650;
+    color: var(--text-primary);
   }
 }

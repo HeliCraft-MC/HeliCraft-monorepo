@@ -1,10 +1,12 @@
+import { useMemo } from 'react';
 import { StateFacts } from './state-facts';
 import { StateVisual } from './state-visual';
 import { Icon } from '../icon';
-import type { ReactElement, ReactNode } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import styles from './state-card.module.scss';
 
 interface StateCardProps {
+  readonly color?: string;
   readonly name: string;
   readonly government?: string;
   readonly citizens?: number;
@@ -17,9 +19,11 @@ interface StateCardProps {
   readonly flagLabel?: string;
   readonly populationLabel?: string;
 }
+// oxlint-disable-next-line max-lines-per-function -- Shared card composition keeps the optional visual, facts and navigation aligned.
 function StateCard(props: StateCardProps): ReactElement {
   const {
     name,
+    color,
     government,
     citizens,
     flag,
@@ -31,6 +35,10 @@ function StateCard(props: StateCardProps): ReactElement {
     flagLabel = 'Флаг',
     populationLabel = 'граждан',
   } = props;
+  const accent = useMemo<CSSProperties & { '--state-accent': string }>(
+    () => ({ '--state-accent': color ?? 'var(--primary)' }),
+    [color],
+  );
   const content = (
     <>
       <StateVisual
@@ -57,11 +65,13 @@ function StateCard(props: StateCardProps): ReactElement {
     </>
   );
   return href !== undefined && href !== '' ? (
-    <a className={styles.card} href={href}>
+    <a className={styles.card} style={accent} href={href} aria-label={name}>
       {content}
     </a>
   ) : (
-    <article className={styles.card}>{content}</article>
+    <article className={styles.card} style={accent}>
+      {content}
+    </article>
   );
 }
 export { StateCard, type StateCardProps };

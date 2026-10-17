@@ -78,7 +78,7 @@
     &[aria-current='page'] {
       color: var(--text-primary);
       background: var(--bg-panel);
-      box-shadow: inset 3px 0 var(--primary);
+      font-weight: 650;
     }
     &:hover {
       color: var(--text-primary);
@@ -91,6 +91,9 @@
   max-width: 900px;
   .form {
     max-width: 680px;
+    > button {
+      justify-self: start;
+    }
   }
   h1 {
     margin-top: 0;
@@ -161,4 +164,96 @@
   display: inline-block;
   margin-inline-start: 1rem;
   font-size: 0.85rem;
+}
+
+.accountContent {
+  > h2 {
+    margin-top: 2rem;
+  }
+  > .form {
+    padding: 1.5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    background: var(--bg-panel);
+  }
+  > .navigation {
+    align-items: center;
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      text-decoration: none;
+      background: var(--bg-panel);
+    }
+  }
+}
+.section {
+  border-radius: 1rem;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem;
+  margin-block: 2rem;
+  > div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+  }
+  dt {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  dd {
+    font-size: 2rem;
+    margin: 0;
+    font-weight: 600;
+  }
+}
+@media (max-width: 40rem) {
+  .accountContent > .form {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+    .eyebrow {
+      display: none;
+    }
+    a {
+      flex: none;
+      white-space: nowrap;
+      padding: 0.75rem;
+    }
+  }
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  align-items: start;
+  gap: 1rem;
+  margin-block: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+}
+.auditMetadata {
+  max-width: 28rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-top: 0.75rem;
+  font-size: var(--font-small);
 }

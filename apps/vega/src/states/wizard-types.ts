@@ -9,6 +9,8 @@ interface StateWizardStepProps {
   readonly configuration: StateConfiguration;
   readonly onChange: Dispatch<SetStateAction<StateConfiguration>>;
   readonly principal: Principal;
+  readonly existingOfficeIds?: readonly string[];
+  readonly holderCandidates?: SelectedPlayer[];
   readonly cofounders: SelectedPlayer[];
   readonly setCofounders: (players: SelectedPlayer[]) => void;
 }

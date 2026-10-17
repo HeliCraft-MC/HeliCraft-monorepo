@@ -1,3 +1,4 @@
+import { uiText } from './states/text';
 import { useTranslation } from './i18n';
 import { getRouteApi } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
@@ -9,9 +10,10 @@ import { browserClient } from './account-api';
 import styles from './account.module.scss';
 
 const PAGE_SIZE = 20;
+const JSON_INDENT = 2;
 const auditRoute = getRouteApi('/admin/audit');
 export function AuditList(): ReactElement {
-  const { text } = useTranslation();
+  const { text, locale } = useTranslation();
 
   const search = auditRoute.useSearch();
   const [target, setTarget] = useState(search.target ?? '');
@@ -62,7 +64,14 @@ export function AuditList(): ReactElement {
   return (
     <>
       <h1>{text('admin.audit')}</h1>
-      <div className={styles.form}>
+      <p className={styles.paragraph}>
+        {uiText(
+          locale,
+          'История административных действий. Уточните автора, объект или период; дополнительные сведения можно открыть в каждой записи.',
+          'Review administrative actions. Filter by actor, target or time period; expand individual records for details.',
+        )}
+      </p>
+      <div className={styles.filters}>
         <FormField label={text('audit.action')} htmlFor="audit-action">
           <TextField id="audit-action" value={action} onChange={handleAction} />
         </FormField>
@@ -100,7 +109,14 @@ export function AuditList(): ReactElement {
               <td>
                 {entry.targetType} / {entry.targetId}
               </td>
-              <td>{JSON.stringify(entry.metadata)}</td>
+              <td aria-label={text('audit.metadata')}>
+                <details>
+                  <summary>{text('audit.metadata')}</summary>
+                  <pre className={styles.auditMetadata}>
+                    {JSON.stringify(entry.metadata, null, JSON_INDENT)}
+                  </pre>
+                </details>
+              </td>
             </tr>
           ))}
         </tbody>

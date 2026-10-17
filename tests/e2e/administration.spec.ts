@@ -1,3 +1,4 @@
+import { assertAdminWorkspacePages } from './admin-workspace-pages';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
@@ -62,4 +63,5 @@ test('OWNER manages real user roles/status and sees audit evidence', async ({
   await expect(page.getByLabel('UUID объекта', { exact: true })).toHaveValue(uuid);
   await page.getByLabel('Действие', { exact: true }).fill('user.status.changed');
   await expect(page.getByRole('cell', { name: `user / ${uuid}`, exact: true })).toBeVisible();
+  await assertAdminWorkspacePages(page, testInfo.project.name);
 });

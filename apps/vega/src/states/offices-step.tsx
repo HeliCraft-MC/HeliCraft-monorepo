@@ -21,8 +21,8 @@ function OfficesStep(props: StateWizardStepProps): ReactElement {
   const { locale } = useTranslation();
   const id = useId();
   const founders = useMemo(
-    () => [{ id: principal.id, name: principal.username }, ...cofounders],
-    [principal.id, principal.username, cofounders],
+    () => props.holderCandidates ?? [{ id: principal.id, name: principal.username }, ...cofounders],
+    [principal.id, principal.username, cofounders, props.holderCandidates],
   );
   const officeChange = useCallback(
     (office: StateOffice): void => {
@@ -74,6 +74,7 @@ function OfficesStep(props: StateWizardStepProps): ReactElement {
         <OfficeEditor
           key={office.id}
           office={office}
+          existing={props.existingOfficeIds?.includes(office.id) ?? false}
           offices={configuration.governance.offices}
           founders={founders}
           rules={step === STEPS.OFFICE_RULES}

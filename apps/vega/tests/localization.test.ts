@@ -17,6 +17,7 @@ const image: GalleryItem = {
   },
   location: null,
   players: [],
+  states: [],
   author: { id: '22222222-2222-4222-8222-222222222222', name: 'Player' },
   width: 800,
   height: 600,

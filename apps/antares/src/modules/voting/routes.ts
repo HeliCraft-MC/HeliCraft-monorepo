@@ -4,8 +4,12 @@ import type { Database } from '../../db';
 import { authenticator, json } from '../platform/routes';
 import { DomainError, HTTP } from '../errors';
 import { VotingInputSchema, VotingDetailSchema } from './contracts';
+import { SurveyAnswerSchema } from './survey-contracts';
+import { surveyRoutes } from './survey-routes';
 import { VotingService } from './service';
 
+const MAX_CHOICES = 50;
+const MAX_ANSWERS = 100;
 const Id = z.object({ id: z.uuid() });
 const Success = z.object({ success: z.literal(true) });
 const Errors = {
@@ -47,6 +51,26 @@ function votingRoutes(db: Database['db'] | undefined, secureCookies: boolean): O
         { id: await service().create(await actorId(context), context.req.valid('json')) },
         HTTP.ok,
       ),
+  );
+  app.openapi(
+    createRoute({
+      method: 'put',
+      path: '/admin/votings/{id}',
+      operationId: 'updateVoting',
+      request: {
+        params: Id,
+        body: { content: { 'application/json': { schema: VotingInputSchema } } },
+      },
+      responses: { 200: json(Success), ...Errors },
+    }),
+    async (context) => {
+      await service().update(
+        context.req.valid('param').id,
+        await actorId(context),
+        context.req.valid('json'),
+      );
+      return context.json({ success: true as const }, HTTP.ok);
+    },
   );
   for (const action of ['publish', 'cancel'] as const) {
     app.openapi(
@@ -100,7 +124,11 @@ function votingRoutes(db: Database['db'] | undefined, secureCookies: boolean): O
         body: {
           content: {
             'application/json': {
-              schema: z.object({ choices: z.array(z.uuid()), abstain: z.boolean() }),
+              schema: z.object({
+                choices: z.array(z.uuid()).max(MAX_CHOICES),
+                abstain: z.boolean(),
+                answers: z.array(SurveyAnswerSchema).max(MAX_ANSWERS).optional(),
+              }),
             },
           },
         },
@@ -112,10 +140,12 @@ function votingRoutes(db: Database['db'] | undefined, secureCookies: boolean): O
       await service().cast(context.req.valid('param').id, await actorId(context), {
         choices: input.choices,
         abstain: input.abstain,
+        answers: input.answers,
       });
       return context.json({ success: true as const }, HTTP.ok);
     },
   );
+  app.route('/', surveyRoutes(db, secureCookies));
   return app;
 }
 export { votingRoutes };
