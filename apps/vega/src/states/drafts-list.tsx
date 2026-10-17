@@ -95,7 +95,7 @@ function StateDraftsList(): ReactElement {
           <StateCard
             key={state.id}
             name={displayText(state.name, locale) || state.slug}
-            href={`/app/states/${state.id}`}
+            href={`/app/states/${state.id}/manage`}
             color={state.color}
             flag={null}
             government={label(state.status, locale)}

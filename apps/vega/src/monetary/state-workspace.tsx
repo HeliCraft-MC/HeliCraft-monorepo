@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getStateMonetary } from '@helicraft/alhena';
 import type { StateDetail } from '@helicraft/alhena';
-import { Alert, FieldHelp } from '@helicraft/atria';
+import { LoadingState, Alert, FieldHelp } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { PublicGovernment } from '../states/public-government';
@@ -53,7 +53,7 @@ function StateMonetaryWorkspace({
   const { data } = query;
   const currencyList = useMemo(() => (data?.currency ? [data.currency] : []), [data]);
   if (query.isPending) {
-    return <output>{text('monetary.loading')}</output>;
+    return <LoadingState label={text('monetary.loading')} />;
   }
   if (!data) {
     return <Alert tone="danger">{errorMessage(query.error)}</Alert>;

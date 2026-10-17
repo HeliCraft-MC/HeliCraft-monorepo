@@ -193,9 +193,9 @@ test('resumes a multilingual state draft, edits governance and constitution, the
   await page.getByRole('button', { name: '12. Проверка', exact: true }).click();
   await page.getByRole('button', { name: 'Проверить конфигурацию', exact: true }).click();
   await page.getByRole('button', { name: 'Создать государство', exact: true }).click();
-  await expect(page).toHaveURL(/\/app\/states\/[0-9a-f-]+$/u);
+  await expect(page).toHaveURL(/\/app\/states\/[0-9a-f-]+\/manage\?section=overview$/u);
   await expect(page.getByText('Ожидает одобрения администрации', { exact: true })).toBeVisible();
-  const stateId = new URL(page.url()).pathname.split('/').at(-1);
+  const stateId = new URL(page.url()).pathname.split('/').at(-2);
   if (stateId === undefined) {
     throw new Error('Missing state id');
   }
@@ -225,8 +225,13 @@ test('resumes a multilingual state draft, edits governance and constitution, the
     await expect(
       page.getByRole('button', { name: 'Предложить изменение', exact: true }),
     ).toBeVisible();
-    await page.getByRole('link', { name: 'Вернуться к государству', exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/app/states/${stateId}$`, 'u'));
+    await page
+      .getByRole('navigation', { name: 'Управление государством', exact: true })
+      .getByRole('link', { name: 'Обзор', exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      new RegExp(`/app/states/${stateId}/manage\\?section=overview$`, 'u'),
+    );
     await assertManagementPage(page, stateId, testInfo.project.name);
     await expect(admin.getByText('Активно', { exact: true })).toBeVisible();
     await expect(admin.getByText('Конфигурация проверена', { exact: true })).toBeVisible();
@@ -242,8 +247,8 @@ test('resumes a multilingual state draft, edits governance and constitution, the
         'href',
         '/states',
       );
-      await expect(publicPage.locator('#states')).toContainText(`Аврора ${suffix}`);
-      await expect(publicPage.locator(`#states a[href="/states/${slug}"]`)).toBeVisible();
+      // The home preview contains the three most populous states; new states use the full directory.
+      await expect(publicPage.locator('#states a[href^="/states/"]')).toHaveCount(3);
       await publicPage
         .locator('#states')
         .screenshot({ path: `/tmp/helicraft-home-states-${test.info().project.name}.png` });

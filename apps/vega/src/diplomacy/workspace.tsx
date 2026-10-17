@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getStateDiplomacy } from '@helicraft/alhena';
 import type { StateDetail } from '@helicraft/alhena';
-import { Alert } from '@helicraft/atria';
+import { LoadingState, Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -39,7 +39,7 @@ function DiplomacyWorkspace({
     void refetch();
   }, [refetch]);
   if (query.isPending) {
-    return <output>{uiText(locale, 'Загрузка дипломатии…', 'Loading diplomacy…')}</output>;
+    return <LoadingState label={uiText(locale, 'Загрузка дипломатии…', 'Loading diplomacy…')} />;
   }
   if (query.data === undefined) {
     return <Alert tone="danger">{errorMessage(query.error)}</Alert>;

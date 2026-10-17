@@ -20,14 +20,10 @@ export default defineConfig(({ mode }) => {
   return {
     envDir: '../..',
     optimizeDeps: {
-      entries: ['./src/client.tsx', './src/routes/**/*.tsx'],
-      include: [
-        'react',
-        'react-dom',
-        'react-dom/client',
-        '@tanstack/react-query',
-        '@tanstack/react-router',
-      ],
+      // Start owns entry discovery and excludes its router so server-function transforms run.
+      include: ['@tanstack/react-query'],
+      // Release the initial bundle before Start's client warmup finishes crawling imports.
+      holdUntilCrawlEnd: false,
     },
     plugins: [
       tanstackStart(),

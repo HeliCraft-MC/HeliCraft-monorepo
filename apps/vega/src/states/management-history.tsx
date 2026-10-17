@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listStateRevisions } from '@helicraft/alhena';
-import { Alert } from '@helicraft/atria';
+import { LoadingState, Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from './text';
@@ -44,7 +44,7 @@ function ManagementHistory({ stateId }: Readonly<{ stateId: string }>): ReactEle
         ))}
       </ol>
       {history.isPending && (
-        <output>{uiText(locale, 'Загрузка истории…', 'Loading history…')}</output>
+        <LoadingState label={uiText(locale, 'Загрузка истории…', 'Loading history…')} />
       )}
       {history.error !== null && <Alert tone="danger">{errorMessage(history.error)}</Alert>}
     </section>

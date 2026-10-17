@@ -6,7 +6,10 @@ interface FieldHelpProps {
   readonly label: string;
   readonly content: string;
 }
-function FieldHelp({ label, content }: FieldHelpProps): ReactElement {
+function FieldHelp({ label, content }: FieldHelpProps): ReactElement | null {
+  if (content.trim() === '' || content.trim() === label.trim()) {
+    return null;
+  }
   return (
     <Popover.Root>
       <Popover.Trigger openOnHover className={styles.trigger} aria-label={`ⓘ ${label}`}>

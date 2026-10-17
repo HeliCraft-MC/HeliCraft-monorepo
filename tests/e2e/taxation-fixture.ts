@@ -43,6 +43,7 @@ async function createTaxState(
     cofounderId: string;
     slug: string;
     name: string;
+    color?: string;
   }>,
 ): Promise<string> {
   const draft = DraftSchema.parse(
@@ -68,6 +69,7 @@ async function createTaxState(
       configuration: {
         ...draft.configuration,
         slug: input.slug,
+        color: input.color ?? draft.configuration.color,
         name: { ru: input.name, en: `State ${input.slug}` },
         cofounderIds: [input.cofounderId],
         governance: {

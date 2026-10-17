@@ -46,11 +46,8 @@ async function assertManagementPage(
   stateId: string,
   projectName: string,
 ): Promise<void> {
-  await expect(page.getByRole('navigation', { name: 'Мой аккаунт', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Панель государства', exact: true }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Добро пожаловать в панель государства', exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Мой аккаунт', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Обзор', exact: true })).toBeVisible();
   await expect(
     page.getByRole('navigation', { name: 'Управление государством', exact: true }),
   ).toBeVisible();

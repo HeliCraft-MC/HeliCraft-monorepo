@@ -60,6 +60,7 @@ export {
 } from './components/PlayerNickname/player-nickname';
 
 export { FieldHelp, type FieldHelpProps } from './components/FieldHelp/field-help';
+export { LoadingState, type LoadingStateProps } from './components/LoadingState/loading-state';
 export {
   LocalizableTextInput,
   type LocalizableTextInputProps,

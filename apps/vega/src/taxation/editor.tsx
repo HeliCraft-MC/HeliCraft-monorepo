@@ -56,7 +56,7 @@ function TaxEditor({
       <p>
         {uiText(
           locale,
-          'Нет полномочия для этого решения. Настройте процедуру через реформу Governance.',
+          'Нет полномочия для этого решения. Настройте процедуру через изменение государственного устройства.',
           'No authority for this decision. Configure its policy through a Governance reform.',
         )}
       </p>

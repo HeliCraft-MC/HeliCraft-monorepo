@@ -3,6 +3,7 @@ import { Link, Outlet, getRouteApi, useRouterState } from '@tanstack/react-route
 import type { ReactElement } from 'react';
 import { PageContainer } from '@helicraft/atria';
 import { SiteHeader } from './site-header';
+import { NavigationProgress } from './navigation-progress';
 import styles from './site.module.scss';
 
 const rootRoute = getRouteApi('__root__');
@@ -14,6 +15,7 @@ export function SiteLayout(): ReactElement {
   const home = useRouterState({ select: (state) => state.location.pathname === '/' });
   return (
     <>
+      <NavigationProgress />
       <a className={styles.skip} href="#main-content">
         {text('navigation.skipContent')}
       </a>

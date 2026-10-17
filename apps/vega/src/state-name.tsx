@@ -52,7 +52,7 @@ function StateName({
       onPreview={requestPreview}
       description={
         state.data === undefined
-          ? uiText(locale, 'Открыть государство', 'Open state')
+          ? undefined
           : displayText(state.data.configuration.description, locale)
       }
       facts={[publicFacts, facts]

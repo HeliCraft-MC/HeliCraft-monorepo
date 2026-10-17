@@ -5,6 +5,15 @@ import { TextField } from '../TextField/text-field';
 
 afterEach(cleanup);
 describe('field explanations', () => {
+  it('omits empty explanations and explanations that only repeat the label', () => {
+    render(
+      <FormField htmlFor="name" label="Название" help=" Название ">
+        <TextField id="name" />
+      </FormField>,
+    );
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Название')).toBeVisible();
+  });
   it('keeps input labels distinct and opens help by clicking the information control', async () => {
     render(
       <FormField

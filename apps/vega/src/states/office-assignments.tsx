@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { listOfficeAssignments } from '@helicraft/alhena';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, EmptyState } from '@helicraft/atria';
+import { LoadingState, Alert, EmptyState } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from './text';
@@ -53,7 +53,7 @@ function OfficeAssignments({ state }: Readonly<{ state: StateDetail }>): ReactEl
         <OfficeAssignmentCard key={id} id={id} stateId={state.id} />
       ))}
       {query.isPending && (
-        <output>{uiText(locale, 'Загрузка назначений…', 'Loading appointments…')}</output>
+        <LoadingState label={uiText(locale, 'Загрузка назначений…', 'Loading appointments…')} />
       )}
       {query.error !== null && <Alert tone="danger">{errorMessage(query.error)}</Alert>}
     </section>

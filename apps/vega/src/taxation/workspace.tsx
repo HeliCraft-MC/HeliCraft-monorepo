@@ -4,7 +4,7 @@ import type { ReactElement, MouseEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getStateTaxation } from '@helicraft/alhena';
 import type { StateDetail, TaxLawRevision } from '@helicraft/alhena';
-import { Alert, Button, FieldHelp, MoneyAmount } from '@helicraft/atria';
+import { LoadingState, Alert, Button, FieldHelp, MoneyAmount } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
@@ -59,7 +59,9 @@ function TaxationWorkspace({
     [data],
   );
   if (query.isPending) {
-    return <output>{uiText(locale, 'Загрузка налоговой системы…', 'Loading taxation…')}</output>;
+    return (
+      <LoadingState label={uiText(locale, 'Загрузка налоговой системы…', 'Loading taxation…')} />
+    );
   }
   if (data === undefined) {
     return <Alert tone="danger">{errorMessage(query.error)}</Alert>;
@@ -76,7 +78,7 @@ function TaxationWorkspace({
           <p>
             {uiText(
               locale,
-              'Налоговая служба ещё не действует. Уполномоченный гражданин предлагает устав, государство утверждает его по Governance, затем администрация ратифицирует веб-институт с обоснованием. Физическое здание не проверяется.',
+              'Налоговая служба ещё не действует. Уполномоченный гражданин предлагает устав, государство утверждает его по своим правилам, затем администрация ратифицирует веб-институт с обоснованием. Физическое здание не проверяется.',
               'The tax office is not active. An authorized citizen proposes its charter, the state approves under Governance, then administration ratifies the web institution with a reason. No physical building is verified.',
             )}
           </p>

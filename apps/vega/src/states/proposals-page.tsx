@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { listStateReformProposals, getOwnedState, createStateReformDraft } from '@helicraft/alhena';
 import { useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Alert, ActionLink, Button, EmptyState } from '@helicraft/atria';
+import { Alert, ActionLink, Button, EmptyState, LoadingState } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { StateProposalCard } from './proposal-card';
@@ -13,7 +13,8 @@ import styles from './states.module.scss';
 function StateProposalsPage({
   stateId,
   actorId,
-}: Readonly<{ stateId: string; actorId: string }>): ReactElement {
+  embedded = false,
+}: Readonly<{ stateId: string; actorId: string; embedded?: boolean }>): ReactElement {
   const { locale } = useTranslation();
   const query = useQuery({
     queryKey: ['state-proposals', stateId],
@@ -57,12 +58,22 @@ function StateProposalsPage({
     createDraft();
   }, [createDraft]);
   return (
-    <section className={styles.page}>
-      <ActionLink href={`/app/states/${stateId}`}>
-        {uiText(locale, 'Вернуться к государству', 'Back to the state')}
-      </ActionLink>
-      <h1>{uiText(locale, 'Предложения о государственном устройстве', 'Governance proposals')}</h1>
-      {state.data && <p>{displayText(state.data.configuration.name, locale)}</p>}
+    <section className={embedded ? styles.editor : styles.page}>
+      {!embedded && (
+        <ActionLink href={`/app/states/${stateId}`}>
+          {uiText(locale, 'Вернуться к государству', 'Back to the state')}
+        </ActionLink>
+      )}
+      {embedded ? (
+        <h2>
+          {uiText(locale, 'Предложения о государственном устройстве', 'Governance proposals')}
+        </h2>
+      ) : (
+        <h1>
+          {uiText(locale, 'Предложения о государственном устройстве', 'Governance proposals')}
+        </h1>
+      )}
+      {!embedded && state.data && <p>{displayText(state.data.configuration.name, locale)}</p>}
       <p>
         {uiText(
           locale,
@@ -87,7 +98,9 @@ function StateProposalsPage({
       {(query.data ?? []).map((proposal) => (
         <StateProposalCard key={proposal.id} id={proposal.id} actorId={actorId} />
       ))}
-      {query.isPending && <p>{uiText(locale, 'Загрузка…', 'Loading…')}</p>}
+      {query.isPending && (
+        <LoadingState label={uiText(locale, 'Загрузка предложений…', 'Loading proposals…')} />
+      )}
       {state.error !== null && <Alert tone="danger">{errorMessage(state.error)}</Alert>}
       {reform.error !== null && <Alert tone="danger">{errorMessage(reform.error)}</Alert>}
       {query.error !== null && <Alert tone="danger">{errorMessage(query.error)}</Alert>}

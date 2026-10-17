@@ -131,7 +131,7 @@ function TreatyWizard({
           label={uiText(locale, 'Ратификация', 'Ratification')}
           content={uiText(
             locale,
-            'Сохранение проекта не меняет налогов. Отправьте неизменяемую редакцию партнёру, затем обе стороны утверждают её по собственному Governance.',
+            'Сохранение проекта не меняет налогов. Отправьте неизменяемую редакцию партнёру, затем обе стороны утверждают её по своим правилам принятия решений.',
             'Saving a draft does not change taxation. Send its immutable revision to your partner, then both states ratify under their own Governance.',
           )}
         />

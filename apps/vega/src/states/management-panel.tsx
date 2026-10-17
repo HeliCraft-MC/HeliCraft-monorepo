@@ -1,41 +1,29 @@
-// oxlint-disable import/max-dependencies -- State workspace composition connects the shared identity preview, section navigation and typed state actions.
-import { StateName } from '../state-name';
-import { useCallback } from 'react';
-import type { ReactElement } from 'react';
+// oxlint-disable import/max-dependencies -- The state shell composes typed API data, navigation and the selected workspace.
+import { useCallback, useMemo } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { createStateReformDraft, getOwnedState } from '@helicraft/alhena';
-import { Alert } from '@helicraft/atria';
+import { Alert, LoadingState } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
-import { displayText, uiText } from './text';
-import { ManagementSections, MANAGEMENT_SECTIONS } from './management-sections';
+import { displayText, label, uiText } from './text';
+import { ManagementSections } from './management-sections';
 import type { ManagementSection } from './management-sections';
+import { managementSections } from './management-access';
+import { ManagementNavigation } from './management-navigation';
+import { managementLabels } from './management-labels';
 import styles from './management.module.scss';
 
-const labels = {
-  overview: ['Обзор', 'Overview'],
-  identity: ['Государство', 'State identity'],
-  government: ['Должности', 'Offices'],
-  constitution: ['Конституция', 'Constitution'],
-  appointments: ['Назначения', 'Appointments'],
-  proposals: ['Предложения и голосования', 'Proposals and voting'],
-  citizenship: ['Моё гражданство', 'My citizenship'],
-  history: ['История', 'History'],
-  bank: ['Центральный банк', 'Central bank'],
-  currency: ['Валюта', 'Currency'],
-  'monetary-policy': ['Денежная политика', 'Monetary policy'],
-  issuance: ['Эмиссия', 'Issuance'],
-  'bank-finances': ['Банковские финансы', 'Bank finances'],
-  treasury: ['Казна', 'Treasury'],
-  taxation: ['Налоговая система', 'Taxation'],
-  diplomacy: ['Дипломатия', 'Diplomacy'],
-} as const;
 function StateManagementPanel({
   stateId,
   actorId,
   section,
-}: Readonly<{ stateId: string; actorId: string; section: ManagementSection }>): ReactElement {
+}: Readonly<{
+  stateId: string;
+  actorId: string;
+  section: ManagementSection;
+}>): ReactElement {
   const { locale } = useTranslation();
   const navigate = useNavigate();
   const state = useQuery({
@@ -67,69 +55,80 @@ function StateManagementPanel({
   const start = useCallback((): void => {
     mutate();
   }, [mutate]);
-  return (
-    <section className={styles.panel}>
-      <header>
-        <span>{uiText(locale, 'Панель государства', 'State management')}</span>
-        <h1>
-          {state.data ? (
-            <StateName
-              name={displayText(state.data.configuration.name, locale)}
-              color={state.data.configuration.color}
-              slug={state.data.slug}
-              href={`/app/states/${stateId}`}
-            />
-          ) : (
-            uiText(locale, 'Государство', 'State')
-          )}
-        </h1>
-        {state.data && (
-          <p>
-            {uiText(
-              locale,
-              state.data.holders.some((holder) => holder.userId === actorId)
-                ? 'Гражданин и должностное лицо'
-                : 'Гражданин',
-              state.data.holders.some((holder) => holder.userId === actorId)
-                ? 'Citizen and office holder'
-                : 'Citizen',
-            )}
-          </p>
+  const color = state.data?.configuration.color ?? '#859b76';
+  const theme = useMemo<CSSProperties & { '--state-accent': string }>(
+    () => ({ '--state-accent': color }),
+    [color],
+  );
+  const publicParams = useMemo(() => ({ slug: state.data?.slug ?? '' }), [state.data?.slug]);
+  if (!state.data) {
+    return (
+      <main id="main-content" className={styles.pending}>
+        {state.isPending ? (
+          <LoadingState label={uiText(locale, 'Загрузка государства…', 'Loading state…')} />
+        ) : (
+          <>
+            <Alert tone="danger">{errorMessage(state.error)}</Alert>
+            <Link to="/app/states/new">{uiText(locale, 'Мои государства', 'My states')}</Link>
+          </>
         )}
-      </header>
-      <div className={styles.layout}>
-        <nav
-          className={styles.navigation}
-          aria-label={uiText(locale, 'Управление государством', 'State management')}
-        >
-          {MANAGEMENT_SECTIONS.map((item) => (
-            <a
-              key={item}
-              href={`/app/states/${stateId}/manage?section=${item}`}
-              aria-current={section === item ? 'page' : undefined}
-            >
-              {uiText(locale, labels[item][0], labels[item][1])}
-            </a>
-          ))}
-        </nav>
+      </main>
+    );
+  }
+  const sections = managementSections(state.data, actorId);
+  const selected = section === 'identity' || section === 'constitution' ? 'overview' : section;
+  const accessible = sections.includes(selected);
+  const name = displayText(state.data.configuration.name, locale);
+  return (
+    <main id="main-content" className={styles.panel} style={theme}>
+      <ManagementNavigation
+        stateId={stateId}
+        stateName={name}
+        section={selected}
+        sections={sections}
+      />
+      <div className={styles.workspace}>
+        <header className={styles.topbar}>
+          <div>
+            <span className={styles.eyebrow}>{name}</span>
+            <h1>{uiText(locale, managementLabels[selected][0], managementLabels[selected][1])}</h1>
+          </div>
+          <div className={styles.headerActions}>
+            <span className={styles.status}>{label(state.data.status, locale)}</span>
+            {state.data.status === 'ACTIVE' && (
+              <Link to="/states/$slug" params={publicParams}>
+                {uiText(locale, 'Публичная страница ↗', 'Public page ↗')}
+              </Link>
+            )}
+          </div>
+        </header>
         <div className={styles.content}>
-          {state.data && (
+          {state.data.status !== 'ACTIVE' && state.data.statusReason !== null && (
+            <Alert>{state.data.statusReason}</Alert>
+          )}
+          {accessible ? (
             <ManagementSections
+              key={`${stateId}:${selected}`}
               state={state.data}
               actorId={actorId}
-              section={section}
+              section={selected}
               onReform={start}
               pending={reform.isPending}
             />
-          )}
-          {state.isPending && (
-            <output>{uiText(locale, 'Загрузка государства…', 'Loading state…')}</output>
+          ) : (
+            <Alert>
+              {uiText(
+                locale,
+                'Этот раздел недоступен с вашими текущими полномочиями. Выберите доступный раздел в меню.',
+                'This section is unavailable with your current authority. Choose an available section from the menu.',
+              )}
+            </Alert>
           )}
           {state.error !== null && <Alert tone="danger">{errorMessage(state.error)}</Alert>}
           {reform.error !== null && <Alert tone="danger">{errorMessage(reform.error)}</Alert>}
         </div>
       </div>
-    </section>
+    </main>
   );
 }
 export { StateManagementPanel };

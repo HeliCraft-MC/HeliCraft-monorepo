@@ -20,5 +20,6 @@ const meta = {
   },
 } satisfies Meta<typeof FieldHelp>;
 const Default: StoryObj<typeof meta> = {};
-export { Default };
+const RedundantHelp: StoryObj<typeof meta> = { args: { label: 'Название', content: 'Название' } };
+export { Default, RedundantHelp };
 export default meta;

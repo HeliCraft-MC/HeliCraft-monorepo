@@ -65,8 +65,8 @@ import { Route as AppVotingsVotingIdRouteImport } from './routes/app.votings_.$v
 import { Route as StatesSlugConstitutionRouteImport } from './routes/states.$slug_.constitution'
 import { Route as StatesSlugTaxationRouteImport } from './routes/states.$slug_.taxation'
 import { Route as AppStatesDraftsDraftIdRouteImport } from './routes/app.states.drafts.$draftId'
-import { Route as AppStatesStateIdManageRouteImport } from './routes/app.states_.$stateId.manage'
 import { Route as AppStatesStateIdProposalsRouteImport } from './routes/app.states_.$stateId.proposals'
+import { Route as AppStatesStateIdManageRouteImport } from './routes/app_.states.$stateId.manage'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -348,17 +348,17 @@ const AppStatesDraftsDraftIdRoute = AppStatesDraftsDraftIdRouteImport.update({
   path: '/states/drafts/$draftId',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStatesStateIdManageRoute = AppStatesStateIdManageRouteImport.update({
-  id: '/states_/$stateId/manage',
-  path: '/states/$stateId/manage',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppStatesStateIdProposalsRoute =
   AppStatesStateIdProposalsRouteImport.update({
     id: '/states_/$stateId/proposals',
     path: '/states/$stateId/proposals',
     getParentRoute: () => AppRoute,
   } as any)
+const AppStatesStateIdManageRoute = AppStatesStateIdManageRouteImport.update({
+  id: '/app_/states/$stateId/manage',
+  path: '/app/states/$stateId/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -417,8 +417,8 @@ export interface FileRoutesByFullPath {
   '/admin/users/': typeof AdminUsersIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
-  '/app/states/$stateId/manage': typeof AppStatesStateIdManageRoute
   '/app/states/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
+  '/app/states/$stateId/manage': typeof AppStatesStateIdManageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -471,8 +471,8 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
   '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
-  '/app/states/$stateId/manage': typeof AppStatesStateIdManageRoute
   '/app/states/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
+  '/app/states/$stateId/manage': typeof AppStatesStateIdManageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -532,8 +532,8 @@ export interface FileRoutesById {
   '/admin/users/': typeof AdminUsersIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
-  '/app/states_/$stateId/manage': typeof AppStatesStateIdManageRoute
   '/app/states_/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
+  '/app_/states/$stateId/manage': typeof AppStatesStateIdManageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -594,8 +594,8 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/app/settings/'
     | '/app/states/drafts/$draftId'
-    | '/app/states/$stateId/manage'
     | '/app/states/$stateId/proposals'
+    | '/app/states/$stateId/manage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -648,8 +648,8 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/app/settings'
     | '/app/states/drafts/$draftId'
-    | '/app/states/$stateId/manage'
     | '/app/states/$stateId/proposals'
+    | '/app/states/$stateId/manage'
   id:
     | '__root__'
     | '/'
@@ -708,8 +708,8 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/app/settings/'
     | '/app/states/drafts/$draftId'
-    | '/app/states_/$stateId/manage'
     | '/app/states_/$stateId/proposals'
+    | '/app_/states/$stateId/manage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -736,6 +736,7 @@ export interface RootRouteChildren {
   TreatiesIndexRoute: typeof TreatiesIndexRoute
   StatesSlugConstitutionRoute: typeof StatesSlugConstitutionRoute
   StatesSlugTaxationRoute: typeof StatesSlugTaxationRoute
+  AppStatesStateIdManageRoute: typeof AppStatesStateIdManageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1132,19 +1133,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStatesDraftsDraftIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/states_/$stateId/manage': {
-      id: '/app/states_/$stateId/manage'
-      path: '/states/$stateId/manage'
-      fullPath: '/app/states/$stateId/manage'
-      preLoaderRoute: typeof AppStatesStateIdManageRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/states_/$stateId/proposals': {
       id: '/app/states_/$stateId/proposals'
       path: '/states/$stateId/proposals'
       fullPath: '/app/states/$stateId/proposals'
       preLoaderRoute: typeof AppStatesStateIdProposalsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app_/states/$stateId/manage': {
+      id: '/app_/states/$stateId/manage'
+      path: '/app/states/$stateId/manage'
+      fullPath: '/app/states/$stateId/manage'
+      preLoaderRoute: typeof AppStatesStateIdManageRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -1238,7 +1239,6 @@ interface AppRouteChildren {
   AppVotingsVotingIdRoute: typeof AppVotingsVotingIdRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppStatesDraftsDraftIdRoute: typeof AppStatesDraftsDraftIdRoute
-  AppStatesStateIdManageRoute: typeof AppStatesStateIdManageRoute
   AppStatesStateIdProposalsRoute: typeof AppStatesStateIdProposalsRoute
 }
 
@@ -1255,7 +1255,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppVotingsVotingIdRoute: AppVotingsVotingIdRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
   AppStatesDraftsDraftIdRoute: AppStatesDraftsDraftIdRoute,
-  AppStatesStateIdManageRoute: AppStatesStateIdManageRoute,
   AppStatesStateIdProposalsRoute: AppStatesStateIdProposalsRoute,
 }
 
@@ -1299,6 +1298,7 @@ const rootRouteChildren: RootRouteChildren = {
   TreatiesIndexRoute: TreatiesIndexRoute,
   StatesSlugConstitutionRoute: StatesSlugConstitutionRoute,
   StatesSlugTaxationRoute: StatesSlugTaxationRoute,
+  AppStatesStateIdManageRoute: AppStatesStateIdManageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

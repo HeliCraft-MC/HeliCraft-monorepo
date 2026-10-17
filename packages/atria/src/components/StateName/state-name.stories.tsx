@@ -22,6 +22,9 @@ const meta = {
   },
 } satisfies Meta<typeof StateName>;
 const Default: StoryObj<typeof meta> = {};
+const WithoutPreview: StoryObj<typeof meta> = {
+  args: { description: undefined, facts: undefined },
+};
 const LightColor: StoryObj<typeof meta> = {
   args: { color: '#ffffff', name: 'A very long state name that wraps on mobile' },
 };
@@ -31,5 +34,5 @@ const LongDescription: StoryObj<typeof meta> = {
       'A public description may include the community history, its founding goals and its approach to cooperation. The hover preview remains a short introduction even when the full description covers several paragraphs. Follow the state link to read the complete description and explore citizenship, offices, decision policies and the constitution. Keeping this text compact makes the preview usable on small screens while preserving the direct link to all public information.',
   },
 };
-export { Default, LightColor, LongDescription };
+export { Default, LightColor, LongDescription, WithoutPreview };
 export default meta;
