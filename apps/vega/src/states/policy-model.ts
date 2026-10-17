@@ -17,6 +17,20 @@ const actions = [
   'REMOVE_CITIZEN',
   'APPOINT_OFFICE_HOLDER',
   'REMOVE_OFFICE_HOLDER',
+  'ESTABLISH_CENTRAL_BANK',
+  'CHANGE_BANK_CHARTER',
+  'CREATE_CURRENCY',
+  'CHANGE_MONETARY_POLICY',
+  'ISSUE_CURRENCY',
+  'BURN_CURRENCY',
+  'TRANSFER_CENTRAL_BANK',
+  'SPEND_TREASURY',
+  'ESTABLISH_TAX_OFFICE',
+  'CHANGE_TAX_OFFICE_CHARTER',
+  'AMEND_TAX_LAW',
+  'AMEND_TREATY',
+  'DENOUNCE_TREATY',
+  'SIGN_TREATY',
 ] as const;
 function newPolicy(action: GovernancePolicy['action']): GovernancePolicy {
   return { action, mechanism: 'CITIZEN_VOTE', officeIds: [], vote: null, manualProcedure: {} };

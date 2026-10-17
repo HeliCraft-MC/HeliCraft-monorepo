@@ -1,3 +1,4 @@
+import { uiText } from './states/text';
 import { useTranslation } from './i18n';
 import { getRouteApi, Link, Outlet } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
@@ -9,7 +10,7 @@ const exact = { exact: true };
 const route = getRouteApi('/admin');
 
 export function AdminLayout(): ReactElement {
-  const { text } = useTranslation();
+  const { text, locale } = useTranslation();
 
   const { principal } = route.useRouteContext();
   return (
@@ -34,7 +35,14 @@ export function AdminLayout(): ReactElement {
               <Link to="/admin/audit">{text('admin.audit')}</Link>
             ) : null}
             {principal.permissions.includes('states.manage') && (
-              <Link to="/admin/states">{text('states.title')}</Link>
+              <>
+                <Link to="/admin/states">{text('states.title')}</Link>
+                <Link to="/admin/tax-offices">
+                  {uiText(locale, 'Налоговые службы', 'Tax offices')}
+                </Link>
+                <Link to="/admin/central-banks">{text('monetary.moderation')}</Link>
+                <Link to="/admin/monetary-directives">{text('monetary.directives')}</Link>
+              </>
             )}
             {principal.permissions.includes('voting.manage') && (
               <Link to="/admin/votings">{text('votings.title')}</Link>

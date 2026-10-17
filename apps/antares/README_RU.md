@@ -39,3 +39,9 @@ S3 использует AWS SDK v3 с endpoint и path-style addressing. Инт�
 ## Gallery foundation
 
 Публичные `/gallery` и `/gallery/:id` используют SSR; `/app/gallery/new` — существующую сессию и CSR. Галерея проходит через Alhena к отдельному домену Antares и private S3/PostgreSQL. [Архитектура галереи](../../docs/architecture/gallery_RU.md). В Atria добавлены StateCard, GalleryTile, PhotoCarousel и ActionLink; каждый компонент расположен в собственной папке `src/components`.
+
+## Monetary system V1
+
+[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/architecture/monetary_RU.md).
+
+Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/architecture/taxation_RU.md), [Diplomacy](../../docs/architecture/diplomacy_RU.md).

@@ -54,3 +54,36 @@ export {
 } from './office-assignment-schema';
 
 export { votingSurveyTexts } from './voting-schema';
+
+export {
+  monetaryDirectives,
+  monetaryApprovals,
+  monetaryVotes,
+  centralBanks,
+  bankReviews,
+  currencies,
+  monetaryPolicyRevisions,
+  financialAccounts,
+  ledgerTransactions,
+  ledgerPostings,
+} from './monetary-schema';
+
+export {
+  economicDirectiveDocuments,
+  taxOffices,
+  taxOfficeReviews,
+  taxLaws,
+  taxLawRevisions,
+  transferQuotes,
+  economicOperations,
+  taxAssessments,
+  taxAssessmentClaims,
+  economicJournals,
+} from './taxation-schema';
+export {
+  treaties,
+  treatyParties,
+  treatyRevisions,
+  treatyDecisions,
+  treatyActivations,
+} from './diplomacy-schema';

@@ -17,6 +17,7 @@ export function AccountLayout(): ReactElement {
               {text('common.overview')}
             </Link>
             <Link to="/app/states/new">{text('states.title')}</Link>
+            <Link to="/app/wallet">{text('monetary.wallet')}</Link>
             <Link to="/app/votings">{text('votings.title')}</Link>
             <Link to="/app/settings/profile">{text('account.profile')}</Link>
             <Link to="/app/settings/skin">{text('account.skin')}</Link>

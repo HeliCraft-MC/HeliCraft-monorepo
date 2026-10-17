@@ -173,6 +173,7 @@ function assignmentApprovalsMet(
   );
 }
 export {
+  policyRequirements,
   assignmentRequirements,
   assignmentApprovalsMet,
   type AssignmentRequirements,

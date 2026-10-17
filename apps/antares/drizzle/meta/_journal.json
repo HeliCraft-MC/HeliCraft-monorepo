@@ -92,6 +92,41 @@
       "when": 1792240274956,
       "tag": "0012_glamorous_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792255140022,
+      "tag": "0013_awesome_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792257611398,
+      "tag": "0014_monetary_supply_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792264541991,
+      "tag": "0015_monetary_policy_revision_numbers",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792269287788,
+      "tag": "0016_taxation_diplomacy_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792269288018,
+      "tag": "0017_taxation_integrity",
+      "breakpoints": true
     }
   ]
 }

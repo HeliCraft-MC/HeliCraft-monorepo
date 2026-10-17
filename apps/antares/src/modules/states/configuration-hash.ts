@@ -18,4 +18,4 @@ function canonicalJson(value: unknown): string {
 function configurationHash(configuration: Readonly<StateConfiguration>): string {
   return createHash('sha256').update(canonicalJson(configuration)).digest('hex');
 }
-export { configurationHash };
+export { configurationHash, canonicalJson };

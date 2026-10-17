@@ -61,6 +61,9 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
           <a onClick={closeMenu} href="/states">
             {text('navigation.states')}
           </a>
+          <a onClick={closeMenu} href="/currencies">
+            {text('monetary.navigation')}
+          </a>
           <a onClick={closeMenu} href="/gallery">
             {text('navigation.atlas')}
           </a>
@@ -97,6 +100,9 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
           </Link>
           <a onClick={closeMenu} href="/states">
             {text('navigation.states')}
+          </a>
+          <a onClick={closeMenu} href="/currencies">
+            {text('monetary.navigation')}
           </a>
           <a onClick={closeMenu} href="/gallery">
             {text('navigation.atlas')}

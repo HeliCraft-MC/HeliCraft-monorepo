@@ -67,3 +67,4 @@ export {
 } from './components/LocalizableTextInput/localizable-text-input';
 
 export { StateName, type StateNameProps } from './components/StateName/state-name';
+export { MoneyAmount, formatMoneyMinor, moneyInputToMinor } from './components/MoneyAmount';

@@ -200,7 +200,7 @@ export type StateOffice = {
 };
 
 export type GovernancePolicy = {
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'SPEND_TREASURY' | 'DECLARE_WAR';
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'DECLARE_WAR';
     mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
     officeIds: Array<string>;
     vote: OptionalVotingRules;
@@ -232,7 +232,7 @@ export type ConstitutionBlock = {
     type: 'GENERATED';
     kind: 'STATE_IDENTITY' | 'FOUNDERS' | 'CITIZENSHIP_RULES' | 'OFFICES_OVERVIEW' | 'SINGLE_OFFICE' | 'OFFICE_APPOINTMENT_RULE' | 'STATE_DECISION_RULE' | 'VOTING_RULES' | 'GOVERNANCE_SUMMARY';
     officeId: string | null;
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'SPEND_TREASURY' | 'DECLARE_WAR' | null;
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'DECLARE_WAR' | null;
 };
 
 export type ReformProposal = {
@@ -398,6 +398,678 @@ export type SurveyResponse = {
     answers: Array<SurveyAnswer>;
 };
 
+export type TransferQuote = {
+    id: string;
+    expiresAt: string;
+    calculation: TaxCalculation;
+};
+
+export type TaxCalculation = {
+    event: TaxableEventType;
+    currencyId: string;
+    senderId: string;
+    recipientId: string;
+    principalMinor: string;
+    totalTaxMinor: string;
+    totalDebitMinor: string;
+    charges: Array<TaxCharge>;
+};
+
+export type TaxableEventType = 'PLAYER_TRANSFER';
+
+export type TaxCharge = {
+    key: string;
+    claims: Array<TaxClaim>;
+    treatyId: string | null;
+    treatyRevisionId: string | null;
+    treatyName: LocalizedInput;
+    mode: 'NATIONAL' | 'EXCLUSIVE' | 'SHARED';
+    rateBps: number;
+    amountMinor: string;
+    allocations: Array<{
+        stateId: string;
+        shareBps: number;
+        amountMinor: string;
+    }>;
+};
+
+export type TaxClaim = {
+    lawId: string;
+    revisionId: string;
+    revision: number;
+    stateId: string;
+    stateName: LocalizedInput;
+    stateSlug: string;
+    name: LocalizedInput;
+    category: string;
+    rateBps: number;
+    evidence: Array<TaxJurisdictionEvidence>;
+    nationalAmountMinor: string;
+};
+
+export type TaxJurisdictionEvidence = {
+    stateId: string;
+    basis: 'CITIZENSHIP' | 'TERRITORIAL';
+    source: 'CITIZENSHIP' | 'CITIZENSHIP_PROXY';
+    membershipJoinedAt: string;
+};
+
+export type MoneyMinor = string;
+
+export type EconomicOperation = {
+    id: string;
+    createdAt: string;
+    calculation: TaxCalculation;
+    journals: Array<{
+        id: string;
+        assessmentId: string | null;
+        creditorStateId: string | null;
+    }>;
+};
+
+export type StateTaxation = {
+    office: OptionalTaxOffice;
+    laws: Array<TaxLawRevision>;
+    directives: Array<MonetaryDirective>;
+    accounts: Array<FinancialAccount>;
+    currencies: Array<NationalCurrency>;
+    assessments: Array<TaxAssessmentView>;
+    receipts: Array<{
+        assessmentId: string;
+        operationId: string;
+        journalId: string;
+        amountMinor: string;
+        currencyId: string;
+        createdAt: string;
+        laws: Array<{
+            lawId: string;
+            revisionId: string;
+            number: number;
+            name: LocalizedInput;
+        }>;
+        treatyId: string | null;
+        treatyRevisionId: string | null;
+        treatyName: LocalizedInput;
+    }>;
+    totals: Array<{
+        currencyId: string;
+        amountMinor: string;
+    }>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type OptionalTaxOffice = {
+    id: string;
+    stateId: string;
+    status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+    charterDirectiveId: string;
+    establishmentDirectiveId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdAt: string;
+    reviews: Array<{
+        id: string;
+        actorId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        reason: string;
+        createdAt: string;
+    }>;
+} | null;
+
+export type TaxLawRevision = {
+    id: string;
+    lawId: string;
+    stateId: string;
+    directiveId: string;
+    number: number;
+    status: 'ACTIVE' | 'REPEALED';
+    rule: TaxRule;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    effectiveAt: string;
+    createdAt: string;
+};
+
+export type TaxRule = {
+    event: TaxableEventType;
+    category: string;
+    taxpayer: 'SENDER';
+    jurisdictions: Array<'CITIZENSHIP' | 'TERRITORIAL'>;
+    rateBps: number;
+    recipient: 'STATE_TREASURY';
+    currencyIds: Array<string>;
+};
+
+export type MonetaryDirective = {
+    id: string;
+    stateId: string;
+    governanceRevisionId: string;
+    createdBy: string;
+    payload: MonetaryDirectivePayload;
+    payloadHash: string;
+    treatyContent: OptionalDirectiveTreatyContent;
+    status: 'PENDING' | 'APPLIED' | 'CANCELLED';
+    createdAt: string;
+    appliedAt: string | null;
+    stale: boolean;
+    ready: boolean;
+    manualRequired: boolean;
+    manualProcedure: LocalizedInput;
+    canApply: boolean;
+    executionProblem: string | null;
+    approvableOfficeIds: Array<string>;
+    approvalGroups: Array<{
+        mode: 'ANY' | 'ALL';
+        officeIds: Array<string>;
+    }>;
+    approvals: Array<{
+        officeId: string;
+        actorId: string;
+        current: boolean;
+    }>;
+    votes: Array<{
+        id: string;
+        approved: boolean;
+    }>;
+};
+
+export type MonetaryDirectivePayload = {
+    kind: 'ESTABLISH_TAX_OFFICE';
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CHANGE_TAX_CHARTER';
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'ENACT_TAX_LAW';
+    lawId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    effectiveAt: string;
+    rule: TaxRule;
+} | {
+    kind: 'AMEND_TAX_LAW';
+    lawId: string;
+    baseRevisionId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    effectiveAt: string;
+    rule: TaxRule;
+} | {
+    kind: 'REPEAL_TAX_LAW';
+    lawId: string;
+    baseRevisionId: string;
+    effectiveAt: string;
+} | {
+    kind: 'AMEND_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'RATIFY_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'DENOUNCE_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'REJECT_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'ESTABLISH_BANK';
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CHANGE_CHARTER';
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CREATE_CURRENCY';
+    code: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CHANGE_POLICY';
+    currencyId: string;
+    policy: MonetaryPolicy;
+} | {
+    kind: 'ISSUE';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+} | {
+    kind: 'BURN';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+} | {
+    kind: 'BANK_TRANSFER';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+    recipient: {
+        type: 'PLAYER';
+        userId: string;
+    } | {
+        type: 'TREASURY';
+    } | {
+        type: 'CENTRAL_BANK';
+    };
+} | {
+    kind: 'TREASURY_TRANSFER';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+    recipient: {
+        type: 'PLAYER';
+        userId: string;
+    } | {
+        type: 'TREASURY';
+    } | {
+        type: 'CENTRAL_BANK';
+    };
+};
+
+export type MonetaryPolicy = {
+    maxSupplyMinor: OptionalMoneyLimit;
+    maxGrossIssuance30dMinor: OptionalMoneyLimit;
+    maxIssuancePerOperationMinor: OptionalMoneyLimit;
+};
+
+export type OptionalMoneyLimit = string | null;
+
+export type OptionalDirectiveTreatyContent = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    type: 'TAX_TREATY';
+    event: TaxableEventType;
+    category: string;
+    taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
+    terms: TreatyTaxTerms;
+    effectiveAt: string;
+    expiresAt: string | null;
+    termination: 'BILATERAL';
+} | null;
+
+export type TreatyTaxTerms = {
+    mode: 'EXCLUSIVE';
+    taxingStateId: string;
+} | {
+    mode: 'SHARED';
+    rateBps: number;
+    firstShareBps: number;
+};
+
+export type FinancialAccount = {
+    id: string;
+    currencyId: string;
+    kind: 'PLAYER' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE';
+    ownerId: string;
+    balanceMinor: string;
+};
+
+export type NationalCurrency = {
+    id: string;
+    stateId: string;
+    bankId: string;
+    code: string;
+    precision: 2;
+    status: 'ACTIVE' | 'BLOCKED';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    supplyMinor: MoneyMinor;
+    createdAt: string;
+    grossIssuance30dMinor: CumulativeMoneyMinor;
+    availableIssuanceMinor: MoneyMinor;
+    remainingIssuanceMinor: MoneyMinor;
+    policy: OptionalMonetaryPolicyRevision;
+};
+
+export type CumulativeMoneyMinor = string;
+
+export type OptionalMonetaryPolicyRevision = {
+    id: string;
+    number: number;
+    directiveId: string;
+    createdAt: string;
+    limits: MonetaryPolicy;
+} | null;
+
+export type TaxAssessmentView = {
+    id: string;
+    operationId: string;
+    currencyId: string;
+    baseMinor: string;
+    amountMinor: string;
+    mode: 'NATIONAL' | 'EXCLUSIVE' | 'SHARED';
+    laws: Array<{
+        lawId: string;
+        revisionId: string;
+        number: number;
+        name: LocalizedInput;
+    }>;
+    treatyId: string | null;
+    treatyRevisionId: string | null;
+    treatyName: LocalizedInput;
+    createdAt: string;
+};
+
+export type TaxOffice = {
+    id: string;
+    stateId: string;
+    status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+    charterDirectiveId: string;
+    establishmentDirectiveId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdAt: string;
+    reviews: Array<{
+        id: string;
+        actorId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        reason: string;
+        createdAt: string;
+    }>;
+};
+
+export type Treaty = {
+    id: string;
+    type: 'TAX_TREATY';
+    proposerStateId: string;
+    status: 'DRAFT' | 'PROPOSED' | 'ACTIVE' | 'REJECTED' | 'EXPIRED' | 'TERMINATED';
+    currentRevisionId: string;
+    activeRevisionId: string | null;
+    parties: Array<{
+        id: string;
+        slug: string | null;
+        name: LocalizedInput;
+        color: string | null;
+        flag: OptionalTreatyFlag;
+    }>;
+    revisions: Array<TreatyRevision>;
+    decisions: Array<{
+        stateId: string;
+        directiveId: string;
+        revisionId: string;
+        kind: string;
+        current: boolean;
+    }>;
+};
+
+export type OptionalTreatyFlag = {
+    horizontal: {
+        mode: 'BANNER';
+        design: MinecraftBanner;
+    } | {
+        mode: 'PNG';
+        mediaId: string | null;
+    };
+} | null;
+
+export type TreatyRevision = {
+    id: string;
+    number: number;
+    contentHash: string;
+    content: TreatyContent;
+    createdAt: string;
+};
+
+export type TreatyContent = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    type: 'TAX_TREATY';
+    event: TaxableEventType;
+    category: string;
+    taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
+    terms: TreatyTaxTerms;
+    effectiveAt: string;
+    expiresAt: string | null;
+    termination: 'BILATERAL';
+};
+
+export type TreatyRevisionHistory = {
+    items: Array<TreatyRevision>;
+    decisions: Array<{
+        directiveId: string;
+        revisionId: string;
+        stateId: string;
+        kind: string;
+        createdAt: string;
+    }>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type TreatyDraftInput = {
+    partnerStateId: string;
+    content: TreatyContent;
+};
+
+export type PublicTaxation = {
+    office: {
+        id: string;
+        stateId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        charterDirectiveId: string;
+        establishmentDirectiveId: string;
+        name: LocalizedInput;
+        description: LocalizedInput;
+        createdAt: string;
+    };
+    laws: Array<PublicTaxLawRevision>;
+};
+
+export type PublicTaxLawRevision = {
+    id: string;
+    lawId: string;
+    stateId: string;
+    directiveId: string;
+    number: number;
+    status: 'ACTIVE' | 'REPEALED';
+    rule: TaxRule;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    effectiveAt: string;
+    createdAt: string;
+    documentHtml: string;
+};
+
+export type PublicTreaty = {
+    id: string;
+    type: 'TAX_TREATY';
+    status: 'ACTIVE' | 'EXPIRED' | 'TERMINATED';
+    name: LocalizedInput;
+    activeRevisionId: string;
+    page: number;
+    hasMore: boolean;
+    parties: Array<{
+        id: string;
+        slug: string | null;
+        name: LocalizedInput;
+        color: string | null;
+        flag: OptionalTreatyFlag;
+    }>;
+    revisions: Array<{
+        id: string;
+        number: number;
+        contentHash: string;
+        name: LocalizedInput;
+        description: LocalizedInput;
+        documentHtml: string;
+        event: 'PLAYER_TRANSFER';
+        category: string;
+        terms: TreatyTaxTerms;
+        effectiveAt: string;
+        expiresAt: string | null;
+    }>;
+};
+
+export type OptionalTreatyContent = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    type: 'TAX_TREATY';
+    event: TaxableEventType;
+    category: string;
+    taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
+    terms: TreatyTaxTerms;
+    effectiveAt: string;
+    expiresAt: string | null;
+    termination: 'BILATERAL';
+} | null;
+
+export type StateMonetary = {
+    bank: OptionalCentralBank;
+    currency: OptionalNationalCurrency;
+    accounts: Array<FinancialAccount>;
+    directives: Array<MonetaryDirective>;
+    policyHistory: Array<MonetaryPolicyRevision>;
+    transactions: Array<LedgerTransaction>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type OptionalCentralBank = {
+    id: string;
+    stateId: string;
+    status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+    charterDirectiveId: string;
+    establishmentDirectiveId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdAt: string;
+    reviews: Array<{
+        id: string;
+        actorId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        reason: string;
+        createdAt: string;
+    }>;
+} | null;
+
+export type OptionalNationalCurrency = {
+    id: string;
+    stateId: string;
+    bankId: string;
+    code: string;
+    precision: 2;
+    status: 'ACTIVE' | 'BLOCKED';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    supplyMinor: MoneyMinor;
+    createdAt: string;
+    grossIssuance30dMinor: CumulativeMoneyMinor;
+    availableIssuanceMinor: MoneyMinor;
+    remainingIssuanceMinor: MoneyMinor;
+    policy: OptionalMonetaryPolicyRevision;
+} | null;
+
+export type MonetaryPolicyRevision = {
+    id: string;
+    number: number;
+    directiveId: string;
+    createdAt: string;
+    limits: MonetaryPolicy;
+};
+
+export type LedgerTransaction = {
+    id: string;
+    currencyId: string;
+    economicOperationId: string | null;
+    kind: 'ISSUE' | 'BURN' | 'TRANSFER';
+    amountMinor: MoneyMinor;
+    purpose: string;
+    actorId: string;
+    directiveId: string | null;
+    policyRevisionId: string | null;
+    createdAt: string;
+    postings: Array<{
+        account: {
+            id: string;
+            currencyId: string;
+            kind: 'PLAYER' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE';
+            ownerId: string;
+        };
+        deltaMinor: string;
+    }>;
+};
+
+export type Wallet = {
+    currencies: Array<NationalCurrency>;
+    accounts: Array<FinancialAccount>;
+    transactions: Array<LedgerTransaction>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type WalletTransfer = {
+    idempotencyKey: string;
+    quoteId?: string;
+    currencyId: string;
+    recipientId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+};
+
+export type CentralBank = {
+    id: string;
+    stateId: string;
+    status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+    charterDirectiveId: string;
+    establishmentDirectiveId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdAt: string;
+    reviews: Array<{
+        id: string;
+        actorId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        reason: string;
+        createdAt: string;
+    }>;
+};
+
+export type PublicCurrency = {
+    currency: NationalCurrency;
+    bank: {
+        id: string;
+        stateId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        charterDirectiveId: string;
+        establishmentDirectiveId: string;
+        name: LocalizedInput;
+        description: LocalizedInput;
+        createdAt: string;
+    };
+    state: {
+        id: string;
+        slug: string | null;
+        name: LocalizedInput & unknown;
+        active: boolean;
+    };
+    issuancePage: number;
+    hasMoreIssuance: boolean;
+    issuance: Array<{
+        id: string;
+        kind: 'ISSUE' | 'BURN';
+        amountMinor: MoneyMinor;
+        policyRevisionId: string | null;
+        createdAt: string;
+    }>;
+};
+
 export type OfficeAssignmentInput = {
     officeId: string;
     userId: string;
@@ -526,7 +1198,7 @@ export type DraftOffice = {
 };
 
 export type DraftPolicy = {
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'SPEND_TREASURY' | 'DECLARE_WAR';
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'DECLARE_WAR';
     mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
     officeIds: Array<string>;
     vote: OptionalDraftVotingRules;
@@ -5482,6 +6154,2048 @@ export type DeleteSurveyResponseResponses = {
 };
 
 export type DeleteSurveyResponseResponse = DeleteSurveyResponseResponses[keyof DeleteSurveyResponseResponses];
+
+export type QuoteWalletTransferData = {
+    body?: {
+        idempotencyKey: string;
+        currencyId: string;
+        recipientId: string;
+        amountMinor: MoneyMinor;
+        purpose: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/wallet/quotes';
+};
+
+export type QuoteWalletTransferErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type QuoteWalletTransferError = QuoteWalletTransferErrors[keyof QuoteWalletTransferErrors];
+
+export type QuoteWalletTransferResponses = {
+    /**
+     * Result
+     */
+    200: TransferQuote;
+};
+
+export type QuoteWalletTransferResponse = QuoteWalletTransferResponses[keyof QuoteWalletTransferResponses];
+
+export type GetEconomicOperationData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/economic-operations/{id}';
+};
+
+export type GetEconomicOperationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetEconomicOperationError = GetEconomicOperationErrors[keyof GetEconomicOperationErrors];
+
+export type GetEconomicOperationResponses = {
+    /**
+     * Result
+     */
+    200: EconomicOperation;
+};
+
+export type GetEconomicOperationResponse = GetEconomicOperationResponses[keyof GetEconomicOperationResponses];
+
+export type GetStateTaxationData = {
+    body?: never;
+    path: {
+        stateId: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{stateId}/taxation';
+};
+
+export type GetStateTaxationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateTaxationError = GetStateTaxationErrors[keyof GetStateTaxationErrors];
+
+export type GetStateTaxationResponses = {
+    /**
+     * Result
+     */
+    200: StateTaxation;
+};
+
+export type GetStateTaxationResponse = GetStateTaxationResponses[keyof GetStateTaxationResponses];
+
+export type PreviewTaxRuleData = {
+    body?: {
+        amountMinor: MoneyMinor;
+        rule: TaxRule;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/taxation/example';
+};
+
+export type PreviewTaxRuleErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type PreviewTaxRuleError = PreviewTaxRuleErrors[keyof PreviewTaxRuleErrors];
+
+export type PreviewTaxRuleResponses = {
+    /**
+     * Result
+     */
+    200: {
+        amountMinor: string;
+    };
+};
+
+export type PreviewTaxRuleResponse = PreviewTaxRuleResponses[keyof PreviewTaxRuleResponses];
+
+export type ListAdminTaxOfficesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/tax-offices';
+};
+
+export type ListAdminTaxOfficesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListAdminTaxOfficesError = ListAdminTaxOfficesErrors[keyof ListAdminTaxOfficesErrors];
+
+export type ListAdminTaxOfficesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<TaxOffice>;
+    };
+};
+
+export type ListAdminTaxOfficesResponse = ListAdminTaxOfficesResponses[keyof ListAdminTaxOfficesResponses];
+
+export type ReviewTaxOfficeData = {
+    body?: {
+        directiveId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        reason: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/tax-offices/{id}/review';
+};
+
+export type ReviewTaxOfficeErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ReviewTaxOfficeError = ReviewTaxOfficeErrors[keyof ReviewTaxOfficeErrors];
+
+export type ReviewTaxOfficeResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ReviewTaxOfficeResponse = ReviewTaxOfficeResponses[keyof ReviewTaxOfficeResponses];
+
+export type GetStateDiplomacyData = {
+    body?: never;
+    path: {
+        stateId: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{stateId}/diplomacy';
+};
+
+export type GetStateDiplomacyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateDiplomacyError = GetStateDiplomacyErrors[keyof GetStateDiplomacyErrors];
+
+export type GetStateDiplomacyResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<Treaty>;
+        directives: Array<MonetaryDirective>;
+        page: number;
+        hasMore: boolean;
+    };
+};
+
+export type GetStateDiplomacyResponse = GetStateDiplomacyResponses[keyof GetStateDiplomacyResponses];
+
+export type GetTreatyRevisionHistoryData = {
+    body?: never;
+    path: {
+        stateId: string;
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{stateId}/treaties/{id}/revisions';
+};
+
+export type GetTreatyRevisionHistoryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetTreatyRevisionHistoryError = GetTreatyRevisionHistoryErrors[keyof GetTreatyRevisionHistoryErrors];
+
+export type GetTreatyRevisionHistoryResponses = {
+    /**
+     * Result
+     */
+    200: TreatyRevisionHistory;
+};
+
+export type GetTreatyRevisionHistoryResponse = GetTreatyRevisionHistoryResponses[keyof GetTreatyRevisionHistoryResponses];
+
+export type CreateTreatyDraftData = {
+    body?: TreatyDraftInput;
+    path: {
+        stateId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/treaties';
+};
+
+export type CreateTreatyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateTreatyDraftError = CreateTreatyDraftErrors[keyof CreateTreatyDraftErrors];
+
+export type CreateTreatyDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type CreateTreatyDraftResponse = CreateTreatyDraftResponses[keyof CreateTreatyDraftResponses];
+
+export type EditTreatyDraftData = {
+    body?: {
+        baseRevisionId: string;
+        content: TreatyContent;
+    };
+    path: {
+        stateId: string;
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/treaties/{id}';
+};
+
+export type EditTreatyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type EditTreatyDraftError = EditTreatyDraftErrors[keyof EditTreatyDraftErrors];
+
+export type EditTreatyDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type EditTreatyDraftResponse = EditTreatyDraftResponses[keyof EditTreatyDraftResponses];
+
+export type SubmitTreatyDraftData = {
+    body?: {
+        revisionId: string;
+    };
+    path: {
+        stateId: string;
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/treaties/{id}/submit';
+};
+
+export type SubmitTreatyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type SubmitTreatyDraftError = SubmitTreatyDraftErrors[keyof SubmitTreatyDraftErrors];
+
+export type SubmitTreatyDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type SubmitTreatyDraftResponse = SubmitTreatyDraftResponses[keyof SubmitTreatyDraftResponses];
+
+export type GetPublicTaxationData = {
+    body?: never;
+    path: {
+        stateId: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+    };
+    url: '/api/v1/public/states/{stateId}/taxation';
+};
+
+export type GetPublicTaxationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicTaxationError = GetPublicTaxationErrors[keyof GetPublicTaxationErrors];
+
+export type GetPublicTaxationResponses = {
+    /**
+     * Result
+     */
+    200: PublicTaxation;
+};
+
+export type GetPublicTaxationResponse = GetPublicTaxationResponses[keyof GetPublicTaxationResponses];
+
+export type GetPublicTaxLawData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+        page?: number;
+    };
+    url: '/api/v1/public/tax-laws/{id}';
+};
+
+export type GetPublicTaxLawErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicTaxLawError = GetPublicTaxLawErrors[keyof GetPublicTaxLawErrors];
+
+export type GetPublicTaxLawResponses = {
+    /**
+     * Result
+     */
+    200: {
+        revisions: Array<PublicTaxLawRevision>;
+        page: number;
+        hasMore: boolean;
+    };
+};
+
+export type GetPublicTaxLawResponse = GetPublicTaxLawResponses[keyof GetPublicTaxLawResponses];
+
+export type ListPublicTreatiesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        locale?: 'ru' | 'en';
+        page?: number;
+    };
+    url: '/api/v1/public/treaties';
+};
+
+export type ListPublicTreatiesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListPublicTreatiesError = ListPublicTreatiesErrors[keyof ListPublicTreatiesErrors];
+
+export type ListPublicTreatiesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<PublicTreaty>;
+        page: number;
+        hasMore: boolean;
+    };
+};
+
+export type ListPublicTreatiesResponse = ListPublicTreatiesResponses[keyof ListPublicTreatiesResponses];
+
+export type GetPublicTreatyData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+        page?: number;
+    };
+    url: '/api/v1/public/treaties/{id}';
+};
+
+export type GetPublicTreatyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicTreatyError = GetPublicTreatyErrors[keyof GetPublicTreatyErrors];
+
+export type GetPublicTreatyResponses = {
+    /**
+     * Result
+     */
+    200: PublicTreaty;
+};
+
+export type GetPublicTreatyResponse = GetPublicTreatyResponses[keyof GetPublicTreatyResponses];
+
+export type ListAdminMonetaryDirectivesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/monetary/directives';
+};
+
+export type ListAdminMonetaryDirectivesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListAdminMonetaryDirectivesError = ListAdminMonetaryDirectivesErrors[keyof ListAdminMonetaryDirectivesErrors];
+
+export type ListAdminMonetaryDirectivesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<MonetaryDirective>;
+    };
+};
+
+export type ListAdminMonetaryDirectivesResponse = ListAdminMonetaryDirectivesResponses[keyof ListAdminMonetaryDirectivesResponses];
+
+export type GetMonetaryVotingPayloadData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/votings/{id}/monetary-directive';
+};
+
+export type GetMonetaryVotingPayloadErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetMonetaryVotingPayloadError = GetMonetaryVotingPayloadErrors[keyof GetMonetaryVotingPayloadErrors];
+
+export type GetMonetaryVotingPayloadResponses = {
+    /**
+     * Result
+     */
+    200: {
+        payload: MonetaryDirectivePayload;
+        payloadHash: string;
+        code: string;
+        treatyContent: OptionalTreatyContent;
+    };
+};
+
+export type GetMonetaryVotingPayloadResponse = GetMonetaryVotingPayloadResponses[keyof GetMonetaryVotingPayloadResponses];
+
+export type GetStateMonetaryData = {
+    body?: never;
+    path: {
+        stateId: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{stateId}/monetary';
+};
+
+export type GetStateMonetaryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateMonetaryError = GetStateMonetaryErrors[keyof GetStateMonetaryErrors];
+
+export type GetStateMonetaryResponses = {
+    /**
+     * Result
+     */
+    200: StateMonetary;
+};
+
+export type GetStateMonetaryResponse = GetStateMonetaryResponses[keyof GetStateMonetaryResponses];
+
+export type CreateMonetaryDirectiveData = {
+    body?: {
+        idempotencyKey: string;
+        payload: MonetaryDirectivePayload;
+    };
+    path: {
+        stateId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/monetary/directives';
+};
+
+export type CreateMonetaryDirectiveErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateMonetaryDirectiveError = CreateMonetaryDirectiveErrors[keyof CreateMonetaryDirectiveErrors];
+
+export type CreateMonetaryDirectiveResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type CreateMonetaryDirectiveResponse = CreateMonetaryDirectiveResponses[keyof CreateMonetaryDirectiveResponses];
+
+export type GetMonetaryDirectiveData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/monetary/directives/{id}';
+};
+
+export type GetMonetaryDirectiveErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetMonetaryDirectiveError = GetMonetaryDirectiveErrors[keyof GetMonetaryDirectiveErrors];
+
+export type GetMonetaryDirectiveResponses = {
+    /**
+     * Result
+     */
+    200: MonetaryDirective;
+};
+
+export type GetMonetaryDirectiveResponse = GetMonetaryDirectiveResponses[keyof GetMonetaryDirectiveResponses];
+
+export type ApproveMonetaryDirectiveData = {
+    body?: never;
+    path: {
+        id: string;
+        officeId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/monetary/directives/{id}/approve/{officeId}';
+};
+
+export type ApproveMonetaryDirectiveErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApproveMonetaryDirectiveError = ApproveMonetaryDirectiveErrors[keyof ApproveMonetaryDirectiveErrors];
+
+export type ApproveMonetaryDirectiveResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApproveMonetaryDirectiveResponse = ApproveMonetaryDirectiveResponses[keyof ApproveMonetaryDirectiveResponses];
+
+export type RevokeMonetaryApprovalData = {
+    body?: never;
+    path: {
+        id: string;
+        officeId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/monetary/directives/{id}/revoke/{officeId}';
+};
+
+export type RevokeMonetaryApprovalErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type RevokeMonetaryApprovalError = RevokeMonetaryApprovalErrors[keyof RevokeMonetaryApprovalErrors];
+
+export type RevokeMonetaryApprovalResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RevokeMonetaryApprovalResponse = RevokeMonetaryApprovalResponses[keyof RevokeMonetaryApprovalResponses];
+
+export type ApplyMonetaryDirectiveData = {
+    body?: {
+        reason?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/monetary/directives/{id}/apply';
+};
+
+export type ApplyMonetaryDirectiveErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApplyMonetaryDirectiveError = ApplyMonetaryDirectiveErrors[keyof ApplyMonetaryDirectiveErrors];
+
+export type ApplyMonetaryDirectiveResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApplyMonetaryDirectiveResponse = ApplyMonetaryDirectiveResponses[keyof ApplyMonetaryDirectiveResponses];
+
+export type CancelMonetaryDirectiveData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/monetary/directives/{id}/cancel';
+};
+
+export type CancelMonetaryDirectiveErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CancelMonetaryDirectiveError = CancelMonetaryDirectiveErrors[keyof CancelMonetaryDirectiveErrors];
+
+export type CancelMonetaryDirectiveResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type CancelMonetaryDirectiveResponse = CancelMonetaryDirectiveResponses[keyof CancelMonetaryDirectiveResponses];
+
+export type GetWalletData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/wallet';
+};
+
+export type GetWalletErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetWalletError = GetWalletErrors[keyof GetWalletErrors];
+
+export type GetWalletResponses = {
+    /**
+     * Result
+     */
+    200: Wallet;
+};
+
+export type GetWalletResponse = GetWalletResponses[keyof GetWalletResponses];
+
+export type TransferWalletData = {
+    body?: WalletTransfer;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/wallet/transfers';
+};
+
+export type TransferWalletErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type TransferWalletError = TransferWalletErrors[keyof TransferWalletErrors];
+
+export type TransferWalletResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type TransferWalletResponse = TransferWalletResponses[keyof TransferWalletResponses];
+
+export type ListAdminCentralBanksData = {
+    body?: never;
+    path?: never;
+    query?: {
+        status?: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+    };
+    url: '/api/v1/admin/central-banks';
+};
+
+export type ListAdminCentralBanksErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListAdminCentralBanksError = ListAdminCentralBanksErrors[keyof ListAdminCentralBanksErrors];
+
+export type ListAdminCentralBanksResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<CentralBank>;
+    };
+};
+
+export type ListAdminCentralBanksResponse = ListAdminCentralBanksResponses[keyof ListAdminCentralBanksResponses];
+
+export type ReviewCentralBankData = {
+    body?: {
+        directiveId: string;
+        status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+        reason: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/central-banks/{id}/review';
+};
+
+export type ReviewCentralBankErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ReviewCentralBankError = ReviewCentralBankErrors[keyof ReviewCentralBankErrors];
+
+export type ReviewCentralBankResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ReviewCentralBankResponse = ReviewCentralBankResponses[keyof ReviewCentralBankResponses];
+
+export type ListPublicCurrenciesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        after?: string;
+    };
+    url: '/api/v1/public/currencies';
+};
+
+export type ListPublicCurrenciesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListPublicCurrenciesError = ListPublicCurrenciesErrors[keyof ListPublicCurrenciesErrors];
+
+export type ListPublicCurrenciesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<PublicCurrency>;
+        nextCode: string | null;
+    };
+};
+
+export type ListPublicCurrenciesResponse = ListPublicCurrenciesResponses[keyof ListPublicCurrenciesResponses];
+
+export type GetPublicCurrencyData = {
+    body?: never;
+    path: {
+        code: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/public/currencies/{code}';
+};
+
+export type GetPublicCurrencyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublicCurrencyError = GetPublicCurrencyErrors[keyof GetPublicCurrencyErrors];
+
+export type GetPublicCurrencyResponses = {
+    /**
+     * Result
+     */
+    200: PublicCurrency;
+};
+
+export type GetPublicCurrencyResponse = GetPublicCurrencyResponses[keyof GetPublicCurrencyResponses];
 
 export type ListOfficeAssignmentsData = {
     body?: never;

@@ -22,7 +22,7 @@ export default defineConfig({
     },
     {
       command: 'API_PROXY_TARGET=http://localhost:3100 bun run --cwd apps/vega dev --port 5175',
-      url: 'http://localhost:5175',
+      url: 'http://localhost:5175/src/client.tsx',
       reuseExistingServer: false,
     },
     {

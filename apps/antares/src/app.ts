@@ -17,6 +17,8 @@ import { stateReformRoutes } from './modules/states/reform-routes';
 import { stateMediaRoutes } from './modules/states/media-routes';
 import { votingRoutes } from './modules/voting/routes';
 import { stateRoutes } from './modules/states/routes';
+import { taxationRoutes } from './modules/taxation/routes';
+import { monetaryRoutes } from './modules/monetary/routes';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 interface Dependencies {
@@ -143,6 +145,8 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   app.route('/api/v1', stateReformRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', playerRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', votingRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', taxationRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', monetaryRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', stateRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', administrationRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.openapi(healthRoute, (context) =>

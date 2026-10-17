@@ -4,12 +4,14 @@
 
 HeliCraft is a persistent social, political and economic Minecraft world. Minecraft is where players physically live; Vega is the other half of the game; Antares keeps every product consistent.
 
-The repository contains a working web foundation: public SSR pages, UUID accounts and server sessions, account/skin settings, a Markdown CMS, role-based administration and a shared UI kit. Game systems from the GDD, economy, territories, World Engine and custom Rigel game login remain future work.
+The repository contains a working web foundation: public SSR pages, UUID accounts and server sessions, account/skin settings, a Markdown CMS, role-based administration and a shared UI kit. Territories, markets, World Engine and custom Rigel game login remain future work.
 
 The state system includes resumable server drafts, multilingual content, independent Minecraft banners/PNG flags, cofounders, configurable governance, immutable revisions, optional block constitutions, hybrid community surveys/decision voting and administrative review. See [States](docs/states/overview.md), [Governance](docs/states/governance.md), [Constitution](docs/states/constitution.md), [Creation flow](docs/states/creation-flow.md), [Localized content](docs/platform/localized-content.md) and [Voting](docs/platform/voting.md).
 Account and administration use persistent sidebar workspaces. State management, separate constitution reading, state-colored shared cards, contextual field help and multilingual inputs are described in [Workspace design](docs/design/workspaces.md). Community polls support multiple questions; gallery photos can link related states. State workspaces support separate office proposals with current approvals, generic single-question votes and reviewed manual procedures.
 
 Public state pages present flags, founders, citizenship, current offices, decision procedures and the Constitution in a responsive layout. Player nicknames link to public profiles at `/players/<UUID>`, showing registration date and affiliations with active states. Profiles never expose sessions, account roles or private state drafts.
+
+The [monetary system V1](docs/architecture/monetary.md) adds Governance-controlled central banks, administrative ratification, national currencies, immutable monetary policies, a double-entry ledger, treasury spending and personal wallets. Operate it entirely through Vega without Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` and public SSR `/currencies`. Monetary authority must be explicitly configured through a reform.
 
 ## Projects
 
@@ -131,3 +133,7 @@ The public home uses world photographs; `/gallery` and `/gallery/:id` render wit
 `bun run dev` and `dev:antares` apply reviewed database migrations before starting the services. PostgreSQL and S3 must be running (`bun run infra:up`). A failed migration stops startup; `dev:vega` uses an external API and does not migrate its database.
 
 Operators are listed by nickname in root `ops.json` (`ms0ur` initially). They receive ADMIN through standard authenticated sessions; names are reserved against registration/rename takeover. File changes apply at the next authorization check. [Operator policy](docs/architecture/operators.md).
+
+## Taxation and diplomacy
+
+State tax offices, immutable transfer-tax laws, bilateral tax treaties and exact atomic settlement run through Antares and Vega. Personal transfers show a server-calculated tax quote before confirmation. Institutions and laws use published Governance; administration ratifies institutions without setting tax rates. See [taxation](docs/architecture/taxation.md), [diplomacy](docs/architecture/diplomacy.md) and [verification](docs/architecture/taxation-verification.md). No Minecraft geography, corporate taxes, exchange or debt collection is implemented.

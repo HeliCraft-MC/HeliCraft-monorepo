@@ -36,3 +36,9 @@ bun run test:e2e
 Публичные `/gallery` и `/gallery/:id` используют SSR; `/app/gallery/new` — существующую сессию и CSR. Галерея проходит через Alhena к отдельному домену Antares и private S3/PostgreSQL. [Архитектура галереи](../../docs/architecture/gallery_RU.md). В Atria добавлены StateCard, GalleryTile, PhotoCarousel и ActionLink; каждый компонент расположен в собственной папке `src/components`.
 
 Переводы интерфейса находятся в `src/locales/ru.ts` и `src/locales/en.ts`; ключи семантические, на английском (`navigation.gallery`). Новый полный словарь регистрируется в `src/locales/index.ts`; формы CMS и галереи берут список языков из этого реестра. Хранятся язык оригинала и необязательные переводы полей. Подписи и очищенный HTML публикаций выбираются для каждого поля в порядке язык клиента → EN → язык оригинала. Смена языка работает через клиентскую навигацию без перезагрузки документа и потери черновика формы. Публичный SSR использует адреса `?lang=ru/en`, canonical/hreflang и переведённые метаданные; cookie сохраняет выбор при навигации.
+
+## Monetary system V1
+
+[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/architecture/monetary_RU.md).
+
+Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/architecture/taxation_RU.md), [Diplomacy](../../docs/architecture/diplomacy_RU.md).

@@ -49,3 +49,7 @@ Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing s
 `PlayerNickname` pairs a decorative Minecraft head with readable text. The host supplies the head URL and optional size; a failed image retains the nickname and fallback. Vega's wrapper accepts UUID/name/skin revision and builds the public avatar URL. The component is also used by gallery tiles and carousel author captions. Storybook includes loaded, fallback and long-name states.
 
 `PlayerNickname.href` renders an accessible link whose name contains only the nickname. Vega links to the immutable player UUID by default; use `linked={false}` in selection buttons and checkbox labels. Gallery tiles place the author link outside the image/title link, and `PhotoCarousel` accepts `authorHref`. Storybook includes `ProfileLink`.
+
+## Monetary system V1
+
+[Domain model, Governance, exact accounting, API, screens and verification](../../docs/architecture/monetary.md).

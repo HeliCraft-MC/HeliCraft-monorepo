@@ -1,4 +1,7 @@
 // oxlint-disable import/max-dependencies -- State workspace composition combines typed decision evidence, citizen actions and shared controls.
+import { TaxationWorkspace } from '../taxation/workspace';
+import { DiplomacyWorkspace } from '../diplomacy/workspace';
+import { StateMonetaryWorkspace } from '../monetary/state-workspace';
 import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { Button, ActionLink } from '@helicraft/atria';
@@ -20,6 +23,14 @@ const MANAGEMENT_SECTIONS = [
   'proposals',
   'citizenship',
   'history',
+  'bank',
+  'currency',
+  'monetary-policy',
+  'issuance',
+  'bank-finances',
+  'treasury',
+  'taxation',
+  'diplomacy',
 ] as const;
 type ManagementSection = (typeof MANAGEMENT_SECTIONS)[number];
 function ManagementSections({
@@ -37,6 +48,22 @@ function ManagementSections({
 }>): ReactElement {
   const { locale } = useTranslation();
   const citizen = state.citizens.some((person) => person.id === actorId);
+  if (section === 'taxation') {
+    return <TaxationWorkspace state={state} actorId={actorId} />;
+  }
+  if (section === 'diplomacy') {
+    return <DiplomacyWorkspace state={state} actorId={actorId} />;
+  }
+  if (
+    section === 'bank' ||
+    section === 'currency' ||
+    section === 'monetary-policy' ||
+    section === 'issuance' ||
+    section === 'bank-finances' ||
+    section === 'treasury'
+  ) {
+    return <StateMonetaryWorkspace state={state} actorId={actorId} section={section} />;
+  }
   if (section === 'appointments') {
     return <OfficeAssignments state={state} />;
   }

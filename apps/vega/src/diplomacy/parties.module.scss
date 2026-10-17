@@ -1,0 +1,29 @@
+.parties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  list-style-position: inside;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  figure {
+    width: 4rem;
+    min-width: 4rem;
+    margin: 0;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2;
+    object-fit: contain;
+  }
+}

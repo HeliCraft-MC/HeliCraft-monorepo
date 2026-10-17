@@ -20,14 +20,20 @@ import { Route as StartRouteImport } from './routes/start'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminCentralBanksRouteImport } from './routes/admin.central-banks'
 import { Route as AdminChronicleRouteImport } from './routes/admin.chronicle'
+import { Route as AdminMonetaryDirectivesRouteImport } from './routes/admin.monetary-directives'
 import { Route as AdminPagesRouteImport } from './routes/admin.pages'
+import { Route as AdminTaxOfficesRouteImport } from './routes/admin.tax-offices'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppVotingsRouteImport } from './routes/app.votings'
+import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as ChronicleIndexRouteImport } from './routes/chronicle.index'
 import { Route as ChronicleSlugRouteImport } from './routes/chronicle.$slug'
+import { Route as CurrenciesIndexRouteImport } from './routes/currencies.index'
+import { Route as CurrenciesCodeRouteImport } from './routes/currencies.$code'
 import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
 import { Route as GalleryIdRouteImport } from './routes/gallery.$id'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
@@ -35,6 +41,9 @@ import { Route as PlayersPlayerIdRouteImport } from './routes/players.$playerId'
 import { Route as StatesIndexRouteImport } from './routes/states.index'
 import { Route as StatesSlugRouteImport } from './routes/states.$slug'
 import { Route as StatesNewRouteImport } from './routes/states.new'
+import { Route as TaxLawsIdRouteImport } from './routes/tax-laws.$id'
+import { Route as TreatiesIndexRouteImport } from './routes/treaties.index'
+import { Route as TreatiesIdRouteImport } from './routes/treaties.$id'
 import { Route as AdminChronicleIndexRouteImport } from './routes/admin.chronicle.index'
 import { Route as AdminChronicleEntryIdRouteImport } from './routes/admin.chronicle.$entryId'
 import { Route as AdminChronicleNewRouteImport } from './routes/admin.chronicle.new'
@@ -54,6 +63,7 @@ import { Route as AppStatesStateIdRouteImport } from './routes/app.states.$state
 import { Route as AppStatesNewRouteImport } from './routes/app.states.new'
 import { Route as AppVotingsVotingIdRouteImport } from './routes/app.votings_.$votingId'
 import { Route as StatesSlugConstitutionRouteImport } from './routes/states.$slug_.constitution'
+import { Route as StatesSlugTaxationRouteImport } from './routes/states.$slug_.taxation'
 import { Route as AppStatesDraftsDraftIdRouteImport } from './routes/app.states.drafts.$draftId'
 import { Route as AppStatesStateIdManageRouteImport } from './routes/app.states_.$stateId.manage'
 import { Route as AppStatesStateIdProposalsRouteImport } from './routes/app.states_.$stateId.proposals'
@@ -113,14 +123,29 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCentralBanksRoute = AdminCentralBanksRouteImport.update({
+  id: '/central-banks',
+  path: '/central-banks',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminChronicleRoute = AdminChronicleRouteImport.update({
   id: '/chronicle',
   path: '/chronicle',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMonetaryDirectivesRoute = AdminMonetaryDirectivesRouteImport.update({
+  id: '/monetary-directives',
+  path: '/monetary-directives',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPagesRoute = AdminPagesRouteImport.update({
   id: '/pages',
   path: '/pages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTaxOfficesRoute = AdminTaxOfficesRouteImport.update({
+  id: '/tax-offices',
+  path: '/tax-offices',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -143,6 +168,11 @@ const AppVotingsRoute = AppVotingsRouteImport.update({
   path: '/votings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppWalletRoute = AppWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AppRoute,
+} as any)
 const ChronicleIndexRoute = ChronicleIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -152,6 +182,16 @@ const ChronicleSlugRoute = ChronicleSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ChronicleRoute,
+} as any)
+const CurrenciesIndexRoute = CurrenciesIndexRouteImport.update({
+  id: '/currencies/',
+  path: '/currencies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CurrenciesCodeRoute = CurrenciesCodeRouteImport.update({
+  id: '/currencies/$code',
+  path: '/currencies/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const GalleryIndexRoute = GalleryIndexRouteImport.update({
   id: '/gallery/',
@@ -186,6 +226,21 @@ const StatesSlugRoute = StatesSlugRouteImport.update({
 const StatesNewRoute = StatesNewRouteImport.update({
   id: '/states/new',
   path: '/states/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TaxLawsIdRoute = TaxLawsIdRouteImport.update({
+  id: '/tax-laws/$id',
+  path: '/tax-laws/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TreatiesIndexRoute = TreatiesIndexRouteImport.update({
+  id: '/treaties/',
+  path: '/treaties/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TreatiesIdRoute = TreatiesIdRouteImport.update({
+  id: '/treaties/$id',
+  path: '/treaties/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminChronicleIndexRoute = AdminChronicleIndexRouteImport.update({
@@ -283,6 +338,11 @@ const StatesSlugConstitutionRoute = StatesSlugConstitutionRouteImport.update({
   path: '/states/$slug/constitution',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatesSlugTaxationRoute = StatesSlugTaxationRouteImport.update({
+  id: '/states/$slug_/taxation',
+  path: '/states/$slug/taxation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppStatesDraftsDraftIdRoute = AppStatesDraftsDraftIdRouteImport.update({
   id: '/states/drafts/$draftId',
   path: '/states/drafts/$draftId',
@@ -311,22 +371,31 @@ export interface FileRoutesByFullPath {
   '/start': typeof StartRoute
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/central-banks': typeof AdminCentralBanksRoute
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
   '/app/votings': typeof AppVotingsRoute
+  '/app/wallet': typeof AppWalletRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/currencies/$code': typeof CurrenciesCodeRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/players/$playerId': typeof PlayersPlayerIdRoute
   '/states/$slug': typeof StatesSlugRoute
   '/states/new': typeof StatesNewRoute
+  '/tax-laws/$id': typeof TaxLawsIdRoute
+  '/treaties/$id': typeof TreatiesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
+  '/currencies/': typeof CurrenciesIndexRoute
   '/gallery/': typeof GalleryIndexRoute
   '/states/': typeof StatesIndexRoute
+  '/treaties/': typeof TreatiesIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -341,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings/$votingId': typeof AppVotingsVotingIdRoute
   '/states/$slug/constitution': typeof StatesSlugConstitutionRoute
+  '/states/$slug/taxation': typeof StatesSlugTaxationRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
   '/admin/pages/': typeof AdminPagesIndexRoute
   '/admin/states/': typeof AdminStatesIndexRoute
@@ -358,19 +428,28 @@ export interface FileRoutesByTo {
   '/start': typeof StartRoute
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/central-banks': typeof AdminCentralBanksRoute
+  '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
+  '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/votings': typeof AdminVotingsRoute
   '/app/votings': typeof AppVotingsRoute
+  '/app/wallet': typeof AppWalletRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/currencies/$code': typeof CurrenciesCodeRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/players/$playerId': typeof PlayersPlayerIdRoute
   '/states/$slug': typeof StatesSlugRoute
   '/states/new': typeof StatesNewRoute
+  '/tax-laws/$id': typeof TaxLawsIdRoute
+  '/treaties/$id': typeof TreatiesIdRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/chronicle': typeof ChronicleIndexRoute
+  '/currencies': typeof CurrenciesIndexRoute
   '/gallery': typeof GalleryIndexRoute
   '/states': typeof StatesIndexRoute
+  '/treaties': typeof TreatiesIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -385,6 +464,7 @@ export interface FileRoutesByTo {
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings/$votingId': typeof AppVotingsVotingIdRoute
   '/states/$slug/constitution': typeof StatesSlugConstitutionRoute
+  '/states/$slug/taxation': typeof StatesSlugTaxationRoute
   '/admin/chronicle': typeof AdminChronicleIndexRoute
   '/admin/pages': typeof AdminPagesIndexRoute
   '/admin/states': typeof AdminStatesIndexRoute
@@ -406,22 +486,31 @@ export interface FileRoutesById {
   '/start': typeof StartRoute
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/central-banks': typeof AdminCentralBanksRoute
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
   '/app/votings': typeof AppVotingsRoute
+  '/app/wallet': typeof AppWalletRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/currencies/$code': typeof CurrenciesCodeRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/players/$playerId': typeof PlayersPlayerIdRoute
   '/states/$slug': typeof StatesSlugRoute
   '/states/new': typeof StatesNewRoute
+  '/tax-laws/$id': typeof TaxLawsIdRoute
+  '/treaties/$id': typeof TreatiesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
+  '/currencies/': typeof CurrenciesIndexRoute
   '/gallery/': typeof GalleryIndexRoute
   '/states/': typeof StatesIndexRoute
+  '/treaties/': typeof TreatiesIndexRoute
   '/admin/chronicle/$entryId': typeof AdminChronicleEntryIdRoute
   '/admin/chronicle/new': typeof AdminChronicleNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -436,6 +525,7 @@ export interface FileRoutesById {
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings_/$votingId': typeof AppVotingsVotingIdRoute
   '/states/$slug_/constitution': typeof StatesSlugConstitutionRoute
+  '/states/$slug_/taxation': typeof StatesSlugTaxationRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
   '/admin/pages/': typeof AdminPagesIndexRoute
   '/admin/states/': typeof AdminStatesIndexRoute
@@ -458,22 +548,31 @@ export interface FileRouteTypes {
     | '/start'
     | '/world'
     | '/admin/audit'
+    | '/admin/central-banks'
     | '/admin/chronicle'
+    | '/admin/monetary-directives'
     | '/admin/pages'
+    | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
     | '/app/votings'
+    | '/app/wallet'
     | '/chronicle/$slug'
+    | '/currencies/$code'
     | '/gallery/$id'
     | '/pages/$slug'
     | '/players/$playerId'
     | '/states/$slug'
     | '/states/new'
+    | '/tax-laws/$id'
+    | '/treaties/$id'
     | '/admin/'
     | '/app/'
     | '/chronicle/'
+    | '/currencies/'
     | '/gallery/'
     | '/states/'
+    | '/treaties/'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
@@ -488,6 +587,7 @@ export interface FileRouteTypes {
     | '/app/states/new'
     | '/app/votings/$votingId'
     | '/states/$slug/constitution'
+    | '/states/$slug/taxation'
     | '/admin/chronicle/'
     | '/admin/pages/'
     | '/admin/states/'
@@ -505,19 +605,28 @@ export interface FileRouteTypes {
     | '/start'
     | '/world'
     | '/admin/audit'
+    | '/admin/central-banks'
+    | '/admin/monetary-directives'
+    | '/admin/tax-offices'
     | '/admin/votings'
     | '/app/votings'
+    | '/app/wallet'
     | '/chronicle/$slug'
+    | '/currencies/$code'
     | '/gallery/$id'
     | '/pages/$slug'
     | '/players/$playerId'
     | '/states/$slug'
     | '/states/new'
+    | '/tax-laws/$id'
+    | '/treaties/$id'
     | '/admin'
     | '/app'
     | '/chronicle'
+    | '/currencies'
     | '/gallery'
     | '/states'
+    | '/treaties'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
@@ -532,6 +641,7 @@ export interface FileRouteTypes {
     | '/app/states/new'
     | '/app/votings/$votingId'
     | '/states/$slug/constitution'
+    | '/states/$slug/taxation'
     | '/admin/chronicle'
     | '/admin/pages'
     | '/admin/states'
@@ -552,22 +662,31 @@ export interface FileRouteTypes {
     | '/start'
     | '/world'
     | '/admin/audit'
+    | '/admin/central-banks'
     | '/admin/chronicle'
+    | '/admin/monetary-directives'
     | '/admin/pages'
+    | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
     | '/app/votings'
+    | '/app/wallet'
     | '/chronicle/$slug'
+    | '/currencies/$code'
     | '/gallery/$id'
     | '/pages/$slug'
     | '/players/$playerId'
     | '/states/$slug'
     | '/states/new'
+    | '/tax-laws/$id'
+    | '/treaties/$id'
     | '/admin/'
     | '/app/'
     | '/chronicle/'
+    | '/currencies/'
     | '/gallery/'
     | '/states/'
+    | '/treaties/'
     | '/admin/chronicle/$entryId'
     | '/admin/chronicle/new'
     | '/admin/pages/$pageId'
@@ -582,6 +701,7 @@ export interface FileRouteTypes {
     | '/app/states/new'
     | '/app/votings_/$votingId'
     | '/states/$slug_/constitution'
+    | '/states/$slug_/taxation'
     | '/admin/chronicle/'
     | '/admin/pages/'
     | '/admin/states/'
@@ -602,14 +722,20 @@ export interface RootRouteChildren {
   RulesRoute: typeof RulesRoute
   StartRoute: typeof StartRoute
   WorldRoute: typeof WorldRoute
+  CurrenciesCodeRoute: typeof CurrenciesCodeRoute
   GalleryIdRoute: typeof GalleryIdRoute
   PagesSlugRoute: typeof PagesSlugRoute
   PlayersPlayerIdRoute: typeof PlayersPlayerIdRoute
   StatesSlugRoute: typeof StatesSlugRoute
   StatesNewRoute: typeof StatesNewRoute
+  TaxLawsIdRoute: typeof TaxLawsIdRoute
+  TreatiesIdRoute: typeof TreatiesIdRoute
+  CurrenciesIndexRoute: typeof CurrenciesIndexRoute
   GalleryIndexRoute: typeof GalleryIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
+  TreatiesIndexRoute: typeof TreatiesIndexRoute
   StatesSlugConstitutionRoute: typeof StatesSlugConstitutionRoute
+  StatesSlugTaxationRoute: typeof StatesSlugTaxationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -691,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/central-banks': {
+      id: '/admin/central-banks'
+      path: '/central-banks'
+      fullPath: '/admin/central-banks'
+      preLoaderRoute: typeof AdminCentralBanksRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/chronicle': {
       id: '/admin/chronicle'
       path: '/chronicle'
@@ -698,11 +831,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChronicleRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/monetary-directives': {
+      id: '/admin/monetary-directives'
+      path: '/monetary-directives'
+      fullPath: '/admin/monetary-directives'
+      preLoaderRoute: typeof AdminMonetaryDirectivesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pages': {
       id: '/admin/pages'
       path: '/pages'
       fullPath: '/admin/pages'
       preLoaderRoute: typeof AdminPagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tax-offices': {
+      id: '/admin/tax-offices'
+      path: '/tax-offices'
+      fullPath: '/admin/tax-offices'
+      preLoaderRoute: typeof AdminTaxOfficesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/users': {
@@ -733,6 +880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVotingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/wallet': {
+      id: '/app/wallet'
+      path: '/wallet'
+      fullPath: '/app/wallet'
+      preLoaderRoute: typeof AppWalletRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/chronicle/': {
       id: '/chronicle/'
       path: '/'
@@ -746,6 +900,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/chronicle/$slug'
       preLoaderRoute: typeof ChronicleSlugRouteImport
       parentRoute: typeof ChronicleRoute
+    }
+    '/currencies/': {
+      id: '/currencies/'
+      path: '/currencies'
+      fullPath: '/currencies/'
+      preLoaderRoute: typeof CurrenciesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/currencies/$code': {
+      id: '/currencies/$code'
+      path: '/currencies/$code'
+      fullPath: '/currencies/$code'
+      preLoaderRoute: typeof CurrenciesCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/gallery/': {
       id: '/gallery/'
@@ -794,6 +962,27 @@ declare module '@tanstack/react-router' {
       path: '/states/new'
       fullPath: '/states/new'
       preLoaderRoute: typeof StatesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tax-laws/$id': {
+      id: '/tax-laws/$id'
+      path: '/tax-laws/$id'
+      fullPath: '/tax-laws/$id'
+      preLoaderRoute: typeof TaxLawsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/treaties/': {
+      id: '/treaties/'
+      path: '/treaties'
+      fullPath: '/treaties/'
+      preLoaderRoute: typeof TreatiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/treaties/$id': {
+      id: '/treaties/$id'
+      path: '/treaties/$id'
+      fullPath: '/treaties/$id'
+      preLoaderRoute: typeof TreatiesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/chronicle/': {
@@ -929,6 +1118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatesSlugConstitutionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/states/$slug_/taxation': {
+      id: '/states/$slug_/taxation'
+      path: '/states/$slug/taxation'
+      fullPath: '/states/$slug/taxation'
+      preLoaderRoute: typeof StatesSlugTaxationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/states/drafts/$draftId': {
       id: '/app/states/drafts/$draftId'
       path: '/states/drafts/$draftId'
@@ -1001,8 +1197,11 @@ const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminCentralBanksRoute: typeof AdminCentralBanksRoute
   AdminChronicleRoute: typeof AdminChronicleRouteWithChildren
+  AdminMonetaryDirectivesRoute: typeof AdminMonetaryDirectivesRoute
   AdminPagesRoute: typeof AdminPagesRouteWithChildren
+  AdminTaxOfficesRoute: typeof AdminTaxOfficesRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminVotingsRoute: typeof AdminVotingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -1012,8 +1211,11 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
+  AdminCentralBanksRoute: AdminCentralBanksRoute,
   AdminChronicleRoute: AdminChronicleRouteWithChildren,
+  AdminMonetaryDirectivesRoute: AdminMonetaryDirectivesRoute,
   AdminPagesRoute: AdminPagesRouteWithChildren,
+  AdminTaxOfficesRoute: AdminTaxOfficesRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminVotingsRoute: AdminVotingsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -1025,6 +1227,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppVotingsRoute: typeof AppVotingsRoute
+  AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
   AppGalleryNewRoute: typeof AppGalleryNewRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
@@ -1041,6 +1244,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppVotingsRoute: AppVotingsRoute,
+  AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,
   AppGalleryNewRoute: AppGalleryNewRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
@@ -1081,14 +1285,20 @@ const rootRouteChildren: RootRouteChildren = {
   RulesRoute: RulesRoute,
   StartRoute: StartRoute,
   WorldRoute: WorldRoute,
+  CurrenciesCodeRoute: CurrenciesCodeRoute,
   GalleryIdRoute: GalleryIdRoute,
   PagesSlugRoute: PagesSlugRoute,
   PlayersPlayerIdRoute: PlayersPlayerIdRoute,
   StatesSlugRoute: StatesSlugRoute,
   StatesNewRoute: StatesNewRoute,
+  TaxLawsIdRoute: TaxLawsIdRoute,
+  TreatiesIdRoute: TreatiesIdRoute,
+  CurrenciesIndexRoute: CurrenciesIndexRoute,
   GalleryIndexRoute: GalleryIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
+  TreatiesIndexRoute: TreatiesIndexRoute,
   StatesSlugConstitutionRoute: StatesSlugConstitutionRoute,
+  StatesSlugTaxationRoute: StatesSlugTaxationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

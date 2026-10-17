@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
   return {
     envDir: '../..',
     optimizeDeps: {
+      entries: ['./src/client.tsx', './src/routes/**/*.tsx'],
       include: [
         'react',
         'react-dom',
@@ -57,6 +58,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       strictPort: true,
+      warmup: { clientFiles: ['./src/client.tsx'] },
       proxy: proxyConfig(apiTarget),
     },
   };

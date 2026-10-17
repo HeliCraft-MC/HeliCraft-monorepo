@@ -22,6 +22,14 @@ const labels = {
   proposals: ['Предложения и голосования', 'Proposals and voting'],
   citizenship: ['Моё гражданство', 'My citizenship'],
   history: ['История', 'History'],
+  bank: ['Центральный банк', 'Central bank'],
+  currency: ['Валюта', 'Currency'],
+  'monetary-policy': ['Денежная политика', 'Monetary policy'],
+  issuance: ['Эмиссия', 'Issuance'],
+  'bank-finances': ['Банковские финансы', 'Bank finances'],
+  treasury: ['Казна', 'Treasury'],
+  taxation: ['Налоговая система', 'Taxation'],
+  diplomacy: ['Дипломатия', 'Diplomacy'],
 } as const;
 function StateManagementPanel({
   stateId,

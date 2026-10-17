@@ -1,3 +1,7 @@
+> **Taxation & Diplomacy V1 implementation amendment:** [Taxation](../architecture/taxation.md) and [Diplomacy](../architecture/diplomacy.md) define implemented transfer-tax laws, tax-office ratification, bilateral agreements, exact quotes and atomic journal settlement. Territorial rules explicitly use a temporary citizenship proxy, with no verified geography or physical-building assertion. Corporate taxes and other economic events remain future work.
+
+> **Monetary V1 implementation amendment:** [The monetary specification](../architecture/monetary.md) supersedes conflicting economy proposals below. One state has one central bank and national currency; no universal/HRU currency, exchange, mandatory backing or physical-building requirement exists in this release. Governance separately controls issuance, burning, bank transfers and treasury spending. Issuance enters the bank account. Existing player transfers survive bank suspension. Physical infrastructure and Minecraft integration are future work.
+
 # HeliCraft — Research-Backed V1 Game Design Document
 
 ## Product thesis and research verdict

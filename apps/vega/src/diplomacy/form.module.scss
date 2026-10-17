@@ -1,0 +1,14 @@
+.step {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: var(--space-4);
+    font-weight: 600;
+  }
+}
