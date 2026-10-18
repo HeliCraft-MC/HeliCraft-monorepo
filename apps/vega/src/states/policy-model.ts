@@ -17,7 +17,7 @@ const actions = [
   'REMOVE_CITIZEN',
   'APPOINT_OFFICE_HOLDER',
   'REMOVE_OFFICE_HOLDER',
-  'ESTABLISH_CENTRAL_BANK',
+  'CREATE_INSTITUTION',
   'CHANGE_BANK_CHARTER',
   'CREATE_CURRENCY',
   'CHANGE_MONETARY_POLICY',
@@ -25,7 +25,6 @@ const actions = [
   'BURN_CURRENCY',
   'TRANSFER_CENTRAL_BANK',
   'SPEND_TREASURY',
-  'ESTABLISH_TAX_OFFICE',
   'CHANGE_TAX_OFFICE_CHARTER',
   'AMEND_TAX_LAW',
   'AMEND_TREATY',
@@ -44,4 +43,20 @@ function selectedOffices(policy: GovernancePolicy, officeId: string, selected: b
   }
   return [...policy.officeIds, officeId];
 }
-export { mechanisms, actions, newPolicy, selectedOffices };
+function replacePolicy(
+  policies: readonly GovernancePolicy[],
+  policy: GovernancePolicy,
+): GovernancePolicy[] {
+  return [
+    ...policies.filter(
+      (item) =>
+        item.action !== policy.action &&
+        !(
+          policy.action === 'CREATE_INSTITUTION' &&
+          ['ESTABLISH_CENTRAL_BANK', 'ESTABLISH_TAX_OFFICE'].includes(item.action)
+        ),
+    ),
+    policy,
+  ];
+}
+export { mechanisms, actions, newPolicy, selectedOffices, replacePolicy };

@@ -1,3 +1,4 @@
+import { decisionPolicy } from '../states/decision-policy';
 import type {
   MonetaryDirectivePayload,
   GovernancePolicy,
@@ -47,9 +48,7 @@ function availableKinds(
     if (monetary !== undefined && !institutionAllows(kind, monetary)) {
       return false;
     }
-    const policy = state.configuration.governance.policies.find(
-      (item) => item.action === actionCodes[kind],
-    );
+    const policy = decisionPolicy(state.configuration.governance.policies, actionCodes[kind]);
     return (
       policy !== undefined &&
       (['CITIZEN_VOTE', 'MANUAL'].includes(policy.mechanism) ||
@@ -88,8 +87,10 @@ function hasFinancialFields(kind: DirectiveKind): boolean {
   );
 }
 function hasMonetaryPolicies(state: StateDetail): boolean {
-  return state.configuration.governance.policies.some((policy) =>
-    Object.values(actionCodes).some((action) => action === policy.action),
+  return state.configuration.governance.policies.some(
+    (policy) =>
+      policy.action === 'CREATE_INSTITUTION' ||
+      Object.values(actionCodes).some((action) => action === policy.action),
   );
 }
 export {

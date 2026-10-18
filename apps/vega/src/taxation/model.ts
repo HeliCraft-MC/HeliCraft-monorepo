@@ -1,3 +1,4 @@
+import { decisionPolicy } from '../states/decision-policy';
 import type { Locale } from '../locales';
 import { uiText } from '../states/text';
 import type { StateDetail, MonetaryDirectivePayload, GovernancePolicy } from '@helicraft/alhena';
@@ -18,9 +19,7 @@ function economicAuthority(
   actorId: string,
   kind: keyof typeof economicActions,
 ): boolean {
-  const policy = state.configuration.governance.policies.find(
-    (item) => item.action === economicActions[kind],
-  );
+  const policy = decisionPolicy(state.configuration.governance.policies, economicActions[kind]);
   return (
     state.status === 'ACTIVE' &&
     state.citizens.some((person) => person.id === actorId) &&

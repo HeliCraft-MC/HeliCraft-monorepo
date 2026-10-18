@@ -84,6 +84,7 @@ function StateManagementPanel({
       <ManagementNavigation
         stateId={stateId}
         stateName={name}
+        flag={state.data.configuration.horizontalFlag}
         section={selected}
         sections={sections}
       />

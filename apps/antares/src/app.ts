@@ -7,6 +7,7 @@ import type { Database } from './db';
 import { identityRoutes } from './modules/identity/routes';
 import { validateBrowserMutation } from './modules/sessions/security';
 import { DomainError } from './modules/errors';
+import { siteSettingsRoutes } from './modules/site-settings/routes';
 import { siteRoutes } from './modules/content/site';
 import { administrationRoutes } from './modules/administration/routes';
 import { contentRoutes } from './modules/content/routes';
@@ -126,6 +127,7 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   app.route(
     '/api/v1',
     siteRoutes({
+      db: dependencies.db,
       links: dependencies.communityLinks,
       phase: dependencies.sitePhase ?? 'PRELAUNCH',
       registrationEnabled: dependencies.registrationEnabled ?? true,
@@ -148,6 +150,16 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   app.route('/api/v1', taxationRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', monetaryRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.route('/api/v1', stateRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route(
+    '/api/v1',
+    siteSettingsRoutes({
+      db: dependencies.db,
+      storage: dependencies.storage,
+      bucket: dependencies.bucket,
+      secureCookies: dependencies.secureCookies ?? false,
+      minecraftAddress: dependencies.minecraftAddress,
+    }),
+  );
   app.route('/api/v1', administrationRoutes(dependencies.db, dependencies.secureCookies ?? false));
   app.openapi(healthRoute, (context) =>
     context.json({ status: 'ok' as const, service: 'antares' as const }, HTTP.ok),

@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Contextual field explanations. Hover or tap the information button; keyboard users open it with Enter or Space and dismiss with Escape. Keep the label specific to the field and use a concrete example.',
+          'Contextual field explanations. Hover opens a temporary explanation. Click pins it until another click, outside press or Escape. Keyboard users open it with Enter or Space. Keep the label specific to the field and use a concrete example.',
       },
     },
   },

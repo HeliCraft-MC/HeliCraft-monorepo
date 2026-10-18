@@ -62,3 +62,5 @@ All institution/currency display text uses normalized Localized Content and exis
 Minecraft integrations may later submit authenticated REST commands and physical-infrastructure observations. Antares must continue to decide institutional capabilities, authority and accounting. No public game-action simulator, plugin change, physical building assertion, Vault dependency or direct database access is introduced.
 
 [Verification report](monetary-verification.md).
+
+The shared `CREATE_INSTITUTION` Governance policy authorizes establishment of both supported institutions. Existing published establishment-specific policies remain a fallback until replaced through a reform. A bank establishment may include new bank-scoped `initialPolicies`; they are normalized, approved with establishment and published as a new immutable governance/constitution revision atomically. Existing procedures can change only through a reform, where institution-specific decisions have their own selector. See [Governance](../states/governance.md).

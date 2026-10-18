@@ -24,6 +24,7 @@ function percentage(base: bigint, bps: number): bigint {
 function nationalCharge(claim: TaxClaim): TaxCharge {
   return {
     key: `law:${claim.lawId}`,
+    taxpayer: claim.taxpayer ?? 'SENDER',
     claims: [claim],
     treatyId: null,
     treatyRevisionId: null,
@@ -34,11 +35,32 @@ function nationalCharge(claim: TaxClaim): TaxCharge {
     allocations: [
       {
         stateId: claim.stateId,
+        beneficiary: claim.beneficiary,
         shareBps: Number(BASIS_POINTS),
         amountMinor: claim.nationalAmountMinor,
       },
     ],
   };
+}
+function sharedBeneficiary(
+  claims: readonly TaxClaim[],
+  stateId: string,
+): TaxClaim['beneficiary'] {
+  const national = claims.filter((claim) => claim.stateId === stateId);
+  const [first] = national;
+  if (
+    national.some(
+      (claim) =>
+        (claim.beneficiary?.kind ?? 'TREASURY') !== (first?.beneficiary?.kind ?? 'TREASURY') ||
+        (claim.beneficiary?.ownerId ?? stateId) !== (first?.beneficiary?.ownerId ?? stateId),
+    )
+  ) {
+    monetaryError(
+      'TREATY_BENEFICIARY_CONFLICT',
+      'Общее налоговое требование имеет несовместимых получателей. Требуется изменение законов или договора',
+    );
+  }
+  return first?.beneficiary;
 }
 function sharedCharge(base: bigint, treaty: ApplicableTreaty, claims: TaxClaim[]): TaxCharge {
   const { terms } = treaty.content;
@@ -48,7 +70,8 @@ function sharedCharge(base: bigint, treaty: ApplicableTreaty, claims: TaxClaim[]
   const amount = percentage(base, terms.rateBps);
   const first = (amount * BigInt(terms.firstShareBps)) / BASIS_POINTS;
   return {
-    key: `treaty:${treaty.revisionId}:${treaty.content.category}`,
+    key: `treaty:${treaty.revisionId}:${treaty.content.category}:${claims[0]?.taxpayer ?? 'SENDER'}`,
+    taxpayer: claims[0]?.taxpayer ?? 'SENDER',
     claims,
     treatyId: treaty.id,
     treatyRevisionId: treaty.revisionId,
@@ -57,9 +80,15 @@ function sharedCharge(base: bigint, treaty: ApplicableTreaty, claims: TaxClaim[]
     rateBps: terms.rateBps,
     amountMinor: amount.toString(),
     allocations: [
-      { stateId: treaty.parties[0], shareBps: terms.firstShareBps, amountMinor: first.toString() },
+      {
+        stateId: treaty.parties[0],
+        beneficiary: sharedBeneficiary(claims, treaty.parties[0]),
+        shareBps: terms.firstShareBps,
+        amountMinor: first.toString(),
+      },
       {
         stateId: treaty.parties[1],
+        beneficiary: sharedBeneficiary(claims, treaty.parties[1]),
         shareBps: Number(BASIS_POINTS) - terms.firstShareBps,
         amountMinor: (amount - first).toString(),
       },
@@ -81,9 +110,7 @@ function exclusiveCharges(treaty: ApplicableTreaty, claims: TaxClaim[]): TaxChar
       treatyName: treaty.content.name,
       mode: 'EXCLUSIVE',
       amountMinor: amount,
-      allocations: [
-        { stateId: claim.stateId, shareBps: Number(BASIS_POINTS), amountMinor: amount },
-      ],
+      allocations: charge.allocations.map((allocation) => ({ ...allocation, amountMinor: amount })),
     };
   });
 }
@@ -105,11 +132,16 @@ function calculateTaxes(
   const charges: TaxCharge[] = [];
   // oxlint-disable-next-line unicorn/no-array-sort -- Sort a copied input without mutating caller data on ES2022.
   for (const treaty of [...treaties].sort((left, right) => left.id.localeCompare(right.id))) {
-    const covered = claims.filter(
-      (claim) =>
-        treaty.parties.includes(claim.stateId) && claim.category === treaty.content.category,
-    );
-    if (treaty.parties.every((stateId) => covered.some((claim) => claim.stateId === stateId))) {
+    for (const taxpayer of ['SENDER', 'RECIPIENT']) {
+      const covered = claims.filter(
+        (claim) =>
+          (claim.taxpayer ?? 'SENDER') === taxpayer &&
+          treaty.parties.includes(claim.stateId) &&
+          claim.category === treaty.content.category,
+      );
+      if (!treaty.parties.every((stateId) => covered.some((claim) => claim.stateId === stateId))) {
+        continue;
+      }
       if (covered.some((claim) => touched.has(claim.lawId))) {
         monetaryError(
           'TREATY_CONFLICT',
@@ -131,14 +163,22 @@ function calculateTaxes(
   );
   charges.sort((left, right) => left.key.localeCompare(right.key));
   const totalTax = charges.reduce((sum, charge) => sum + BigInt(charge.amountMinor), 0n);
-  if (base + totalTax > MAX_MINOR) {
+  const recipientTax = charges
+    .filter((charge) => charge.taxpayer === 'RECIPIENT')
+    .reduce((sum, charge) => sum + BigInt(charge.amountMinor), 0n);
+  const totalDebit = base + totalTax - recipientTax;
+  if (recipientTax > base) {
+    monetaryError('TAX_WITHHOLDING_EXCEEDS_PRINCIPAL', 'Налоги получателя превышают сумму перевода');
+  }
+  if (totalDebit > MAX_MINOR) {
     monetaryError('TAX_OVERFLOW', 'Общая сумма перевода с налогами превышает допустимый диапазон');
   }
   return {
     ...event,
     charges,
     totalTaxMinor: totalTax.toString(),
-    totalDebitMinor: (base + totalTax).toString(),
+    totalDebitMinor: totalDebit.toString(),
+    recipientCreditMinor: (base - recipientTax).toString(),
   };
 }
 export { percentage, calculateTaxes, BASIS_POINTS, type ApplicableTreaty };

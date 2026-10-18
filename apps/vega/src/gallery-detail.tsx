@@ -1,3 +1,4 @@
+import { useSiteBranding } from './site-branding';
 import { StateName } from './state-name';
 // oxlint-disable import/max-dependencies -- Photo detail connects public entity references and owner metadata controls.
 import { galleryStateRole } from './gallery-state-labels';
@@ -15,6 +16,7 @@ import styles from './gallery.module.scss';
 const route = getRouteApi('/gallery/$id');
 function GalleryDetail(): ReactElement {
   const { text, locale } = useTranslation();
+  const { serverName } = useSiteBranding();
 
   const { item: original } = route.useLoaderData();
   const item = original ? localizeGallery(original, locale) : null;
@@ -29,7 +31,7 @@ function GalleryDetail(): ReactElement {
       <header className={styles.detailHeading}>
         <h1>{item.title}</h1>
         <p className={styles.eyebrow}>
-          {uiText(locale, 'Из мира HeliCraft', 'From the world of HeliCraft')}
+          {uiText(locale, `Из мира ${serverName}`, `From the world of ${serverName}`)}
         </p>
       </header>
       <figure className={styles.detailImage}>

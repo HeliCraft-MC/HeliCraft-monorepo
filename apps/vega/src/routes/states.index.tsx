@@ -101,12 +101,13 @@ const Route = createFileRoute('/states/')({
     await loadStates({ data: { ...deps, locale: context.locale } }),
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: uiText(match.context.locale, 'Государства', 'States'),
       description: uiText(
         match.context.locale,
-        'Каталог государств HeliCraft: граждане, флаги и правила вступления.',
-        'HeliCraft state directory: citizens, flags and entry rules.',
+        'Каталог государств {serverName}: граждане, флаги и правила вступления.',
+        '{serverName} state directory: citizens, flags and entry rules.',
       ),
       path: '/states',
       origin: loaderData?.site.canonicalOrigin ?? 'http://localhost:5173',

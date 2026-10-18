@@ -121,3 +121,18 @@
 .documentBlock {
   min-width: 0;
 }
+
+.reviewIdentity {
+  display: grid;
+  gap: 1rem;
+  dd {
+    margin: 0.5rem 0 0;
+  }
+}
+.colorSwatch {
+  display: inline-block;
+  width: 5rem;
+  height: 2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+}

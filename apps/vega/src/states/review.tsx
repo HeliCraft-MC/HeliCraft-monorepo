@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { PlayerNickname } from '../player-nickname';
 import { uiText, displayText, label } from './text';
 import { EMPTY_FOUNDERS, EMPTY_HTML } from './empty';
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { StateConfiguration, StateDetail } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
 import { BannerPreview } from './banner-preview';
@@ -27,15 +28,37 @@ function StateReview({
   showConstitution?: boolean;
 }>): ReactElement {
   const { locale } = useTranslation();
+  const color = useMemo<CSSProperties>(
+    () => ({ background: configuration.color }),
+    [configuration.color],
+  );
   return (
     <section className={styles.editor}>
       <h2>
         {displayText(configuration.name, locale) || uiText(locale, 'Без названия', 'Unnamed')}
       </h2>
       <p>{displayText(configuration.description, locale)}</p>
-      <p>
-        {configuration.slug} · {configuration.color}
-      </p>
+      <dl className={styles.reviewIdentity}>
+        <div>
+          <dt>{uiText(locale, 'Адрес публичной страницы', 'Public page address')}</dt>
+          <dd>
+            <span>/states/{configuration.slug}</span>
+            <p className={styles.hint}>
+              {uiText(
+                locale,
+                'По этому адресу игроки смогут найти государство после одобрения.',
+                'Players can find the state at this address after approval.',
+              )}
+            </p>
+          </dd>
+        </div>
+        <div>
+          <dt>{uiText(locale, 'Цвет государства на сайте', 'State color on the site')}</dt>
+          <dd>
+            <span className={styles.colorSwatch} style={color} aria-hidden="true" />
+          </dd>
+        </div>
+      </dl>
       <div className={styles.actions}>
         <BannerPreview design={configuration.verticalBanner} />
         {configuration.horizontalFlag.mode === 'BANNER' ? (

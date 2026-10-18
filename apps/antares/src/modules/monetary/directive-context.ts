@@ -14,7 +14,7 @@ import type { DirectiveRecord } from './store';
 import type { DirectiveDetail, DirectivePayload, MonetaryActor } from './contracts';
 import { directiveVotes } from './votes';
 import { executionProblem } from './availability';
-import { DECISION_ACTIONS, monetaryHash, monetaryError } from './domain';
+import { decisionPolicy, monetaryHash, monetaryError } from './domain';
 import { policyActor, directiveApprovals, proofsMet } from './evidence';
 
 async function directiveIsStale(
@@ -87,9 +87,7 @@ async function directiveContext(
       ? null
       : await readRevision(transaction, record.governanceRevisionId);
   const pinned = revision?.configuration ?? state.configuration;
-  const policy = pinned.governance.policies.find(
-    (item) => item.action === DECISION_ACTIONS[payload.kind],
-  );
+  const policy = decisionPolicy(pinned.governance.policies, payload.kind);
   if (!policy) {
     throw new DomainError(
       HTTP.forbidden,

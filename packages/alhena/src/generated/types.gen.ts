@@ -126,6 +126,9 @@ export type AdminContent = PublicContent & {
 };
 
 export type PublicSite = {
+    serverName: string;
+    githubUrl: string;
+    logoUrl: string | null;
     phase: 'PRELAUNCH' | 'OPEN';
     registrationEnabled: boolean;
     minecraftAddress: string | null;
@@ -412,6 +415,7 @@ export type TaxCalculation = {
     principalMinor: string;
     totalTaxMinor: string;
     totalDebitMinor: string;
+    recipientCreditMinor?: string;
     charges: Array<TaxCharge>;
 };
 
@@ -419,6 +423,7 @@ export type TaxableEventType = 'PLAYER_TRANSFER';
 
 export type TaxCharge = {
     key: string;
+    taxpayer?: 'SENDER' | 'RECIPIENT';
     claims: Array<TaxClaim>;
     treatyId: string | null;
     treatyRevisionId: string | null;
@@ -430,6 +435,10 @@ export type TaxCharge = {
         stateId: string;
         shareBps: number;
         amountMinor: string;
+        beneficiary?: {
+            kind: 'TREASURY' | 'CENTRAL_BANK';
+            ownerId: string;
+        };
     }>;
 };
 
@@ -442,6 +451,12 @@ export type TaxClaim = {
     stateSlug: string;
     name: LocalizedInput;
     category: string;
+    taxpayer?: 'SENDER' | 'RECIPIENT';
+    baseMinor?: string;
+    beneficiary?: {
+        kind: 'TREASURY' | 'CENTRAL_BANK';
+        ownerId: string;
+    };
     rateBps: number;
     evidence: Array<TaxJurisdictionEvidence>;
     nationalAmountMinor: string;
@@ -535,10 +550,16 @@ export type TaxLawRevision = {
 export type TaxRule = {
     event: TaxableEventType;
     category: string;
-    taxpayer: 'SENDER';
+    taxpayer: 'SENDER' | 'RECIPIENT';
+    base?: {
+        kind: 'FULL_AMOUNT';
+    } | {
+        kind: 'EXCESS';
+        thresholdMinor: string;
+    };
     jurisdictions: Array<'CITIZENSHIP' | 'TERRITORIAL'>;
     rateBps: number;
-    recipient: 'STATE_TREASURY';
+    recipient: 'STATE_TREASURY' | 'CENTRAL_BANK';
     currencyIds: Array<string>;
 };
 
@@ -579,6 +600,7 @@ export type MonetaryDirectivePayload = {
     kind: 'ESTABLISH_TAX_OFFICE';
     name: LocalizedInput;
     description: LocalizedInput;
+    initialPolicies?: Array<GovernancePolicy>;
 } | {
     kind: 'CHANGE_TAX_CHARTER';
     name: LocalizedInput;
@@ -629,6 +651,7 @@ export type MonetaryDirectivePayload = {
     kind: 'ESTABLISH_BANK';
     name: LocalizedInput;
     description: LocalizedInput;
+    initialPolicies?: Array<GovernancePolicy>;
 } | {
     kind: 'CHANGE_CHARTER';
     name: LocalizedInput;
@@ -1280,6 +1303,16 @@ export type PublicStateSummary = {
     officeCount: number;
     hasConstitution: boolean;
     createdAt: string;
+};
+
+export type SiteSettings = SiteSettingsInput & {
+    logoUrl: string | null;
+};
+
+export type SiteSettingsInput = {
+    serverName: string;
+    minecraftAddress: string;
+    githubUrl: '' | string;
 };
 
 export type Health = {
@@ -4239,6 +4272,36 @@ export type PreviewMarkdownResponses = {
 };
 
 export type PreviewMarkdownResponse = PreviewMarkdownResponses[keyof PreviewMarkdownResponses];
+
+export type GetSiteManifestData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/site/manifest.webmanifest';
+};
+
+export type GetSiteManifestResponses = {
+    /**
+     * Current public server identity for installation
+     */
+    200: {
+        name: string;
+        short_name: string;
+        description: string;
+        start_url: string;
+        scope: string;
+        display: 'standalone';
+        theme_color: string;
+        background_color: string;
+        icons: Array<{
+            src: string;
+            sizes: string;
+            type: 'image/png';
+        }>;
+    };
+};
+
+export type GetSiteManifestResponse = GetSiteManifestResponses[keyof GetSiteManifestResponses];
 
 export type GetSiteData = {
     body?: never;
@@ -8622,6 +8685,13 @@ export type ListMyStatesResponses = {
             slug: string;
             status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
             color: string;
+            horizontalFlag?: {
+                mode: 'BANNER';
+                design: MinecraftBanner;
+            } | {
+                mode: 'PNG';
+                mediaId: string | null;
+            };
             name: LocalizedInput;
         }>;
     };
@@ -9564,6 +9634,13 @@ export type ListAdminStatesResponses = {
             slug: string;
             status: 'CREATED' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED' | 'DORMANT' | 'DISSOLVED';
             color: string;
+            horizontalFlag?: {
+                mode: 'BANNER';
+                design: MinecraftBanner;
+            } | {
+                mode: 'PNG';
+                mediaId: string | null;
+            };
             name: LocalizedInput;
         }>;
     };
@@ -9696,6 +9773,269 @@ export type ChangeStateStatusResponses = {
 };
 
 export type ChangeStateStatusResponse = ChangeStateStatusResponses[keyof ChangeStateStatusResponses];
+
+export type GetSiteSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/site-settings';
+};
+
+export type GetSiteSettingsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetSiteSettingsError = GetSiteSettingsErrors[keyof GetSiteSettingsErrors];
+
+export type GetSiteSettingsResponses = {
+    /**
+     * Result
+     */
+    200: SiteSettings;
+};
+
+export type GetSiteSettingsResponse = GetSiteSettingsResponses[keyof GetSiteSettingsResponses];
+
+export type UpdateSiteSettingsData = {
+    body: SiteSettingsInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/site-settings';
+};
+
+export type UpdateSiteSettingsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type UpdateSiteSettingsError = UpdateSiteSettingsErrors[keyof UpdateSiteSettingsErrors];
+
+export type UpdateSiteSettingsResponses = {
+    /**
+     * Result
+     */
+    200: SiteSettings;
+};
+
+export type UpdateSiteSettingsResponse = UpdateSiteSettingsResponses[keyof UpdateSiteSettingsResponses];
+
+export type ResetSiteLogoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/site-settings/logo';
+};
+
+export type ResetSiteLogoErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ResetSiteLogoError = ResetSiteLogoErrors[keyof ResetSiteLogoErrors];
+
+export type ResetSiteLogoResponses = {
+    /**
+     * Result
+     */
+    200: SiteSettings;
+};
+
+export type ResetSiteLogoResponse = ResetSiteLogoResponses[keyof ResetSiteLogoResponses];
+
+export type UploadSiteLogoData = {
+    body: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/site-settings/logo';
+};
+
+export type UploadSiteLogoErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type UploadSiteLogoError = UploadSiteLogoErrors[keyof UploadSiteLogoErrors];
+
+export type UploadSiteLogoResponses = {
+    /**
+     * Result
+     */
+    200: SiteSettings;
+};
+
+export type UploadSiteLogoResponse = UploadSiteLogoResponses[keyof UploadSiteLogoResponses];
+
+export type GetSiteLogoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/site/logo.png';
+};
+
+export type GetSiteLogoErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetSiteLogoError = GetSiteLogoErrors[keyof GetSiteLogoErrors];
+
+export type GetSiteLogoResponses = {
+    /**
+     * Normalized logo
+     */
+    200: Blob | File;
+};
+
+export type GetSiteLogoResponse = GetSiteLogoResponses[keyof GetSiteLogoResponses];
 
 export type ListUsersData = {
     body?: never;

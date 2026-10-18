@@ -108,36 +108,40 @@ export function SkinSettings(): ReactElement {
         />
         <p>{skin.data ? `${text('skin.currentSkin')}: ${skin.data.model}` : text('skin.notSet')}</p>
       </div>
-      {url ? (
-        <Suspense fallback={loadingPreview}>
-          <Viewer key={url} url={url} model={file ? model : (skin.data?.model ?? 'CLASSIC')} />
-        </Suspense>
-      ) : null}
-      <div className={styles.form}>
-        <FileDropzone
-          id="skin-file"
-          label={text('skin.file')}
-          hint={`${text('files.dropHint')} · ${text('skin.fileHint')}`}
-          accept="image/png"
-          file={file}
-          onChoose={handleChoose}
-          disabled={busy}
-        />
-        <FormField label={text('skin.model')} htmlFor="skin-model">
-          <select id="skin-model" value={model} onChange={handleModel}>
-            <option value="CLASSIC">Classic</option>
-            <option value="SLIM">Slim</option>
-          </select>
-        </FormField>
-        {message === null ? null : <Alert>{text(message)}</Alert>}
-        {skin.isError ? <Alert tone="danger">{text('skin.loadError')}</Alert> : null}
-        <div className={styles.navigation}>
-          <Button disabled={!file || busy} onClick={handleSave}>
-            {text('skin.save')}
-          </Button>
-          <Button tone="quiet" disabled={!skin.data || busy} onClick={handleReset}>
-            {text('skin.reset')}
-          </Button>
+      <div className={styles.skinWorkspace}>
+        <div className={styles.skinPreview}>
+          {url ? (
+            <Suspense fallback={loadingPreview}>
+              <Viewer key={url} url={url} model={file ? model : (skin.data?.model ?? 'CLASSIC')} />
+            </Suspense>
+          ) : null}
+        </div>
+        <div className={styles.form}>
+          <FileDropzone
+            id="skin-file"
+            label={text('skin.file')}
+            hint={`${text('files.dropHint')} · ${text('skin.fileHint')}`}
+            accept="image/png"
+            file={file}
+            onChoose={handleChoose}
+            disabled={busy}
+          />
+          <FormField label={text('skin.model')} htmlFor="skin-model">
+            <select id="skin-model" value={model} onChange={handleModel}>
+              <option value="CLASSIC">Classic</option>
+              <option value="SLIM">Slim</option>
+            </select>
+          </FormField>
+          {message === null ? null : <Alert>{text(message)}</Alert>}
+          {skin.isError ? <Alert tone="danger">{text('skin.loadError')}</Alert> : null}
+          <div className={styles.navigation}>
+            <Button disabled={!file || busy} onClick={handleSave}>
+              {text('skin.save')}
+            </Button>
+            <Button tone="quiet" disabled={!skin.data || busy} onClick={handleReset}>
+              {text('skin.reset')}
+            </Button>
+          </div>
         </div>
       </div>
     </>

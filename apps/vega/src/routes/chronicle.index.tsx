@@ -11,6 +11,7 @@ export const Route = createFileRoute('/chronicle/')({
   loader: async ({ deps }) => await loadChronicle({ data: deps }),
   head: ({ loaderData, match }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: translate('admin.chronicle', match.context.locale),
       description: translate('seo.chronicle.description', match.context.locale),

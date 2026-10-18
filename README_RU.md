@@ -137,3 +137,7 @@ Vesper, Teapot и Soon перенесены в `archive/apps/` вместе с �
 ## Taxation and diplomacy
 
 Государственные налоговые службы, неизменяемые законы о налогах на переводы, двусторонние налоговые договоры и точное атомарное исполнение работают через Антарес и Вегу. До подтверждения личного перевода показывается серверный расчёт налогов. Учреждения и законы следуют опубликованному Governance; администрация ратифицирует учреждения, не назначая ставки. См. [Taxation](docs/architecture/taxation_RU.md), [Diplomacy](docs/architecture/diplomacy_RU.md) и [проверки](docs/architecture/taxation-verification.md). География Minecraft, корпоративные налоги, обмен валют и взыскание задолженности не реализованы.
+
+## Stand deployment
+
+Запуск: `docker compose --env-file .env -f compose.stand.yml up -d --build`. Reverse proxy должен быть подключён к существующей внешней сети `intranet` и обращаться к `helicraft-stand-vega:8080`. Порты на хост не публикуются, плагины не включены. Укажите точный публичный HTTPS `SITE_ORIGIN` и рабочие учётные данные. Отображаемые названия сервера подставляются только из [общих настроек](docs/architecture/site-settings.md), доступных в `/admin/settings`; жёстко заданные названия в интерфейсе запрещены.

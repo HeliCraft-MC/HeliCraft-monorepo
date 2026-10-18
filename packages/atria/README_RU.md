@@ -53,3 +53,5 @@ MarkdownContent принимает только очищенный HTML Анта
 ## Monetary system V1
 
 [Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/architecture/monetary_RU.md).
+
+`MarkdownEditor.preview` и `previewLabel` добавляют третий режим с безопасным содержимым от приложения; одновременно виден один режим, Markdown сохраняется при переключении. Button и ActionLink используют общий `--radius-medium`. Ссылочные PlayerNickname и StateName по умолчанию показывают превью при наведении/фокусе. FieldHelp открывается при наведении; клик закрепляет подсказку до повторного клика, клика снаружи или Escape.

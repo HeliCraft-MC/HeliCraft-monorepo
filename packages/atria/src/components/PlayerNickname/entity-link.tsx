@@ -16,11 +16,6 @@ function EntityLink({ href, name, children, preview, onPreview }: EntityLinkProp
   const id = useId();
   const [open, setOpen] = useState(false);
   const anchor = useMemo(() => <a href={href} aria-label={name} />, [href, name]);
-  const hasDetails =
-    preview !== undefined &&
-    [preview.description, preview.facts].some(
-      (value) => value !== undefined && value.trim() !== '' && value.trim() !== name.trim(),
-    );
   if (preview === undefined) {
     return (
       <a href={href} className={styles.nickname} onPointerEnter={onPreview} onFocus={onPreview}>
@@ -33,14 +28,14 @@ function EntityLink({ href, name, children, preview, onPreview }: EntityLinkProp
       <Tooltip.Root open={open} onOpenChange={setOpen}>
         <Tooltip.Trigger
           render={anchor}
-          aria-describedby={open && hasDetails ? id : undefined}
+          aria-describedby={open ? id : undefined}
           className={styles.nickname}
           onPointerEnter={onPreview}
           onFocus={onPreview}
         >
           {children}
         </Tooltip.Trigger>
-        {hasDetails && (
+        {preview !== undefined && (
           <Tooltip.Portal>
             <Tooltip.Positioner sideOffset={8}>
               <Tooltip.Popup id={id} role="tooltip" className={styles.preview}>

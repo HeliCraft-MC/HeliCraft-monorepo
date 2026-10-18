@@ -4,7 +4,8 @@ import {
   assertManagementPage,
   assertStateFits,
 } from './state-public-pages';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 import { DraftSchema } from '../../apps/antares/src/modules/states/contracts';
 
 // oxlint-disable max-lines, max-lines-per-function, max-statements -- This sequential real-browser lifecycle covers a resumable wizard, admin review and JavaScript-free SSR.
@@ -119,6 +120,7 @@ test('resumes a multilingual state draft, edits governance and constitution, the
   await page.getByRole('button', { name: '6. Должности', exact: true }).click();
   await page.getByLabel('Название должности · Русский', { exact: true }).fill('Правитель Авроры');
   await page.getByRole('button', { name: '9. Государственные решения', exact: true }).click();
+  await page.getByLabel('Настройки решений', { exact: true }).selectOption('tax');
   const law = page
     .getByRole('heading', { name: 'Принятие законов', exact: true })
     .locator('xpath=..');
@@ -140,6 +142,8 @@ test('resumes a multilingual state draft, edits governance and constitution, the
       return document?.blocks[0]?.type === 'MARKDOWN' ? document.blocks[0].content.ru : null;
     })
     .toBe(constitutionSource);
+  await page.getByRole('button', { name: 'Превью документа', exact: true }).click();
+  await expect(page.getByLabel('Текст Конституции · RU', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Живой предпросмотр', exact: true })).toContainText(
     'основано игроками',
   );

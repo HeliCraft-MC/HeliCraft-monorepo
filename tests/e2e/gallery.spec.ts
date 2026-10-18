@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 
 const PASSWORD = 'Browser test password 2026';
 async function verifyPreferences(page: Page): Promise<void> {

@@ -51,16 +51,32 @@ const servers = [
   { port: 3100, siteOrigin: 'http://localhost:5175' },
   { port: 3101, siteOrigin: 'http://localhost:8085' },
 ].map(({ port, siteOrigin }) => {
-  const app = createApp({
-    db: database.db,
-    storage,
-    bucket: 'helicraft',
-    siteOrigin,
-    checkReady: async (): Promise<void> => {
-      await database.pool.query('select 1');
+  const application = (): ReturnType<typeof createApp> =>
+    createApp({
+      db: database.db,
+      storage,
+      bucket: 'helicraft',
+      siteOrigin,
+      checkReady: async (): Promise<void> => {
+        await database.pool.query('select 1');
+      },
+    });
+  let app = application();
+  return Bun.serve({
+    port,
+    fetch: async (request) => {
+      // This reset exists only on disposable browser-test servers. Production mounts no test routes.
+      if (
+        request.method === 'POST' &&
+        new URL(request.url).pathname === '/api/__e2e/reset-rate-limits' &&
+        request.headers.get('origin') === siteOrigin
+      ) {
+        app = application();
+        return Response.json({ ready: true });
+      }
+      return await app.fetch(request);
     },
   });
-  return Bun.serve({ port, fetch: app.fetch });
 });
 async function close(): Promise<void> {
   await Promise.all(

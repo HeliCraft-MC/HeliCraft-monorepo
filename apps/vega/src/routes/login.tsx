@@ -1,3 +1,5 @@
+import { brandText, DEFAULT_SERVER_NAME } from '../site-branding';
+import { loadPublicSite } from '../public-data';
 import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
@@ -21,9 +23,15 @@ export const Route = createFileRoute('/login')({
       throw redirect({ to: '/app' });
     }
   },
-  head: ({ match }) => ({
+  loader: async () => await loadPublicSite(),
+  head: ({ match, loaderData }) => ({
     meta: [
-      { title: translate('seo.login.title', match.context.locale) },
+      {
+        title: brandText(
+          translate('seo.login.title', match.context.locale),
+          loaderData?.serverName ?? DEFAULT_SERVER_NAME,
+        ),
+      },
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),

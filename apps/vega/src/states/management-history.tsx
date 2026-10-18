@@ -4,6 +4,7 @@ import { listStateRevisions } from '@helicraft/alhena';
 import { LoadingState, Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
+import { revisionReason } from './revision-reason';
 import { uiText } from './text';
 import styles from './states.module.scss';
 
@@ -39,7 +40,7 @@ function ManagementHistory({ stateId }: Readonly<{ stateId: string }>): ReactEle
             <time dateTime={revision.createdAt}>
               {new Date(revision.createdAt).toLocaleString(locale)}
             </time>
-            {revision.reason !== null && <p>{revision.reason}</p>}
+            {revision.reason !== null && <p>{revisionReason(revision.reason, locale)}</p>}
           </li>
         ))}
       </ol>

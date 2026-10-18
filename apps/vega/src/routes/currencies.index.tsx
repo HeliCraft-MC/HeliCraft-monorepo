@@ -53,12 +53,13 @@ const Route = createFileRoute('/currencies/')({
   loader: async ({ deps }) => await loadCurrencies({ data: deps }),
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: uiText(match.context.locale, 'Национальные валюты', 'National currencies'),
       description: uiText(
         match.context.locale,
-        'Центральные банки, денежная масса и политика государств HeliCraft.',
-        'HeliCraft central banks, money supply and state monetary policies.',
+        'Центральные банки, денежная масса и политика государств {serverName}.',
+        '{serverName} central banks, money supply and state monetary policies.',
       ),
       path: '/currencies',
       origin: loaderData?.site.canonicalOrigin ?? 'http://localhost:5173',

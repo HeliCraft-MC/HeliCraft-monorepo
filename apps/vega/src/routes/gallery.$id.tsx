@@ -22,6 +22,7 @@ const Route = createFileRoute('/gallery/$id')({
       ? localizeGallery(loaderData.item, match.context.locale)
       : undefined;
     return metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: item?.title ?? translate('seo.photo.title', match.context.locale),
       description:

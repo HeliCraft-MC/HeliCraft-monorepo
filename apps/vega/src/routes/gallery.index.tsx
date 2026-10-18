@@ -13,6 +13,7 @@ const Route = createFileRoute('/gallery/')({
   loader: async ({ deps }) => await loadGallery({ data: deps }),
   head: ({ loaderData, match }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: translate('seo.gallery.title', match.context.locale),
       description: translate('seo.gallery.description', match.context.locale),

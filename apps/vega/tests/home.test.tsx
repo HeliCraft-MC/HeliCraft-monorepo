@@ -7,6 +7,9 @@ import type { GalleryItem } from '@helicraft/alhena';
 
 const homeData: HomeData = {
   site: {
+    serverName: 'HeliCraft',
+    githubUrl: 'https://github.com/HeliCraft-MC',
+    logoUrl: null,
     phase: 'PRELAUNCH',
     registrationEnabled: false,
     minecraftAddress: null,

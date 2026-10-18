@@ -1,6 +1,7 @@
 // oxlint-disable no-await-in-loop -- Responsive assertions resize the same browser page sequentially; concurrent resizing would race.
 import type { Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 
 const PASSWORD = 'Browser test password 2026';
 const HTTP_NOT_FOUND = 404;

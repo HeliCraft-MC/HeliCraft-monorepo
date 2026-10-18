@@ -5,7 +5,7 @@ const managementLabels = {
   government: ['Устройство и должности', 'Government and offices'],
   constitution: ['Конституция', 'Constitution'],
   appointments: ['Назначения', 'Appointments'],
-  proposals: ['Предложения и голосования', 'Proposals and voting'],
+  proposals: ['Реформы государства', 'State reforms'],
   citizenship: ['Моё гражданство', 'My citizenship'],
   history: ['История изменений', 'Revision history'],
   bank: ['Центральный банк', 'Central bank'],

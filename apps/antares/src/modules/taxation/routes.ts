@@ -30,6 +30,7 @@ import {
 } from './read-contracts';
 import { TransferQuoteSchema, TaxRuleSchema } from './contracts';
 import { percentage } from './engine';
+import { taxBaseMinor } from './rule';
 
 const MAX_HISTORY_PAGE = 1_000_000;
 const MAX_REASON_LENGTH = 2000;
@@ -150,13 +151,33 @@ function taxationRoutes(db: Database['db'] | undefined, secureCookies: boolean):
           },
         },
       },
-      responses: { 200: json(z.object({ amountMinor: z.string() })), ...Errors },
+      responses: {
+        200: json(
+          z.object({
+            amountMinor: z.string(),
+            baseMinor: z.string(),
+            totalDebitMinor: z.string(),
+            recipientCreditMinor: z.string(),
+          }),
+        ),
+        ...Errors,
+      },
     }),
     async (context) => {
       await actor(context);
       const input = context.req.valid('json');
+      const principal = BigInt(input.amountMinor);
+      const base = taxBaseMinor(principal, input.rule);
+      const tax = percentage(base, input.rule.rateBps);
       return context.json(
-        { amountMinor: percentage(BigInt(input.amountMinor), input.rule.rateBps).toString() },
+        {
+          amountMinor: tax.toString(),
+          baseMinor: base.toString(),
+          totalDebitMinor: (principal + (input.rule.taxpayer === 'SENDER' ? tax : 0n)).toString(),
+          recipientCreditMinor: (
+            principal - (input.rule.taxpayer === 'RECIPIENT' ? tax : 0n)
+          ).toString(),
+        },
         HTTP.ok,
       );
     },

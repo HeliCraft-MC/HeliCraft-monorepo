@@ -36,14 +36,14 @@ function AccountLinks({
   const signOut = useCallback((): void => {
     void leave();
   }, []);
-  if (account.isError || account.data === undefined) {
+  if (!hydrated || account.isError || account.data === undefined) {
     return (
       <>
-        <Link to="/login">{text('auth.signIn')}</Link>
+        <a href="/login">{text('auth.signIn')}</a>
         {registrationEnabled ? (
-          <Link className={styles.cta} to="/register">
+          <a className={styles.cta} href="/register">
             {text('auth.createAccount')}
-          </Link>
+          </a>
         ) : null}
       </>
     );

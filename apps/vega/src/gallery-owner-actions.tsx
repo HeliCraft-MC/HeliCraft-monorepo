@@ -42,7 +42,7 @@ function GalleryOwnerActions({
   const handleCancel = useCallback((): void => {
     setConfirm(false);
   }, []);
-  if (account.data?.id !== ownerId) {
+  if (!hydrated || account.data?.id !== ownerId) {
     return null;
   }
   return (

@@ -8,6 +8,7 @@ export const Route = createFileRoute('/world')({
   loader: async () => await loadPublicHome(),
   head: ({ loaderData, match }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: translate('world.title', match.context.locale),
       description: translate('seo.world.description', match.context.locale),

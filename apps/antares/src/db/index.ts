@@ -2,6 +2,8 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
+  institutionPolicyTexts,
+  siteSettings,
   economicDirectiveDocuments,
   taxOffices,
   taxOfficeReviews,
@@ -71,6 +73,8 @@ import {
 } from './schema';
 
 const schema = {
+  institutionPolicyTexts,
+  siteSettings,
   economicDirectiveDocuments,
   taxOffices,
   taxOfficeReviews,

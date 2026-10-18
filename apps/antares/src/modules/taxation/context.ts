@@ -1,6 +1,6 @@
 // oxlint-disable no-await-in-loop -- Immutable law and treaty revisions hydrate sequentially on one locked connection.
 import { and, desc, eq, inArray, lte, ne } from 'drizzle-orm';
-import { taxLawRevisions, taxLaws, taxOffices, treaties, states } from '../../db/schema';
+import { taxLawRevisions, taxLaws, treaties, states } from '../../db/schema';
 import type { Transaction } from '../permissions/transaction';
 import { readRevision } from '../states/revisions';
 import { readText } from '../localized-content/service';
@@ -10,6 +10,8 @@ import type { TaxClaim, TaxCalculation } from './contracts';
 import { calculateTaxes, percentage } from './engine';
 import type { ApplicableTreaty } from './engine';
 import { jurisdictionMemberships, resolveJurisdiction } from './jurisdiction';
+import { taxBaseMinor } from './rule';
+import { taxBeneficiary } from './beneficiary';
 
 async function applicableTreaties(
   transaction: Transaction,
@@ -49,6 +51,7 @@ async function transferCalculation(
 ): Promise<TaxCalculation> {
   const now = new Date();
   const memberships = await jurisdictionMemberships(transaction, senderId);
+  const recipientMemberships = await jurisdictionMemberships(transaction, input.recipientId);
   const revisions = await transaction
     .select({
       revision: taxLawRevisions,
@@ -59,8 +62,7 @@ async function transferCalculation(
     .from(taxLawRevisions)
     .innerJoin(taxLaws, eq(taxLaws.id, taxLawRevisions.lawId))
     .innerJoin(states, eq(states.id, taxLaws.stateId))
-    .innerJoin(taxOffices, eq(taxOffices.stateId, taxLaws.stateId))
-    .where(and(eq(taxOffices.status, 'ACTIVE'), lte(taxLawRevisions.effectiveAt, now)))
+    .where(and(eq(states.status, 'ACTIVE'), lte(taxLawRevisions.effectiveAt, now)))
     .orderBy(desc(taxLawRevisions.number));
   const seen = new Set<string>();
   const claims: TaxClaim[] = [];
@@ -68,7 +70,11 @@ async function transferCalculation(
     if (!seen.has(revision.lawId)) {
       seen.add(revision.lawId);
       const { rule } = revision;
-      const evidence = resolveJurisdiction(stateId, rule, memberships);
+      const evidence = resolveJurisdiction(
+        stateId,
+        rule,
+        rule.taxpayer === 'RECIPIENT' ? recipientMemberships : memberships,
+      );
       if (
         revision.status === 'ACTIVE' &&
         evidence.length > 0 &&
@@ -85,9 +91,15 @@ async function transferCalculation(
           stateId,
           name: await readText(transaction, revision.nameTextId),
           category: rule.category,
+          taxpayer: rule.taxpayer,
+          baseMinor: taxBaseMinor(BigInt(input.amountMinor), rule).toString(),
+          beneficiary: await taxBeneficiary(transaction, stateId, rule),
           rateBps: rule.rateBps,
           evidence,
-          nationalAmountMinor: percentage(BigInt(input.amountMinor), rule.rateBps).toString(),
+          nationalAmountMinor: percentage(
+            taxBaseMinor(BigInt(input.amountMinor), rule),
+            rule.rateBps,
+          ).toString(),
         });
       }
     }

@@ -1,4 +1,9 @@
-import type { LocalizedInput, MonetaryDirectivePayload, MonetaryPolicy } from '@helicraft/alhena';
+import type {
+  GovernancePolicy,
+  LocalizedInput,
+  MonetaryDirectivePayload,
+  MonetaryPolicy,
+} from '@helicraft/alhena';
 import { moneyInputToMinor } from '@helicraft/atria';
 import type { SelectedPlayer } from '../player-picker';
 import { amountFromForm, formText } from './model';
@@ -23,11 +28,14 @@ function composePayload(
     description: LocalizedInput;
     currencyId: string | null;
     players: SelectedPlayer[];
+    initialPolicies?: GovernancePolicy[];
   }>,
 ): MonetaryDirectivePayload {
   const { kind, form, name, description, currencyId, players } = input;
   if (kind === 'ESTABLISH_BANK' || kind === 'CHANGE_CHARTER') {
-    return { kind, name, description };
+    return kind === 'ESTABLISH_BANK'
+      ? { kind, name, description, initialPolicies: input.initialPolicies }
+      : { kind, name, description };
   }
   if (kind === 'CREATE_CURRENCY') {
     return {

@@ -91,3 +91,7 @@ The full state workspace includes onboarding, identity, offices, constitution, a
 Reviewed migrations `0010_modern_mandroid.sql` and `0011_closed_lifeguard.sql` were applied to fresh Testcontainers and the configured local `helicraft` database through the migration runner. No schema push was used.
 
 Passed: `build:ts`, TS7 `typecheck`, strict type-aware lint, `format:check`, 97 unit tests, 21 PostgreSQL/S3 integration tests, Storybook build, and root/development/affected Antares/Vega Compose validation. The full browser suite passes 19 cases across development/production, with the existing development counterpart of the production-only static-cache case intentionally skipped. Independent public-gallery suite: 14 passed, including JavaScript-free SSR and language navigation. Docker was initially stopped and became available after the user started it. A transient development client import failure in the first public-gallery run did not recur in the clean full rerun; no errors were suppressed. Existing PostgreSQL driver deprecation and large-chunk build warnings remain non-failing tooling observations. Archives and Java plugins were not modified.
+
+## Workspace follow-up — 2026-10-18
+
+The current 18-point workspace follow-up, changed behavior and release evidence are tracked in [the current verification report](../design/workspace-follow-up.md). Earlier release gates above remain historical.

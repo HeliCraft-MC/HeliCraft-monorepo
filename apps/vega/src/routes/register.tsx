@@ -1,3 +1,4 @@
+import { brandText, DEFAULT_SERVER_NAME } from '../site-branding';
 import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
@@ -23,9 +24,14 @@ export const Route = createFileRoute('/register')({
     }
   },
   loader: async () => await loadPublicSite(),
-  head: ({ match }) => ({
+  head: ({ match, loaderData }) => ({
     meta: [
-      { title: translate('seo.register.title', match.context.locale) },
+      {
+        title: brandText(
+          translate('seo.register.title', match.context.locale),
+          loaderData?.serverName ?? DEFAULT_SERVER_NAME,
+        ),
+      },
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),

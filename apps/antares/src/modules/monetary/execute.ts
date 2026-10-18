@@ -1,3 +1,4 @@
+import { publishInitialPolicies } from './institution-policies';
 // oxlint-disable import/max-dependencies -- Approved economic directives dispatch to existing ledger or institution/law/treaty domain services.
 import { TaxDirectiveSchema } from '../taxation/contracts';
 import { TreatyDirectiveSchema } from '../diplomacy/contracts';
@@ -93,6 +94,7 @@ async function applyDirective(
       await executeFinancial(transaction, { record, payload, currency, actorId: actor.id });
     }
   }
+  await publishInitialPolicies(transaction, { record, actorId: actor.id }, payload);
   await transaction
     .update(monetaryDirectives)
     .set({ status: 'APPLIED', appliedAt: sql`clock_timestamp()` })

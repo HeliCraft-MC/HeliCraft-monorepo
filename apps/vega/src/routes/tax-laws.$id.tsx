@@ -47,6 +47,7 @@ const Route = createFileRoute('/tax-laws/$id')({
   },
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: loaderData
         ? displayText(loaderData.law.revisions[0]?.name ?? {}, match.context.locale)

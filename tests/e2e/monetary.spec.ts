@@ -1,6 +1,7 @@
 // oxlint-disable max-lines, max-lines-per-function, max-statements -- Real browser lifecycle covers the monetary system without Minecraft or mock financial endpoints.
 import { assertOfficeAssignmentPages } from './office-assignments';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 import type { APIRequestContext, Page } from '@playwright/test';
 import { DraftSchema, StateDetailSchema } from '../../apps/antares/src/modules/states/contracts';
 import { applyPreset } from '../../apps/antares/src/modules/states/presets';
@@ -53,7 +54,12 @@ async function assertWalletStates(page: Page): Promise<void> {
     await route.continue();
   });
   await page.goto('/app/wallet');
-  await expect(page.locator('output')).toBeVisible();
+  await expect(
+    page
+      .getByRole('main')
+      .getByRole('status')
+      .filter({ hasText: /^Загрузка денежных данных…$/u }),
+  ).toBeVisible();
   gate.resume();
   await expect(page.getByText('В кошельке пока нет валют.', { exact: false })).toBeVisible();
   await page.unroute('**/api/v1/account/wallet?*');
@@ -395,7 +401,10 @@ test('operates a national monetary system through the web and renders public cur
     expect(forbiddenIssue.status()).toBe(403);
     await page.goto(`/app/states/${stateId}/manage?section=issuance`);
     await expect(
-      page.getByText('Сейчас у вас нет полномочий на новые денежные решения.', { exact: true }),
+      page.getByText(
+        'Этот раздел недоступен с вашими текущими полномочиями. Выберите доступный раздел в меню.',
+        { exact: true },
+      ),
     ).toBeVisible();
     const successorPage = await recipientContext.newPage();
     await successorPage.goto(`/app/states/${stateId}/manage?section=issuance`);

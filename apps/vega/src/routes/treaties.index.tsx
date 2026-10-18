@@ -54,12 +54,13 @@ const Route = createFileRoute('/treaties/')({
     await loadTreaties({ data: { locale: context.locale, page: deps.page } }),
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: uiText(match.context.locale, 'Международные договоры', 'International treaties'),
       description: uiText(
         match.context.locale,
-        'Ратифицированные двусторонние соглашения государств HeliCraft',
-        'Ratified bilateral HeliCraft state agreements',
+        'Ратифицированные двусторонние соглашения государств {serverName}',
+        'Ratified bilateral {serverName} state agreements',
       ),
       path: '/treaties',
       origin: loaderData?.site.canonicalOrigin ?? 'http://localhost:5173',

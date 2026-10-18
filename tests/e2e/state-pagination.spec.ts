@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 
 test('citizens use ten-person GET pages without JavaScript and preserve language', async ({
   browser,

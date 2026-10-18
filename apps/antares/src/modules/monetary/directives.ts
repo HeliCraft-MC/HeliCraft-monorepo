@@ -7,7 +7,7 @@ import { DomainError, HTTP } from '../errors';
 import { DirectiveInputSchema } from './contracts';
 import type { DirectiveInput, DirectiveDetail, MonetaryActor } from './contracts';
 import { assertExecutable } from './availability';
-import { DECISION_ACTIONS, monetaryHash, monetaryError } from './domain';
+import { decisionPolicy, monetaryHash, monetaryError } from './domain';
 import {
   monetaryActor,
   storePayload,
@@ -45,9 +45,7 @@ class MonetaryDirectiveService {
         }
         return prior.id;
       }
-      const policy = state.configuration.governance.policies.find(
-        (item) => item.action === DECISION_ACTIONS[input.payload.kind],
-      );
+      const policy = decisionPolicy(state.configuration.governance.policies, input.payload.kind);
       if (state.status !== 'ACTIVE' || !policy || !policyActor(state, policy, actor.id)) {
         throw new DomainError(
           HTTP.forbidden,

@@ -1,21 +1,36 @@
 // oxlint-disable no-magic-numbers -- Rates, event registry and revision limits are explicit validated domain contracts.
+import { PolicySchema } from '../states/contracts';
 import { z } from '@hono/zod-openapi';
 import { LocalizedInputSchema, resolveText } from '../localized-content/contracts';
 
 const TaxEventSchema = z.enum(['PLAYER_TRANSFER']).openapi('TaxableEventType');
 const JurisdictionSchema = z.enum(['CITIZENSHIP', 'TERRITORIAL']);
+const TaxpayerSchema = z.enum(['SENDER', 'RECIPIENT']);
+const TaxBaseSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('FULL_AMOUNT') }).strict(),
+  z
+    .object({
+      kind: z.literal('EXCESS'),
+      thresholdMinor: z.string().regex(/^(?:0|[1-9][0-9]{0,29})$/u),
+    })
+    .strict(),
+]);
+const TaxBeneficiarySchema = z
+  .object({ kind: z.enum(['TREASURY', 'CENTRAL_BANK']), ownerId: z.uuid() })
+  .strict();
 const TaxRuleSchema = z
   .object({
     event: TaxEventSchema,
     category: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/u),
-    taxpayer: z.literal('SENDER'),
+    taxpayer: TaxpayerSchema,
+    base: TaxBaseSchema.optional(),
     jurisdictions: z
       .array(JurisdictionSchema)
       .min(1)
       .max(2)
       .refine((items) => new Set(items).size === items.length, 'Duplicate jurisdiction'),
     rateBps: z.number().int().min(0).max(10_000),
-    recipient: z.literal('STATE_TREASURY'),
+    recipient: z.enum(['STATE_TREASURY', 'CENTRAL_BANK']),
     currencyIds: z
       .array(z.uuid())
       .max(100)
@@ -40,7 +55,13 @@ const TaxLawContentSchema = z
   .strict()
   .openapi('TaxLawContent');
 const TaxDirectiveSchemas = [
-  z.object({ kind: z.literal('ESTABLISH_TAX_OFFICE'), ...TaxIdentity }).strict(),
+  z
+    .object({
+      kind: z.literal('ESTABLISH_TAX_OFFICE'),
+      ...TaxIdentity,
+      initialPolicies: z.array(PolicySchema).max(20).optional(),
+    })
+    .strict(),
   z.object({ kind: z.literal('CHANGE_TAX_CHARTER'), ...TaxIdentity }).strict(),
   z
     .object({ kind: z.literal('ENACT_TAX_LAW'), lawId: z.uuid(), ...TaxLawContentSchema.shape })
@@ -82,6 +103,9 @@ const TaxClaimSchema = z
     stateSlug: z.string(),
     name: LocalizedInputSchema,
     category: z.string(),
+    taxpayer: TaxpayerSchema.optional(),
+    baseMinor: z.string().optional(),
+    beneficiary: TaxBeneficiarySchema.optional(),
     rateBps: z.number().int(),
     evidence: z.array(TaxEvidenceSchema),
     nationalAmountMinor: z.string(),
@@ -91,6 +115,7 @@ const TaxClaimSchema = z
 const TaxChargeSchema = z
   .object({
     key: z.string(),
+    taxpayer: TaxpayerSchema.optional(),
     claims: z.array(TaxClaimSchema),
     treatyId: z.uuid().nullable(),
     treatyRevisionId: z.uuid().nullable(),
@@ -99,7 +124,12 @@ const TaxChargeSchema = z
     rateBps: z.number().int(),
     amountMinor: z.string(),
     allocations: z.array(
-      z.object({ stateId: z.uuid(), shareBps: z.number().int(), amountMinor: z.string() }),
+      z.object({
+        stateId: z.uuid(),
+        shareBps: z.number().int(),
+        amountMinor: z.string(),
+        beneficiary: TaxBeneficiarySchema.optional(),
+      }),
     ),
   })
   .strict()
@@ -113,6 +143,7 @@ const TaxCalculationSchema = z
     principalMinor: z.string(),
     totalTaxMinor: z.string(),
     totalDebitMinor: z.string(),
+    recipientCreditMinor: z.string().optional(),
     charges: z.array(TaxChargeSchema),
   })
   .strict()

@@ -26,7 +26,7 @@ async function settleTaxes(
       id: assessmentId,
       operationId,
       assessmentKey: charge.key,
-      taxpayerId: actorId,
+      taxpayerId: charge.taxpayer === 'RECIPIENT' ? calculation.recipientId : actorId,
       currencyId: currency.id,
       baseMinor: calculation.principalMinor,
       charge,
@@ -45,13 +45,13 @@ async function settleTaxes(
       const source = await account(transaction, {
         currencyId: currency.id,
         kind: 'PLAYER',
-        ownerId: actorId,
+        ownerId: charge.taxpayer === 'RECIPIENT' ? calculation.recipientId : actorId,
       });
       // oxlint-disable-next-line no-await-in-loop -- Treasury accounts support the event currency without creating or exchanging currency.
       const target = await account(transaction, {
         currencyId: currency.id,
-        kind: 'TREASURY',
-        ownerId: allocation.stateId,
+        kind: allocation.beneficiary?.kind ?? 'TREASURY',
+        ownerId: allocation.beneficiary?.ownerId ?? allocation.stateId,
       });
       // oxlint-disable-next-line no-await-in-loop -- Internal journals deliberately bypass taxable event dispatch to prevent recursion.
       const journalId = await post(transaction, {

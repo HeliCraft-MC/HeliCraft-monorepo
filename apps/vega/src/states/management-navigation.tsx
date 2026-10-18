@@ -1,3 +1,5 @@
+import type { StateDetail } from '@helicraft/alhena';
+import { BannerPreview } from './banner-preview';
 import type { ReactElement } from 'react';
 import { useTranslation } from '../i18n';
 import { uiText } from './text';
@@ -10,11 +12,13 @@ import styles from './management.module.scss';
 function ManagementNavigation({
   stateId,
   stateName,
+  flag,
   section,
   sections,
 }: Readonly<{
   stateId: string;
   stateName: string;
+  flag: StateDetail['configuration']['horizontalFlag'];
   section: ManagementSection;
   sections: readonly ManagementSection[];
 }>): ReactElement {
@@ -23,7 +27,11 @@ function ManagementNavigation({
     <aside className={styles.sidebar}>
       <ManagementSectionLink className={styles.brand} stateId={stateId} section="overview">
         <span className={styles.stateMark} aria-hidden="true">
-          {stateName.slice(0, 1)}
+          {flag.mode === 'BANNER' ? (
+            <BannerPreview design={flag.design} horizontal />
+          ) : (
+            <img src={`/api/v1/account/states/${stateId}/flag`} alt="" />
+          )}
         </span>
         <span>
           {stateName}

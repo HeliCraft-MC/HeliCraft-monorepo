@@ -30,6 +30,7 @@ const Route = createFileRoute('/currencies/$code')({
   },
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: loaderData
         ? `${displayText(loaderData.currency.currency.name, match.context.locale)} · ${loaderData.currency.currency.code}`

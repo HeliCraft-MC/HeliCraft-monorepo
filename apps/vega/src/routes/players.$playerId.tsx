@@ -34,6 +34,7 @@ const Route = createFileRoute('/players/$playerId')({
   },
   head: ({ loaderData, match }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title:
         loaderData?.player?.name ??
@@ -41,8 +42,8 @@ const Route = createFileRoute('/players/$playerId')({
       description: loaderData?.player
         ? uiText(
             match.context.locale,
-            `Публичный профиль игрока ${loaderData.player.name} на HeliCraft.`,
-            `Public profile of ${loaderData.player.name} on HeliCraft.`,
+            `Публичный профиль игрока ${loaderData.player.name} на {serverName}.`,
+            `Public profile of ${loaderData.player.name} on {serverName}.`,
           )
         : '',
       path: `/players/${match.params.playerId}`,

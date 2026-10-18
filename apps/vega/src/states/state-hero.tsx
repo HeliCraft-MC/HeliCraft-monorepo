@@ -1,3 +1,4 @@
+import { useSiteBranding } from '../site-branding';
 import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
@@ -11,13 +12,14 @@ function StateHero({
   flagUrl,
 }: Readonly<{ state: StateDetail; publicView: boolean; flagUrl?: string }>): ReactElement {
   const { locale } = useTranslation();
+  const { serverName } = useSiteBranding();
   const { configuration } = state;
   const horizontalLabel = uiText(locale, 'Флаг государства', 'State flag');
   return (
     <header className={styles.hero}>
       <div className={styles.identity}>
         <div className={styles.eyebrow}>
-          {uiText(locale, 'Государство HeliCraft', 'HeliCraft state')}{' '}
+          {uiText(locale, `Государство ${serverName}`, `${serverName} state`)}{' '}
           <span className={styles.status}>{label(state.status, locale)}</span>
         </div>
         <h1>{displayText(configuration.name, locale)}</h1>

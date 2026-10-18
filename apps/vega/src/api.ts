@@ -1,3 +1,4 @@
+import { DEFAULT_SERVER_NAME } from './site-branding';
 import { createClient, getHello } from '@helicraft/alhena';
 import { z } from 'zod';
 
@@ -6,7 +7,7 @@ export async function loadGreeting(signal?: AbortSignal): Promise<z.infer<typeof
   const client = createClient({ baseUrl: globalThis.location?.origin ?? 'http://localhost:3000' });
   const { data } = await getHello({
     client,
-    query: { name: 'HeliCraft' },
+    query: { name: DEFAULT_SERVER_NAME },
     signal,
     throwOnError: true,
   });

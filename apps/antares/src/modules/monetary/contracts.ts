@@ -1,4 +1,5 @@
 // oxlint-disable no-magic-numbers -- Monetary precision, exact integer size and bounded request limits are API contracts.
+import { PolicySchema } from '../states/contracts';
 import { z } from '@hono/zod-openapi';
 import { TaxDirectiveSchemas } from '../taxation/contracts';
 import { TreatyContentSchema, TreatyDirectiveSchemas } from '../diplomacy/contracts';
@@ -41,7 +42,13 @@ const DirectivePayloadSchema = z
   .discriminatedUnion('kind', [
     ...TaxDirectiveSchemas,
     ...TreatyDirectiveSchemas,
-    z.object({ kind: z.literal('ESTABLISH_BANK'), ...institution }).strict(),
+    z
+      .object({
+        kind: z.literal('ESTABLISH_BANK'),
+        ...institution,
+        initialPolicies: z.array(PolicySchema).max(20).optional(),
+      })
+      .strict(),
     z.object({ kind: z.literal('CHANGE_CHARTER'), ...institution }).strict(),
     z
       .object({

@@ -54,6 +54,25 @@ function DiplomacyWorkspace({
           'Each state approves the same revision through its own offices and voting. Taxation changes only after two valid ratifications.',
         )}
       </p>
+      {state.configuration.governance.policies.some((policy) => policy.action === 'SIGN_TREATY') ? (
+        !economicAuthority(state, actorId, 'RATIFY_TREATY') && (
+          <Alert>
+            {uiText(
+              locale,
+              'Процедура подписания договоров настроена, но ваша должность не входит в число уполномоченных. Требования указаны в разделе «Устройство и должности».',
+              'A treaty signing procedure exists, but your office is not authorized. See Government and offices for the requirements.',
+            )}
+          </Alert>
+        )
+      ) : (
+        <Alert>
+          {uiText(
+            locale,
+            'Подписание договоров недоступно: процедура не настроена. Создайте реформу в разделе «Устройство и должности» → «Государственные решения» → «Подписание договоров» и укажите, кто утверждает договор. Название должности само по себе не даёт полномочий.',
+            'Treaty signing is unavailable because no procedure is configured. Create a reform under Government and offices → State decisions → Treaty signing and choose who approves treaties. An office title alone grants no authority.',
+          )}
+        </Alert>
+      )}
       {economicAuthority(state, actorId, 'RATIFY_TREATY') && (
         <TreatyWizard stateId={state.id} onSaved={refresh} />
       )}

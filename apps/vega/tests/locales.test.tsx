@@ -9,6 +9,9 @@ import type { HomeData } from '../src/home-data';
 
 const data: HomeData = {
   site: {
+    serverName: 'HeliCraft',
+    githubUrl: 'https://github.com/HeliCraft-MC',
+    logoUrl: null,
     phase: 'PRELAUNCH',
     registrationEnabled: true,
     minecraftAddress: null,

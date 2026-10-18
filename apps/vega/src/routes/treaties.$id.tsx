@@ -38,6 +38,7 @@ const Route = createFileRoute('/treaties/$id')({
   },
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: loaderData ? displayText(loaderData.treaty.name, match.context.locale) : 'Treaty',
       description: loaderData

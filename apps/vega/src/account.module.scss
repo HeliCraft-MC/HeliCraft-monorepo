@@ -63,8 +63,12 @@
   min-height: 35rem;
   display: grid;
   grid-template-columns: 210px minmax(0, 1fr);
-  gap: clamp(24px, 5vw, 72px);
+  gap: clamp(24px, 3vw, 48px);
   align-items: start;
+}
+.workspaceContainer {
+  width: 100%;
+  padding-inline: clamp(1rem, 2vw, 2rem);
 }
 .sidebar {
   display: grid;
@@ -72,6 +76,9 @@
   position: sticky;
   top: 110px;
   a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-medium);
     text-decoration: none;
@@ -80,6 +87,15 @@
       color: var(--text-primary);
       background: var(--bg-panel);
       font-weight: 650;
+      &::after {
+        content: '';
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 50%;
+        background: currentColor;
+        flex: none;
+        margin-inline-start: auto;
+      }
     }
     &:hover {
       color: var(--text-primary);
@@ -89,7 +105,7 @@
 }
 .accountContent {
   min-width: 0;
-  max-width: 900px;
+  width: 100%;
   .form {
     max-width: 680px;
     > button {
@@ -257,4 +273,79 @@
   overflow-wrap: anywhere;
   margin-top: 0.75rem;
   font-size: var(--font-small);
+}
+
+.skinWorkspace {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);
+  gap: 2rem;
+  align-items: start;
+}
+.skinPreview {
+  position: sticky;
+  top: 7rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+}
+@media (max-width: 60rem) {
+  .skinWorkspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .skinPreview {
+    position: static;
+  }
+}
+
+.adminPage {
+  min-height: calc(100dvh - 5.5rem);
+  .workspaceContainer {
+    padding: 0;
+  }
+  .accountLayout {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    gap: 0;
+  }
+  .sidebar {
+    top: 5.5rem;
+    height: calc(100dvh - 5.5rem);
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-subtle);
+  }
+  .accountContent {
+    padding: clamp(1rem, 3vw, 3rem);
+  }
+}
+@media (max-width: 760px) {
+  .adminPage {
+    .accountLayout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sidebar {
+      height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+  }
+}
+
+.accountOverview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 68rem) {
+  .accountOverview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.preview canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }

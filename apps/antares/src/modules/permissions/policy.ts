@@ -12,7 +12,8 @@ type Permission =
   | 'content.publish'
   | 'audit.read'
   | 'states.manage'
-  | 'voting.manage';
+  | 'voting.manage'
+  | 'site.manage';
 const editorial: readonly Permission[] = ['content.read', 'content.write', 'content.publish'];
 const moderation: readonly Permission[] = [
   'users.read',
@@ -30,6 +31,7 @@ const grants: Record<Role, readonly Permission[]> = {
     'audit.read',
     'states.manage',
     'voting.manage',
+    'site.manage',
   ],
   OWNER: [
     ...editorial,
@@ -38,6 +40,7 @@ const grants: Record<Role, readonly Permission[]> = {
     'audit.read',
     'states.manage',
     'voting.manage',
+    'site.manage',
   ],
 };
 function permissionsFor(roles: readonly Role[]): Permission[] {

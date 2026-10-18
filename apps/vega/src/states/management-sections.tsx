@@ -94,7 +94,7 @@ function ManagementSections({
   } else if (section === 'history') {
     content = <ManagementHistory stateId={state.id} />;
   } else if (section === 'citizenship') {
-    content = <ManagementMembership stateId={state.id} />;
+    content = <ManagementMembership state={state} actorId={actorId} />;
   } else if (section === 'citizens') {
     content = <ManagementCitizens state={state} />;
   } else if (section === 'government') {

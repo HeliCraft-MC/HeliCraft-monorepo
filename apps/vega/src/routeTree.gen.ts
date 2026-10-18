@@ -22,8 +22,10 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminCentralBanksRouteImport } from './routes/admin.central-banks'
 import { Route as AdminChronicleRouteImport } from './routes/admin.chronicle'
+import { Route as AdminInstitutionsRouteImport } from './routes/admin.institutions'
 import { Route as AdminMonetaryDirectivesRouteImport } from './routes/admin.monetary-directives'
 import { Route as AdminPagesRouteImport } from './routes/admin.pages'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTaxOfficesRouteImport } from './routes/admin.tax-offices'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
@@ -133,6 +135,11 @@ const AdminChronicleRoute = AdminChronicleRouteImport.update({
   path: '/chronicle',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminInstitutionsRoute = AdminInstitutionsRouteImport.update({
+  id: '/institutions',
+  path: '/institutions',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMonetaryDirectivesRoute = AdminMonetaryDirectivesRouteImport.update({
   id: '/monetary-directives',
   path: '/monetary-directives',
@@ -141,6 +148,11 @@ const AdminMonetaryDirectivesRoute = AdminMonetaryDirectivesRouteImport.update({
 const AdminPagesRoute = AdminPagesRouteImport.update({
   id: '/pages',
   path: '/pages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTaxOfficesRoute = AdminTaxOfficesRouteImport.update({
@@ -373,8 +385,10 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/central-banks': typeof AdminCentralBanksRoute
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/institutions': typeof AdminInstitutionsRoute
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
@@ -429,7 +443,9 @@ export interface FileRoutesByTo {
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/central-banks': typeof AdminCentralBanksRoute
+  '/admin/institutions': typeof AdminInstitutionsRoute
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/votings': typeof AdminVotingsRoute
   '/app/votings': typeof AppVotingsRoute
@@ -488,8 +504,10 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/central-banks': typeof AdminCentralBanksRoute
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/institutions': typeof AdminInstitutionsRoute
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
@@ -550,8 +568,10 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/central-banks'
     | '/admin/chronicle'
+    | '/admin/institutions'
     | '/admin/monetary-directives'
     | '/admin/pages'
+    | '/admin/settings'
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
@@ -606,7 +626,9 @@ export interface FileRouteTypes {
     | '/world'
     | '/admin/audit'
     | '/admin/central-banks'
+    | '/admin/institutions'
     | '/admin/monetary-directives'
+    | '/admin/settings'
     | '/admin/tax-offices'
     | '/admin/votings'
     | '/app/votings'
@@ -664,8 +686,10 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/central-banks'
     | '/admin/chronicle'
+    | '/admin/institutions'
     | '/admin/monetary-directives'
     | '/admin/pages'
+    | '/admin/settings'
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
@@ -832,6 +856,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChronicleRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/institutions': {
+      id: '/admin/institutions'
+      path: '/institutions'
+      fullPath: '/admin/institutions'
+      preLoaderRoute: typeof AdminInstitutionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/monetary-directives': {
       id: '/admin/monetary-directives'
       path: '/monetary-directives'
@@ -844,6 +875,13 @@ declare module '@tanstack/react-router' {
       path: '/pages'
       fullPath: '/admin/pages'
       preLoaderRoute: typeof AdminPagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/tax-offices': {
@@ -1200,8 +1238,10 @@ interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminCentralBanksRoute: typeof AdminCentralBanksRoute
   AdminChronicleRoute: typeof AdminChronicleRouteWithChildren
+  AdminInstitutionsRoute: typeof AdminInstitutionsRoute
   AdminMonetaryDirectivesRoute: typeof AdminMonetaryDirectivesRoute
   AdminPagesRoute: typeof AdminPagesRouteWithChildren
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTaxOfficesRoute: typeof AdminTaxOfficesRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminVotingsRoute: typeof AdminVotingsRoute
@@ -1214,8 +1254,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminCentralBanksRoute: AdminCentralBanksRoute,
   AdminChronicleRoute: AdminChronicleRouteWithChildren,
+  AdminInstitutionsRoute: AdminInstitutionsRoute,
   AdminMonetaryDirectivesRoute: AdminMonetaryDirectivesRoute,
   AdminPagesRoute: AdminPagesRouteWithChildren,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminTaxOfficesRoute: AdminTaxOfficesRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminVotingsRoute: AdminVotingsRoute,

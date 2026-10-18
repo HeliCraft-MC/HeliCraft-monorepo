@@ -127,6 +127,20 @@
       "when": 1792269288018,
       "tag": "0017_taxation_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792321806100,
+      "tag": "0018_dazzling_bushwacker",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792322418144,
+      "tag": "0019_harsh_thunderbolts",
+      "breakpoints": true
     }
   ]
 }

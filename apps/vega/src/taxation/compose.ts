@@ -1,4 +1,5 @@
 import type {
+  GovernancePolicy,
   LocalizedInput,
   MonetaryDirectivePayload,
   TaxLawRevision,
@@ -35,10 +36,14 @@ function composeTaxPayload(
     description: LocalizedInput;
     document: LocalizedInput;
     revision?: TaxLawRevision;
+    initialPolicies?: GovernancePolicy[];
   }>,
 ): MonetaryDirectivePayload {
   const { kind, form, name, description, document, revision } = input;
-  if (kind === 'ESTABLISH_TAX_OFFICE' || kind === 'CHANGE_TAX_CHARTER') {
+  if (kind === 'ESTABLISH_TAX_OFFICE') {
+    return { kind, name, description, initialPolicies: input.initialPolicies };
+  }
+  if (kind === 'CHANGE_TAX_CHARTER') {
     return { kind, name, description };
   }
   if (kind === 'REPEAL_TAX_LAW') {

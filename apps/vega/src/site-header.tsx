@@ -1,3 +1,4 @@
+import { useSiteBranding } from './site-branding';
 import { Icon, ActionLink } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { Link } from '@tanstack/react-router';
@@ -8,6 +9,7 @@ import styles from './site.module.scss';
 
 function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
   const { text } = useTranslation();
+  const branding = useSiteBranding();
 
   const HEADER_SCROLL_THRESHOLD = 40;
   const [scrolled, setScrolled] = useState(false);
@@ -51,8 +53,8 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
     >
       <div className={styles.headerInner}>
         <Link className={styles.brand} to="/" aria-label={text('navigation.homeLabel')}>
-          <img src="/world/logo.png" alt="" width="38" height="38" />
-          HeliCraft
+          <img src={branding.logoUrl ?? '/world/logo.png'} alt="" width="38" height="38" />
+          <span>{branding.serverName}</span>
         </Link>
         <nav className={styles.navigation} aria-label={text('navigation.mainLabel')}>
           <Link onClick={closeMenu} to="/world">

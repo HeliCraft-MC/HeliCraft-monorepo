@@ -36,7 +36,7 @@ function GovernmentSummary({
       <h3>{uiText(locale, 'Правила голосования по умолчанию', 'Default voting rules')}</h3>
       <p>{votingDescription(configuration.governance.votingDefaults, locale)}</p>
       <h3>{uiText(locale, 'Государственные решения', 'State decisions')}</h3>
-      <dl>
+      <dl className={styles.editor}>
         {configuration.governance.policies.map((policy) => (
           <div key={policy.action} className={styles.card}>
             <dt>{label(policy.action, locale)}</dt>

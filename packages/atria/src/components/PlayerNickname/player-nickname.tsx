@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { EntityLink } from './entity-link';
 import type { EntityPreviewProps } from './entity-preview';
@@ -20,6 +21,7 @@ function PlayerNickname({
   preview,
   onPreview,
 }: PlayerNicknameProps): ReactElement {
+  const resolvedPreview = useMemo(() => preview ?? { title: name }, [preview, name]);
   const content = (
     <>
       <span aria-hidden="true">
@@ -31,7 +33,7 @@ function PlayerNickname({
   return href === undefined ? (
     <span className={styles.nickname}>{content}</span>
   ) : (
-    <EntityLink href={href} name={name} preview={preview} onPreview={onPreview}>
+    <EntityLink href={href} name={name} preview={resolvedPreview} onPreview={onPreview}>
       {content}
     </EntityLink>
   );

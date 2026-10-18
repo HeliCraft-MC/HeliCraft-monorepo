@@ -1,8 +1,14 @@
+import { InstitutionPolicyEditor } from '../states/institution-policy-editor';
 import { monetaryLabel } from './labels';
 // oxlint-disable import/max-dependencies -- Form composition reuses localized input, player search, exact amount presentation and API mutation.
 import { useCallback, useId, useState } from 'react';
 import type { ChangeEvent, SubmitEvent, ReactElement } from 'react';
-import type { LocalizedInput, StateDetail, StateMonetary } from '@helicraft/alhena';
+import type {
+  GovernancePolicy,
+  LocalizedInput,
+  StateDetail,
+  StateMonetary,
+} from '@helicraft/alhena';
 import { Button, Select, FormField, FieldHelp, Alert, Dialog } from '@helicraft/atria';
 import { IdentityFields } from './identity-fields';
 import type { SelectedPlayer } from '../player-picker';
@@ -43,6 +49,7 @@ function DirectiveComposer({
   const [description, setDescription] = useState<LocalizedInput>(() =>
     structuredClone(kind === 'CHANGE_CHARTER' ? (monetary.bank?.description ?? {}) : {}),
   );
+  const [initialPolicies, setInitialPolicies] = useState<GovernancePolicy[]>([]);
   const [players, setPlayers] = useState<SelectedPlayer[]>([]);
   const [problem, setProblem] = useState('');
   const submission = useDirectiveSubmission(state.id, onSaved);
@@ -73,6 +80,7 @@ function DirectiveComposer({
           description: structuredClone(description),
           currencyId,
           players: structuredClone(players),
+          initialPolicies: structuredClone(initialPolicies),
         });
         setReview({ idempotencyKey: crypto.randomUUID(), payload });
         setProblem('');
@@ -81,7 +89,7 @@ function DirectiveComposer({
       }
     },
     // oxlint-disable-next-line react/preserve-manual-memoization -- These exact controlled values determine the confirmation snapshot.
-    [kind, name, description, currencyId, players, text, setReview],
+    [kind, name, description, currencyId, players, text, setReview, initialPolicies],
   );
   if (available.length === 0) {
     return (
@@ -123,6 +131,14 @@ function DirectiveComposer({
             id={id}
           />
         )}
+        {kind === 'ESTABLISH_BANK' && (
+          <InstitutionPolicyEditor
+            state={state}
+            group="bank"
+            value={initialPolicies}
+            onChange={setInitialPolicies}
+          />
+        )}
         {kind === 'CHANGE_POLICY' && <PolicyFields />}
         {hasFinancialFields(kind) && (
           <FinancialFields
@@ -144,7 +160,11 @@ function DirectiveComposer({
         closeLabel={text('monetary.close')}
       >
         {review !== null && (
-          <PayloadSummary payload={review.payload} code={monetary.currency?.code ?? ''} />
+          <PayloadSummary
+            payload={review.payload}
+            configuration={state.configuration}
+            code={monetary.currency?.code ?? ''}
+          />
         )}
         <Button onClick={confirm} disabled={submission.pending}>
           {text('monetary.confirm')}

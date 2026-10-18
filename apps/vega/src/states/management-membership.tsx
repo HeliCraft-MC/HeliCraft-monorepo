@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
+import type { StateDetail } from '@helicraft/alhena';
 import { leaveState } from '@helicraft/alhena';
 import { Alert, Button, Checkbox } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
@@ -9,7 +10,12 @@ import { useTranslation } from '../i18n';
 import { uiText } from './text';
 import styles from './states.module.scss';
 
-function ManagementMembership({ stateId }: Readonly<{ stateId: string }>): ReactElement {
+function ManagementMembership({
+  state,
+  actorId,
+}: Readonly<{ state: StateDetail; actorId: string }>): ReactElement {
+  const stateId = state.id;
+  const holdsOffice = state.holders.some((holder) => holder.userId === actorId);
   const { locale } = useTranslation();
   const [confirmed, setConfirmed] = useState(false);
   const navigate = useNavigate();
@@ -35,11 +41,21 @@ function ManagementMembership({ stateId }: Readonly<{ stateId: string }>): React
       <p>
         {uiText(
           locale,
-          'Вы можете добровольно покинуть государство. Гражданство и текущие должности завершатся, а история сохранится. Если вы занимаете обязательную должность без другого действующего держателя, сначала потребуется назначить преемника.',
-          'You may leave voluntarily. Your citizenship and current offices will end while history remains. If you are the last serving holder of a required office, appoint a successor first.',
+          'Вы можете добровольно покинуть государство, если не занимаете должностей. Сначала передайте полномочия или завершите назначение по действующей процедуре. История гражданства сохраняется.',
+          'You may leave when you hold no offices. First transfer authority or end your appointment through the current procedure. Citizenship history is retained.',
         )}
       </p>
+      {holdsOffice && (
+        <Alert>
+          {uiText(
+            locale,
+            'Вы занимаете должность. Выход станет доступен после освобождения всех должностей.',
+            'You hold an office. Leaving becomes available after all your appointments end.',
+          )}
+        </Alert>
+      )}
       <Checkbox
+        disabled={holdsOffice}
         label={uiText(
           locale,
           'Я понимаю последствия и хочу выйти из государства',
@@ -48,7 +64,7 @@ function ManagementMembership({ stateId }: Readonly<{ stateId: string }>): React
         checked={confirmed}
         onChange={confirm}
       />
-      <Button disabled={!confirmed || departure.isPending} onClick={leave}>
+      <Button disabled={holdsOffice || !confirmed || departure.isPending} onClick={leave}>
         {uiText(locale, 'Покинуть государство', 'Leave state')}
       </Button>
       {departure.error !== null && <Alert tone="danger">{errorMessage(departure.error)}</Alert>}

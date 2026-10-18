@@ -24,6 +24,7 @@ export const Route = createFileRoute('/chronicle/$slug')({
     const original = loaderData?.content?.document;
     const localized = original ? localizeContent(original, match.context.locale) : undefined;
     return metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       article: localized,
       title:

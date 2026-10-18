@@ -1,7 +1,14 @@
+import { institutionGroup } from '../states/policy-groups';
+import { InstitutionPolicyEditor } from '../states/institution-policy-editor';
 // oxlint-disable import/max-dependencies -- The form reuses shared localized input, confirmation and Governance submission.
 import { useCallback, useState } from 'react';
 import type { ReactElement, SubmitEvent } from 'react';
-import type { LocalizedInput, StateDetail, TaxLawRevision } from '@helicraft/alhena';
+import type {
+  GovernancePolicy,
+  LocalizedInput,
+  StateDetail,
+  TaxLawRevision,
+} from '@helicraft/alhena';
 import { Alert, Button, Dialog, FormField, TextField } from '@helicraft/atria';
 import { LocalizedInputField } from '../localized-input';
 import { errorMessage } from '../account-api';
@@ -34,6 +41,7 @@ function TaxEditor({
   const [name, setName] = useState<LocalizedInput>(revision?.name ?? {});
   const [description, setDescription] = useState<LocalizedInput>(revision?.description ?? {});
   const [document, setDocument] = useState<LocalizedInput>(revision?.document ?? {});
+  const [initialPolicies, setInitialPolicies] = useState<GovernancePolicy[]>([]);
   const [problem, setProblem] = useState('');
   const submission = useDirectiveSubmission(state.id, onSaved);
   const { setReview, confirm: handleConfirm, changeOpen: handleChangeOpen } = submission;
@@ -42,14 +50,22 @@ function TaxEditor({
       event.preventDefault();
       const form = new FormData(event.currentTarget);
       try {
-        const payload = composeTaxPayload({ kind, form, name, description, document, revision });
+        const payload = composeTaxPayload({
+          kind,
+          form,
+          name,
+          description,
+          document,
+          revision,
+          initialPolicies,
+        });
         setReview({ idempotencyKey: crypto.randomUUID(), payload });
         setProblem('');
       } catch {
         setProblem(uiText(locale, 'Проверьте поля закона и дату.', 'Check law fields and date.'));
       }
     },
-    [kind, revision, name, description, document, setReview, locale],
+    [kind, revision, name, description, document, setReview, locale, initialPolicies],
   );
   if (!economicAuthority(state, actorId, kind)) {
     return (
@@ -82,6 +98,12 @@ function TaxEditor({
             />
           </>
         )}
+        <InstitutionPolicyEditor
+          state={state}
+          group={institutionGroup(kind)}
+          value={initialPolicies}
+          onChange={setInitialPolicies}
+        />
         {(kind === 'ENACT_TAX_LAW' || kind === 'AMEND_TAX_LAW') && (
           <>
             <TaxLawFields revision={revision} />
@@ -115,7 +137,11 @@ function TaxEditor({
         title={uiText(locale, 'Подтвердить решение', 'Confirm decision')}
       >
         {submission.review !== null && (
-          <PayloadSummary payload={submission.review.payload} code="" />
+          <PayloadSummary
+            configuration={state.configuration}
+            payload={submission.review.payload}
+            code=""
+          />
         )}
         <Button onClick={handleConfirm} disabled={submission.pending}>
           {uiText(locale, 'Подтвердить решение', 'Confirm decision')}

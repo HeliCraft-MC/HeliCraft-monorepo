@@ -1,3 +1,4 @@
+import { useSiteBranding } from './site-branding';
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { PublicPlayerProfile } from '@helicraft/alhena';
@@ -9,6 +10,7 @@ import styles from './player-public-page.module.scss';
 
 function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>): ReactElement {
   const { locale } = useTranslation();
+  const { serverName } = useSiteBranding();
   const facts = useMemo(
     () =>
       new Map(
@@ -31,7 +33,7 @@ function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>)
   return (
     <article className={styles.page}>
       <a className={styles.back} href="/">
-        ← HeliCraft
+        ← {serverName}
       </a>
       <header className={styles.hero}>
         <div className={styles.portrait}>
@@ -47,7 +49,7 @@ function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>)
           </span>
           <h1>{player.name}</h1>
           <p>
-            {uiText(locale, 'На HeliCraft с', 'Joined HeliCraft on')}{' '}
+            {uiText(locale, `На ${serverName} с`, `Joined ${serverName} on`)}{' '}
             <time dateTime={player.registeredAt}>{formatDate(player.registeredAt, locale)}</time>
           </p>
         </div>
@@ -64,7 +66,7 @@ function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>)
       </header>
       <section className={styles.section}>
         <span className={styles.eyebrow}>
-          {uiText(locale, 'В мире HeliCraft', 'In the world of HeliCraft')}
+          {uiText(locale, `В мире ${serverName}`, `In the world of ${serverName}`)}
         </span>
         <h2>{uiText(locale, 'Государства и должности', 'States and offices')}</h2>
         {player.states.length === 0 ? (

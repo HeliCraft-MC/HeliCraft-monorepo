@@ -28,6 +28,18 @@ const DECISION_ACTIONS = {
   REJECT_TREATY: 'SIGN_TREATY',
   DENOUNCE_TREATY: 'DENOUNCE_TREATY',
 } satisfies Record<DirectivePayload['kind'], Policy['action']>;
+function decisionPolicy(
+  policies: readonly Policy[],
+  kind: DirectivePayload['kind'],
+): Policy | undefined {
+  if (kind === 'ESTABLISH_BANK' || kind === 'ESTABLISH_TAX_OFFICE') {
+    const shared = policies.find((policy) => policy.action === 'CREATE_INSTITUTION');
+    if (shared) {
+      return shared;
+    }
+  }
+  return policies.find((policy) => policy.action === DECISION_ACTIONS[kind]);
+}
 function monetaryHash(value: unknown): string {
   return createHash('sha256').update(canonicalJson(value)).digest('hex');
 }
@@ -55,6 +67,7 @@ function assertIssuance(
   }
 }
 export {
+  decisionPolicy,
   ACTIONS,
   DECISION_ACTIONS,
   MAX_MINOR,

@@ -31,6 +31,7 @@ const Route = createFileRoute('/states/$slug')({
   },
   head: ({ loaderData, match }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: loaderData?.state
         ? displayText(loaderData.state.configuration.name, match.context.locale)

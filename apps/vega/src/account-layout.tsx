@@ -1,22 +1,26 @@
 import { useTranslation } from './i18n';
-import { Link, Outlet } from '@tanstack/react-router';
+import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
-import { PageContainer } from '@helicraft/atria';
 import styles from './account.module.scss';
 
 const exact = { exact: true };
 export function AccountLayout(): ReactElement {
   const { text } = useTranslation();
+  const inStates = useRouterState({
+    select: (state) => state.location.pathname.startsWith('/app/states'),
+  });
   return (
     <main id="main-content" className={styles.page}>
-      <PageContainer>
+      <div className={styles.workspaceContainer}>
         <div className={styles.accountLayout}>
           <nav aria-label={text('account.myAccount')} className={styles.sidebar}>
             <p className={styles.eyebrow}>{text('account.myAccount')}</p>
             <Link to="/app" activeOptions={exact}>
               {text('common.overview')}
             </Link>
-            <Link to="/app/states/new">{text('states.title')}</Link>
+            <Link to="/app/states/new" aria-current={inStates ? 'page' : undefined}>
+              {text('states.title')}
+            </Link>
             <Link to="/app/wallet">{text('monetary.wallet')}</Link>
             <Link to="/app/votings">{text('votings.title')}</Link>
             <Link to="/app/settings/profile">{text('account.profile')}</Link>
@@ -30,7 +34,7 @@ export function AccountLayout(): ReactElement {
             <Outlet />
           </div>
         </div>
-      </PageContainer>
+      </div>
     </main>
   );
 }

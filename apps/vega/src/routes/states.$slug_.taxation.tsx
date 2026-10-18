@@ -27,6 +27,7 @@ const Route = createFileRoute('/states/$slug_/taxation')({
   },
   head: ({ match, loaderData }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: loaderData
         ? displayText(loaderData.taxation.office.name, match.context.locale)

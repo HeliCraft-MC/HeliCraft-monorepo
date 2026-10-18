@@ -20,7 +20,7 @@ import { readStateDetail } from './reader';
 import type { StateReadAccess } from './reader';
 import { audit, stateRecord, validatePersistent } from './persistence';
 import { assertTransition } from './domain';
-import type { StateDetail, StateStatus, Issue } from './contracts';
+import type { StateDetail, StateStatus, StateConfiguration, Issue } from './contracts';
 
 class StateService {
   private readonly db: Database['db'];
@@ -151,7 +151,14 @@ class StateService {
     adminActorId?: string,
     memberId?: string,
   ): Promise<
-    { id: string; slug: string; status: StateStatus; color: string; name: LocalizedInput }[]
+    {
+      id: string;
+      slug: string;
+      status: StateStatus;
+      color: string;
+      horizontalFlag: StateConfiguration['horizontalFlag'] | undefined;
+      name: LocalizedInput;
+    }[]
   > {
     // oxlint-disable-next-line max-lines-per-function -- Authorized list hydrates versioned state identity and color within one transaction.
     return await this.db.transaction(async (transaction) => {
@@ -203,6 +210,7 @@ class StateService {
             slug: record.slug,
             status: record.status,
             color: record.configuration?.color ?? '#607d8b',
+            horizontalFlag: record.configuration?.horizontalFlag,
             name: reference === undefined ? {} : await readText(transaction, reference.textId),
           };
         }),

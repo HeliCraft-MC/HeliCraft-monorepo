@@ -1,3 +1,4 @@
+import { useStateRefresh } from '../states/use-state-refresh';
 import { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { createMonetaryDirective } from '@helicraft/alhena';
@@ -18,6 +19,7 @@ interface DirectiveSubmission {
   changeOpen: (open: boolean) => void;
 }
 function useDirectiveSubmission(stateId: string, onSaved: () => void): DirectiveSubmission {
+  const refreshState = useStateRefresh(stateId, onSaved);
   const [review, setReview] = useState<DirectiveConfirmation | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const mutation = useMutation({
@@ -33,10 +35,10 @@ function useDirectiveSubmission(stateId: string, onSaved: () => void): Directive
       });
       return result.data.id;
     },
-    onSuccess: (id) => {
+    onSuccess: async (id) => {
       setSavedId(id);
       setReview(null);
-      onSaved();
+      await refreshState();
     },
   });
   const { mutate, isPending } = mutation;

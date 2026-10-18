@@ -183,4 +183,4 @@ async function fundTaxWallet(
   });
   return currency.id;
 }
-export { post, register, createTaxState, directive, fundTaxWallet, PASSWORD };
+export { stringField, post, register, createTaxState, directive, fundTaxWallet, PASSWORD };

@@ -12,7 +12,6 @@
   grid-template-columns: 16rem minmax(0, 1fr);
   min-height: calc(100dvh - 5.5rem);
   background: color-mix(in srgb, var(--state-accent) 3%, var(--bg-base));
-  border-top: 3px solid var(--state-accent);
 }
 .pending {
   min-height: 75vh;
@@ -75,7 +74,6 @@
       color: var(--text-primary);
       background: color-mix(in srgb, var(--state-accent) 18%, var(--bg-elevated));
       border-color: var(--state-border);
-      box-shadow: inset 3px 0 var(--state-accent);
       font-weight: 650;
     }
   }
@@ -355,5 +353,20 @@
 @media (prefers-reduced-motion: reduce) {
   .metric {
     transition: none;
+  }
+}
+
+.stateMark {
+  width: 3rem;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  svg,
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
   }
 }

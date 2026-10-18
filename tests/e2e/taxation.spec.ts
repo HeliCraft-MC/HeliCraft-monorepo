@@ -1,5 +1,6 @@
 // oxlint-disable max-lines, max-lines-per-function, max-statements -- Real-browser two-state lifecycle verifies the complete tax/treaty result and historical receipts.
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 import type { Page } from '@playwright/test';
 import { StateTaxationSchema } from '../../apps/antares/src/modules/taxation/read-contracts';
 import { WalletSchema } from '../../apps/antares/src/modules/monetary/contracts';

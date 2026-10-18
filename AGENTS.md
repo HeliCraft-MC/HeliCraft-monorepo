@@ -35,6 +35,7 @@
 - `docs/GDD/` is authoritative for game systems. Account UUIDs, editorial content and game/world events are separate domains; do not invent live game state for public UI.
 - Vega uses TanStack Start SSR for public pages and CSR for protected `/app` and `/admin`. Public content and metadata must exist in the HTML response without JavaScript. Never forward session cookies into public SSR loaders.
 - Antares owns identity. Player UUIDs are immutable; names are mutable labels. Rigel/Velocity identity authentication requires a separate security review before implementation.
+- Server display identity must come only from Antares public site settings. Use `useSiteBranding().serverName` or `{serverName}` UI messages and loader-provided identity for metadata; never hardcode a server display name. Keep package, cookie and infrastructure identifiers stable.
 - Reusable UI belongs in Atria, with meaningful documentation and Storybook states. Vega contains product composition. Preserve keyboard navigation, labelled fields and reduced motion.
 - Consult Context7, official documentation and installed sources when framework APIs or compatibility are uncertain.
 - Markdown is rendered and sanitized by Antares. Drafts and protected data must never enter public loaders, sitemaps or service-worker caches.

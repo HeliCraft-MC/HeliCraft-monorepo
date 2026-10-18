@@ -13,6 +13,7 @@ const Route = createFileRoute('/')({
   loader: async () => await loadPublicHome(),
   head: ({ loaderData, match }) =>
     metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title: translate('seo.home.title', match.context.locale),
       description: translate('seo.home.description', match.context.locale),

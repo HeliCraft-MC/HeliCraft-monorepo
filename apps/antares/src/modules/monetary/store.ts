@@ -1,3 +1,8 @@
+import {
+  stripInitialPolicies,
+  storeInitialPolicies,
+  hydrateInitialPolicies,
+} from './institution-policies';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import {
   economicDirectiveDocuments,
@@ -96,7 +101,11 @@ async function hydratePayload(
   if ('document' in payload && document !== undefined && identity !== null) {
     return { ...payload, ...identity, document: await readText(transaction, document.textId) };
   }
-  return identity !== null && 'name' in payload ? { ...payload, ...identity } : payload;
+  return await hydrateInitialPolicies(
+    transaction,
+    record.id,
+    identity !== null && 'name' in payload ? { ...payload, ...identity } : payload,
+  );
 }
 async function storePayload(
   transaction: Transaction,
@@ -114,7 +123,9 @@ async function storePayload(
     'document' in payload ? await createText(transaction, payload.document) : null;
   const stripped = 'name' in payload ? { ...payload, name: {}, description: {} } : payload;
   return {
-    payload: 'document' in stripped ? { ...stripped, document: {} } : stripped,
+    payload: stripInitialPolicies(
+      'document' in stripped ? { ...stripped, document: {} } : stripped,
+    ),
     nameTextId,
     descriptionTextId,
     documentTextId,
@@ -125,6 +136,7 @@ async function storeDirectiveDocument(
   directiveId: string,
   payload: DirectivePayload,
 ): Promise<void> {
+  await storeInitialPolicies(transaction, directiveId, payload);
   if ('document' in payload) {
     await transaction
       .insert(economicDirectiveDocuments)

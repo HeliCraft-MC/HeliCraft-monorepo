@@ -21,7 +21,7 @@ const labels = {
   VOTING_CLOSED: ['Завершено', 'Closed'],
   VOTING_ARCHIVED: ['В архиве', 'Archived'],
   VOTING_CANCELLED: ['Отменено', 'Cancelled'],
-  CREATE_INSTITUTION: ['Создание учреждений', 'Create institutions'],
+  CREATE_INSTITUTION: ['Учреждение институтов', 'Establish institutions'],
   CHANGE_TERRITORY: ['Изменение территории', 'Change territory'],
   SIGN_TREATY: ['Подписание договоров', 'Sign treaties'],
   ESTABLISH_TAX_OFFICE: ['Учреждение налоговой службы', 'Establish tax office'],

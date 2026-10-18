@@ -1,8 +1,14 @@
+import { manifestRoutes } from '../site-settings/manifest';
+import type { Database } from '../../db';
+import { readSiteSettings } from '../site-settings/service';
 import { HTTP } from '../errors';
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 
 const SiteSchema = z
   .object({
+    serverName: z.string(),
+    githubUrl: z.string(),
+    logoUrl: z.string().nullable(),
     phase: z.enum(['PRELAUNCH', 'OPEN']),
     registrationEnabled: z.boolean(),
     minecraftAddress: z.string().nullable(),
@@ -11,6 +17,7 @@ const SiteSchema = z
   })
   .openapi('PublicSite');
 interface SiteConfig {
+  readonly db?: Database['db'];
   readonly links?: readonly { label: string; url: string }[];
   readonly phase: 'PRELAUNCH' | 'OPEN';
   readonly registrationEnabled: boolean;
@@ -19,6 +26,7 @@ interface SiteConfig {
 }
 function siteRoutes(config: SiteConfig): OpenAPIHono {
   const app = new OpenAPIHono();
+  app.route('/', manifestRoutes(config));
   app.openapi(
     createRoute({
       method: 'get',
@@ -31,17 +39,22 @@ function siteRoutes(config: SiteConfig): OpenAPIHono {
         },
       },
     }),
-    (context) =>
-      context.json(
+    async (context) => {
+      const settings = await readSiteSettings(config.db, config);
+      return context.json(
         {
+          serverName: settings.serverName,
+          githubUrl: settings.githubUrl,
+          logoUrl: settings.logoUrl,
           phase: config.phase,
           registrationEnabled: config.registrationEnabled,
-          minecraftAddress: config.phase === 'OPEN' ? (config.minecraftAddress ?? null) : null,
+          minecraftAddress: config.phase === 'OPEN' ? settings.minecraftAddress || null : null,
           canonicalOrigin: config.canonicalOrigin,
           links: [...(config.links ?? [])],
         },
         HTTP.ok,
-      ),
+      );
+    },
   );
   const WorldSchema = z
     .object({

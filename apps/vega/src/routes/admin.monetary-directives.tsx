@@ -1,5 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { AdminMonetaryDirectives } from '../monetary/admin-directives';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
-const Route = createFileRoute('/admin/monetary-directives')({ component: AdminMonetaryDirectives });
+const Route = createFileRoute('/admin/monetary-directives')({
+  beforeLoad: () => {
+    throw redirect({ to: '/admin/institutions', search: { institution: 'bank' } });
+  },
+});
 export { Route };

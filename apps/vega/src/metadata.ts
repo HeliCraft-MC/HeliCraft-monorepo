@@ -1,3 +1,4 @@
+import { DEFAULT_SERVER_NAME, brandText } from './site-branding';
 import { locales } from './locales';
 import type { Locale } from './locales';
 import type { PublicContent } from '@helicraft/alhena';
@@ -5,6 +6,7 @@ import type { PublicContent } from '@helicraft/alhena';
 interface MetadataOptions {
   readonly locale?: Locale;
   readonly title: string;
+  readonly serverName?: string;
   readonly description: string;
   readonly path: string;
   readonly origin: string;
@@ -29,24 +31,24 @@ function alternateLanguages(options: MetadataOptions): MetadataResult['links'] {
   });
 }
 function metadata(options: MetadataOptions): MetadataResult {
-  const title = `${options.title} · HeliCraft`;
-  const language = options.locale ?? 'ru';
-  const canonical = languageUrl(options, language);
-  const alternateLinks = alternateLanguages(options);
+  const serverName = options.serverName ?? DEFAULT_SERVER_NAME;
+  const title = `${brandText(options.title, serverName)} · ${serverName}`;
+
+  const canonical = languageUrl(options, options.locale ?? 'ru');
   return {
     meta: [
       { title },
-      { name: 'description', content: options.description },
+      { name: 'description', content: brandText(options.description, serverName) },
       { name: 'robots', content: options.noindex === true ? 'noindex, nofollow' : 'index, follow' },
       { property: 'og:title', content: title },
-      { property: 'og:description', content: options.description },
+      { property: 'og:description', content: brandText(options.description, serverName) },
       { property: 'og:url', content: canonical },
       { property: 'og:type', content: options.article === undefined ? 'website' : 'article' },
       { name: 'twitter:card', content: 'summary' },
     ],
     links: [
       { rel: 'canonical', href: canonical },
-      ...alternateLinks,
+      ...alternateLanguages(options),
       { rel: 'alternate', hrefLang: 'x-default', href: new URL(options.path, options.origin).href },
     ],
     scripts: [
@@ -56,18 +58,18 @@ function metadata(options: MetadataOptions): MetadataResult {
           options.article === undefined
             ? {
                 '@context': 'https://schema.org',
-                inLanguage: language,
+                inLanguage: options.locale ?? 'ru',
                 '@type': options.path === '/' ? 'WebSite' : 'WebPage',
                 name: title,
-                description: options.description,
+                description: brandText(options.description, serverName),
                 url: canonical,
               }
             : {
                 '@context': 'https://schema.org',
                 '@type': 'Article',
-                inLanguage: language,
+                inLanguage: options.locale ?? 'ru',
                 headline: options.article.title,
-                description: options.description,
+                description: brandText(options.description, serverName),
                 datePublished: options.article.publishedAt,
                 dateModified: options.article.updatedAt,
                 author: { '@type': 'Person', name: options.article.author },

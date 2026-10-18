@@ -1,3 +1,4 @@
+import { useSiteBranding } from './site-branding';
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient, getPublicPlayerProfile } from '@helicraft/alhena';
@@ -22,6 +23,7 @@ function PlayerNickname({
   linked?: boolean;
 }>): ReactElement {
   const { locale } = useTranslation();
+  const { serverName } = useSiteBranding();
   const [requested, setRequested] = useState(false);
   const requestPreview = useCallback((): void => {
     setRequested(true);
@@ -46,13 +48,13 @@ function PlayerNickname({
       description:
         profile.data === undefined
           ? uiText(locale, 'Открыть профиль игрока', 'Open player profile')
-          : `${uiText(locale, 'На HeliCraft с', 'Joined HeliCraft on')} ${formatDate(profile.data.registeredAt, locale)}`,
+          : `${uiText(locale, `На ${serverName} с`, `Joined ${serverName} on`)} ${formatDate(profile.data.registeredAt, locale)}`,
       facts:
         profile.data === undefined
           ? undefined
           : `${uiText(locale, 'Гражданства', 'Citizenships')}: ${profile.data.states.filter((state) => state.citizenSince !== null).length} · ${uiText(locale, 'Должности', 'Offices')}: ${profile.data.states.reduce((total, state) => total + state.offices.length, 0)}`,
     }),
-    [name, profile.data, locale],
+    [name, profile.data, locale, serverName],
   );
   const version = skinId === undefined ? '' : `?v=${skinId ?? 'default'}`;
   return (

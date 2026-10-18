@@ -1,4 +1,5 @@
 import { Popover } from '@base-ui/react/popover';
+import { useCallback, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import styles from './field-help.module.scss';
 
@@ -7,12 +8,40 @@ interface FieldHelpProps {
   readonly content: string;
 }
 function FieldHelp({ label, content }: FieldHelpProps): ReactElement | null {
+  const [open, setOpen] = useState(false);
+  const pinned = useRef(false);
+  const changeOpen = useCallback(
+    (next: boolean, details: Popover.Root.ChangeEventDetails): void => {
+      if (details.reason === 'trigger-press') {
+        pinned.current = !pinned.current;
+        setOpen(pinned.current);
+        return;
+      }
+      if (
+        pinned.current &&
+        (details.reason === 'trigger-hover' || details.reason === 'focus-out')
+      ) {
+        return;
+      }
+      if (!next) {
+        pinned.current = false;
+      }
+      setOpen(next);
+    },
+    [],
+  );
   if (content.trim() === '' || content.trim() === label.trim()) {
     return null;
   }
   return (
-    <Popover.Root>
-      <Popover.Trigger openOnHover className={styles.trigger} aria-label={`ⓘ ${label}`}>
+    <Popover.Root open={open} onOpenChange={changeOpen}>
+      <Popover.Trigger
+        openOnHover
+        delay={0}
+        closeDelay={0}
+        className={styles.trigger}
+        aria-label={`ⓘ ${label}`}
+      >
         <span aria-hidden="true">ⓘ</span>
       </Popover.Trigger>
       <Popover.Portal>

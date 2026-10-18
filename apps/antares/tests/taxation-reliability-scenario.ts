@@ -218,8 +218,8 @@ async function assertTaxReliability(
     suspended.calculation.charges.some((charge) =>
       charge.claims.some((claim) => claim.stateId === third.stateId),
     ),
-  ).toBe(false);
-  await expect(tax.publicState(third.stateId, 'en')).rejects.toThrow('не найдена');
+  ).toBe(true);
+  expect((await tax.publicState(third.stateId, 'en')).office.status).toBe('SUSPENDED');
   await moderation.review(office.id, third.adminId, {
     directiveId: office.establishmentDirectiveId,
     status: 'ACTIVE',

@@ -2,10 +2,11 @@ import { uiText } from './states/text';
 import { useTranslation } from './i18n';
 import { getRouteApi, Link, Outlet } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
-import { PageContainer } from '@helicraft/atria';
 
 import styles from './account.module.scss';
 
+const institutionActiveOptions = { includeSearch: false };
+const institutionsSearch = { institution: 'bank' } as const;
 const exact = { exact: true };
 const route = getRouteApi('/admin');
 
@@ -14,8 +15,8 @@ export function AdminLayout(): ReactElement {
 
   const { principal } = route.useRouteContext();
   return (
-    <main id="main-content" className={styles.page}>
-      <PageContainer>
+    <main id="main-content" className={styles.adminPage}>
+      <div className={styles.workspaceContainer}>
         <div className={styles.accountLayout}>
           <nav className={styles.sidebar} aria-label={text('admin.title')}>
             <p className={styles.eyebrow}>{text('admin.title')}</p>
@@ -37,15 +38,22 @@ export function AdminLayout(): ReactElement {
             {principal.permissions.includes('states.manage') && (
               <>
                 <Link to="/admin/states">{text('states.title')}</Link>
-                <Link to="/admin/tax-offices">
-                  {uiText(locale, 'Налоговые службы', 'Tax offices')}
+                <Link
+                  to="/admin/institutions"
+                  search={institutionsSearch}
+                  activeOptions={institutionActiveOptions}
+                >
+                  {uiText(locale, 'Институты', 'Institutions')}
                 </Link>
-                <Link to="/admin/central-banks">{text('monetary.moderation')}</Link>
-                <Link to="/admin/monetary-directives">{text('monetary.directives')}</Link>
               </>
             )}
             {principal.permissions.includes('voting.manage') && (
               <Link to="/admin/votings">{text('votings.title')}</Link>
+            )}
+            {principal.permissions.includes('site.manage') && (
+              <Link to="/admin/settings">
+                {uiText(locale, 'Настройки сервера', 'Server settings')}
+              </Link>
             )}
             <Link to="/app">{text('account.myAccount')}</Link>
           </nav>
@@ -53,7 +61,7 @@ export function AdminLayout(): ReactElement {
             <Outlet />
           </div>
         </div>
-      </PageContainer>
+      </div>
     </main>
   );
 }

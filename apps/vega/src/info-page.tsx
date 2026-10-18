@@ -1,3 +1,4 @@
+import { useSiteBranding } from './site-branding';
 import { localizeContent } from './localized-content';
 import { useTranslation } from './i18n';
 import { useLoaderData, useLocation } from '@tanstack/react-router';
@@ -38,6 +39,7 @@ const information: Record<string, { title: string; paragraphs: readonly string[]
 };
 export function InfoPage(): ReactElement {
   const { text, locale } = useTranslation();
+  const { serverName } = useSiteBranding();
   const data = useLoaderData({ strict: false });
   const location = useLocation();
   if (
@@ -60,7 +62,7 @@ export function InfoPage(): ReactElement {
   return (
     <main id="main-content" className={styles.page}>
       <PageContainer narrow>
-        <h1>{text(content?.title ?? 'HeliCraft')}</h1>
+        <h1>{text(content?.title ?? serverName)}</h1>
         {content?.paragraphs.map((paragraph) => (
           <p className={styles.paragraph} key={text(paragraph)}>
             {text(paragraph)}

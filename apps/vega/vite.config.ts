@@ -7,6 +7,10 @@ import { VitePWA as vitePwa } from 'vite-plugin-pwa';
 function proxyConfig(target: string): Record<string, string | ProxyOptions> {
   return {
     '/api': target,
+    '/manifest.webmanifest': {
+      target,
+      rewrite: (): string => '/api/v1/public/site/manifest.webmanifest',
+    },
     '/openapi.json': target,
     '/robots.txt': { target, rewrite: (): string => '/api/v1/public/robots.txt' },
     '/sitemap.xml': { target, rewrite: (): string => '/api/v1/public/sitemap.xml' },
@@ -32,18 +36,7 @@ export default defineConfig(({ mode }) => {
         outDir: 'dist/client',
         injectRegister: null,
         registerType: 'autoUpdate',
-        manifest: {
-          name: 'HeliCraft Vega',
-          short_name: 'Vega',
-          description: 'Your HeliCraft world',
-          theme_color: '#0e0a06',
-          background_color: '#0e0a06',
-          display: 'standalone',
-          icons: [
-            { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-            { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-          ],
-        },
+        manifest: false,
         workbox: {
           navigateFallback: null,
           globPatterns: ['**/*.{js,css,woff2,png,svg}'],

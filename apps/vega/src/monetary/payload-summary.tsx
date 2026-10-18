@@ -1,12 +1,13 @@
+import { policyDescription } from '../states/policy-description';
 // oxlint-disable import/max-dependencies -- Immutable economic payload review composes monetary and tax/diplomatic summaries.
 import { EconomicPayload } from '../taxation/payload';
 import { economicLabels } from '../taxation/model';
 import { monetaryLabel } from './labels';
 import type { ReactElement } from 'react';
-import type { MonetaryDirectivePayload } from '@helicraft/alhena';
+import type { MonetaryDirectivePayload, StateConfiguration } from '@helicraft/alhena';
 import { MoneyAmount } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
-import { displayText } from '../states/text';
+import { displayText, label, uiText } from '../states/text';
 import { MonetaryPlayer } from './player';
 import { PolicySummary } from './policy-summary';
 import styles from './monetary.module.scss';
@@ -14,7 +15,12 @@ import styles from './monetary.module.scss';
 function PayloadSummary({
   payload,
   code,
-}: Readonly<{ payload: MonetaryDirectivePayload; code: string }>): ReactElement {
+  configuration,
+}: Readonly<{
+  payload: MonetaryDirectivePayload;
+  code: string;
+  configuration?: StateConfiguration;
+}>): ReactElement {
   const { text, locale } = useTranslation();
   return (
     <div className={styles.panel}>
@@ -43,6 +49,25 @@ function PayloadSummary({
           )}
         </p>
       )}
+      {'initialPolicies' in payload &&
+        payload.initialPolicies !== undefined &&
+        payload.initialPolicies.length > 0 && (
+          <section>
+            <h4>{uiText(locale, 'Первоначальные процедуры', 'Initial procedures')}</h4>
+            <dl className={styles.panel}>
+              {payload.initialPolicies.map((policy) => (
+                <div key={policy.action}>
+                  <dt>{label(policy.action, locale)}</dt>
+                  <dd>
+                    {configuration === undefined
+                      ? label(policy.mechanism, locale)
+                      : policyDescription(policy, configuration, locale)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
       {payload.kind === 'CHANGE_POLICY' && <PolicySummary policy={payload.policy} code={code} />}
     </div>
   );

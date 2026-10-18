@@ -53,3 +53,5 @@ Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing s
 ## Monetary system V1
 
 [Domain model, Governance, exact accounting, API, screens and verification](../../docs/architecture/monetary.md).
+
+`MarkdownEditor.preview` and `previewLabel` add an exclusive third view using host-supplied sanitized content. Switching does not reset Markdown. Buttons and ActionLink share `--radius-medium`. Linked PlayerNickname and StateName enable hover/focus previews by default. FieldHelp opens on hover; click pins until another click, outside press or Escape.

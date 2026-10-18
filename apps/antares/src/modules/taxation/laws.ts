@@ -4,6 +4,7 @@ import type { Transaction } from '../permissions/transaction';
 import { monetaryError } from '../monetary/domain';
 import type { DirectiveRecord } from '../monetary/store';
 import type { TaxDirective } from './contracts';
+import { taxBeneficiary } from './beneficiary';
 
 async function latestLawRevision(
   transaction: Transaction,
@@ -38,6 +39,9 @@ async function assertTaxDirective(
   }
   if (!('lawId' in payload)) {
     return;
+  }
+  if ('rule' in payload) {
+    await taxBeneficiary(transaction, stateId, payload.rule);
   }
   const [law] = await transaction.select().from(taxLaws).where(eq(taxLaws.id, payload.lawId));
   if (payload.kind === 'ENACT_TAX_LAW') {

@@ -1,5 +1,6 @@
 import { assertAdminWorkspacePages } from './admin-workspace-pages';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 import type { Page } from '@playwright/test';
 
 async function openUserManagement(page: Page, username: string, uuid: string): Promise<void> {

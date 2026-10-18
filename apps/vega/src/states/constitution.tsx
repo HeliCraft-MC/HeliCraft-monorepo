@@ -3,7 +3,7 @@ import { EMPTY_FOUNDERS, EMPTY_HTML, PREWRAP_STYLE } from './empty';
 import { GeneratedBlock } from './generated-block';
 import type { ReactElement } from 'react';
 import type { StateConfiguration, StateDetail } from '@helicraft/alhena';
-import { MarkdownContent } from '@helicraft/atria';
+import { EntityMarkdown } from '../entity-markdown';
 import { useTranslation } from '../i18n';
 import { GovernmentSummary } from './government';
 
@@ -42,7 +42,7 @@ function ConstitutionDocument({
   ): ReactElement {
     const rendered = html.find((item) => item.id === block.id);
     if (rendered) {
-      return <MarkdownContent html={rendered.html} />;
+      return <EntityMarkdown html={rendered.html} />;
     }
     if (block.type === 'GENERATED') {
       return <GeneratedBlock block={block} configuration={configuration} founders={founders} />;

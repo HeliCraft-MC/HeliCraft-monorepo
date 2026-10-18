@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
 
 const PASSWORD = 'Browser test password 2026';
 test('admin publishes a saved global poll, a user votes, and results remain reviewable', async ({

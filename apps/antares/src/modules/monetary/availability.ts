@@ -1,3 +1,4 @@
+import { institutionConfiguration } from './institution-policies';
 // oxlint-disable import/max-dependencies -- Execution availability composes bank, taxation and treaty domain checks under the existing directive boundary.
 import { TaxDirectiveSchema } from '../taxation/contracts';
 import { TreatyDirectiveSchema } from '../diplomacy/contracts';
@@ -60,6 +61,12 @@ async function assertExecutable(
   stateId: string,
   payload: DirectivePayload,
 ): Promise<void> {
+  if (
+    (payload.kind === 'ESTABLISH_BANK' || payload.kind === 'ESTABLISH_TAX_OFFICE') &&
+    payload.initialPolicies !== undefined
+  ) {
+    await institutionConfiguration(transaction, stateId, payload);
+  }
   const tax = TaxDirectiveSchema.safeParse(payload);
   if (tax.success) {
     await assertTaxDirective(transaction, stateId, tax.data);

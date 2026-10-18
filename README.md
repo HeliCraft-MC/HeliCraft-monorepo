@@ -137,3 +137,7 @@ Operators are listed by nickname in root `ops.json` (`ms0ur` initially). They re
 ## Taxation and diplomacy
 
 State tax offices, immutable transfer-tax laws, bilateral tax treaties and exact atomic settlement run through Antares and Vega. Personal transfers show a server-calculated tax quote before confirmation. Institutions and laws use published Governance; administration ratifies institutions without setting tax rates. See [taxation](docs/architecture/taxation.md), [diplomacy](docs/architecture/diplomacy.md) and [verification](docs/architecture/taxation-verification.md). No Minecraft geography, corporate taxes, exchange or debt collection is implemented.
+
+## Stand deployment
+
+Use `docker compose --env-file .env -f compose.stand.yml up -d --build`. The reverse proxy must join the existing external `intranet` network and connect to `helicraft-stand-vega:8080`. No host ports or plugins are included. Set the exact public HTTPS `SITE_ORIGIN` and production credentials. Server display strings must use the [central server identity settings](docs/architecture/site-settings.md), editable in `/admin/settings`; never hardcode a display name.

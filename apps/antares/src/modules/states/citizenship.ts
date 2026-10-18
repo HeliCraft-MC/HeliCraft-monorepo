@@ -6,9 +6,9 @@ import { audit, stateRecord } from './persistence';
 import { readRevision } from './revisions';
 import { holderHasAuthority } from './office-authority';
 
-// oxlint-disable-next-line max-lines-per-function -- Voluntary departure locks the state, checks succession and closes membership/holder intervals atomically.
+// oxlint-disable-next-line max-lines-per-function -- Voluntary departure locks the state, checks all serving appointments and closes membership atomically.
 async function leaveState(db: Database['db'], stateId: string, actorId: string): Promise<void> {
-  // oxlint-disable-next-line max-lines-per-function -- Succession checks and both interval closures must share the locked transaction.
+  // oxlint-disable-next-line max-lines-per-function -- Office checks and membership closure must share the locked transaction.
   await db.transaction(async (transaction) => {
     const state = await stateRecord(transaction, stateId);
     if (!['ACTIVE', 'SUSPENDED'].includes(state.status) || state.currentRevisionId === null) {
@@ -51,27 +51,19 @@ async function leaveState(db: Database['db'], stateId: string, actorId: string):
               ),
             );
     const now = new Date();
-    const wouldVacate = configuration.governance.offices.some(
-      (office) =>
-        office.required &&
-        holders.some(
-          (holder) =>
-            holder.officeId === office.id &&
-            holder.userId === actorId &&
-            holderHasAuthority(office, holder.since, now),
-        ) &&
-        !holders.some(
-          (holder) =>
-            holder.officeId === office.id &&
-            holder.userId !== actorId &&
-            holderHasAuthority(office, holder.since, now),
-        ),
+    const holdsOffice = configuration.governance.offices.some((office) =>
+      holders.some(
+        (holder) =>
+          holder.officeId === office.id &&
+          holder.userId === actorId &&
+          holderHasAuthority(office, holder.since, now),
+      ),
     );
-    if (wouldVacate) {
+    if (holdsOffice) {
       throw new DomainError(
         HTTP.conflict,
-        'SUCCESSOR_REQUIRED',
-        'Сначала назначьте преемника на обязательную должность по действующей процедуре',
+        'OFFICE_HOLDER_CANNOT_LEAVE',
+        'Сначала освободите все занимаемые должности по действующей процедуре, затем покиньте государство',
       );
     }
     await transaction
@@ -84,6 +76,7 @@ async function leaveState(db: Database['db'], stateId: string, actorId: string):
           isNull(stateMemberships.endedAt),
         ),
       );
+    // Serving appointments were rejected above. Close any expired intervals so later term reforms cannot revive them.
     if (officeIds.length > 0) {
       await transaction
         .update(stateOfficeHolders)

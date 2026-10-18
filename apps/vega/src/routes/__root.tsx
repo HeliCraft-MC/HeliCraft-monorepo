@@ -1,3 +1,4 @@
+import { DEFAULT_SERVER_NAME } from '../site-branding';
 import { isLocale } from '../locales';
 import { loadLocale } from '../locale-server';
 import { ErrorPage } from '../error-page';
@@ -22,13 +23,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   }),
   errorComponent: ErrorPage,
   loader: async () => await loadPublicNavigation(),
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { charSet: 'utf8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'HeliCraft' },
+      { title: loaderData?.site?.serverName ?? DEFAULT_SERVER_NAME },
     ],
-    links: [{ rel: 'manifest', href: '/manifest.webmanifest' }],
+    links: [
+      { rel: 'manifest', href: '/manifest.webmanifest' },
+      { rel: 'icon', href: loaderData?.site?.logoUrl ?? '/world/logo.png' },
+    ],
   }),
   shellComponent: RootDocument,
   component: SiteLayout,

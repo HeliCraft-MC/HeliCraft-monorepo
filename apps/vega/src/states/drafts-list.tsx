@@ -1,4 +1,6 @@
-import { uiText, displayText, label } from './text';
+// oxlint-disable import/max-dependencies -- The account list composes shared state cards with independent draft commands.
+import { OwnedStateCard } from './owned-state-card';
+import { uiText } from './text';
 import { useMemo } from 'react';
 import type { ComponentProps, ReactElement } from 'react';
 import { usePropCache, rowKey } from './use-prop-cache';
@@ -11,7 +13,7 @@ import {
   listMyStates,
 } from '@helicraft/alhena';
 import type { StateDraft } from '@helicraft/alhena';
-import { Alert, Button, ActionLink, StateCard, EmptyState } from '@helicraft/atria';
+import { Alert, Button, ActionLink, EmptyState } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import styles from './states.module.scss';
@@ -92,14 +94,7 @@ function StateDraftsList(): ReactElement {
       )}
       <div className={styles.grid}>
         {(states.data ?? []).map((state) => (
-          <StateCard
-            key={state.id}
-            name={displayText(state.name, locale) || state.slug}
-            href={`/app/states/${state.id}/manage`}
-            color={state.color}
-            flag={null}
-            government={label(state.status, locale)}
-          />
+          <OwnedStateCard key={state.id} state={state} />
         ))}
       </div>
       {states.error !== null && <Alert tone="danger">{errorMessage(states.error)}</Alert>}

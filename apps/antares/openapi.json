@@ -527,6 +527,16 @@
       "PublicSite": {
         "type": "object",
         "properties": {
+          "serverName": {
+            "type": "string"
+          },
+          "githubUrl": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "phase": {
             "type": "string",
             "enum": [
@@ -566,6 +576,9 @@
           }
         },
         "required": [
+          "serverName",
+          "githubUrl",
+          "logoUrl",
           "phase",
           "registrationEnabled",
           "minecraftAddress",
@@ -2043,6 +2056,9 @@
           "totalDebitMinor": {
             "type": "string"
           },
+          "recipientCreditMinor": {
+            "type": "string"
+          },
           "charges": {
             "type": "array",
             "items": {
@@ -2073,6 +2089,13 @@
         "properties": {
           "key": {
             "type": "string"
+          },
+          "taxpayer": {
+            "type": "string",
+            "enum": [
+              "SENDER",
+              "RECIPIENT"
+            ]
           },
           "claims": {
             "type": "array",
@@ -2121,6 +2144,27 @@
                 },
                 "amountMinor": {
                   "type": "string"
+                },
+                "beneficiary": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "TREASURY",
+                        "CENTRAL_BANK"
+                      ]
+                    },
+                    "ownerId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "ownerId"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "required": [
@@ -2173,6 +2217,37 @@
           },
           "category": {
             "type": "string"
+          },
+          "taxpayer": {
+            "type": "string",
+            "enum": [
+              "SENDER",
+              "RECIPIENT"
+            ]
+          },
+          "baseMinor": {
+            "type": "string"
+          },
+          "beneficiary": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "TREASURY",
+                  "CENTRAL_BANK"
+                ]
+              },
+              "ownerId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "kind",
+              "ownerId"
+            ],
+            "additionalProperties": false
           },
           "rateBps": {
             "type": "integer"
@@ -2617,7 +2692,47 @@
           "taxpayer": {
             "type": "string",
             "enum": [
-              "SENDER"
+              "SENDER",
+              "RECIPIENT"
+            ]
+          },
+          "base": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "FULL_AMOUNT"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "EXCESS"
+                    ]
+                  },
+                  "thresholdMinor": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,29})$/u"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "thresholdMinor"
+                ],
+                "additionalProperties": false
+              }
             ]
           },
           "jurisdictions": {
@@ -2640,7 +2755,8 @@
           "recipient": {
             "type": "string",
             "enum": [
-              "STATE_TREASURY"
+              "STATE_TREASURY",
+              "CENTRAL_BANK"
             ]
           },
           "currencyIds": {
@@ -2843,6 +2959,13 @@
               },
               "description": {
                 "$ref": "#/components/schemas/LocalizedInput"
+              },
+              "initialPolicies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GovernancePolicy"
+                },
+                "maxItems": 20
               }
             },
             "required": [
@@ -3126,6 +3249,13 @@
               },
               "description": {
                 "$ref": "#/components/schemas/LocalizedInput"
+              },
+              "initialPolicies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GovernancePolicy"
+                },
+                "maxItems": 20
               }
             },
             "required": [
@@ -6291,6 +6421,61 @@
           "hasConstitution",
           "createdAt"
         ]
+      },
+      "SiteSettings": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SiteSettingsInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "logoUrl": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "logoUrl"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "SiteSettingsInput": {
+        "type": "object",
+        "properties": {
+          "serverName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "minecraftAddress": {
+            "type": "string",
+            "maxLength": 253
+          },
+          "githubUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  ""
+                ]
+              },
+              {
+                "type": "string",
+                "maxLength": 2048,
+                "format": "uri"
+              }
+            ]
+          }
+        },
+        "required": [
+          "serverName",
+          "minecraftAddress",
+          "githubUrl"
+        ],
+        "additionalProperties": false
       },
       "Health": {
         "type": "object",
@@ -13686,6 +13871,88 @@
         }
       }
     },
+    "/api/v1/public/site/manifest.webmanifest": {
+      "get": {
+        "operationId": "getSiteManifest",
+        "responses": {
+          "200": {
+            "description": "Current public server identity for installation",
+            "content": {
+              "application/manifest+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "short_name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "start_url": {
+                      "type": "string"
+                    },
+                    "scope": {
+                      "type": "string"
+                    },
+                    "display": {
+                      "type": "string",
+                      "enum": [
+                        "standalone"
+                      ]
+                    },
+                    "theme_color": {
+                      "type": "string"
+                    },
+                    "background_color": {
+                      "type": "string"
+                    },
+                    "icons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "src": {
+                            "type": "string"
+                          },
+                          "sizes": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "image/png"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "src",
+                          "sizes",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "short_name",
+                    "description",
+                    "start_url",
+                    "scope",
+                    "display",
+                    "theme_color",
+                    "background_color",
+                    "icons"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/public/site": {
       "get": {
         "operationId": "getSite",
@@ -18868,10 +19135,22 @@
                   "properties": {
                     "amountMinor": {
                       "type": "string"
+                    },
+                    "baseMinor": {
+                      "type": "string"
+                    },
+                    "totalDebitMinor": {
+                      "type": "string"
+                    },
+                    "recipientCreditMinor": {
+                      "type": "string"
                     }
                   },
                   "required": [
-                    "amountMinor"
+                    "amountMinor",
+                    "baseMinor",
+                    "totalDebitMinor",
+                    "recipientCreditMinor"
                   ]
                 }
               }
@@ -24503,6 +24782,48 @@
                           "color": {
                             "type": "string"
                           },
+                          "horizontalFlag": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "BANNER"
+                                    ]
+                                  },
+                                  "design": {
+                                    "$ref": "#/components/schemas/MinecraftBanner"
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "design"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PNG"
+                                    ]
+                                  },
+                                  "mediaId": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "format": "uuid"
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "mediaId"
+                                ]
+                              }
+                            ]
+                          },
                           "name": {
                             "$ref": "#/components/schemas/LocalizedInput"
                           }
@@ -26938,6 +27259,48 @@
                           "color": {
                             "type": "string"
                           },
+                          "horizontalFlag": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "BANNER"
+                                    ]
+                                  },
+                                  "design": {
+                                    "$ref": "#/components/schemas/MinecraftBanner"
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "design"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PNG"
+                                    ]
+                                  },
+                                  "mediaId": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "format": "uuid"
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "mediaId"
+                                ]
+                              }
+                            ]
+                          },
                           "name": {
                             "$ref": "#/components/schemas/LocalizedInput"
                           }
@@ -27368,6 +27731,585 @@
             }
           },
           "409": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/site-settings": {
+      "get": {
+        "operationId": "getSiteSettings",
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSiteSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteSettingsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/site-settings/logo": {
+      "post": {
+        "operationId": "uploadSiteLogo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "resetSiteLogo",
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/site/logo.png": {
+      "get": {
+        "operationId": "getSiteLogo",
+        "responses": {
+          "200": {
+            "description": "Normalized logo",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
             "description": "Result",
             "content": {
               "application/json": {

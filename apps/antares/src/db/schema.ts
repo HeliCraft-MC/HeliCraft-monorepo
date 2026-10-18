@@ -87,3 +87,7 @@ export {
   treatyDecisions,
   treatyActivations,
 } from './diplomacy-schema';
+
+export { siteSettings } from './site-schema';
+
+export { institutionPolicyTexts } from './institution-policy-schema';

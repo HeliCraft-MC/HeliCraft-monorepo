@@ -1,3 +1,5 @@
+import { brandText, DEFAULT_SERVER_NAME } from '../site-branding';
+import { loadPublicSite } from '../public-data';
 import { createFileRoute, getRouteApi, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
 import type { ReactElement } from 'react';
@@ -22,6 +24,7 @@ function Page(): ReactElement {
 }
 const Route = createFileRoute('/app_/states/$stateId/manage')({
   ssr: false,
+  loader: async () => await loadPublicSite(),
   beforeLoad: async ({ location }) => {
     try {
       return { principal: await currentAccount() };
@@ -29,9 +32,14 @@ const Route = createFileRoute('/app_/states/$stateId/manage')({
       throw redirect({ to: '/login', search: { returnTo: location.href } });
     }
   },
-  head: ({ match }) => ({
+  head: ({ match, loaderData }) => ({
     meta: [
-      { title: translate('seo.account.title', match.context.locale) },
+      {
+        title: brandText(
+          translate('seo.account.title', match.context.locale),
+          loaderData?.serverName ?? DEFAULT_SERVER_NAME,
+        ),
+      },
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),

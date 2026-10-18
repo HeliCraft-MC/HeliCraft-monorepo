@@ -1,5 +1,5 @@
 // oxlint-disable import/max-dependencies -- Protected/public reads combine state access, normalized text, rendering and exact financial evidence.
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from '@hono/zod-openapi';
 import type { Database } from '../../db';
 import { taxOffices, taxLaws, economicOperations, economicJournals, states } from '../../db/schema';
@@ -37,7 +37,11 @@ async function publicOffice(
     .from(taxOffices)
     .innerJoin(states, eq(states.id, taxOffices.stateId))
     .where(
-      and(eq(states.id, stateId), eq(states.status, 'ACTIVE'), eq(taxOffices.status, 'ACTIVE')),
+      and(
+        eq(states.id, stateId),
+        eq(states.status, 'ACTIVE'),
+        inArray(taxOffices.status, ['ACTIVE', 'SUSPENDED']),
+      ),
     );
   if (!record) {
     throw new DomainError(

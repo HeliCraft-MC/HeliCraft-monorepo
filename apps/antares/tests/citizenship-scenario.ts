@@ -1,3 +1,4 @@
+import { OfficeAssignmentService } from '../src/modules/states/office-assignment-service';
 // oxlint-disable no-magic-numbers, unicorn/no-await-expression-member -- Scenario fixture counts and response assertions exercise real persisted behavior.
 import { expect } from 'vitest';
 import type { Database } from '../src/db';
@@ -52,7 +53,7 @@ async function assertCitizenshipDeparture(
   await service.changeStatus(id, adminId, { status: 'ACTIVE', reason: 'Departure test' });
   const previous = await service.detail(id, 'en');
   await expect(leaveState(db, id, adminId)).rejects.toThrow('гражданства');
-  await expect(leaveState(db, id, founderId)).rejects.toThrow('преемника');
+  await expect(leaveState(db, id, founderId)).rejects.toThrow('освободите все');
   expect((await service.detail(id, 'en')).citizens).toHaveLength(2);
   const voting = new VotingService(db);
   const yes = crypto.randomUUID();
@@ -71,6 +72,21 @@ async function assertCitizenshipDeparture(
     resultVisibility: 'PUBLIC',
   });
   await voting.publish(votingId, adminId);
+  await expect(leaveState(db, id, citizenId)).rejects.toThrow('освободите все');
+  const [, delegate] = configuration.governance.offices;
+  if (delegate === undefined) {
+    throw new Error('Delegate missing');
+  }
+  const assignments = new OfficeAssignmentService(db);
+  const founder = { id: founderId, admin: false };
+  const removal = await assignments.create(id, founder, {
+    officeId: delegate.id,
+    userId: citizenId,
+    kind: 'REMOVE',
+    replacedUserId: null,
+  });
+  await assignments.approve(removal, founder, office.id);
+  await assignments.apply(removal, founder);
   await leaveState(db, id, citizenId);
   const current = await service.detail(id, 'en');
   expect(current.citizens).toHaveLength(1);

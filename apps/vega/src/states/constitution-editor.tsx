@@ -49,6 +49,14 @@ function ConstitutionEditor({
     [configuration, language],
   );
   const labels = useMemo(() => markdownLabels(locale), [locale]);
+  const livePreview = useMemo(
+    () => (
+      <section aria-label={uiText(locale, 'Живой предпросмотр', 'Live preview')}>
+        <ConstitutionPreview preview={preview} locale={language} />
+      </section>
+    ),
+    [preview, language, locale],
+  );
   const text = document === null ? '' : documentMarkdown(document, language);
   return (
     <section className={styles.editor}>
@@ -98,6 +106,8 @@ function ConstitutionEditor({
                 label={`${uiText(locale, 'Текст Конституции', 'Constitution text')} · ${language.toUpperCase()}`}
                 labels={labels}
                 snippets={snippets}
+                preview={livePreview}
+                previewLabel={uiText(locale, 'Превью документа', 'Document preview')}
                 placeholder={uiText(
                   locale,
                   'Начните писать или выберите подстановку…',
@@ -112,12 +122,6 @@ function ConstitutionEditor({
                 )}
               </p>
             </div>
-            <section aria-label={uiText(locale, 'Живой предпросмотр', 'Live preview')}>
-              <h3>
-                {uiText(locale, 'Так будет выглядеть документ', 'How the document will look')}
-              </h3>
-              <ConstitutionPreview preview={preview} locale={language} />
-            </section>
           </div>
           <ConstitutionPreviewDialog
             id={id}

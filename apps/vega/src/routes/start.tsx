@@ -18,6 +18,7 @@ export const Route = createFileRoute('/start')({
     const original = loaderData?.content?.document;
     const localized = original ? localizeContent(original, match.context.locale) : undefined;
     return metadata({
+      serverName: loaderData?.site?.serverName,
       locale: match.context.locale,
       title:
         localized?.seoTitle ??

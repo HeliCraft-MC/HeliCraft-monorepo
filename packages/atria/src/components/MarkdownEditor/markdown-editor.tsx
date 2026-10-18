@@ -1,6 +1,6 @@
 // oxlint-disable import/max-dependencies -- The shared editor composes TipTap extensions and existing form primitives.
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, KeyboardEvent, ReactElement } from 'react';
+import type { ChangeEvent, KeyboardEvent, ReactElement, ReactNode } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Markdown } from '@tiptap/markdown';
@@ -25,6 +25,8 @@ interface MarkdownEditorProps {
   readonly labels: MarkdownEditorLabels;
   readonly snippets?: readonly MarkdownSnippet[];
   readonly placeholder?: string;
+  readonly preview?: ReactNode;
+  readonly previewLabel?: string;
 }
 const EMPTY_SNIPPETS: readonly MarkdownSnippet[] = [];
 const INDENT_SIZE = 4;
@@ -36,9 +38,12 @@ function MarkdownEditor({
   labels,
   snippets = EMPTY_SNIPPETS,
   placeholder = '',
+  preview,
+  previewLabel = 'Preview',
 }: MarkdownEditorProps): ReactElement {
   const id = useId();
   const [source, setSource] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [snippetId, setSnippetId] = useState('');
   const editorRef = useRef<NonNullable<ReturnType<typeof useEditor>> | null>(null);
   const indentRef = useRef(true);
@@ -93,10 +98,15 @@ function MarkdownEditor({
     }
   }, [editor, value]);
   const editVisual = useCallback((): void => {
+    setShowPreview(false);
     setSource(false);
   }, []);
   const editSource = useCallback((): void => {
+    setShowPreview(false);
     setSource(true);
+  }, []);
+  const viewPreview = useCallback((): void => {
+    setShowPreview(true);
   }, []);
   const changeSource = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>): void => {
@@ -164,15 +174,20 @@ function MarkdownEditor({
   return (
     <section className={styles.editor}>
       <div className={styles.modes}>
-        <Button tone="quiet" aria-pressed={!source} onClick={editVisual}>
+        <Button tone="quiet" aria-pressed={!source && !showPreview} onClick={editVisual}>
           {labels.visual}
         </Button>
-        <Button tone="quiet" aria-pressed={source} onClick={editSource}>
+        <Button tone="quiet" aria-pressed={source && !showPreview} onClick={editSource}>
           {labels.source}
         </Button>
+        {preview !== undefined && (
+          <Button tone="quiet" aria-pressed={showPreview} onClick={viewPreview}>
+            {previewLabel}
+          </Button>
+        )}
       </div>
-      <MarkdownToolbar editor={editor} labels={labels} disabled={source} />
-      {snippets.length > 0 && (
+      {!showPreview && <MarkdownToolbar editor={editor} labels={labels} disabled={source} />}
+      {!showPreview && snippets.length > 0 && (
         <div className={styles.snippets}>
           <label htmlFor={id}>{labels.snippet}</label>
           <Select id={id} value={snippetId} onChange={selectSnippet}>
@@ -188,7 +203,8 @@ function MarkdownEditor({
           </Button>
         </div>
       )}
-      {source ? (
+      {showPreview && preview}
+      {!showPreview && source && (
         <Textarea
           ref={sourceRef}
           value={value}
@@ -198,9 +214,8 @@ function MarkdownEditor({
           className={styles.source}
           spellCheck={false}
         />
-      ) : (
-        <EditorContent editor={editor} className={styles.content} />
       )}
+      {!showPreview && !source && <EditorContent editor={editor} className={styles.content} />}
     </section>
   );
 }

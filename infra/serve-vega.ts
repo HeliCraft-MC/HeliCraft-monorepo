@@ -79,6 +79,9 @@ Bun.serve({
   port,
   async fetch(request) {
     const url = new URL(request.url);
+    if (url.pathname === '/manifest.webmanifest') {
+      return await proxy(request, new URL('/api/v1/public/site/manifest.webmanifest', url));
+    }
     if (url.pathname === '/robots.txt' || url.pathname === '/sitemap.xml') {
       const target = new URL(`/api/v1/public${url.pathname}`, url);
       return await proxy(request, target);

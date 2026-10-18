@@ -1,3 +1,5 @@
+import { brandText, DEFAULT_SERVER_NAME } from '../site-branding';
+import { loadPublicSite } from '../public-data';
 import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { currentAccount } from '../account-api';
@@ -5,6 +7,7 @@ import { AccountLayout } from '../account-layout';
 
 export const Route = createFileRoute('/app')({
   ssr: false,
+  loader: async () => await loadPublicSite(),
   beforeLoad: async ({ location }) => {
     try {
       return { principal: await currentAccount() };
@@ -12,9 +15,14 @@ export const Route = createFileRoute('/app')({
       throw redirect({ to: '/login', search: { returnTo: location.pathname } });
     }
   },
-  head: ({ match }) => ({
+  head: ({ match, loaderData }) => ({
     meta: [
-      { title: translate('seo.account.title', match.context.locale) },
+      {
+        title: brandText(
+          translate('seo.account.title', match.context.locale),
+          loaderData?.serverName ?? DEFAULT_SERVER_NAME,
+        ),
+      },
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),
