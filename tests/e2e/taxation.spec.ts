@@ -3,7 +3,10 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures';
 import type { Page } from '@playwright/test';
 import { StateTaxationSchema } from '../../apps/antares/src/modules/taxation/read-contracts';
-import { WalletSchema } from '../../apps/antares/src/modules/monetary/contracts';
+import {
+  WalletSchema,
+  StateMonetarySchema,
+} from '../../apps/antares/src/modules/monetary/contracts';
 import { post, register, createTaxState, fundTaxWallet, PASSWORD } from './taxation-fixture';
 
 async function confirmDecision(page: Page): Promise<void> {
@@ -11,6 +14,13 @@ async function confirmDecision(page: Page): Promise<void> {
   const dialog = page.getByRole('dialog', { name: 'Подтвердить решение', exact: true });
   await dialog.getByRole('button', { name: 'Подтвердить решение', exact: true }).click();
   await expect(dialog).not.toBeVisible();
+}
+async function effectiveNow(page: Page): Promise<void> {
+  const value = await page.evaluate(() => {
+    const now = new Date();
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, -1);
+  });
+  await page.getByLabel('Дата вступления в силу', { exact: true }).fill(value);
 }
 async function establishOffice(
   page: Page,
@@ -281,6 +291,58 @@ test('taxes a dual citizen, ratifies a shared treaty independently, and renders 
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(`/app/states/${firstId}/manage?section=taxation`);
     await page.getByRole('button', { name: 'Изменить закон', exact: true }).click();
+    await page.getByLabel('Категория налога', { exact: true }).selectOption('CONTRIBUTION');
+    await effectiveNow(page);
+    await confirmDecision(page);
+    await transfer(page, { code, recipient: recipientName, expected: '108,00' });
+    await page.goto(`/app/states/${firstId}/manage?section=taxation`);
+    await page.getByRole('button', { name: 'Изменить закон', exact: true }).click();
+    await page.getByLabel('Налогоплательщик', { exact: true }).selectOption('RECIPIENT');
+    await page.getByLabel('Налоговая база', { exact: true }).selectOption('EXCESS');
+    await page.getByLabel('Необлагаемый порог', { exact: true }).fill('50.00');
+    await page.getByLabel('Получатель налога', { exact: true }).selectOption('CENTRAL_BANK');
+    await effectiveNow(page);
+    await page.getByRole('button', { name: 'Рассчитать пример', exact: true }).click();
+    await expect(page.getByText('Получателю:', { exact: false }).first()).toContainText('97,50');
+    await page.screenshot({
+      path: `/tmp/tax-settings-desktop-${testInfo.project.name}.png`,
+      fullPage: true,
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({
+      path: `/tmp/tax-settings-mobile-${testInfo.project.name}.png`,
+      fullPage: true,
+    });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await confirmDecision(page);
+    await transfer(page, { code, recipient: recipientName, expected: '103,00' });
+    const changedTaxResponse = await page.request.get(`/api/v1/account/states/${firstId}/taxation`);
+    expect(
+      StateTaxationSchema.parse(await changedTaxResponse.json()).totals.find(
+        (total) => total.currencyId === currencyId,
+      )?.amountMinor,
+    ).toBe('1550');
+    const changedRecipientResponse = await recipient.request.get('/api/v1/account/wallet');
+    expect(
+      WalletSchema.parse(await changedRecipientResponse.json()).accounts[0]?.balanceMinor,
+    ).toBe('39750');
+    const changedBankResponse = await page.request.get(
+      `/api/v1/account/states/${firstId}/monetary`,
+    );
+    expect(
+      StateMonetarySchema.parse(await changedBankResponse.json()).accounts.find(
+        (account) => account.kind === 'CENTRAL_BANK' && account.currencyId === currencyId,
+      )?.balanceMinor,
+    ).toBe('250');
+    await page.goto(`/app/states/${firstId}/manage?section=taxation`);
+    await page.getByRole('button', { name: 'Изменить закон', exact: true }).click();
+    await expect(page.getByLabel('Налогоплательщик', { exact: true })).toHaveValue('RECIPIENT');
+    await expect(page.getByLabel('Налоговая база', { exact: true })).toHaveValue('EXCESS');
+    await expect(page.getByLabel('Необлагаемый порог', { exact: true })).toHaveValue('50.00');
+    await expect(page.getByLabel('Получатель налога', { exact: true })).toHaveValue('CENTRAL_BANK');
     await page.getByLabel('Ставка, базисные пункты', { exact: true }).fill('700');
     await page.getByLabel('Дата вступления в силу', { exact: true }).fill('2099-01-01T00:00');
     await confirmDecision(page);

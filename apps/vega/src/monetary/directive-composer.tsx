@@ -1,27 +1,27 @@
-import { InstitutionPolicyEditor } from '../states/institution-policy-editor';
 import { monetaryLabel } from './labels';
 // oxlint-disable import/max-dependencies -- Form composition reuses localized input, player search, exact amount presentation and API mutation.
 import { useCallback, useId, useState } from 'react';
 import type { ChangeEvent, SubmitEvent, ReactElement } from 'react';
 import type {
+  PublishedCompanyIdentity,
   GovernancePolicy,
   LocalizedInput,
   StateDetail,
   StateMonetary,
 } from '@helicraft/alhena';
-import { Button, Select, FormField, FieldHelp, Alert, Dialog } from '@helicraft/atria';
-import { IdentityFields } from './identity-fields';
+import { Button, Select, FormField, FieldHelp, Alert } from '@helicraft/atria';
+import { DirectiveIdentity } from './directive-identity';
 import type { SelectedPlayer } from '../player-picker';
-import { errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
-import { availableKinds, isDirectiveKind, hasLocalizedIdentity, hasFinancialFields } from './model';
+import { availableKinds, isDirectiveKind, hasFinancialFields } from './model';
 import type { DirectiveKind } from './model';
-import { composePayload } from './compose-payload';
+import { composePayload, directiveCurrencyId } from './compose-payload';
 import { PolicyFields } from './policy-fields';
 import { FinancialFields } from './financial-fields';
 import { useDirectiveSubmission } from './use-directive-submission';
+import { DirectiveEmpty } from './directive-empty';
 import { DirectiveResult } from './directive-result';
-import { PayloadSummary } from './payload-summary';
+import { DirectiveReview } from './directive-review';
 import styles from './monetary.module.scss';
 
 function DirectiveComposer({
@@ -40,6 +40,10 @@ function DirectiveComposer({
   const { text } = useTranslation();
   const id = useId();
   const currencyId = monetary.currency?.id ?? null;
+  const allowedCurrencyIds = monetary.currencies
+    .filter((currency) => currency.status === 'ACTIVE')
+    .map((currency) => currency.id)
+    .join(',');
   const available = availableKinds(state, actorId, monetary);
   const [selected, setSelected] = useState<DirectiveKind>(initialKind);
   const kind = available.includes(selected) ? selected : (available[0] ?? 'ESTABLISH_BANK');
@@ -50,15 +54,17 @@ function DirectiveComposer({
     structuredClone(kind === 'CHANGE_CHARTER' ? (monetary.bank?.description ?? {}) : {}),
   );
   const [initialPolicies, setInitialPolicies] = useState<GovernancePolicy[]>([]);
+  const [company, setCompany] = useState<PublishedCompanyIdentity | null>(null);
   const [players, setPlayers] = useState<SelectedPlayer[]>([]);
   const [problem, setProblem] = useState('');
   const submission = useDirectiveSubmission(state.id, onSaved);
-  const { review, setReview, savedId, confirm, changeOpen } = submission;
+  const { setReview, savedId } = submission;
   const changeKind = useCallback(
     (event: ChangeEvent<HTMLSelectElement>): void => {
       const { value } = event.currentTarget;
       if (isDirectiveKind(value)) {
         setSelected(value);
+        setCompany(null);
         setName(structuredClone(value === 'CHANGE_CHARTER' ? (monetary.bank?.name ?? {}) : {}));
         setDescription(
           structuredClone(value === 'CHANGE_CHARTER' ? (monetary.bank?.description ?? {}) : {}),
@@ -66,20 +72,27 @@ function DirectiveComposer({
         setProblem('');
       }
     },
-    [monetary.bank, setName, setDescription],
+    [monetary.bank, setName, setDescription, setCompany],
   );
-  // oxlint-disable-next-line react/preserve-manual-memoization -- The submit callback snapshots FormData and clones controlled content before confirmation; no live form value is mutated.
+  // oxlint-disable-next-line react/preserve-manual-memoization -- FormData and cloned controlled content intentionally freeze the submitted confirmation; the compiler cannot prove clone isolation.
   const submit = useCallback(
     (event: SubmitEvent<HTMLFormElement>): void => {
       event.preventDefault();
       try {
+        const form = new FormData(event.currentTarget);
         const payload = composePayload({
           kind,
-          form: new FormData(event.currentTarget),
+          form,
           name: structuredClone(name),
           description: structuredClone(description),
-          currencyId,
+          currencyId: directiveCurrencyId({
+            kind,
+            form,
+            nationalId: currencyId,
+            allowedCurrencyIds: allowedCurrencyIds.split(','),
+          }),
           players: structuredClone(players),
+          company: company === null ? null : structuredClone(company),
           initialPolicies: structuredClone(initialPolicies),
         });
         setReview({ idempotencyKey: crypto.randomUUID(), payload });
@@ -88,16 +101,22 @@ function DirectiveComposer({
         setProblem(`${text('monetary.invalidAmount')} ${text('monetary.invalidRecipient')}`);
       }
     },
-    // oxlint-disable-next-line react/preserve-manual-memoization -- These exact controlled values determine the confirmation snapshot.
-    [kind, name, description, currencyId, players, text, setReview, initialPolicies],
+    [
+      // oxlint-disable-next-line react/preserve-manual-memoization -- The selected kind derives from live availability; submission clones its controlled values and retains no mutable form reference.
+      kind,
+      name,
+      description,
+      currencyId,
+      allowedCurrencyIds,
+      players,
+      company,
+      text,
+      setReview,
+      initialPolicies,
+    ],
   );
   if (available.length === 0) {
-    return (
-      <section className={styles.panel}>
-        <DirectiveResult id={savedId} monetary={monetary} />
-        <p>{text('monetary.noAvailableActions')}</p>
-      </section>
-    );
+    return <DirectiveEmpty id={savedId} monetary={monetary} />;
   }
 
   return (
@@ -121,24 +140,17 @@ function DirectiveComposer({
             ))}
           </Select>
         </FormField>
-        {hasLocalizedIdentity(kind) && (
-          <IdentityFields
-            name={name}
-            description={description}
-            onName={setName}
-            onDescription={setDescription}
-            currency={kind === 'CREATE_CURRENCY'}
-            id={id}
-          />
-        )}
-        {kind === 'ESTABLISH_BANK' && (
-          <InstitutionPolicyEditor
-            state={state}
-            group="bank"
-            value={initialPolicies}
-            onChange={setInitialPolicies}
-          />
-        )}
+        <DirectiveIdentity
+          kind={kind}
+          id={id}
+          name={name}
+          description={description}
+          onName={setName}
+          onDescription={setDescription}
+          state={state}
+          initialPolicies={initialPolicies}
+          onPolicies={setInitialPolicies}
+        />
         {kind === 'CHANGE_POLICY' && <PolicyFields />}
         {hasFinancialFields(kind) && (
           <FinancialFields
@@ -146,31 +158,21 @@ function DirectiveComposer({
             kind={kind}
             players={players}
             onPlayers={setPlayers}
+            company={company}
+            onCompany={setCompany}
             currency={monetary.currency}
+            currencies={monetary.currencies}
           />
         )}
         <Button type="submit">{text('monetary.submit')}</Button>
         {problem !== '' && <Alert tone="danger">{problem}</Alert>}
       </form>
-      <Dialog
-        open={review !== null}
-        onOpenChange={changeOpen}
-        title={text('monetary.confirm')}
-        description={text('monetary.directiveHelp')}
-        closeLabel={text('monetary.close')}
-      >
-        {review !== null && (
-          <PayloadSummary
-            payload={review.payload}
-            configuration={state.configuration}
-            code={monetary.currency?.code ?? ''}
-          />
-        )}
-        <Button onClick={confirm} disabled={submission.pending}>
-          {text('monetary.confirm')}
-        </Button>
-        {submission.error !== null && <Alert tone="danger">{errorMessage(submission.error)}</Alert>}
-      </Dialog>
+      <DirectiveReview
+        submission={submission}
+        state={state}
+        monetary={monetary}
+        company={company}
+      />
     </section>
   );
 }

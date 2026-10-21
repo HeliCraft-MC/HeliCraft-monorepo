@@ -9,6 +9,9 @@ const BANK_ACTIONS: readonly Policy['action'][] = [
   'ISSUE_CURRENCY',
   'BURN_CURRENCY',
   'TRANSFER_CENTRAL_BANK',
+  'MANAGE_FX_OFFERS',
+  'CANCEL_FX_OFFERS',
+  'APPROVE_INTERBANK_EXCHANGE',
 ];
 const TAX_ACTIONS: readonly Policy['action'][] = [
   'CHANGE_TAX_OFFICE_CHARTER',

@@ -4,16 +4,10 @@ import { z } from '@hono/zod-openapi';
 import { TaxDirectiveSchemas } from '../taxation/contracts';
 import { TreatyContentSchema, TreatyDirectiveSchemas } from '../diplomacy/contracts';
 import { LocalizedInputSchema, resolveText } from '../localized-content/contracts';
+import { MinorSchema, CumulativeMinorSchema, PositiveMinorSchema } from './amount-contracts';
+import { CompanyStateDirectiveSchemas } from '../companies/registration-contracts';
+import { FxDecisionDisplaySchema, FxDirectiveSchemas } from '../fx/contracts';
 
-const MinorSchema = z
-  .string()
-  .regex(/^(?:0|[1-9][0-9]{0,29})$/u)
-  .openapi('MoneyMinor', { pattern: '^(?:0|[1-9][0-9]{0,29})$' });
-const CumulativeMinorSchema = z
-  .string()
-  .regex(/^(?:0|[1-9][0-9]*)$/u)
-  .openapi('CumulativeMoneyMinor', { pattern: '^(?:0|[1-9][0-9]*)$' });
-const PositiveMinorSchema = MinorSchema.refine((value) => value !== '0', 'Amount must be positive');
 const NameSchema = LocalizedInputSchema.refine(
   (value) => resolveText(value, 'en').value.trim().length > 0,
   'Name required',
@@ -29,6 +23,7 @@ const MonetaryPolicySchema = z
   .openapi('MonetaryPolicy');
 const RecipientSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('PLAYER'), userId: z.uuid() }).strict(),
+  z.object({ type: z.literal('COMPANY'), companyId: z.uuid() }).strict(),
   z.object({ type: z.literal('TREASURY') }).strict(),
   z.object({ type: z.literal('CENTRAL_BANK') }).strict(),
 ]);
@@ -40,6 +35,8 @@ const financial = {
 };
 const DirectivePayloadSchema = z
   .discriminatedUnion('kind', [
+    ...FxDirectiveSchemas,
+    ...CompanyStateDirectiveSchemas,
     ...TaxDirectiveSchemas,
     ...TreatyDirectiveSchemas,
     z
@@ -86,6 +83,7 @@ const WalletTransferSchema = z
     quoteId: z.uuid().optional(),
     currencyId: z.uuid(),
     recipientId: z.uuid(),
+    recipientType: z.enum(['PLAYER', 'COMPANY']).optional(),
     amountMinor: PositiveMinorSchema,
     purpose: z.string().trim().max(1000),
   })
@@ -101,6 +99,7 @@ const DirectiveDetailSchema = z
     payload: DirectivePayloadSchema,
     payloadHash: z.string(),
     treatyContent: TreatyContentSchema.nullable().openapi('OptionalDirectiveTreatyContent'),
+    fxDisplay: FxDecisionDisplaySchema.optional(),
     status: z.enum(['PENDING', 'APPLIED', 'CANCELLED']),
     createdAt: z.iso.datetime(),
     appliedAt: z.iso.datetime().nullable(),
@@ -170,9 +169,11 @@ const AccountSchema = z
   .object({
     id: z.uuid(),
     currencyId: z.uuid(),
-    kind: z.enum(['PLAYER', 'CENTRAL_BANK', 'TREASURY', 'ISSUANCE']),
+    kind: z.enum(['PLAYER', 'COMPANY', 'CENTRAL_BANK', 'TREASURY', 'ISSUANCE']),
     ownerId: z.uuid(),
     balanceMinor: z.string(),
+    reservedMinor: MinorSchema.optional(),
+    availableMinor: MinorSchema.optional(),
   })
   .openapi('FinancialAccount');
 const LedgerTransactionSchema = z
@@ -184,7 +185,9 @@ const LedgerTransactionSchema = z
     amountMinor: PositiveMinorSchema,
     purpose: z.string(),
     actorId: z.uuid(),
+    initiatorId: z.uuid(),
     directiveId: z.uuid().nullable(),
+    companyDecisionId: z.uuid().nullable(),
     policyRevisionId: z.uuid().nullable(),
     createdAt: z.iso.datetime(),
     postings: z.array(
@@ -196,6 +199,7 @@ const StateMonetarySchema = z
   .object({
     bank: BankSchema.nullable().openapi('OptionalCentralBank'),
     currency: CurrencySchema.nullable().openapi('OptionalNationalCurrency'),
+    currencies: z.array(CurrencySchema),
     accounts: z.array(AccountSchema),
     directives: z.array(DirectiveDetailSchema),
     policyHistory: z.array(PolicyRevisionSchema),
@@ -220,7 +224,7 @@ const PublicCurrencySchema = z
     state: z.object({
       id: z.uuid(),
       slug: z.string().nullable(),
-      name: LocalizedInputSchema.nullable(),
+      name: z.union([LocalizedInputSchema, z.null()]),
       active: z.boolean(),
     }),
     issuancePage: z.number().int(),
@@ -247,9 +251,6 @@ type LedgerTransaction = z.infer<typeof LedgerTransactionSchema>;
 type WalletTransfer = z.infer<typeof WalletTransferSchema>;
 type MonetaryActor = Readonly<{ id: string; admin: boolean }>;
 export {
-  MinorSchema,
-  CumulativeMinorSchema,
-  PositiveMinorSchema,
   MonetaryPolicySchema,
   PolicyRevisionSchema,
   DirectivePayloadSchema,
@@ -275,3 +276,4 @@ export {
   type WalletTransfer,
   type MonetaryActor,
 };
+export { MinorSchema, CumulativeMinorSchema, PositiveMinorSchema } from './amount-contracts';

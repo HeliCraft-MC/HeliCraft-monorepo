@@ -20,6 +20,18 @@ import { votingRoutes } from './modules/voting/routes';
 import { stateRoutes } from './modules/states/routes';
 import { taxationRoutes } from './modules/taxation/routes';
 import { monetaryRoutes } from './modules/monetary/routes';
+import { companyRoutes } from './modules/companies/routes';
+import { companyApplicationRoutes } from './modules/companies/application-routes';
+import { companyDecisionRoutes } from './modules/companies/decision-routes';
+import { companyLifecycleRoutes } from './modules/companies/lifecycle-routes';
+import { shareRoutes } from './modules/companies/share-routes';
+import { branchRoutes } from './modules/companies/branch-routes';
+import { companyFinanceRoutes } from './modules/companies/finance-routes';
+import { companyPaymentQuoteRoutes } from './modules/companies/payment-quote-routes';
+import { publicCompanyRoutes } from './modules/companies/public-routes';
+import { companyCatalogueRoutes } from './modules/companies/catalogue-routes';
+import { fxRoutes } from './modules/fx/routes';
+import { publicFxRoutes } from './modules/fx/public-routes';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 interface Dependencies {
@@ -83,6 +95,7 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
     defaultHook: (result, context): Response | undefined =>
       result.success ? undefined : context.json({ message: 'Invalid request' }, HTTP.invalid),
   });
+  const secureCookies = dependencies.secureCookies ?? false;
   const siteOrigin = dependencies.siteOrigin ?? 'http://localhost:5173';
   app.use('/api/*', cors({ origin: siteOrigin, credentials: true }));
   app.use('/api/v1/account/gallery', bodyLimit({ maxSize: 10_600_000 }));
@@ -98,7 +111,7 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
     '/api/v1',
     identityRoutes(dependencies.db, {
       siteOrigin,
-      secureCookies: dependencies.secureCookies ?? false,
+      secureCookies,
       registrationEnabled: dependencies.registrationEnabled ?? true,
     }),
   );
@@ -108,7 +121,7 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
       db: dependencies.db,
       storage: dependencies.storage,
       bucket: dependencies.bucket,
-      secureCookies: dependencies.secureCookies ?? false,
+      secureCookies,
     }),
   );
   app.route(
@@ -117,13 +130,10 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
       db: dependencies.db,
       storage: dependencies.storage,
       bucket: dependencies.bucket,
-      secureCookies: dependencies.secureCookies ?? false,
+      secureCookies,
     }),
   );
-  app.route(
-    '/api/v1',
-    contentRoutes(dependencies.db, dependencies.secureCookies ?? false, siteOrigin),
-  );
+  app.route('/api/v1', contentRoutes(dependencies.db, secureCookies, siteOrigin));
   app.route(
     '/api/v1',
     siteRoutes({
@@ -141,26 +151,38 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
       db: dependencies.db,
       storage: dependencies.storage,
       bucket: dependencies.bucket,
-      secureCookies: dependencies.secureCookies ?? false,
+      secureCookies,
     }),
   );
-  app.route('/api/v1', stateReformRoutes(dependencies.db, dependencies.secureCookies ?? false));
-  app.route('/api/v1', playerRoutes(dependencies.db, dependencies.secureCookies ?? false));
-  app.route('/api/v1', votingRoutes(dependencies.db, dependencies.secureCookies ?? false));
-  app.route('/api/v1', taxationRoutes(dependencies.db, dependencies.secureCookies ?? false));
-  app.route('/api/v1', monetaryRoutes(dependencies.db, dependencies.secureCookies ?? false));
-  app.route('/api/v1', stateRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', stateReformRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', playerRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', votingRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', taxationRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', monetaryRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', publicFxRoutes(dependencies.db));
+  app.route('/api/v1', fxRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', companyRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', companyApplicationRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', companyDecisionRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', companyLifecycleRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', shareRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', branchRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', companyCatalogueRoutes(dependencies.db));
+  app.route('/api/v1', publicCompanyRoutes(dependencies.db));
+  app.route('/api/v1', companyFinanceRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', companyPaymentQuoteRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', stateRoutes(dependencies.db, secureCookies));
   app.route(
     '/api/v1',
     siteSettingsRoutes({
       db: dependencies.db,
       storage: dependencies.storage,
       bucket: dependencies.bucket,
-      secureCookies: dependencies.secureCookies ?? false,
+      secureCookies,
       minecraftAddress: dependencies.minecraftAddress,
     }),
   );
-  app.route('/api/v1', administrationRoutes(dependencies.db, dependencies.secureCookies ?? false));
+  app.route('/api/v1', administrationRoutes(dependencies.db, secureCookies));
   app.openapi(healthRoute, (context) =>
     context.json({ status: 'ok' as const, service: 'antares' as const }, HTTP.ok),
   );
@@ -175,8 +197,8 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
       return context.json({ message: 'Dependencies unavailable' }, HTTP.unavailable);
     }
   });
-  app.doc('/openapi.json', {
-    openapi: '3.0.0',
+  app.doc31('/openapi.json', {
+    openapi: '3.1.0',
     info: { title: 'HeliCraft Antares', version: '0.1.0' },
   });
   app.get('/', (context) => context.json({ service: 'Antares', openapi: '/openapi.json' }));

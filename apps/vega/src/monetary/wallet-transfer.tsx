@@ -1,5 +1,6 @@
-import { useCallback, useId, useState } from 'react';
-import type { SubmitEvent, ReactElement } from 'react';
+// oxlint-disable import/max-dependencies -- Wallet confirmation binds exact quotes to immutable selected player/company identities and shared form controls.
+import { useCallback, useState } from 'react';
+import type { SubmitEvent, ReactElement, ChangeEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { TaxBreakdown } from '../taxation/breakdown';
 import { transferWallet, quoteWalletTransfer } from '@helicraft/alhena';
@@ -7,38 +8,45 @@ import type {
   NationalCurrency,
   WalletTransfer as TransferInput,
   TransferQuote,
+  PublishedCompanyIdentity,
 } from '@helicraft/alhena';
-import { Alert, Button, Dialog, FormField, Select, TextField } from '@helicraft/atria';
+import { Alert, Button, Dialog } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
-import { PlayerPicker } from '../player-picker';
 import type { SelectedPlayer } from '../player-picker';
 import { useTranslation } from '../i18n';
-import { amountFromForm, formText } from './model';
+import { selectedWalletRecipient, walletCommand } from './wallet-recipient';
+import type { WalletRecipient } from './wallet-recipient';
+import { WalletTransferFields } from './wallet-transfer-fields';
+import { WalletRecipientSummary } from './wallet-recipient-summary';
 import styles from './monetary.module.scss';
 
+interface QuotedTransfer {
+  command: TransferInput;
+  recipient: WalletRecipient;
+  quote: TransferQuote;
+}
 function WalletTransfer({
   currencies,
   onSaved,
 }: Readonly<{ currencies: NationalCurrency[]; onSaved: () => void }>): ReactElement {
   const { text } = useTranslation();
-  const id = useId();
   const [players, setPlayers] = useState<SelectedPlayer[]>([]);
-  const [quote, setQuote] = useState<TransferQuote | null>(null);
-  const [review, setReview] = useState<TransferInput | null>(null);
+  const [kind, setKind] = useState<'PLAYER' | 'COMPANY'>('PLAYER');
+  const [company, setCompany] = useState<PublishedCompanyIdentity | null>(null);
+  const [review, setReview] = useState<QuotedTransfer | null>(null);
   const [problem, setProblem] = useState('');
   const [savedId, setSavedId] = useState<string | null>(null);
   const preview = useMutation({
-    mutationFn: async (input: TransferInput) => {
+    mutationFn: async (input: Omit<QuotedTransfer, 'quote'>) => {
       const result = await quoteWalletTransfer({
         client: browserClient(),
-        body: input,
+        body: input.command,
         throwOnError: true,
       });
-      return { input, quote: result.data };
+      return { ...input, quote: result.data };
     },
     onSuccess: (result) => {
-      setQuote(result.quote);
-      setReview({ ...result.input, quoteId: result.quote.id });
+      setReview({ ...result, command: { ...result.command, quoteId: result.quote.id } });
     },
   });
   const { mutate: calculate } = preview;
@@ -49,7 +57,7 @@ function WalletTransfer({
       }
       const result = await transferWallet({
         client: browserClient(),
-        body: review,
+        body: review.command,
         throwOnError: true,
       });
       return result.data.id;
@@ -63,27 +71,28 @@ function WalletTransfer({
   const submit = useCallback(
     (event: SubmitEvent<HTMLFormElement>): void => {
       event.preventDefault();
-      const [recipient] = players;
-      if (players.length !== 1 || !recipient) {
+      const form = new FormData(event.currentTarget);
+      let recipient: WalletRecipient | undefined = undefined;
+      try {
+        recipient = selectedWalletRecipient(kind, players, company);
+      } catch {
         setProblem(text('monetary.invalidRecipient'));
         return;
       }
-      const form = new FormData(event.currentTarget);
       try {
-        calculate({
-          idempotencyKey: crypto.randomUUID(),
-          currencyId: formText(form, 'currencyId'),
-          recipientId: recipient.id,
-          amountMinor: amountFromForm(form, 'amount'),
-          purpose: formText(form, 'purpose'),
-        });
+        calculate({ command: walletCommand(form, recipient), recipient });
         setProblem('');
       } catch {
         setProblem(text('monetary.invalidAmount'));
       }
     },
-    [players, text, calculate],
+    [kind, players, company, text, calculate],
   );
+  const handleKindChange = useCallback((event: ChangeEvent<HTMLSelectElement>): void => {
+    if (event.currentTarget.value === 'PLAYER' || event.currentTarget.value === 'COMPANY') {
+      setKind(event.currentTarget.value);
+    }
+  }, []);
   const changeOpen = useCallback(
     (open: boolean): void => {
       if (!open && !mutation.isPending) {
@@ -105,30 +114,15 @@ function WalletTransfer({
         </Alert>
       )}
       <form className={styles.form} onSubmit={submit}>
-        <FormField label={text('monetary.currency')} htmlFor={`${id}-currency`}>
-          <Select id={`${id}-currency`} name="currencyId" required defaultValue="">
-            <option value="">{text('monetary.selectCurrency')}</option>
-            {currencies.map((currency) => (
-              <option key={currency.id} value={currency.id}>
-                {currency.code}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-        <PlayerPicker players={players} onChange={setPlayers} label={text('monetary.recipient')} />
-        <FormField label={text('monetary.amount')} htmlFor={`${id}-amount`}>
-          <TextField
-            id={`${id}-amount`}
-            name="amount"
-            required
-            inputMode="decimal"
-            maxLength={31}
-            placeholder="0.00"
-          />
-        </FormField>
-        <FormField label={text('monetary.purpose')} htmlFor={`${id}-purpose`}>
-          <TextField id={`${id}-purpose`} name="purpose" maxLength={1000} />
-        </FormField>
+        <WalletTransferFields
+          currencies={currencies}
+          kind={kind}
+          onKindChange={handleKindChange}
+          players={players}
+          onPlayersChange={setPlayers}
+          company={company}
+          onCompanyChange={setCompany}
+        />
         <Button type="submit" disabled={preview.isPending}>
           {text('monetary.transfer')}
         </Button>
@@ -144,16 +138,14 @@ function WalletTransfer({
       >
         {review !== null && (
           <div className={styles.panel}>
-            {quote !== null && (
-              <TaxBreakdown
-                calculation={quote.calculation}
-                code={currencies.find((currency) => currency.id === review.currencyId)?.code ?? ''}
-              />
-            )}
-            <p>
-              {text('monetary.recipient')}: {players[0]?.name}
-            </p>
-            <p>{review.purpose}</p>
+            <TaxBreakdown
+              calculation={review.quote.calculation}
+              code={
+                currencies.find((currency) => currency.id === review.command.currencyId)?.code ?? ''
+              }
+            />
+            <WalletRecipientSummary recipient={review.recipient} />
+            <p>{review.command.purpose}</p>
           </div>
         )}
         <Button disabled={mutation.isPending} onClick={confirm}>

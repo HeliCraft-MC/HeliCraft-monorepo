@@ -18,6 +18,13 @@ const LawRevisionSchema = z
     number: z.number().int(),
     status: z.enum(['ACTIVE', 'REPEALED']),
     rule: TaxRuleSchema,
+    regimeSubject: z
+      .object({
+        companyName: LocalizedInputSchema,
+        branchName: z.union([LocalizedInputSchema, z.null()]),
+      })
+      .optional(),
+    categoryName: LocalizedInputSchema.optional(),
     name: LocalizedInputSchema,
     description: LocalizedInputSchema,
     document: LocalizedInputSchema,
@@ -31,6 +38,9 @@ const PublicLawRevisionSchema = LawRevisionSchema.omit({ document: true })
 const EconomicOperationSchema = z
   .object({
     id: z.uuid(),
+    initiatorId: z.uuid(),
+    actorId: z.uuid(),
+    companyDecisionId: z.uuid().nullable(),
     createdAt: z.iso.datetime(),
     calculation: TaxCalculationSchema,
     journals: z.array(

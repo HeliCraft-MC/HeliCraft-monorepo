@@ -19,10 +19,16 @@ function StateManagementPanel({
   stateId,
   actorId,
   section,
+  shareOperationId,
+  formationDraftId,
+  votingId,
 }: Readonly<{
   stateId: string;
   actorId: string;
   section: ManagementSection;
+  shareOperationId?: string;
+  formationDraftId?: string;
+  votingId?: string;
 }>): ReactElement {
   const { locale } = useTranslation();
   const navigate = useNavigate();
@@ -109,6 +115,9 @@ function StateManagementPanel({
           )}
           {accessible ? (
             <ManagementSections
+              votingId={votingId}
+              formationDraftId={formationDraftId}
+              shareOperationId={shareOperationId}
               key={`${stateId}:${selected}`}
               state={state.data}
               actorId={actorId}

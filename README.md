@@ -136,7 +136,9 @@ Operators are listed by nickname in root `ops.json` (`ms0ur` initially). They re
 
 ## Taxation and diplomacy
 
-State tax offices, immutable transfer-tax laws, bilateral tax treaties and exact atomic settlement run through Antares and Vega. Personal transfers show a server-calculated tax quote before confirmation. Institutions and laws use published Governance; administration ratifies institutions without setting tax rates. See [taxation](docs/architecture/taxation.md), [diplomacy](docs/architecture/diplomacy.md) and [verification](docs/architecture/taxation-verification.md). No Minecraft geography, corporate taxes, exchange or debt collection is implemented.
+State tax offices, immutable transfer-tax laws, bilateral tax treaties and exact atomic settlement run through Antares and Vega. Personal transfers show a server-calculated tax quote before confirmation. Institutions and laws use published Governance; administration ratifies institutions without setting tax rates. See [taxation](docs/architecture/taxation.md), [diplomacy](docs/architecture/diplomacy.md) and [verification](docs/architecture/taxation-verification.md). Minecraft geography and debt collection remain outside this implementation.
+
+[Current taxation improvements](docs/architecture/taxation-improvements.md) add sender/recipient liability, exact tax-free allowances, approved treasury/central-bank beneficiaries and accumulated fractional obligations. Office suspension preserves enacted laws; state suspension stops new assessments prospectively. The shared engine also covers company transfers, registration/confirmed-branch jurisdiction, explicit categories and national corporate regimes. [Companies](docs/architecture/companies.md) provide resumable registration, flexible Governance, exact shares, subsidiaries, branches, official finance and public SSR profiles. [Currency exchange](docs/architecture/currency-exchange.md) provides bilateral central-bank swaps and finite reserved player offers. See the [acceptance map](docs/architecture/companies-fx-taxation-verification.md) and [verification results](docs/architecture/companies-fx-taxation-plan.md).
 
 ## Stand deployment
 

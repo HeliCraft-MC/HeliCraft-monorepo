@@ -1,11 +1,9 @@
 import type { Governance, Office, Policy } from './contracts';
 import type { VotingInput } from '../voting/contracts';
 import { DomainError, HTTP } from '../errors';
+import { compileAuthority, approvalsSatisfied } from '../governance/authority';
+import type { ApprovalGroup, AuthorityMechanism } from '../governance/authority';
 
-interface ApprovalGroup {
-  readonly mode: 'ANY' | 'ALL';
-  readonly officeIds: string[];
-}
 interface AssignmentVote {
   readonly source: 'OFFICE' | 'POLICY' | 'REMOVAL_POLICY';
   readonly electorate: VotingInput['electorate'];
@@ -16,31 +14,36 @@ interface AssignmentRequirements {
   readonly votes: AssignmentVote[];
   readonly manual: boolean;
 }
+function stateMechanism(mechanism: Policy['mechanism']): AuthorityMechanism {
+  if (mechanism === 'CITIZEN_VOTE') {
+    return 'VOTE';
+  }
+  return mechanism === 'COUNCIL_VOTE' ? 'OFFICE_VOTE' : mechanism;
+}
 function policyRequirements(
   policy: Policy,
   stateId: string,
   defaults: Governance['votingDefaults'],
 ): AssignmentRequirements {
-  const approvalGroups: ApprovalGroup[] = [
-    'SINGLE_OFFICE',
-    'ANY_OF_OFFICES',
-    'MULTIPLE_OFFICES',
-    'COMBINED',
-  ].includes(policy.mechanism)
-    ? [{ mode: policy.mechanism === 'ANY_OF_OFFICES' ? 'ANY' : 'ALL', officeIds: policy.officeIds }]
-    : [];
-  const votes: AssignmentVote[] = [];
-  if (['CITIZEN_VOTE', 'COMBINED', 'COUNCIL_VOTE'].includes(policy.mechanism)) {
-    votes.push({
+  const compiled = compileAuthority<VotingInput['electorate']>(
+    {
+      ...policy,
+      mechanism: stateMechanism(policy.mechanism),
+    },
+    {
+      electorate: { type: 'STATE_CITIZENS', stateId },
+      officeElectorate: { type: 'OFFICE_HOLDERS', stateId, officeIds: policy.officeIds },
+      defaults,
+    },
+  );
+  return {
+    ...compiled,
+    votes: compiled.votes.map((vote) => ({
+      electorate: vote.electorate,
+      rules: vote.rules,
       source: 'POLICY',
-      rules: policy.vote ?? defaults,
-      electorate:
-        policy.mechanism === 'COUNCIL_VOTE'
-          ? { type: 'OFFICE_HOLDERS', stateId, officeIds: policy.officeIds }
-          : { type: 'STATE_CITIZENS', stateId },
-    });
-  }
-  return { approvalGroups, votes, manual: policy.mechanism === 'MANUAL' };
+    })),
+  };
 }
 function appointmentRequirements(
   office: Office,
@@ -166,11 +169,7 @@ function assignmentApprovalsMet(
   groups: readonly ApprovalGroup[],
   offices: ReadonlySet<string>,
 ): boolean {
-  return groups.every((group) =>
-    group.mode === 'ANY'
-      ? group.officeIds.some((id) => offices.has(id))
-      : group.officeIds.every((id) => offices.has(id)),
-  );
+  return approvalsSatisfied(groups, offices);
 }
 export {
   policyRequirements,

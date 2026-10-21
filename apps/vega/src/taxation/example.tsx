@@ -19,7 +19,7 @@ function TaxExample(): ReactElement {
         body: { amountMinor: principalMinor, rule: taxRuleFromForm(form) },
         throwOnError: true,
       });
-      return { principalMinor, amountMinor: result.data.amountMinor };
+      return result.data;
     },
   });
   const { mutate } = example;
@@ -39,8 +39,8 @@ function TaxExample(): ReactElement {
         htmlFor="tax-example"
         help={uiText(
           locale,
-          'Пример показывает только этот закон. Перед настоящим переводом Антарес учитывает все законы и договоры.',
-          'This example shows this law alone. Before a real transfer Antares includes all laws and treaties.',
+          'Пример показывает только этот закон без ранее накопленного дробного остатка. Перед настоящим переводом Антарес учитывает все законы, договоры и точные остатки.',
+          'This example shows this law alone without an existing fractional remainder. Before a real transfer Antares includes all laws, treaties and exact residual obligations.',
         )}
       >
         <TextField id="tax-example" name="example" defaultValue="100.00" inputMode="decimal" />
@@ -51,17 +51,13 @@ function TaxExample(): ReactElement {
       {example.data !== undefined && (
         <p>
           {uiText(locale, 'Получателю', 'Recipient')}:{' '}
-          <MoneyAmount minor={example.data.principalMinor} code="" locale={locale} /> ·{' '}
-          {uiText(locale, 'В казну', 'Treasury')}:{' '}
+          <MoneyAmount minor={example.data.recipientCreditMinor} code="" locale={locale} /> ·{' '}
+          {uiText(locale, 'Налоговому получателю', 'Tax beneficiary')}:{' '}
           <MoneyAmount minor={example.data.amountMinor} code="" locale={locale} /> ·{' '}
           {uiText(locale, 'С отправителя', 'Sender debit')}:{' '}
-          <MoneyAmount
-            minor={(
-              BigInt(example.data.principalMinor) + BigInt(example.data.amountMinor)
-            ).toString()}
-            code=""
-            locale={locale}
-          />
+          <MoneyAmount minor={example.data.totalDebitMinor} code="" locale={locale} /> ·{' '}
+          {uiText(locale, 'Налоговая база', 'Tax base')}:{' '}
+          <MoneyAmount minor={example.data.baseMinor} code="" locale={locale} />
         </p>
       )}
       {example.error !== null && <Alert tone="danger">{errorMessage(example.error)}</Alert>}

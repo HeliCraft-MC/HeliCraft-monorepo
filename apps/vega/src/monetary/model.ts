@@ -34,6 +34,9 @@ function institutionAllows(kind: DirectiveKind, monetary: StateMonetary): boolea
   if (kind === 'CHANGE_CHARTER') {
     return true;
   }
+  if (kind === 'BANK_TRANSFER' || kind === 'TREASURY_TRANSFER') {
+    return monetary.currencies.length > 0;
+  }
   return kind === 'CREATE_CURRENCY' ? monetary.currency === null : monetary.currency !== null;
 }
 function availableKinds(

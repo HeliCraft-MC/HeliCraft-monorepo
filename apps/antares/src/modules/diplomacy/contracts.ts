@@ -22,6 +22,13 @@ const TreatyContentSchema = z
     type: z.literal('TAX_TREATY'),
     event: TaxEventSchema,
     category: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/u),
+    categoryMapping: z
+      .object({
+        firstCategory: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/u),
+        secondCategory: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/u),
+      })
+      .strict()
+      .optional(),
     taxpayerScope: z.literal('OVERLAPPING_NATIONAL_CLAIMS'),
     terms: TreatyTermsSchema,
     effectiveAt: z.iso.datetime(),

@@ -5,7 +5,7 @@ import styles from './account.module.scss';
 
 const exact = { exact: true };
 export function AccountLayout(): ReactElement {
-  const { text } = useTranslation();
+  const { text, locale } = useTranslation();
   const inStates = useRouterState({
     select: (state) => state.location.pathname.startsWith('/app/states'),
   });
@@ -22,6 +22,9 @@ export function AccountLayout(): ReactElement {
               {text('states.title')}
             </Link>
             <Link to="/app/wallet">{text('monetary.wallet')}</Link>
+            <a href="/app/exchange">{text('fx.navigation')}</a>
+            <a href="/app/companies">{locale === 'ru' ? 'Компании' : 'Companies'}</a>
+            <a href="/app/shares">{locale === 'ru' ? 'Мои акции' : 'My shares'}</a>
             <Link to="/app/votings">{text('votings.title')}</Link>
             <Link to="/app/settings/profile">{text('account.profile')}</Link>
             <Link to="/app/settings/skin">{text('account.skin')}</Link>

@@ -4,7 +4,7 @@ import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { and, eq, isNull, sql } from 'drizzle-orm';
-import { beforeAll, afterAll, describe, expect, it } from 'vitest';
+import { beforeEach, afterEach, describe, expect, it } from 'vitest';
 import { createDatabase } from '../src/db';
 import type { Database } from '../src/db';
 import {
@@ -45,7 +45,7 @@ function content(category: string): TreatyContent {
     document: { en: 'Immutable agreement text' },
     type: 'TAX_TREATY',
     event: 'PLAYER_TRANSFER',
-    category,
+    category: 'TRANSFER',
     taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS',
     terms: { mode: 'EXCLUSIVE', taxingStateId: requiredEnvironment().first.stateId },
     effectiveAt: new Date(0).toISOString(),
@@ -104,7 +104,7 @@ async function policy(mechanism: 'SINGLE_OFFICE' | 'COMBINED' | 'MANUAL'): Promi
     first.adminId,
   );
 }
-beforeAll(async () => {
+beforeEach(async () => {
   const container = await new PostgreSqlContainer('postgis/postgis:18-3.6')
     .withDatabase('helicraft')
     .start();
@@ -116,7 +116,7 @@ beforeAll(async () => {
   await addEconomicAuthority(database.db, second);
   environment = { container, database, first, second };
 });
-afterAll(async () => {
+afterEach(async () => {
   if (environment !== null) {
     await environment.database.pool.end();
     await environment.container.stop();

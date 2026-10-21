@@ -4,94 +4,26 @@ import type { TaxLawRevision } from '@helicraft/alhena';
 import { FormField, TextField, Select, Alert } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
+import { TaxLiabilityFields } from './liability-fields';
+import { TaxScopeFields } from './scope-fields';
+import { TaxCategoryField } from './category-field';
+import { TaxRegimeFields } from './regime-fields';
 import styles from '../monetary/monetary.module.scss';
 
 const DEFAULT_RATE_BPS = 500;
 
-function TaxLawFields({ revision }: Readonly<{ revision?: TaxLawRevision }>): ReactElement {
+function TaxLawFields({
+  revision,
+  stateId,
+}: Readonly<{ revision?: TaxLawRevision; stateId?: string }>): ReactElement {
   const { locale } = useTranslation();
   const id = useId();
   return (
     <div className={styles.form}>
-      <FormField
-        label={uiText(locale, 'Событие', 'Event')}
-        htmlFor={`${id}-event`}
-        help={uiText(
-          locale,
-          'Поддерживается только личный перевод. Эмиссия, казённые платежи и сами налоги не облагаются.',
-          'Only personal transfers are supported. Issuance, treasury payments and taxes are excluded.',
-        )}
-      >
-        <Select id={`${id}-event`} name="event">
-          <option value="PLAYER_TRANSFER">
-            {uiText(locale, 'Личный перевод', 'Personal transfer')}
-          </option>
-        </Select>
-      </FormField>
-      <FormField
-        label={uiText(locale, 'Налогоплательщик и база', 'Taxpayer and base')}
-        htmlFor={`${id}-payer`}
-        help={uiText(
-          locale,
-          'Отправитель платит налог дополнительно от исходной суммы. Получатель получает полный перевод.',
-          'The sender pays on top of the original amount. The recipient receives the full transfer.',
-        )}
-      >
-        <TextField
-          id={`${id}-payer`}
-          readOnly
-          value={uiText(
-            locale,
-            'Отправитель · исходная сумма перевода',
-            'Sender · original transfer amount',
-          )}
-        />
-      </FormField>
-      <FormField
-        label={uiText(locale, 'Категория налога', 'Tax category')}
-        htmlFor={`${id}-category`}
-        help={uiText(
-          locale,
-          'Стабильный код связывает национальные требования с областью договора. Несколько разных законов могут действовать одновременно.',
-          'A stable code connects national claims to treaty scope. Several independent laws may apply together.',
-        )}
-      >
-        <TextField
-          id={`${id}-category`}
-          name="category"
-          required
-          pattern="[A-Z][A-Z0-9_]{0,63}"
-          maxLength={64}
-          defaultValue={revision?.rule.category ?? 'TRANSFER'}
-        />
-      </FormField>
-      <FormField
-        label={uiText(locale, 'Налоговая юрисдикция', 'Tax jurisdiction')}
-        htmlFor={`${id}-basis`}
-        help={uiText(
-          locale,
-          'Гражданство применяется ко всем действующим гражданствам. Территориальное правило пока использует тот же список с явной пометкой временной стратегии.',
-          'Citizenship uses every current citizenship. Territorial rules currently use the same list with an explicit proxy label.',
-        )}
-      >
-        <Select
-          id={`${id}-basis`}
-          name="basis"
-          defaultValue={revision?.rule.jurisdictions[0] ?? 'CITIZENSHIP'}
-        >
-          <option value="CITIZENSHIP">{uiText(locale, 'Гражданство', 'Citizenship')}</option>
-          <option value="TERRITORIAL">
-            {uiText(
-              locale,
-              'Территория — временно по гражданству',
-              'Territory — temporary citizenship proxy',
-            )}
-          </option>
-          <option value="BOTH">
-            {uiText(locale, 'Оба основания — один налог', 'Both bases — one tax')}
-          </option>
-        </Select>
-      </FormField>
+      <TaxScopeFields rule={revision?.rule} />
+      <TaxLiabilityFields rule={revision?.rule} />
+      <TaxCategoryField value={revision?.rule.category} />
+      {stateId !== undefined && <TaxRegimeFields stateId={stateId} rule={revision?.rule} />}
       <Alert>
         {uiText(
           locale,
@@ -104,8 +36,8 @@ function TaxLawFields({ revision }: Readonly<{ revision?: TaxLawRevision }>): Re
         htmlFor={`${id}-rate`}
         help={uiText(
           locale,
-          '100 базисных пунктов = 1%. Диапазон 0–10000. Результат округляется вниз до минимальной единицы; нулевой налог сохраняется без денежной проводки.',
-          '100 basis points = 1%. Range 0–10000. Tax rounds down to a minor unit; zero assessments retain evidence without a payment.',
+          '100 базисных пунктов = 1%. Диапазон 0–10000. Дробная часть налога накапливается до целой минимальной единицы и не исчезает при мелких переводах. Нулевое взыскание сохраняется без денежной проводки.',
+          '100 basis points = 1%. Range 0–10000. Fractional tax accumulates until a whole minor unit is due and is retained across tiny transfers. Zero collections retain evidence without a payment.',
         )}
       >
         <TextField
@@ -124,15 +56,22 @@ function TaxLawFields({ revision }: Readonly<{ revision?: TaxLawRevision }>): Re
         htmlFor={`${id}-recipient`}
         help={uiText(
           locale,
-          'Казна получает валюту перевода, включая иностранную. Автоматического обмена нет.',
-          'The treasury receives the transfer currency, including foreign currency. No conversion occurs.',
+          'Выбранный официальный счёт получает валюту перевода, включая иностранную. Центральный банк должен быть действующим. Если он недоступен, перевод отклоняется без перенаправления налога.',
+          'The selected official account receives the transfer currency, including foreign currency. A central bank must be active. If unavailable, the transfer fails without redirecting tax.',
         )}
       >
-        <TextField
+        <Select
           id={`${id}-recipient`}
-          readOnly
-          value={uiText(locale, 'Казна государства', 'State treasury')}
-        />
+          name="taxRecipient"
+          defaultValue={revision?.rule.recipient ?? 'STATE_TREASURY'}
+        >
+          <option value="STATE_TREASURY">
+            {uiText(locale, 'Казна государства', 'State treasury')}
+          </option>
+          <option value="CENTRAL_BANK">
+            {uiText(locale, 'Центральный банк государства', 'State central bank')}
+          </option>
+        </Select>
       </FormField>
       <FormField
         label={uiText(locale, 'Дата вступления в силу', 'Effective date')}
@@ -143,7 +82,13 @@ function TaxLawFields({ revision }: Readonly<{ revision?: TaxLawRevision }>): Re
           'The law applies after state approval and this date. Past transfers are never recalculated.',
         )}
       >
-        <TextField id={`${id}-date`} name="effectiveAt" type="datetime-local" required />
+        <TextField
+          id={`${id}-date`}
+          name="effectiveAt"
+          type="datetime-local"
+          step="0.001"
+          required
+        />
       </FormField>
     </div>
   );

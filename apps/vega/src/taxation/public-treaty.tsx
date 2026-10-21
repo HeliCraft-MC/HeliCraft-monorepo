@@ -6,6 +6,7 @@ import { MarkdownContent } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import styles from '../monetary/monetary.module.scss';
+import { taxEventLabel } from './event-labels';
 
 const PERCENT_BPS = 100;
 const BASIS_POINTS = 10_000;
@@ -24,7 +25,9 @@ function PublicTreatyPage({ item }: Readonly<{ item: PublicTreaty }>): ReactElem
           </h2>
           <p>{displayText(revision.description, locale)}</p>
           <p>
-            {revision.category} ·{' '}
+            {taxEventLabel(revision.event, locale)} ·{' '}
+            {revision.categoryMapping?.firstCategory ?? revision.category} ↔{' '}
+            {revision.categoryMapping?.secondCategory ?? revision.category} ·{' '}
             {revision.terms.mode === 'SHARED'
               ? uiText(locale, 'Общая ставка с распределением', 'Shared tax rate')
               : uiText(locale, 'Исключительное право', 'Exclusive taxation')}{' '}

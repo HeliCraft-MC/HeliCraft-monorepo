@@ -1,6 +1,7 @@
 import type { TreatyContent } from '../diplomacy/contracts';
 import { MAX_MINOR, monetaryError } from '../monetary/domain';
-import type { TaxCalculation, TaxClaim, TaxCharge } from './contracts';
+import { treatyCategoryFor } from '../diplomacy/category-scope';
+import type { TaxCalculation, TaxClaim, TaxCharge, TaxEvent } from './contracts';
 
 const BASIS_POINTS = 10_000n;
 interface ApplicableTreaty {
@@ -25,6 +26,7 @@ function nationalCharge(claim: TaxClaim): TaxCharge {
   return {
     key: `law:${claim.lawId}`,
     taxpayer: claim.taxpayer ?? 'SENDER',
+    baseMinor: claim.baseMinor,
     claims: [claim],
     treatyId: null,
     treatyRevisionId: null,
@@ -42,10 +44,7 @@ function nationalCharge(claim: TaxClaim): TaxCharge {
     ],
   };
 }
-function sharedBeneficiary(
-  claims: readonly TaxClaim[],
-  stateId: string,
-): TaxClaim['beneficiary'] {
+function sharedBeneficiary(claims: readonly TaxClaim[], stateId: string): TaxClaim['beneficiary'] {
   const national = claims.filter((claim) => claim.stateId === stateId);
   const [first] = national;
   if (
@@ -72,6 +71,7 @@ function sharedCharge(base: bigint, treaty: ApplicableTreaty, claims: TaxClaim[]
   return {
     key: `treaty:${treaty.revisionId}:${treaty.content.category}:${claims[0]?.taxpayer ?? 'SENDER'}`,
     taxpayer: claims[0]?.taxpayer ?? 'SENDER',
+    baseMinor: base.toString(),
     claims,
     treatyId: treaty.id,
     treatyRevisionId: treaty.revisionId,
@@ -109,12 +109,81 @@ function exclusiveCharges(treaty: ApplicableTreaty, claims: TaxClaim[]): TaxChar
       treatyRevisionId: treaty.revisionId,
       treatyName: treaty.content.name,
       mode: 'EXCLUSIVE',
+      exempt: claim.stateId !== terms.taxingStateId,
       amountMinor: amount,
-      allocations: charge.allocations.map((allocation) => ({ ...allocation, amountMinor: amount })),
+      allocations: charge.allocations.map((allocation) =>
+        Object.assign(allocation, { amountMinor: amount }),
+      ),
     };
   });
 }
-// oxlint-disable-next-line max-lines-per-function -- Deterministic treaty replacement retains every original law and rejects overlapping obligations.
+function treatyCharges(
+  base: bigint,
+  claims: readonly TaxClaim[],
+  context: Readonly<{ treaties: readonly ApplicableTreaty[]; event: TaxEvent }>,
+): TaxCharge[] {
+  const touched = new Set<string>();
+  const charges: TaxCharge[] = [];
+  const ordered = [...context.treaties].filter(
+    (candidate) => candidate.content.event === context.event,
+  );
+  ordered.sort((left, right) => left.id.localeCompare(right.id));
+  for (const treaty of ordered) {
+    for (const taxpayer of ['SENDER', 'RECIPIENT']) {
+      const covered = claims.filter(
+        (claim) =>
+          (claim.taxpayer ?? 'SENDER') === taxpayer &&
+          treaty.parties.includes(claim.stateId) &&
+          claim.category === treatyCategoryFor(treaty, claim.stateId),
+      );
+      if (treaty.parties.every((stateId) => covered.some((claim) => claim.stateId === stateId))) {
+        if (covered.some((claim) => touched.has(claim.lawId))) {
+          monetaryError(
+            'TREATY_CONFLICT',
+            'Налоговые договоры противоречат друг другу. Перевод не исполнен',
+          );
+        }
+        for (const claim of covered) {
+          touched.add(claim.lawId);
+        }
+        charges.push(
+          ...(treaty.content.terms.mode === 'SHARED'
+            ? [sharedCharge(base, treaty, covered)]
+            : exclusiveCharges(treaty, covered)),
+        );
+      }
+    }
+  }
+  charges.push(
+    ...claims.filter((claim) => !touched.has(claim.lawId)).map((claim) => nationalCharge(claim)),
+  );
+  charges.sort((left, right) => left.key.localeCompare(right.key));
+  return charges;
+}
+function taxTotals(
+  base: bigint,
+  charges: readonly TaxCharge[],
+): Pick<TaxCalculation, 'totalTaxMinor' | 'totalDebitMinor' | 'recipientCreditMinor'> {
+  const totalTax = charges.reduce((sum, charge) => sum + BigInt(charge.amountMinor), 0n);
+  const recipientTax = charges
+    .filter((charge) => charge.taxpayer === 'RECIPIENT')
+    .reduce((sum, charge) => sum + BigInt(charge.amountMinor), 0n);
+  const totalDebit = base + totalTax - recipientTax;
+  if (recipientTax > base) {
+    monetaryError(
+      'TAX_WITHHOLDING_EXCEEDS_PRINCIPAL',
+      'Налоги получателя превышают сумму перевода',
+    );
+  }
+  if (totalDebit > MAX_MINOR) {
+    monetaryError('TAX_OVERFLOW', 'Общая сумма перевода с налогами превышает допустимый диапазон');
+  }
+  return {
+    totalTaxMinor: totalTax.toString(),
+    totalDebitMinor: totalDebit.toString(),
+    recipientCreditMinor: (base - recipientTax).toString(),
+  };
+}
 function calculateTaxes(
   event: Readonly<Omit<TaxCalculation, 'charges' | 'totalTaxMinor' | 'totalDebitMinor'>>,
   inputClaims: readonly TaxClaim[],
@@ -128,57 +197,7 @@ function calculateTaxes(
   const claims = [...new Map(inputClaims.map((claim) => [claim.lawId, claim])).values()].sort(
     (left, right) => left.lawId.localeCompare(right.lawId),
   );
-  const touched = new Set<string>();
-  const charges: TaxCharge[] = [];
-  // oxlint-disable-next-line unicorn/no-array-sort -- Sort a copied input without mutating caller data on ES2022.
-  for (const treaty of [...treaties].sort((left, right) => left.id.localeCompare(right.id))) {
-    for (const taxpayer of ['SENDER', 'RECIPIENT']) {
-      const covered = claims.filter(
-        (claim) =>
-          (claim.taxpayer ?? 'SENDER') === taxpayer &&
-          treaty.parties.includes(claim.stateId) &&
-          claim.category === treaty.content.category,
-      );
-      if (!treaty.parties.every((stateId) => covered.some((claim) => claim.stateId === stateId))) {
-        continue;
-      }
-      if (covered.some((claim) => touched.has(claim.lawId))) {
-        monetaryError(
-          'TREATY_CONFLICT',
-          'Налоговые договоры противоречат друг другу. Перевод не исполнен',
-        );
-      }
-      for (const claim of covered) {
-        touched.add(claim.lawId);
-      }
-      charges.push(
-        ...(treaty.content.terms.mode === 'SHARED'
-          ? [sharedCharge(base, treaty, covered)]
-          : exclusiveCharges(treaty, covered)),
-      );
-    }
-  }
-  charges.push(
-    ...claims.filter((claim) => !touched.has(claim.lawId)).map((claim) => nationalCharge(claim)),
-  );
-  charges.sort((left, right) => left.key.localeCompare(right.key));
-  const totalTax = charges.reduce((sum, charge) => sum + BigInt(charge.amountMinor), 0n);
-  const recipientTax = charges
-    .filter((charge) => charge.taxpayer === 'RECIPIENT')
-    .reduce((sum, charge) => sum + BigInt(charge.amountMinor), 0n);
-  const totalDebit = base + totalTax - recipientTax;
-  if (recipientTax > base) {
-    monetaryError('TAX_WITHHOLDING_EXCEEDS_PRINCIPAL', 'Налоги получателя превышают сумму перевода');
-  }
-  if (totalDebit > MAX_MINOR) {
-    monetaryError('TAX_OVERFLOW', 'Общая сумма перевода с налогами превышает допустимый диапазон');
-  }
-  return {
-    ...event,
-    charges,
-    totalTaxMinor: totalTax.toString(),
-    totalDebitMinor: totalDebit.toString(),
-    recipientCreditMinor: (base - recipientTax).toString(),
-  };
+  const charges = treatyCharges(base, claims, { treaties, event: event.event });
+  return { ...event, charges, ...taxTotals(base, charges) };
 }
-export { percentage, calculateTaxes, BASIS_POINTS, type ApplicableTreaty };
+export { percentage, calculateTaxes, taxTotals, BASIS_POINTS, type ApplicableTreaty };

@@ -51,7 +51,7 @@ function StateMonetaryWorkspace({
     void refetch();
   }, [refetch]);
   const { data } = query;
-  const currencyList = useMemo(() => (data?.currency ? [data.currency] : []), [data]);
+  const currencyList = useMemo(() => data?.currencies ?? [], [data]);
   if (query.isPending) {
     return <LoadingState label={text('monetary.loading')} />;
   }
@@ -90,7 +90,12 @@ function StateMonetaryWorkspace({
             directive={directive}
             state={state}
             actorId={actorId}
-            code={data.currency?.code ?? ''}
+            code={
+              data.currencies.find(
+                (currency) =>
+                  'currencyId' in directive.payload && currency.id === directive.payload.currencyId,
+              )?.code ?? ''
+            }
             onSaved={refresh}
           />
         ))}

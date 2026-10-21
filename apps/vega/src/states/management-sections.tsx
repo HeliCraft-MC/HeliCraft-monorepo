@@ -24,6 +24,14 @@ const StateMonetaryWorkspace = lazy(async () => {
   const module = await import('../monetary/state-workspace');
   return { default: module.StateMonetaryWorkspace };
 });
+const StateFxWorkspace = lazy(async () => {
+  const module = await import('../fx/state-workspace');
+  return { default: module.StateFxWorkspace };
+});
+const StateCompanyWorkspace = lazy(async () => {
+  const module = await import('../companies/state-workspace');
+  return { default: module.StateCompanyWorkspace };
+});
 const OfficeAssignments = lazy(async () => {
   const module = await import('./office-assignments');
   return { default: module.OfficeAssignments };
@@ -51,6 +59,8 @@ const MANAGEMENT_SECTIONS = [
   'treasury',
   'taxation',
   'diplomacy',
+  'fx',
+  'companies',
 ] as const;
 type ManagementSection = (typeof MANAGEMENT_SECTIONS)[number];
 function ManagementSections({
@@ -59,12 +69,18 @@ function ManagementSections({
   section,
   onReform,
   pending,
+  shareOperationId,
+  formationDraftId,
+  votingId,
 }: Readonly<{
   state: StateDetail;
   actorId: string;
   section: ManagementSection;
   onReform: () => void;
   pending: boolean;
+  shareOperationId?: string;
+  formationDraftId?: string;
+  votingId?: string;
 }>): ReactElement {
   const { locale } = useTranslation();
   const fallback = useMemo(
@@ -78,6 +94,18 @@ function ManagementSections({
     content = <TaxationWorkspace state={state} actorId={actorId} />;
   } else if (section === 'diplomacy') {
     content = <DiplomacyWorkspace state={state} actorId={actorId} />;
+  } else if (section === 'fx') {
+    content = <StateFxWorkspace state={state} actorId={actorId} />;
+  } else if (section === 'companies') {
+    content = (
+      <StateCompanyWorkspace
+        state={state}
+        actorId={actorId}
+        votingId={votingId}
+        formationDraftId={formationDraftId}
+        shareOperationId={shareOperationId}
+      />
+    );
   } else if (
     section === 'bank' ||
     section === 'currency' ||

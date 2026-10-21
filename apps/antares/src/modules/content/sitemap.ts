@@ -1,9 +1,27 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { eq, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import type { Database } from '../../db';
-import { contentDocuments, galleryImages } from '../../db/schema';
+import {
+  companies,
+  contentDocuments,
+  galleryImages,
+  fxOffers,
+  centralBanks,
+  states,
+} from '../../db/schema';
+import { availableFxFilter } from '../fx/catalogue';
 import { DomainError, HTTP } from '../errors';
 
+const STATIC_PAGES = [
+  '/',
+  '/world',
+  '/start',
+  '/rules',
+  '/chronicle',
+  '/gallery',
+  '/companies',
+  '/exchange',
+];
 function xml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -11,6 +29,32 @@ function xml(value: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;');
+}
+async function companyUrls(db: Database['db'], origin: string): Promise<string[]> {
+  const registered = await db
+    .select({ id: companies.id })
+    .from(companies)
+    .where(
+      and(
+        isNotNull(companies.foundedAt),
+        isNotNull(companies.currentRevisionId),
+        inArray(companies.status, ['ACTIVE', 'SUSPENDED', 'CLOSED']),
+      ),
+    );
+  return registered.map(
+    (company) => `<url><loc>${xml(new URL(`/companies/${company.id}`, origin).href)}</loc></url>`,
+  );
+}
+async function exchangeUrls(db: Database['db'], origin: string): Promise<string[]> {
+  const offers = await db
+    .select({ id: fxOffers.id })
+    .from(fxOffers)
+    .innerJoin(centralBanks, eq(centralBanks.id, fxOffers.bankId))
+    .innerJoin(states, eq(states.id, fxOffers.stateId))
+    .where(availableFxFilter());
+  return offers.map(
+    (offer) => `<url><loc>${xml(new URL(`/exchange/${offer.id}`, origin).href)}</loc></url>`,
+  );
 }
 function sitemapRoutes(db: Database['db'] | undefined, origin: string): OpenAPIHono {
   const app = new OpenAPIHono();
@@ -35,7 +79,7 @@ function sitemapRoutes(db: Database['db'] | undefined, origin: string): OpenAPIH
       })
       .from(contentDocuments)
       .where(eq(contentDocuments.status, 'PUBLISHED'));
-    const staticPages = ['/', '/world', '/start', '/rules', '/chronicle', '/gallery'].map(
+    const staticPages = STATIC_PAGES.map(
       (path) => `<url><loc>${xml(new URL(path, origin).href)}</loc></url>`,
     );
     const publications = documents
@@ -52,9 +96,11 @@ function sitemapRoutes(db: Database['db'] | undefined, origin: string): OpenAPIH
       (photo) =>
         `<url><loc>${xml(new URL(`/gallery/${photo.id}`, origin).href)}</loc><lastmod>${photo.createdAt.toISOString()}</lastmod></url>`,
     );
+    const companyPages = await companyUrls(db, origin);
+    const exchanges = await exchangeUrls(db, origin);
     context.header('Content-Type', 'application/xml; charset=utf-8');
     return context.body(
-      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticPages, ...publications, ...gallery].join('')}</urlset>`,
+      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticPages, ...publications, ...gallery, ...companyPages, ...exchanges].join('')}</urlset>`,
     );
   });
   return app;

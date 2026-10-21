@@ -106,7 +106,7 @@ function TaxEditor({
         />
         {(kind === 'ENACT_TAX_LAW' || kind === 'AMEND_TAX_LAW') && (
           <>
-            <TaxLawFields revision={revision} />
+            <TaxLawFields revision={revision} stateId={state.id} />
             <LocalizedInputField
               label={uiText(locale, 'Текст закона (Markdown)', 'Law document (Markdown)')}
               multiline

@@ -1,5 +1,5 @@
 import { treatyRevision } from '../diplomacy/store';
-import type { TreatyContent } from '../diplomacy/contracts';
+import { fxDecisionDisplay } from '../fx/decision-display';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Transaction } from '../permissions/transaction';
 import type { Database } from '../../db';
@@ -60,7 +60,8 @@ class MonetaryReviewService {
     payload: DirectivePayload;
     payloadHash: string;
     code: string;
-    treatyContent: TreatyContent | null;
+    treatyContent: DirectiveDetail['treatyContent'];
+    fxDisplay: DirectiveDetail['fxDisplay'];
   }> {
     return await this.db.transaction(async (transaction) => {
       await monetaryActor(transaction, actor);
@@ -95,6 +96,7 @@ class MonetaryReviewService {
         payloadHash: record.payloadHash,
         code,
         treatyContent: treaty?.content ?? null,
+        fxDisplay: await fxDecisionDisplay(transaction, record.stateId, payload),
       };
     });
   }

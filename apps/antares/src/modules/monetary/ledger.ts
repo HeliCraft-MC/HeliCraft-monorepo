@@ -5,13 +5,15 @@ import {
   ledgerPostings,
   currencies,
   users,
+  companies,
 } from '../../db/schema';
 import type { Transaction } from '../permissions/transaction';
 import type { Account, DirectivePayload } from './contracts';
 import { assertIssuance, monetaryError, monetaryHash } from './domain';
 import { grossIssuance30d } from './statistics';
-import { currentPolicy, monetaryAudit } from './store';
+import { bankRecord, currentPolicy, monetaryAudit } from './store';
 import type { CurrencyRecord, DirectiveRecord } from './store';
+import { assertAvailableBankFunds } from '../fx/reserves';
 
 type AccountRecord = typeof financialAccounts.$inferSelect;
 async function account(
@@ -53,6 +55,24 @@ async function playerAccount(
   }
   return await account(transaction, { currencyId, kind: 'PLAYER', ownerId: userId });
 }
+async function companyAccount(
+  transaction: Transaction,
+  currencyId: string,
+  companyId: string,
+): Promise<AccountRecord> {
+  const [company] = await transaction
+    .select({ status: companies.status })
+    .from(companies)
+    .where(eq(companies.id, companyId))
+    .for('update');
+  if (company?.status !== 'ACTIVE') {
+    monetaryError(
+      'RECIPIENT_UNAVAILABLE',
+      'Компания не найдена или её деятельность приостановлена',
+    );
+  }
+  return await account(transaction, { currencyId, kind: 'COMPANY', ownerId: companyId });
+}
 interface PostingCommand {
   readonly actorId: string;
   readonly key: string;
@@ -64,12 +84,21 @@ interface PostingCommand {
   readonly source: AccountRecord;
   readonly target: AccountRecord;
   readonly directiveId: string | null;
+  readonly companyDecisionId?: string;
   readonly policyRevisionId: string | null;
 }
 // oxlint-disable-next-line max-lines-per-function -- Journal, balancing postings, supply and audit form one atomic commit.
 async function post(transaction: Transaction, command: PostingCommand): Promise<string> {
   if (command.source.id === command.target.id) {
     monetaryError('SAME_ACCOUNT', 'Выберите другой счёт получателя');
+  }
+  if (command.source.kind === 'CENTRAL_BANK') {
+    await assertAvailableBankFunds(transaction, {
+      bankId: command.source.ownerId,
+      currencyId: command.currency.id,
+      balanceMinor: command.source.balanceMinor,
+      amountMinor: command.amountMinor,
+    });
   }
   if (
     command.source.kind !== 'ISSUANCE' &&
@@ -88,6 +117,7 @@ async function post(transaction: Transaction, command: PostingCommand): Promise<
     amountMinor: command.amountMinor,
     purpose: command.purpose,
     directiveId: command.directiveId,
+    companyDecisionId: command.companyDecisionId ?? null,
     policyRevisionId: command.policyRevisionId,
     createdAt: sql`clock_timestamp()`,
   });
@@ -161,15 +191,22 @@ async function issuancePolicy(
 async function recipientAccount(
   transaction: Transaction,
   currency: CurrencyRecord,
-  recipient: Extract<DirectivePayload, { kind: 'BANK_TRANSFER' }>['recipient'],
+  input: Readonly<{
+    recipient: Extract<DirectivePayload, { kind: 'BANK_TRANSFER' }>['recipient'];
+    owner: Readonly<{ stateId: string; bankId: string }>;
+  }>,
 ): Promise<AccountRecord> {
+  const { recipient, owner } = input;
   if (recipient.type === 'PLAYER') {
     return await playerAccount(transaction, currency.id, recipient.userId);
+  }
+  if (recipient.type === 'COMPANY') {
+    return await companyAccount(transaction, currency.id, recipient.companyId);
   }
   return await account(transaction, {
     currencyId: currency.id,
     kind: recipient.type,
-    ownerId: recipient.type === 'TREASURY' ? currency.stateId : currency.bankId,
+    ownerId: recipient.type === 'TREASURY' ? owner.stateId : owner.bankId,
   });
 }
 // oxlint-disable-next-line max-lines-per-function -- Approved commands choose fixed account types and post one atomic journal.
@@ -184,10 +221,14 @@ async function executeFinancial(
 ): Promise<string> {
   const { record, payload, currency, actorId } = input;
   const hash = monetaryHash({ directiveId: record.id });
+  const institution = await bankRecord(transaction, record.stateId);
+  if (institution === null) {
+    throw new Error('Executing bank missing');
+  }
   const bank = await account(transaction, {
     currencyId: currency.id,
     kind: 'CENTRAL_BANK',
-    ownerId: currency.bankId,
+    ownerId: institution.id,
   });
   const issuance = await account(transaction, {
     currencyId: currency.id,
@@ -202,7 +243,7 @@ async function executeFinancial(
     source = await account(transaction, {
       currencyId: currency.id,
       kind: 'TREASURY',
-      ownerId: currency.stateId,
+      ownerId: record.stateId,
     });
   }
   let target = bank;
@@ -210,7 +251,10 @@ async function executeFinancial(
     target = issuance;
   }
   if ('recipient' in payload) {
-    target = await recipientAccount(transaction, currency, payload.recipient);
+    target = await recipientAccount(transaction, currency, {
+      recipient: payload.recipient,
+      owner: { stateId: record.stateId, bankId: institution.id },
+    });
   }
   const policy = await currentPolicy(transaction, currency.id);
   const policyRevisionId =
@@ -231,4 +275,4 @@ async function executeFinancial(
     policyRevisionId,
   });
 }
-export { account, playerAccount, post, previousTransaction, executeFinancial };
+export { account, playerAccount, companyAccount, post, previousTransaction, executeFinancial };

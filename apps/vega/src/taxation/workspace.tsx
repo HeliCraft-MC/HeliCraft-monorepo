@@ -14,6 +14,7 @@ import { TaxAssessments } from './assessments';
 import { TaxEditor } from './editor';
 import type { TaxKind } from './compose';
 import { economicAuthority, economicStatus } from './model';
+import { TaxRuleSummary } from './rule-summary';
 import styles from '../monetary/monetary.module.scss';
 
 const PERCENT_BPS = 100;
@@ -115,8 +116,8 @@ function TaxationWorkspace({
           label={uiText(locale, 'Множественное налогообложение', 'Multiple taxation')}
           content={uiText(
             locale,
-            'Каждый закон применяется один раз от исходной суммы. Соглашение может урегулировать совпадающие требования двух сторон; права третьего государства сохраняются.',
-            'Each law applies once to the original amount. A treaty may settle overlapping claims of two parties; a third state retains its rights.',
+            'Каждый закон применяется один раз со своей налоговой базой и плательщиком. Соглашение может урегулировать совпадающие требования двух сторон к одному плательщику; права третьего государства сохраняются.',
+            'Each law applies once with its own base and taxpayer. A treaty may settle overlapping claims of two parties against one taxpayer; a third state retains its rights.',
           )}
         />
       </p>
@@ -150,6 +151,7 @@ function TaxationWorkspace({
             {revision.rule.category} · {new Date(revision.effectiveAt).toLocaleString(locale)}
           </p>
           <p>{displayText(revision.description, locale)}</p>
+          <TaxRuleSummary rule={revision.rule} subject={revision.regimeSubject} />
           {revision.status !== 'REPEALED' && (
             <div className={styles.actions}>
               {economicAuthority(state, actorId, 'AMEND_TAX_LAW') && (

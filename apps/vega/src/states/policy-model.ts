@@ -30,6 +30,15 @@ const actions = [
   'AMEND_TREATY',
   'DENOUNCE_TREATY',
   'SIGN_TREATY',
+  'SET_COMPANY_REGISTRATION_POLICY',
+  'REGISTER_COMPANY',
+  'REGISTER_COMPANY_BRANCH',
+  'PARTICIPATE_IN_COMPANY',
+  'ACQUIRE_COMPANY_SHARES',
+  'TRANSFER_COMPANY_SHARES',
+  'MANAGE_FX_OFFERS',
+  'CANCEL_FX_OFFERS',
+  'APPROVE_INTERBANK_EXCHANGE',
 ] as const;
 function newPolicy(action: GovernancePolicy['action']): GovernancePolicy {
   return { action, mechanism: 'CITIZEN_VOTE', officeIds: [], vote: null, manualProcedure: {} };

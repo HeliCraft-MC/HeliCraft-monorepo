@@ -2,7 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testIgnore: 'gallery-public.spec.ts',
+  testIgnore: [
+    'company-formation.spec.ts',
+    'gallery-public.spec.ts',
+    'company-catalogue-public.spec.ts',
+    'company-profile-public.spec.ts',
+    'fx-workflow.spec.ts',
+  ],
   fullyParallel: false,
   workers: 1,
   use: { trace: 'retain-on-failure' },

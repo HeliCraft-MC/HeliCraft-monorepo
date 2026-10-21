@@ -38,11 +38,13 @@ function resolveJurisdiction(
   if (!membership) {
     return [];
   }
-  return rule.jurisdictions.map((basis) => ({
-    stateId,
-    basis,
-    membershipJoinedAt: membership.joinedAt.toISOString(),
-    source: basis === 'CITIZENSHIP' ? 'CITIZENSHIP' : 'CITIZENSHIP_PROXY',
-  }));
+  return rule.jurisdictions
+    .filter((basis) => basis === 'CITIZENSHIP' || basis === 'TERRITORIAL')
+    .map((basis) => ({
+      stateId,
+      basis,
+      membershipJoinedAt: membership.joinedAt.toISOString(),
+      source: basis === 'CITIZENSHIP' ? 'CITIZENSHIP' : 'CITIZENSHIP_PROXY',
+    }));
 }
 export { jurisdictionMemberships, resolveJurisdiction };

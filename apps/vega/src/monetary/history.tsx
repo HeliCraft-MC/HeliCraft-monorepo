@@ -3,7 +3,8 @@ import { monetaryLabel } from './labels';
 import type { ReactElement } from 'react';
 import type { LedgerTransaction } from '@helicraft/alhena';
 import { MoneyAmount } from '@helicraft/atria';
-import { MonetaryPlayer } from './player';
+import { AccountOwner } from './account-owner';
+import { HistoryActors } from './history-actors';
 import { uiText } from '../states/text';
 import { useTranslation } from '../i18n';
 import styles from './monetary.module.scss';
@@ -12,9 +13,11 @@ function MonetaryHistory({
   transactions,
   currencies,
   ownActorId,
+  showOperationDetails = false,
 }: Readonly<{
   transactions: LedgerTransaction[];
   ownActorId?: string;
+  showOperationDetails?: boolean;
   currencies: readonly { id: string; code: string }[];
 }>): ReactElement {
   const { text, locale } = useTranslation();
@@ -44,13 +47,17 @@ function MonetaryHistory({
             </p>
             <details>
               <summary>{text('monetary.details')}</summary>
-              {entry.economicOperationId !== null && entry.actorId === ownActorId && (
-                <OperationDetails
-                  id={entry.economicOperationId}
-                  code={currencies.find((currency) => currency.id === entry.currencyId)?.code ?? ''}
-                />
-              )}
+              {entry.economicOperationId !== null &&
+                (showOperationDetails || entry.actorId === ownActorId) && (
+                  <OperationDetails
+                    id={entry.economicOperationId}
+                    code={
+                      currencies.find((currency) => currency.id === entry.currencyId)?.code ?? ''
+                    }
+                  />
+                )}
               <dl className={styles.facts}>
+                <HistoryActors entry={entry} />
                 <div>
                   <dt>{text('monetary.id')}</dt>
                   <dd>{entry.id}</dd>
@@ -67,15 +74,21 @@ function MonetaryHistory({
                     <dd>{entry.directiveId}</dd>
                   </div>
                 )}
+                {entry.companyDecisionId !== null && (
+                  <div>
+                    <dt>{uiText(locale, 'Корпоративное решение', 'Corporate decision')}</dt>
+                    <dd>
+                      <a href={`/app/company-decisions/${entry.companyDecisionId}`}>
+                        {entry.companyDecisionId}
+                      </a>
+                    </dd>
+                  </div>
+                )}
                 {entry.postings.map((posting) => (
                   <div key={posting.account.id}>
                     <dt>
                       {monetaryLabel(text, posting.account.kind)} ·{' '}
-                      {posting.account.kind === 'PLAYER' ? (
-                        <MonetaryPlayer id={posting.account.ownerId} />
-                      ) : (
-                        posting.account.ownerId
-                      )}
+                      <AccountOwner account={posting.account} />
                     </dt>
                     <dd>
                       <MoneyAmount

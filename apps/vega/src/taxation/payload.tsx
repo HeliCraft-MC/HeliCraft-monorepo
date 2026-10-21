@@ -3,6 +3,8 @@ import type { MonetaryDirectivePayload } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { economicLabels } from './model';
+import { TaxRuleSummary } from './rule-summary';
+import { taxJurisdictionLabel } from './event-labels';
 
 const PERCENT_BPS = 100;
 
@@ -19,26 +21,19 @@ function EconomicPayload({
       <h3>{uiText(locale, title[0], title[1])}</h3>
       {'rule' in payload && (
         <dl>
-          <dt>{uiText(locale, 'Ставка от исходной суммы', 'Rate on original amount')}</dt>
+          <dt>{uiText(locale, 'Ставка', 'Rate')}</dt>
           <dd>{payload.rule.rateBps / PERCENT_BPS}%</dd>
           <dt>{uiText(locale, 'Юрисдикция', 'Jurisdiction')}</dt>
           <dd>
             {payload.rule.jurisdictions
-              .map((basis) =>
-                basis === 'CITIZENSHIP'
-                  ? uiText(locale, 'Гражданство', 'Citizenship')
-                  : uiText(
-                      locale,
-                      'Территория — временно по гражданству',
-                      'Territory — temporary citizenship proxy',
-                    ),
-              )
+              .map((basis) => taxJurisdictionLabel(basis, locale))
               .join(', ')}
           </dd>
           <dt>{uiText(locale, 'Категория', 'Category')}</dt>
           <dd>{payload.rule.category}</dd>
         </dl>
       )}
+      {'rule' in payload && <TaxRuleSummary rule={payload.rule} />}
       {'effectiveAt' in payload && (
         <p>
           {uiText(locale, 'Вступление в силу', 'Effective date')}:{' '}

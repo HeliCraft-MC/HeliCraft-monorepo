@@ -4,6 +4,8 @@ import {
   check,
   index,
   integer,
+  numeric,
+  foreignKey,
   jsonb,
   pgTable,
   primaryKey,
@@ -14,6 +16,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { users } from './core-schema';
 import { localizedTexts, stateGovernanceRevisions } from './state-schema';
+import { legalSubjects, companyRevisions } from './company-identity-schema';
 import type { SurveyAnswer } from '../modules/voting/survey-contracts';
 import type { VotingInput, VotingSubject } from '../modules/voting/contracts';
 
@@ -42,6 +45,7 @@ const votings = pgTable(
     governanceRevisionId: uuid('governance_revision_id').references(
       () => stateGovernanceRevisions.id,
     ),
+    companyRevisionId: uuid('company_revision_id').references(() => companyRevisions.id),
     subject: jsonb('subject').$type<VotingSubject>(),
     snapshotAt: time('snapshot_at'),
     createdAt: time('created_at').notNull().defaultNow(),
@@ -86,14 +90,22 @@ const votingEligibleVoters = pgTable(
     votingId: uuid('voting_id')
       .notNull()
       .references(() => votings.id),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.id),
-    weight: integer('weight').notNull().default(1),
+    voterId: uuid('voter_id').notNull(),
+    userId: uuid('user_id').references(() => users.id),
+    subjectId: uuid('subject_id').references(() => legalSubjects.id),
+    weight: numeric('weight', { precision: 38, scale: 0 }).notNull().default('1'),
   },
   (table) => [
-    primaryKey({ columns: [table.votingId, table.userId] }),
+    primaryKey({ columns: [table.votingId, table.voterId] }),
     check('voting_weight_positive', sql`${table.weight} > 0`),
+    check(
+      'voting_voter_identity',
+      sql`(
+      ${table.userId} is not null and ${table.subjectId} is null and ${table.voterId} = ${table.userId}
+    ) or (
+      ${table.userId} is null and ${table.subjectId} is not null and ${table.voterId} = ${table.subjectId}
+    )`,
+    ),
   ],
 );
 const votingBallots = pgTable(
@@ -106,6 +118,12 @@ const votingBallots = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id),
+    voterId: uuid('voter_id').notNull(),
+    companyDecisionId: uuid('company_decision_id'),
+    stateDirectiveId: uuid('state_directive_id'),
+    databaseTransaction: text('database_transaction')
+      .notNull()
+      .default(sql`pg_current_xact_id()::text`),
     answers: jsonb('answers').$type<SurveyAnswer[]>(),
     repeatKey: uuid('repeat_key'),
     abstain: boolean('abstain').notNull().default(false),
@@ -113,8 +131,13 @@ const votingBallots = pgTable(
   },
   (table) => [
     uniqueIndex('voting_one_ballot')
-      .on(table.votingId, table.userId)
+      .on(table.votingId, table.voterId)
       .where(sql`${table.repeatKey} IS NULL`),
+    foreignKey({
+      name: 'voting_ballot_frozen_voter',
+      columns: [table.votingId, table.voterId],
+      foreignColumns: [votingEligibleVoters.votingId, votingEligibleVoters.voterId],
+    }),
   ],
 );
 const votingBallotChoices = pgTable(

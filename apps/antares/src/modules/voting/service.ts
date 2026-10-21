@@ -6,17 +6,15 @@ import { castBallot } from './ballots';
 import type { Ballot } from './ballots';
 import { desc, eq, inArray } from 'drizzle-orm';
 import type { Database } from '../../db';
-import {
-  votings,
-  votingOptions,
-  votingEligibleVoters,
-  votingBallots,
-  votingBallotChoices,
-  adminAuditLog,
-} from '../../db/schema';
+import type { Transaction } from '../permissions/transaction';
+import { votings, votingBallots, adminAuditLog } from '../../db/schema';
 import { authorizeMutation } from '../permissions/transaction';
 import { DomainError, HTTP } from '../errors';
-import { validateVoting, calculateResult } from './domain';
+import { validateVoting } from './domain';
+import { storedVotingResult } from './results';
+import { personalVoter, corporateVotingReader } from './read-access';
+import { entityVotingParticipants } from './entity-read';
+import { companyActor } from '../companies/store';
 import type { VotingInput, VotingDetail } from './contracts';
 import {
   lockedVoting,
@@ -27,6 +25,25 @@ import {
   replaceVotingInput,
 } from './persistence';
 
+async function corporateVoteReader(
+  transaction: Transaction,
+  input: Readonly<{ id: string; electorate: VotingInput['electorate'] }>,
+  actorId: string,
+): Promise<boolean> {
+  const { id, electorate } = input;
+  const entities = await entityVotingParticipants(transaction, id, actorId);
+  return (
+    (await personalVoter(transaction, id, actorId)) ||
+    (await corporateVotingReader(transaction, electorate, actorId)) ||
+    entities.length > 0
+  );
+}
+async function votingBallotRecords(
+  transaction: Transaction,
+  id: string,
+): Promise<(typeof votingBallots.$inferSelect)[]> {
+  return await transaction.select().from(votingBallots).where(eq(votingBallots.votingId, id));
+}
 class VotingService {
   private readonly db: Database['db'];
   public constructor(db: Database['db']) {
@@ -34,6 +51,13 @@ class VotingService {
   }
   public async create(actorId: string, input: Readonly<VotingInput>): Promise<string> {
     validateVoting(input);
+    if ('companyId' in input.electorate) {
+      throw new DomainError(
+        HTTP.conflict,
+        'CORPORATE_VOTING_BINDING_REQUIRED',
+        'Корпоративное голосование создаётся только из действительного решения компании',
+      );
+    }
     return await this.db.transaction(async (transaction) => {
       await authorizeMutation(transaction, actorId, 'voting.manage');
       return await persistVoting(transaction, actorId, input);
@@ -41,6 +65,13 @@ class VotingService {
   }
   public async update(id: string, actorId: string, input: Readonly<VotingInput>): Promise<void> {
     validateVoting(input);
+    if ('companyId' in input.electorate) {
+      throw new DomainError(
+        HTTP.conflict,
+        'CORPORATE_VOTING_BINDING_REQUIRED',
+        'Корпоративное голосование создаётся только из действительного решения компании',
+      );
+    }
     await this.db.transaction(async (transaction) => {
       await authorizeMutation(transaction, actorId, 'voting.manage');
       const record = await lockedVoting(transaction, id);
@@ -104,19 +135,37 @@ class VotingService {
         await authorizeMutation(transaction, actorId, 'voting.manage');
       }
       const rows = await transaction
-        .select({ id: votings.id })
+        .select({ id: votings.id, configuration: votings.configuration })
         .from(votings)
         .where(admin ? undefined : inArray(votings.status, ['SCHEDULED', 'OPEN', 'CLOSED']))
         .orderBy(desc(votings.createdAt));
-      return rows.map((row) => row.id);
+      if (rows.some((row) => 'companyId' in row.configuration.electorate)) {
+        // Legal-owner authorization reads lock corporate heads, so lists follow the same authorization/ownership order as votes and company commands.
+        await companyActor(transaction, actorId);
+      }
+      const visible: string[] = [];
+      for (const row of rows) {
+        if (admin || !('companyId' in row.configuration.electorate)) {
+          visible.push(row.id);
+        } else {
+          // oxlint-disable-next-line no-await-in-loop -- Private corporate votes are filtered through the same frozen and current authorities before returning their IDs.
+          const allowed = await corporateVoteReader(
+            transaction,
+            { id: row.id, electorate: row.configuration.electorate },
+            actorId,
+          );
+          if (allowed) {
+            visible.push(row.id);
+          }
+        }
+      }
+      return visible;
     });
   }
   public async cast(id: string, userId: string, ballot: Ballot): Promise<void> {
     await castBallot(this.db, { id, userId, ballot });
   }
-  // oxlint-disable-next-line max-lines-per-function -- The locked read advances lifecycle and enforces ballot/result visibility.
   public async detail(id: string, userId: string, admin: boolean): Promise<VotingDetail> {
-    // oxlint-disable-next-line max-lines-per-function -- Voting detail is read under one lock.
     return await this.db.transaction(async (transaction) => {
       if (admin) {
         await authorizeMutation(transaction, userId, 'voting.manage');
@@ -126,44 +175,29 @@ class VotingService {
         throw new DomainError(HTTP.notFound, 'VOTING_NOT_FOUND', 'Голосование не найдено');
       }
       const input = await hydrateInput(transaction, record);
-      const electorate = await transaction
-        .select()
-        .from(votingEligibleVoters)
-        .where(eq(votingEligibleVoters.votingId, id));
-      const eligible = electorate.some((voter) => voter.userId === userId);
-      const ballots = await transaction
-        .select()
-        .from(votingBallots)
-        .where(eq(votingBallots.votingId, id));
-      const choices = await transaction
-        .select({ ballotId: votingBallotChoices.ballotId, optionKey: votingOptions.optionKey })
-        .from(votingBallotChoices)
-        .innerJoin(votingOptions, eq(votingOptions.id, votingBallotChoices.optionId))
-        .where(eq(votingOptions.votingId, id));
+      const eligible = await personalVoter(transaction, id, userId);
+      const entityVoters = await entityVotingParticipants(transaction, id, userId);
+      const corporateReader =
+        entityVoters.length > 0 ||
+        (await corporateVotingReader(transaction, input.electorate, userId));
+      if ('companyId' in input.electorate && !admin && !eligible && !corporateReader) {
+        throw new DomainError(HTTP.notFound, 'VOTING_NOT_FOUND', 'Голосование не найдено');
+      }
+      const ballots = await votingBallotRecords(transaction, id);
       const visible =
         admin ||
         input.resultVisibility === 'PUBLIC' ||
         (input.resultVisibility === 'AFTER_CLOSE' && record.status === 'CLOSED') ||
-        (input.resultVisibility === 'ELIGIBLE_ONLY' && eligible);
-      const result = visible
-        ? calculateResult(
-            input,
-            electorate.length,
-            ballots.map((ballot) => ({
-              abstain: ballot.abstain,
-              choices: choices
-                .filter((choice) => choice.ballotId === ballot.id)
-                .map((choice) => choice.optionKey),
-            })),
-          )
-        : null;
+        (input.resultVisibility === 'ELIGIBLE_ONLY' && (eligible || corporateReader));
+      const result = visible ? await storedVotingResult(transaction, id, input) : null;
       return {
         id,
         surveyHtml: input.survey ? await surveyMarkdown(input) : undefined,
         status: record.status,
         input,
         eligible,
-        hasVoted: ballots.some((ballot) => ballot.userId === userId),
+        entityVoters,
+        hasVoted: eligible && ballots.some((ballot) => ballot.voterId === userId),
         result:
           result && input.survey
             ? {
@@ -175,6 +209,7 @@ class VotingService {
               }
             : result,
         governanceRevisionId: record.governanceRevisionId,
+        companyRevisionId: record.companyRevisionId,
         subject: record.subject,
       };
     });

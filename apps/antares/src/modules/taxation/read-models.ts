@@ -21,6 +21,8 @@ import { stateAccounts, currencyDto, HISTORY_LIMIT } from '../monetary/read-mode
 import { directiveContext } from '../monetary/directive-context';
 import type { MonetaryActor } from '../monetary/contracts';
 import type { LawRevisionSchema, TaxOfficeSchema, StateTaxationSchema } from './read-contracts';
+import { taxRegimeSubject } from './regime-subject';
+import { TAX_CATEGORIES } from './category-registry';
 
 async function taxOfficeDto(
   transaction: Transaction,
@@ -65,6 +67,8 @@ async function lawRevisionDto(
     number: revision.number,
     status: revision.status,
     rule: revision.rule,
+    regimeSubject: await taxRegimeSubject(transaction, revision.rule),
+    categoryName: TAX_CATEGORIES.find((category) => category.code === revision.rule.category)?.name,
     name: await readText(transaction, revision.nameTextId),
     description: await readText(transaction, revision.descriptionTextId),
     document: await readText(transaction, revision.documentTextId),

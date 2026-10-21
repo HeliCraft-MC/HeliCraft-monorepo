@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminCentralBanksRouteImport } from './routes/admin.central-banks'
 import { Route as AdminChronicleRouteImport } from './routes/admin.chronicle'
+import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminInstitutionsRouteImport } from './routes/admin.institutions'
 import { Route as AdminMonetaryDirectivesRouteImport } from './routes/admin.monetary-directives'
 import { Route as AdminPagesRouteImport } from './routes/admin.pages'
@@ -30,12 +31,17 @@ import { Route as AdminTaxOfficesRouteImport } from './routes/admin.tax-offices'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppSharesRouteImport } from './routes/app.shares'
 import { Route as AppVotingsRouteImport } from './routes/app.votings'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as ChronicleIndexRouteImport } from './routes/chronicle.index'
 import { Route as ChronicleSlugRouteImport } from './routes/chronicle.$slug'
+import { Route as CompaniesIndexRouteImport } from './routes/companies.index'
+import { Route as CompaniesIdRouteImport } from './routes/companies.$id'
 import { Route as CurrenciesIndexRouteImport } from './routes/currencies.index'
 import { Route as CurrenciesCodeRouteImport } from './routes/currencies.$code'
+import { Route as ExchangeIndexRouteImport } from './routes/exchange.index'
+import { Route as ExchangeIdRouteImport } from './routes/exchange.$id'
 import { Route as GalleryIndexRouteImport } from './routes/gallery.index'
 import { Route as GalleryIdRouteImport } from './routes/gallery.$id'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
@@ -56,16 +62,24 @@ import { Route as AdminStatesIndexRouteImport } from './routes/admin.states.inde
 import { Route as AdminStatesStateIdRouteImport } from './routes/admin.states.$stateId'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
+import { Route as AppCompaniesIndexRouteImport } from './routes/app.companies.index'
+import { Route as AppCompaniesIdRouteImport } from './routes/app.companies.$id'
+import { Route as AppCompanyDecisionsIdRouteImport } from './routes/app.company-decisions.$id'
+import { Route as AppExchangeIndexRouteImport } from './routes/app.exchange.index'
+import { Route as AppExchangeIdRouteImport } from './routes/app.exchange.$id'
 import { Route as AppGalleryNewRouteImport } from './routes/app.gallery.new'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsSecurityRouteImport } from './routes/app.settings.security'
 import { Route as AppSettingsSkinRouteImport } from './routes/app.settings.skin'
+import { Route as AppShareOperationsIdRouteImport } from './routes/app.share-operations.$id'
 import { Route as AppStatesStateIdRouteImport } from './routes/app.states.$stateId'
 import { Route as AppStatesNewRouteImport } from './routes/app.states.new'
 import { Route as AppVotingsVotingIdRouteImport } from './routes/app.votings_.$votingId'
 import { Route as StatesSlugConstitutionRouteImport } from './routes/states.$slug_.constitution'
 import { Route as StatesSlugTaxationRouteImport } from './routes/states.$slug_.taxation'
+import { Route as AppCompaniesApplicationsIdRouteImport } from './routes/app.companies.applications.$id'
+import { Route as AppCompaniesDraftsDraftIdRouteImport } from './routes/app.companies.drafts.$draftId'
 import { Route as AppStatesDraftsDraftIdRouteImport } from './routes/app.states.drafts.$draftId'
 import { Route as AppStatesStateIdProposalsRouteImport } from './routes/app.states_.$stateId.proposals'
 import { Route as AppStatesStateIdManageRouteImport } from './routes/app_.states.$stateId.manage'
@@ -135,6 +149,11 @@ const AdminChronicleRoute = AdminChronicleRouteImport.update({
   path: '/chronicle',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInstitutionsRoute = AdminInstitutionsRouteImport.update({
   id: '/institutions',
   path: '/institutions',
@@ -175,6 +194,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSharesRoute = AppSharesRouteImport.update({
+  id: '/shares',
+  path: '/shares',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppVotingsRoute = AppVotingsRouteImport.update({
   id: '/votings',
   path: '/votings',
@@ -195,6 +219,16 @@ const ChronicleSlugRoute = ChronicleSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ChronicleRoute,
 } as any)
+const CompaniesIndexRoute = CompaniesIndexRouteImport.update({
+  id: '/companies/',
+  path: '/companies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompaniesIdRoute = CompaniesIdRouteImport.update({
+  id: '/companies/$id',
+  path: '/companies/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CurrenciesIndexRoute = CurrenciesIndexRouteImport.update({
   id: '/currencies/',
   path: '/currencies/',
@@ -203,6 +237,16 @@ const CurrenciesIndexRoute = CurrenciesIndexRouteImport.update({
 const CurrenciesCodeRoute = CurrenciesCodeRouteImport.update({
   id: '/currencies/$code',
   path: '/currencies/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExchangeIndexRoute = ExchangeIndexRouteImport.update({
+  id: '/exchange/',
+  path: '/exchange/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExchangeIdRoute = ExchangeIdRouteImport.update({
+  id: '/exchange/$id',
+  path: '/exchange/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GalleryIndexRoute = GalleryIndexRouteImport.update({
@@ -305,6 +349,31 @@ const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
   path: '/$userId',
   getParentRoute: () => AdminUsersRoute,
 } as any)
+const AppCompaniesIndexRoute = AppCompaniesIndexRouteImport.update({
+  id: '/companies/',
+  path: '/companies/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCompaniesIdRoute = AppCompaniesIdRouteImport.update({
+  id: '/companies/$id',
+  path: '/companies/$id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCompanyDecisionsIdRoute = AppCompanyDecisionsIdRouteImport.update({
+  id: '/company-decisions/$id',
+  path: '/company-decisions/$id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExchangeIndexRoute = AppExchangeIndexRouteImport.update({
+  id: '/exchange/',
+  path: '/exchange/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExchangeIdRoute = AppExchangeIdRouteImport.update({
+  id: '/exchange/$id',
+  path: '/exchange/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGalleryNewRoute = AppGalleryNewRouteImport.update({
   id: '/gallery/new',
   path: '/gallery/new',
@@ -328,6 +397,11 @@ const AppSettingsSecurityRoute = AppSettingsSecurityRouteImport.update({
 const AppSettingsSkinRoute = AppSettingsSkinRouteImport.update({
   id: '/settings/skin',
   path: '/settings/skin',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShareOperationsIdRoute = AppShareOperationsIdRouteImport.update({
+  id: '/share-operations/$id',
+  path: '/share-operations/$id',
   getParentRoute: () => AppRoute,
 } as any)
 const AppStatesStateIdRoute = AppStatesStateIdRouteImport.update({
@@ -355,6 +429,18 @@ const StatesSlugTaxationRoute = StatesSlugTaxationRouteImport.update({
   path: '/states/$slug/taxation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppCompaniesApplicationsIdRoute =
+  AppCompaniesApplicationsIdRouteImport.update({
+    id: '/companies/applications/$id',
+    path: '/companies/applications/$id',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppCompaniesDraftsDraftIdRoute =
+  AppCompaniesDraftsDraftIdRouteImport.update({
+    id: '/companies/drafts/$draftId',
+    path: '/companies/drafts/$draftId',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppStatesDraftsDraftIdRoute = AppStatesDraftsDraftIdRouteImport.update({
   id: '/states/drafts/$draftId',
   path: '/states/drafts/$draftId',
@@ -385,6 +471,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/central-banks': typeof AdminCentralBanksRoute
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/companies': typeof AdminCompaniesRoute
   '/admin/institutions': typeof AdminInstitutionsRoute
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/pages': typeof AdminPagesRouteWithChildren
@@ -392,10 +479,13 @@ export interface FileRoutesByFullPath {
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/companies/$id': typeof CompaniesIdRoute
   '/currencies/$code': typeof CurrenciesCodeRoute
+  '/exchange/$id': typeof ExchangeIdRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/players/$playerId': typeof PlayersPlayerIdRoute
@@ -406,7 +496,9 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
+  '/companies/': typeof CompaniesIndexRoute
   '/currencies/': typeof CurrenciesIndexRoute
+  '/exchange/': typeof ExchangeIndexRoute
   '/gallery/': typeof GalleryIndexRoute
   '/states/': typeof StatesIndexRoute
   '/treaties/': typeof TreatiesIndexRoute
@@ -416,10 +508,14 @@ export interface FileRoutesByFullPath {
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/companies/$id': typeof AppCompaniesIdRoute
+  '/app/company-decisions/$id': typeof AppCompanyDecisionsIdRoute
+  '/app/exchange/$id': typeof AppExchangeIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/app/share-operations/$id': typeof AppShareOperationsIdRoute
   '/app/states/$stateId': typeof AppStatesStateIdRoute
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings/$votingId': typeof AppVotingsVotingIdRoute
@@ -429,7 +525,11 @@ export interface FileRoutesByFullPath {
   '/admin/pages/': typeof AdminPagesIndexRoute
   '/admin/states/': typeof AdminStatesIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/app/companies/': typeof AppCompaniesIndexRoute
+  '/app/exchange/': typeof AppExchangeIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/companies/applications/$id': typeof AppCompaniesApplicationsIdRoute
+  '/app/companies/drafts/$draftId': typeof AppCompaniesDraftsDraftIdRoute
   '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
   '/app/states/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
   '/app/states/$stateId/manage': typeof AppStatesStateIdManageRoute
@@ -443,15 +543,19 @@ export interface FileRoutesByTo {
   '/world': typeof WorldRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/central-banks': typeof AdminCentralBanksRoute
+  '/admin/companies': typeof AdminCompaniesRoute
   '/admin/institutions': typeof AdminInstitutionsRoute
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/companies/$id': typeof CompaniesIdRoute
   '/currencies/$code': typeof CurrenciesCodeRoute
+  '/exchange/$id': typeof ExchangeIdRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/players/$playerId': typeof PlayersPlayerIdRoute
@@ -462,7 +566,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/chronicle': typeof ChronicleIndexRoute
+  '/companies': typeof CompaniesIndexRoute
   '/currencies': typeof CurrenciesIndexRoute
+  '/exchange': typeof ExchangeIndexRoute
   '/gallery': typeof GalleryIndexRoute
   '/states': typeof StatesIndexRoute
   '/treaties': typeof TreatiesIndexRoute
@@ -472,10 +578,14 @@ export interface FileRoutesByTo {
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/companies/$id': typeof AppCompaniesIdRoute
+  '/app/company-decisions/$id': typeof AppCompanyDecisionsIdRoute
+  '/app/exchange/$id': typeof AppExchangeIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/app/share-operations/$id': typeof AppShareOperationsIdRoute
   '/app/states/$stateId': typeof AppStatesStateIdRoute
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings/$votingId': typeof AppVotingsVotingIdRoute
@@ -485,7 +595,11 @@ export interface FileRoutesByTo {
   '/admin/pages': typeof AdminPagesIndexRoute
   '/admin/states': typeof AdminStatesIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/app/companies': typeof AppCompaniesIndexRoute
+  '/app/exchange': typeof AppExchangeIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/app/companies/applications/$id': typeof AppCompaniesApplicationsIdRoute
+  '/app/companies/drafts/$draftId': typeof AppCompaniesDraftsDraftIdRoute
   '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
   '/app/states/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
   '/app/states/$stateId/manage': typeof AppStatesStateIdManageRoute
@@ -504,6 +618,7 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/central-banks': typeof AdminCentralBanksRoute
   '/admin/chronicle': typeof AdminChronicleRouteWithChildren
+  '/admin/companies': typeof AdminCompaniesRoute
   '/admin/institutions': typeof AdminInstitutionsRoute
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/pages': typeof AdminPagesRouteWithChildren
@@ -511,10 +626,13 @@ export interface FileRoutesById {
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/chronicle/$slug': typeof ChronicleSlugRoute
+  '/companies/$id': typeof CompaniesIdRoute
   '/currencies/$code': typeof CurrenciesCodeRoute
+  '/exchange/$id': typeof ExchangeIdRoute
   '/gallery/$id': typeof GalleryIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/players/$playerId': typeof PlayersPlayerIdRoute
@@ -525,7 +643,9 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/chronicle/': typeof ChronicleIndexRoute
+  '/companies/': typeof CompaniesIndexRoute
   '/currencies/': typeof CurrenciesIndexRoute
+  '/exchange/': typeof ExchangeIndexRoute
   '/gallery/': typeof GalleryIndexRoute
   '/states/': typeof StatesIndexRoute
   '/treaties/': typeof TreatiesIndexRoute
@@ -535,10 +655,14 @@ export interface FileRoutesById {
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/app/companies/$id': typeof AppCompaniesIdRoute
+  '/app/company-decisions/$id': typeof AppCompanyDecisionsIdRoute
+  '/app/exchange/$id': typeof AppExchangeIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
+  '/app/share-operations/$id': typeof AppShareOperationsIdRoute
   '/app/states/$stateId': typeof AppStatesStateIdRoute
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings_/$votingId': typeof AppVotingsVotingIdRoute
@@ -548,7 +672,11 @@ export interface FileRoutesById {
   '/admin/pages/': typeof AdminPagesIndexRoute
   '/admin/states/': typeof AdminStatesIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/app/companies/': typeof AppCompaniesIndexRoute
+  '/app/exchange/': typeof AppExchangeIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/companies/applications/$id': typeof AppCompaniesApplicationsIdRoute
+  '/app/companies/drafts/$draftId': typeof AppCompaniesDraftsDraftIdRoute
   '/app/states/drafts/$draftId': typeof AppStatesDraftsDraftIdRoute
   '/app/states_/$stateId/proposals': typeof AppStatesStateIdProposalsRoute
   '/app_/states/$stateId/manage': typeof AppStatesStateIdManageRoute
@@ -568,6 +696,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/central-banks'
     | '/admin/chronicle'
+    | '/admin/companies'
     | '/admin/institutions'
     | '/admin/monetary-directives'
     | '/admin/pages'
@@ -575,10 +704,13 @@ export interface FileRouteTypes {
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
+    | '/app/shares'
     | '/app/votings'
     | '/app/wallet'
     | '/chronicle/$slug'
+    | '/companies/$id'
     | '/currencies/$code'
+    | '/exchange/$id'
     | '/gallery/$id'
     | '/pages/$slug'
     | '/players/$playerId'
@@ -589,7 +721,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/chronicle/'
+    | '/companies/'
     | '/currencies/'
+    | '/exchange/'
     | '/gallery/'
     | '/states/'
     | '/treaties/'
@@ -599,10 +733,14 @@ export interface FileRouteTypes {
     | '/admin/pages/new'
     | '/admin/states/$stateId'
     | '/admin/users/$userId'
+    | '/app/companies/$id'
+    | '/app/company-decisions/$id'
+    | '/app/exchange/$id'
     | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
+    | '/app/share-operations/$id'
     | '/app/states/$stateId'
     | '/app/states/new'
     | '/app/votings/$votingId'
@@ -612,7 +750,11 @@ export interface FileRouteTypes {
     | '/admin/pages/'
     | '/admin/states/'
     | '/admin/users/'
+    | '/app/companies/'
+    | '/app/exchange/'
     | '/app/settings/'
+    | '/app/companies/applications/$id'
+    | '/app/companies/drafts/$draftId'
     | '/app/states/drafts/$draftId'
     | '/app/states/$stateId/proposals'
     | '/app/states/$stateId/manage'
@@ -626,15 +768,19 @@ export interface FileRouteTypes {
     | '/world'
     | '/admin/audit'
     | '/admin/central-banks'
+    | '/admin/companies'
     | '/admin/institutions'
     | '/admin/monetary-directives'
     | '/admin/settings'
     | '/admin/tax-offices'
     | '/admin/votings'
+    | '/app/shares'
     | '/app/votings'
     | '/app/wallet'
     | '/chronicle/$slug'
+    | '/companies/$id'
     | '/currencies/$code'
+    | '/exchange/$id'
     | '/gallery/$id'
     | '/pages/$slug'
     | '/players/$playerId'
@@ -645,7 +791,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/chronicle'
+    | '/companies'
     | '/currencies'
+    | '/exchange'
     | '/gallery'
     | '/states'
     | '/treaties'
@@ -655,10 +803,14 @@ export interface FileRouteTypes {
     | '/admin/pages/new'
     | '/admin/states/$stateId'
     | '/admin/users/$userId'
+    | '/app/companies/$id'
+    | '/app/company-decisions/$id'
+    | '/app/exchange/$id'
     | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
+    | '/app/share-operations/$id'
     | '/app/states/$stateId'
     | '/app/states/new'
     | '/app/votings/$votingId'
@@ -668,7 +820,11 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/states'
     | '/admin/users'
+    | '/app/companies'
+    | '/app/exchange'
     | '/app/settings'
+    | '/app/companies/applications/$id'
+    | '/app/companies/drafts/$draftId'
     | '/app/states/drafts/$draftId'
     | '/app/states/$stateId/proposals'
     | '/app/states/$stateId/manage'
@@ -686,6 +842,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/central-banks'
     | '/admin/chronicle'
+    | '/admin/companies'
     | '/admin/institutions'
     | '/admin/monetary-directives'
     | '/admin/pages'
@@ -693,10 +850,13 @@ export interface FileRouteTypes {
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
+    | '/app/shares'
     | '/app/votings'
     | '/app/wallet'
     | '/chronicle/$slug'
+    | '/companies/$id'
     | '/currencies/$code'
+    | '/exchange/$id'
     | '/gallery/$id'
     | '/pages/$slug'
     | '/players/$playerId'
@@ -707,7 +867,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/chronicle/'
+    | '/companies/'
     | '/currencies/'
+    | '/exchange/'
     | '/gallery/'
     | '/states/'
     | '/treaties/'
@@ -717,10 +879,14 @@ export interface FileRouteTypes {
     | '/admin/pages/new'
     | '/admin/states/$stateId'
     | '/admin/users/$userId'
+    | '/app/companies/$id'
+    | '/app/company-decisions/$id'
+    | '/app/exchange/$id'
     | '/app/gallery/new'
     | '/app/settings/profile'
     | '/app/settings/security'
     | '/app/settings/skin'
+    | '/app/share-operations/$id'
     | '/app/states/$stateId'
     | '/app/states/new'
     | '/app/votings_/$votingId'
@@ -730,7 +896,11 @@ export interface FileRouteTypes {
     | '/admin/pages/'
     | '/admin/states/'
     | '/admin/users/'
+    | '/app/companies/'
+    | '/app/exchange/'
     | '/app/settings/'
+    | '/app/companies/applications/$id'
+    | '/app/companies/drafts/$draftId'
     | '/app/states/drafts/$draftId'
     | '/app/states_/$stateId/proposals'
     | '/app_/states/$stateId/manage'
@@ -746,7 +916,9 @@ export interface RootRouteChildren {
   RulesRoute: typeof RulesRoute
   StartRoute: typeof StartRoute
   WorldRoute: typeof WorldRoute
+  CompaniesIdRoute: typeof CompaniesIdRoute
   CurrenciesCodeRoute: typeof CurrenciesCodeRoute
+  ExchangeIdRoute: typeof ExchangeIdRoute
   GalleryIdRoute: typeof GalleryIdRoute
   PagesSlugRoute: typeof PagesSlugRoute
   PlayersPlayerIdRoute: typeof PlayersPlayerIdRoute
@@ -754,7 +926,9 @@ export interface RootRouteChildren {
   StatesNewRoute: typeof StatesNewRoute
   TaxLawsIdRoute: typeof TaxLawsIdRoute
   TreatiesIdRoute: typeof TreatiesIdRoute
+  CompaniesIndexRoute: typeof CompaniesIndexRoute
   CurrenciesIndexRoute: typeof CurrenciesIndexRoute
+  ExchangeIndexRoute: typeof ExchangeIndexRoute
   GalleryIndexRoute: typeof GalleryIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
   TreatiesIndexRoute: typeof TreatiesIndexRoute
@@ -856,6 +1030,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChronicleRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/companies': {
+      id: '/admin/companies'
+      path: '/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof AdminCompaniesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/institutions': {
       id: '/admin/institutions'
       path: '/institutions'
@@ -912,6 +1093,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/shares': {
+      id: '/app/shares'
+      path: '/shares'
+      fullPath: '/app/shares'
+      preLoaderRoute: typeof AppSharesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/votings': {
       id: '/app/votings'
       path: '/votings'
@@ -940,6 +1128,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChronicleSlugRouteImport
       parentRoute: typeof ChronicleRoute
     }
+    '/companies/': {
+      id: '/companies/'
+      path: '/companies'
+      fullPath: '/companies/'
+      preLoaderRoute: typeof CompaniesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companies/$id': {
+      id: '/companies/$id'
+      path: '/companies/$id'
+      fullPath: '/companies/$id'
+      preLoaderRoute: typeof CompaniesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/currencies/': {
       id: '/currencies/'
       path: '/currencies'
@@ -952,6 +1154,20 @@ declare module '@tanstack/react-router' {
       path: '/currencies/$code'
       fullPath: '/currencies/$code'
       preLoaderRoute: typeof CurrenciesCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exchange/': {
+      id: '/exchange/'
+      path: '/exchange'
+      fullPath: '/exchange/'
+      preLoaderRoute: typeof ExchangeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exchange/$id': {
+      id: '/exchange/$id'
+      path: '/exchange/$id'
+      fullPath: '/exchange/$id'
+      preLoaderRoute: typeof ExchangeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gallery/': {
@@ -1094,6 +1310,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersUserIdRouteImport
       parentRoute: typeof AdminUsersRoute
     }
+    '/app/companies/': {
+      id: '/app/companies/'
+      path: '/companies'
+      fullPath: '/app/companies/'
+      preLoaderRoute: typeof AppCompaniesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/companies/$id': {
+      id: '/app/companies/$id'
+      path: '/companies/$id'
+      fullPath: '/app/companies/$id'
+      preLoaderRoute: typeof AppCompaniesIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/company-decisions/$id': {
+      id: '/app/company-decisions/$id'
+      path: '/company-decisions/$id'
+      fullPath: '/app/company-decisions/$id'
+      preLoaderRoute: typeof AppCompanyDecisionsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/exchange/': {
+      id: '/app/exchange/'
+      path: '/exchange'
+      fullPath: '/app/exchange/'
+      preLoaderRoute: typeof AppExchangeIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/exchange/$id': {
+      id: '/app/exchange/$id'
+      path: '/exchange/$id'
+      fullPath: '/app/exchange/$id'
+      preLoaderRoute: typeof AppExchangeIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/gallery/new': {
       id: '/app/gallery/new'
       path: '/gallery/new'
@@ -1127,6 +1378,13 @@ declare module '@tanstack/react-router' {
       path: '/settings/skin'
       fullPath: '/app/settings/skin'
       preLoaderRoute: typeof AppSettingsSkinRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/share-operations/$id': {
+      id: '/app/share-operations/$id'
+      path: '/share-operations/$id'
+      fullPath: '/app/share-operations/$id'
+      preLoaderRoute: typeof AppShareOperationsIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/states/$stateId': {
@@ -1163,6 +1421,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/states/$slug/taxation'
       preLoaderRoute: typeof StatesSlugTaxationRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/companies/applications/$id': {
+      id: '/app/companies/applications/$id'
+      path: '/companies/applications/$id'
+      fullPath: '/app/companies/applications/$id'
+      preLoaderRoute: typeof AppCompaniesApplicationsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/companies/drafts/$draftId': {
+      id: '/app/companies/drafts/$draftId'
+      path: '/companies/drafts/$draftId'
+      fullPath: '/app/companies/drafts/$draftId'
+      preLoaderRoute: typeof AppCompaniesDraftsDraftIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/states/drafts/$draftId': {
       id: '/app/states/drafts/$draftId'
@@ -1238,6 +1510,7 @@ interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminCentralBanksRoute: typeof AdminCentralBanksRoute
   AdminChronicleRoute: typeof AdminChronicleRouteWithChildren
+  AdminCompaniesRoute: typeof AdminCompaniesRoute
   AdminInstitutionsRoute: typeof AdminInstitutionsRoute
   AdminMonetaryDirectivesRoute: typeof AdminMonetaryDirectivesRoute
   AdminPagesRoute: typeof AdminPagesRouteWithChildren
@@ -1254,6 +1527,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminCentralBanksRoute: AdminCentralBanksRoute,
   AdminChronicleRoute: AdminChronicleRouteWithChildren,
+  AdminCompaniesRoute: AdminCompaniesRoute,
   AdminInstitutionsRoute: AdminInstitutionsRoute,
   AdminMonetaryDirectivesRoute: AdminMonetaryDirectivesRoute,
   AdminPagesRoute: AdminPagesRouteWithChildren,
@@ -1269,33 +1543,51 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
+  AppSharesRoute: typeof AppSharesRoute
   AppVotingsRoute: typeof AppVotingsRoute
   AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppCompaniesIdRoute: typeof AppCompaniesIdRoute
+  AppCompanyDecisionsIdRoute: typeof AppCompanyDecisionsIdRoute
+  AppExchangeIdRoute: typeof AppExchangeIdRoute
   AppGalleryNewRoute: typeof AppGalleryNewRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
   AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
   AppSettingsSkinRoute: typeof AppSettingsSkinRoute
+  AppShareOperationsIdRoute: typeof AppShareOperationsIdRoute
   AppStatesStateIdRoute: typeof AppStatesStateIdRoute
   AppStatesNewRoute: typeof AppStatesNewRoute
   AppVotingsVotingIdRoute: typeof AppVotingsVotingIdRoute
+  AppCompaniesIndexRoute: typeof AppCompaniesIndexRoute
+  AppExchangeIndexRoute: typeof AppExchangeIndexRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+  AppCompaniesApplicationsIdRoute: typeof AppCompaniesApplicationsIdRoute
+  AppCompaniesDraftsDraftIdRoute: typeof AppCompaniesDraftsDraftIdRoute
   AppStatesDraftsDraftIdRoute: typeof AppStatesDraftsDraftIdRoute
   AppStatesStateIdProposalsRoute: typeof AppStatesStateIdProposalsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppSharesRoute: AppSharesRoute,
   AppVotingsRoute: AppVotingsRoute,
   AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,
+  AppCompaniesIdRoute: AppCompaniesIdRoute,
+  AppCompanyDecisionsIdRoute: AppCompanyDecisionsIdRoute,
+  AppExchangeIdRoute: AppExchangeIdRoute,
   AppGalleryNewRoute: AppGalleryNewRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
   AppSettingsSecurityRoute: AppSettingsSecurityRoute,
   AppSettingsSkinRoute: AppSettingsSkinRoute,
+  AppShareOperationsIdRoute: AppShareOperationsIdRoute,
   AppStatesStateIdRoute: AppStatesStateIdRoute,
   AppStatesNewRoute: AppStatesNewRoute,
   AppVotingsVotingIdRoute: AppVotingsVotingIdRoute,
+  AppCompaniesIndexRoute: AppCompaniesIndexRoute,
+  AppExchangeIndexRoute: AppExchangeIndexRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
+  AppCompaniesApplicationsIdRoute: AppCompaniesApplicationsIdRoute,
+  AppCompaniesDraftsDraftIdRoute: AppCompaniesDraftsDraftIdRoute,
   AppStatesDraftsDraftIdRoute: AppStatesDraftsDraftIdRoute,
   AppStatesStateIdProposalsRoute: AppStatesStateIdProposalsRoute,
 }
@@ -1326,7 +1618,9 @@ const rootRouteChildren: RootRouteChildren = {
   RulesRoute: RulesRoute,
   StartRoute: StartRoute,
   WorldRoute: WorldRoute,
+  CompaniesIdRoute: CompaniesIdRoute,
   CurrenciesCodeRoute: CurrenciesCodeRoute,
+  ExchangeIdRoute: ExchangeIdRoute,
   GalleryIdRoute: GalleryIdRoute,
   PagesSlugRoute: PagesSlugRoute,
   PlayersPlayerIdRoute: PlayersPlayerIdRoute,
@@ -1334,7 +1628,9 @@ const rootRouteChildren: RootRouteChildren = {
   StatesNewRoute: StatesNewRoute,
   TaxLawsIdRoute: TaxLawsIdRoute,
   TreatiesIdRoute: TreatiesIdRoute,
+  CompaniesIndexRoute: CompaniesIndexRoute,
   CurrenciesIndexRoute: CurrenciesIndexRoute,
+  ExchangeIndexRoute: ExchangeIndexRoute,
   GalleryIndexRoute: GalleryIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
   TreatiesIndexRoute: TreatiesIndexRoute,

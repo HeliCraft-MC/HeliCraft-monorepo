@@ -2,16 +2,42 @@
 import { PolicySchema } from '../states/contracts';
 import { z } from '@hono/zod-openapi';
 import { LocalizedInputSchema, resolveText } from '../localized-content/contracts';
+import { MinorSchema } from '../monetary/amount-contracts';
 
-const TaxEventSchema = z.enum(['PLAYER_TRANSFER']).openapi('TaxableEventType');
-const JurisdictionSchema = z.enum(['CITIZENSHIP', 'TERRITORIAL']);
+const TaxEventSchema = z
+  .enum([
+    'PLAYER_TRANSFER',
+    'PLAYER_COMPANY_TRANSFER',
+    'COMPANY_PLAYER_TRANSFER',
+    'COMPANY_TRANSFER',
+  ])
+  .openapi('TaxableEventType');
+const JurisdictionSchema = z.enum([
+  'CITIZENSHIP',
+  'TERRITORIAL',
+  'COMPANY_REGISTRATION',
+  'BRANCH_REGISTRATION',
+]);
+const CompanyTaxRegimeSchema = z
+  .object({
+    companyId: z.uuid(),
+    branchId: z.uuid().nullable(),
+    mode: z.enum(['EXEMPT', 'REPLACE', 'ADDITIONAL']),
+    targetLawId: z.uuid().nullable(),
+  })
+  .strict()
+  .refine(
+    (regime) => (regime.mode === 'ADDITIONAL') === (regime.targetLawId === null),
+    'Replacement/exemption requires a target law; additional obligations have their own identity',
+  )
+  .openapi('CompanyTaxRegime');
 const TaxpayerSchema = z.enum(['SENDER', 'RECIPIENT']);
 const TaxBaseSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('FULL_AMOUNT') }).strict(),
   z
     .object({
       kind: z.literal('EXCESS'),
-      thresholdMinor: z.string().regex(/^(?:0|[1-9][0-9]{0,29})$/u),
+      thresholdMinor: MinorSchema,
     })
     .strict(),
 ]);
@@ -21,13 +47,20 @@ const TaxBeneficiarySchema = z
 const TaxRuleSchema = z
   .object({
     event: TaxEventSchema,
+    events: z
+      .array(TaxEventSchema)
+      .min(1)
+      .max(4)
+      .refine((events) => new Set(events).size === events.length, 'Duplicate event')
+      .optional(),
+    regime: CompanyTaxRegimeSchema.optional(),
     category: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/u),
     taxpayer: TaxpayerSchema,
     base: TaxBaseSchema.optional(),
     jurisdictions: z
       .array(JurisdictionSchema)
       .min(1)
-      .max(2)
+      .max(4)
       .refine((items) => new Set(items).size === items.length, 'Duplicate jurisdiction'),
     rateBps: z.number().int().min(0).max(10_000),
     recipient: z.enum(['STATE_TREASURY', 'CENTRAL_BANK']),
@@ -37,6 +70,14 @@ const TaxRuleSchema = z
       .refine((ids) => new Set(ids).size === ids.length, 'Duplicate currency'),
   })
   .strict()
+  .refine(
+    (rule) => rule.events === undefined || rule.events.includes(rule.event),
+    'The primary event must be included in the selected events',
+  )
+  .refine(
+    (rule) => rule.regime?.mode !== 'EXEMPT' || rule.rateBps === 0,
+    'An exemption requires an explicit zero rate',
+  )
   .openapi('TaxRule');
 const TaxIdentity = {
   name: LocalizedInputSchema.refine(
@@ -85,13 +126,35 @@ const TaxDirectiveSchemas = [
 ] as const;
 const TaxDirectiveSchema = z.discriminatedUnion('kind', TaxDirectiveSchemas);
 const TaxEvidenceSchema = z
-  .object({
-    stateId: z.uuid(),
-    basis: JurisdictionSchema,
-    source: z.enum(['CITIZENSHIP', 'CITIZENSHIP_PROXY']),
-    membershipJoinedAt: z.iso.datetime(),
-  })
-  .strict()
+  .discriminatedUnion('source', [
+    z
+      .object({
+        stateId: z.uuid(),
+        basis: z.enum(['CITIZENSHIP', 'TERRITORIAL']),
+        source: z.enum(['CITIZENSHIP', 'CITIZENSHIP_PROXY']),
+        membershipJoinedAt: z.iso.datetime(),
+      })
+      .strict(),
+    z
+      .object({
+        stateId: z.uuid(),
+        basis: z.literal('COMPANY_REGISTRATION'),
+        source: z.literal('COMPANY_REGISTRATION'),
+        companyId: z.uuid(),
+        registeredAt: z.iso.datetime(),
+      })
+      .strict(),
+    z
+      .object({
+        stateId: z.uuid(),
+        basis: z.literal('BRANCH_REGISTRATION'),
+        source: z.literal('APPROVED_CORPORATE_BRANCH_CONTEXT'),
+        companyId: z.uuid(),
+        branchId: z.uuid(),
+        applicationId: z.uuid(),
+      })
+      .strict(),
+  ])
   .openapi('TaxJurisdictionEvidence');
 const TaxClaimSchema = z
   .object({
@@ -109,6 +172,14 @@ const TaxClaimSchema = z
     rateBps: z.number().int(),
     evidence: z.array(TaxEvidenceSchema),
     nationalAmountMinor: z.string(),
+    regime: z
+      .object({
+        lawId: z.uuid(),
+        revisionId: z.uuid(),
+        mode: z.enum(['EXEMPT', 'REPLACE', 'ADDITIONAL']),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .openapi('TaxClaim');
@@ -116,6 +187,8 @@ const TaxChargeSchema = z
   .object({
     key: z.string(),
     taxpayer: TaxpayerSchema.optional(),
+    baseMinor: z.string().optional(),
+    exempt: z.boolean().optional(),
     claims: z.array(TaxClaimSchema),
     treatyId: z.uuid().nullable(),
     treatyRevisionId: z.uuid().nullable(),
@@ -129,6 +202,16 @@ const TaxChargeSchema = z
         shareBps: z.number().int(),
         amountMinor: z.string(),
         beneficiary: TaxBeneficiarySchema.optional(),
+        accrual: z
+          .object({
+            key: z.string(),
+            denominator: z.literal('100000000'),
+            exactNumerator: z.string(),
+            remainderBefore: z.string(),
+            remainderAfter: z.string(),
+          })
+          .strict()
+          .optional(),
       }),
     ),
   })
@@ -140,6 +223,9 @@ const TaxCalculationSchema = z
     currencyId: z.uuid(),
     senderId: z.uuid(),
     recipientId: z.uuid(),
+    senderKind: z.enum(['PLAYER', 'COMPANY']).optional(),
+    recipientKind: z.enum(['PLAYER', 'COMPANY']).optional(),
+    sourceBranchId: z.uuid().optional(),
     principalMinor: z.string(),
     totalTaxMinor: z.string(),
     totalDebitMinor: z.string(),
@@ -162,8 +248,10 @@ type TaxEvidence = z.infer<typeof TaxEvidenceSchema>;
 type TaxClaim = z.infer<typeof TaxClaimSchema>;
 type TaxCharge = z.infer<typeof TaxChargeSchema>;
 type TaxCalculation = z.infer<typeof TaxCalculationSchema>;
+type TaxEvent = z.infer<typeof TaxEventSchema>;
 export {
   TaxEventSchema,
+  CompanyTaxRegimeSchema,
   TaxRuleSchema,
   TaxLawContentSchema,
   TaxIdentity,
@@ -180,4 +268,5 @@ export {
   type TaxClaim,
   type TaxCharge,
   type TaxCalculation,
+  type TaxEvent,
 };

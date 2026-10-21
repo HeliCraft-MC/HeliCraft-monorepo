@@ -5,6 +5,7 @@ import { monetaryError } from '../monetary/domain';
 import type { DirectiveRecord } from '../monetary/store';
 import type { TaxDirective } from './contracts';
 import { taxBeneficiary } from './beneficiary';
+import { assertTaxRuleIdentity } from './regime-validation';
 
 async function latestLawRevision(
   transaction: Transaction,
@@ -17,6 +18,40 @@ async function latestLawRevision(
     .orderBy(desc(taxLawRevisions.number))
     .limit(1);
   return revision ?? null;
+}
+async function assertExistingLaw(
+  transaction: Transaction,
+  stateId: string,
+  payload: Extract<TaxDirective, { lawId: string }>,
+): Promise<void> {
+  const previous = await latestLawRevision(transaction, payload.lawId);
+  if ('rule' in payload) {
+    await taxBeneficiary(transaction, stateId, payload.rule);
+    await assertTaxRuleIdentity(transaction, {
+      stateId,
+      lawId: payload.lawId,
+      rule: payload.rule,
+      previous,
+    });
+  }
+  const [law] = await transaction.select().from(taxLaws).where(eq(taxLaws.id, payload.lawId));
+  if (payload.kind === 'ENACT_TAX_LAW') {
+    if (law) {
+      monetaryError('TAX_LAW_EXISTS', 'Закон с таким идентификатором уже существует');
+    }
+    return;
+  }
+  if (
+    law?.stateId !== stateId ||
+    !previous ||
+    previous.id !== payload.baseRevisionId ||
+    previous.status === 'REPEALED'
+  ) {
+    monetaryError('TAX_LAW_STALE', 'Закон изменился или отменён. Подготовьте новое решение');
+  }
+  if (new Date(payload.effectiveAt) < previous.effectiveAt) {
+    monetaryError('TAX_EFFECTIVE_DATE', 'Новая редакция не может предшествовать предыдущей');
+  }
 }
 async function assertTaxDirective(
   transaction: Transaction,
@@ -37,30 +72,8 @@ async function assertTaxDirective(
   if (office?.status !== 'ACTIVE') {
     monetaryError('TAX_OFFICE_INACTIVE', 'Требуется действующая налоговая служба');
   }
-  if (!('lawId' in payload)) {
-    return;
-  }
-  if ('rule' in payload) {
-    await taxBeneficiary(transaction, stateId, payload.rule);
-  }
-  const [law] = await transaction.select().from(taxLaws).where(eq(taxLaws.id, payload.lawId));
-  if (payload.kind === 'ENACT_TAX_LAW') {
-    if (law) {
-      monetaryError('TAX_LAW_EXISTS', 'Закон с таким идентификатором уже существует');
-    }
-    return;
-  }
-  const previous = await latestLawRevision(transaction, payload.lawId);
-  if (
-    law?.stateId !== stateId ||
-    !previous ||
-    previous.id !== payload.baseRevisionId ||
-    previous.status === 'REPEALED'
-  ) {
-    monetaryError('TAX_LAW_STALE', 'Закон изменился или отменён. Подготовьте новое решение');
-  }
-  if (new Date(payload.effectiveAt) < previous.effectiveAt) {
-    monetaryError('TAX_EFFECTIVE_DATE', 'Новая редакция не может предшествовать предыдущей');
+  if ('lawId' in payload) {
+    await assertExistingLaw(transaction, stateId, payload);
   }
 }
 async function updateTaxOffice(

@@ -4,6 +4,8 @@ import { MoneyAmount, Alert } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import styles from '../monetary/monetary.module.scss';
+import { TaxClaimEvidence } from './claim-evidence';
+import { taxEventLabel } from './event-labels';
 
 const PERCENT_BPS = 100;
 
@@ -17,9 +19,14 @@ function TaxBreakdown({
       className={styles.panel}
       aria-label={uiText(locale, 'Расчёт налогов', 'Tax calculation')}
     >
+      <p>{taxEventLabel(calculation.event, locale)}</p>
       <p>
-        {uiText(locale, 'Получатель получит полностью', 'Recipient receives in full')}:{' '}
-        <MoneyAmount minor={calculation.principalMinor} code={code} locale={locale} />
+        {uiText(locale, 'Получатель получит', 'Recipient receives')}:{' '}
+        <MoneyAmount
+          minor={calculation.recipientCreditMinor ?? calculation.principalMinor}
+          code={code}
+          locale={locale}
+        />
       </p>
       <p>
         {uiText(locale, 'Всего налогов', 'Total tax')}:{' '}
@@ -40,7 +47,10 @@ function TaxBreakdown({
               : displayText(charge.claims[0]?.name ?? {}, locale)}
           </strong>
           <p>
-            {uiText(locale, 'Налог', 'Tax')}:{' '}
+            {charge.taxpayer === 'RECIPIENT'
+              ? uiText(locale, 'Удержание из перевода', 'Withheld from transfer')
+              : uiText(locale, 'Дополнительно с отправителя', 'Charged to sender')}{' '}
+            · {uiText(locale, 'Налог', 'Tax')}:{' '}
             <MoneyAmount minor={charge.amountMinor} code={code} locale={locale} /> ·{' '}
             {charge.rateBps / PERCENT_BPS}%
           </p>
@@ -54,36 +64,35 @@ function TaxBreakdown({
             const claim = charge.claims.find((item) => item.stateId === allocation.stateId);
             return (
               <p key={allocation.stateId}>
+                {allocation.beneficiary?.kind === 'CENTRAL_BANK'
+                  ? uiText(locale, 'Центральный банк', 'Central bank')
+                  : uiText(locale, 'Казна', 'Treasury')}{' '}
+                ·{' '}
                 <a href={`/states/${claim?.stateSlug ?? ''}`}>
                   {displayText(claim?.stateName ?? {}, locale)}
                 </a>
                 : <MoneyAmount minor={allocation.amountMinor} code={code} locale={locale} /> ·{' '}
                 {allocation.shareBps / PERCENT_BPS}%
+                {allocation.accrual !== undefined && (
+                  <small>
+                    {' '}
+                    ·{' '}
+                    {uiText(
+                      locale,
+                      'Точный остаток минимальной единицы',
+                      'Exact remainder of a minor unit',
+                    )}
+                    : {allocation.accrual.remainderBefore}/{allocation.accrual.denominator} →{' '}
+                    {allocation.accrual.remainderAfter}/{allocation.accrual.denominator}
+                  </small>
+                )}
               </p>
             );
           })}
           <details>
             <summary>{uiText(locale, 'Правовые основания', 'Legal basis')}</summary>
             {charge.claims.map((claim) => (
-              <div key={claim.lawId}>
-                <a href={`/tax-laws/${claim.lawId}`}>{displayText(claim.name, locale)}</a> · №{' '}
-                {claim.revision} · {claim.rateBps / PERCENT_BPS}%
-                <p>
-                  {uiText(locale, 'Первоначальный налог', 'Original national tax')}:{' '}
-                  <MoneyAmount minor={claim.nationalAmountMinor} code={code} locale={locale} />
-                </p>
-                {claim.evidence.map((evidence) => (
-                  <p key={evidence.basis}>
-                    {evidence.source === 'CITIZENSHIP'
-                      ? uiText(locale, 'Гражданство', 'Citizenship')
-                      : uiText(
-                          locale,
-                          'Территориальное основание: временно по гражданству',
-                          'Territorial basis: temporary citizenship proxy',
-                        )}
-                  </p>
-                ))}
-              </div>
+              <TaxClaimEvidence key={claim.lawId} claim={claim} code={code} />
             ))}
           </details>
           {charge.mode === 'SHARED' && (

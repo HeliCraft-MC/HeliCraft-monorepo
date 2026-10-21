@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import type { StateMonetary } from '@helicraft/alhena';
 import { FieldHelp, MoneyAmount } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
-import { displayText } from '../states/text';
+import { displayText, uiText } from '../states/text';
 import { IssuanceStatus } from './issuance-status';
 import { MonetaryPolicyHistory } from './policy-history';
 import type { MonetarySection } from './model';
@@ -110,10 +110,39 @@ function MonetaryOverview({
                   <div className={styles.amount}>
                     <MoneyAmount
                       minor={account.balanceMinor}
-                      code={data.currency?.code ?? ''}
+                      code={
+                        data.currencies.find((currency) => currency.id === account.currencyId)
+                          ?.code ?? ''
+                      }
                       locale={locale}
                     />
                   </div>
+                  {account.reservedMinor !== undefined && (
+                    <p>
+                      {uiText(locale, 'В резерве', 'Reserved')}:{' '}
+                      <MoneyAmount
+                        minor={account.reservedMinor}
+                        code={
+                          data.currencies.find((currency) => currency.id === account.currencyId)
+                            ?.code ?? ''
+                        }
+                        locale={locale}
+                      />
+                    </p>
+                  )}
+                  {account.availableMinor !== undefined && (
+                    <p>
+                      {uiText(locale, 'Доступно', 'Available')}:{' '}
+                      <MoneyAmount
+                        minor={account.availableMinor}
+                        code={
+                          data.currencies.find((currency) => currency.id === account.currencyId)
+                            ?.code ?? ''
+                        }
+                        locale={locale}
+                      />
+                    </p>
+                  )}
                 </article>
               ))}
           </div>

@@ -194,7 +194,11 @@ async function assertBankCurrency(
     return { bank, currency: null };
   }
   const currency = await currencyRecord(transaction, directiveCurrencyId(payload));
-  if (currency.stateId !== stateId || currency.bankId !== bank.id || currency.status !== 'ACTIVE') {
+  const transfer = payload.kind === 'BANK_TRANSFER' || payload.kind === 'TREASURY_TRANSFER';
+  if (
+    currency.status !== 'ACTIVE' ||
+    (!transfer && (currency.stateId !== stateId || currency.bankId !== bank.id))
+  ) {
     monetaryError('CURRENCY_UNAVAILABLE', 'Валюта не принадлежит этому банку или заблокирована');
   }
   return { bank, currency };

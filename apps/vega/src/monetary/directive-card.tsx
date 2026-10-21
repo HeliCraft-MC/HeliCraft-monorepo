@@ -1,6 +1,5 @@
 import { useStateRefresh } from '../states/use-state-refresh';
 // oxlint-disable import/max-dependencies -- Economic decision review composes immutable treaty terms alongside existing monetary evidence and actions.
-import { TreatyDecisionContent } from '../diplomacy/decision-content';
 import { useCallback, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -16,7 +15,7 @@ import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText } from '../states/text';
 import { DirectiveEvidence } from './directive-evidence';
-import { PayloadSummary } from './payload-summary';
+import { DirectiveContent } from './directive-content';
 import styles from './monetary.module.scss';
 
 function DirectiveCard({
@@ -81,10 +80,7 @@ function DirectiveCard({
   const status = statuses[directive.status];
   return (
     <article className={styles.card}>
-      <PayloadSummary configuration={state.configuration} payload={directive.payload} code={code} />
-      {directive.treatyContent !== null && (
-        <TreatyDecisionContent content={directive.treatyContent} />
-      )}
+      <DirectiveContent directive={directive} state={state} code={code} />
       <p>
         <strong>{status}</strong> ·{' '}
         <time dateTime={directive.createdAt}>

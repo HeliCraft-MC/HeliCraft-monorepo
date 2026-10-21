@@ -47,7 +47,14 @@ function managementSections(state: StateDetail, actorId: string): ManagementSect
     if (taxationKinds.some((kind) => economicAuthority(state, actorId, kind))) {
       sections.push('taxation');
     }
-    sections.push('diplomacy');
+    sections.push('diplomacy', 'companies');
+    if (
+      (['PUBLISH_FX_OFFER', 'CANCEL_FX_OFFER', 'APPROVE_INTERBANK_EXCHANGE'] as const).some(
+        (kind) => economicAuthority(state, actorId, kind),
+      )
+    ) {
+      sections.push('fx');
+    }
   }
   return [...sections, 'history', 'citizenship'];
 }

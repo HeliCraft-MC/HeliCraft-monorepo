@@ -31,6 +31,7 @@ import {
 import { TransferQuoteSchema, TaxRuleSchema } from './contracts';
 import { percentage } from './engine';
 import { taxBaseMinor } from './rule';
+import { TAX_CATEGORIES, TaxCategorySchema } from './category-registry';
 
 const MAX_HISTORY_PAGE = 1_000_000;
 const MAX_REASON_LENGTH = 2000;
@@ -89,6 +90,15 @@ function taxationRoutes(db: Database['db'] | undefined, secureCookies: boolean):
   }
   app.openapi(
     createRoute({
+      method: 'get',
+      path: '/public/tax-categories',
+      operationId: 'listTaxCategories',
+      responses: { 200: json(z.object({ items: z.array(TaxCategorySchema) })) },
+    }),
+    (context) => context.json({ items: [...TAX_CATEGORIES] }, HTTP.ok),
+  );
+  app.openapi(
+    createRoute({
       method: 'post',
       path: '/account/wallet/quotes',
       operationId: 'quoteWalletTransfer',
@@ -113,11 +123,17 @@ function taxationRoutes(db: Database['db'] | undefined, secureCookies: boolean):
       request: { params: Id },
       responses: { 200: json(EconomicOperationSchema), ...Errors },
     }),
-    async (context) =>
-      context.json(
-        await services().tax.operation(context.req.valid('param').id, await actorId(context)),
+    async (context) => {
+      const principal = await actor(context);
+      return context.json(
+        await services().tax.operation(
+          context.req.valid('param').id,
+          principal.id,
+          principal.admin,
+        ),
         HTTP.ok,
-      ),
+      );
+    },
   );
   app.openapi(
     createRoute({

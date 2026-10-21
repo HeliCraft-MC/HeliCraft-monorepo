@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "company_share_operation_identity" ON "company_share_operations" USING btree ("id","issuer_id");

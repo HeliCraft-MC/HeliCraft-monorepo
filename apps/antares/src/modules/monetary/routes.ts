@@ -2,6 +2,7 @@
 // oxlint-disable max-lines -- Cohesive monetary OpenAPI declarations expose typed operations; services own all accounting and authority.
 // oxlint-disable max-lines-per-function, max-statements -- Typed OpenAPI declarations delegate all lifecycle, accounting and authorization to services.
 import { TreatyContentSchema } from '../diplomacy/contracts';
+import { FxDecisionDisplaySchema } from '../fx/contracts';
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 import type { Database } from '../../db';
@@ -103,6 +104,7 @@ function monetaryRoutes(db: Database['db'] | undefined, secureCookies: boolean):
             payloadHash: z.string(),
             code: z.string(),
             treatyContent: TreatyContentSchema.nullable().openapi('OptionalTreatyContent'),
+            fxDisplay: FxDecisionDisplaySchema.optional(),
           }),
         ),
         ...Errors,

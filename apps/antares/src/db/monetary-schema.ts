@@ -176,7 +176,9 @@ const financialAccounts = pgTable(
     currencyId: uuid('currency_id')
       .notNull()
       .references(() => currencies.id),
-    kind: text('kind').$type<'PLAYER' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE'>().notNull(),
+    kind: text('kind')
+      .$type<'PLAYER' | 'COMPANY' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE'>()
+      .notNull(),
     ownerId: uuid('owner_id').notNull(),
     balanceMinor: numeric('balance_minor', { precision: 38, scale: 0 }).notNull().default('0'),
   },
@@ -185,7 +187,7 @@ const financialAccounts = pgTable(
     uniqueIndex('financial_account_currency').on(table.id, table.currencyId),
     check(
       'financial_account_kind',
-      sql`${table.kind} in ('PLAYER','CENTRAL_BANK','TREASURY','ISSUANCE')`,
+      sql`${table.kind} in ('PLAYER','COMPANY','CENTRAL_BANK','TREASURY','ISSUANCE')`,
     ),
     check('financial_nonnegative', sql`${table.kind} = 'ISSUANCE' or ${table.balanceMinor} >= 0`),
   ],
@@ -201,6 +203,7 @@ const ledgerTransactions = pgTable(
       .unique()
       .references(() => monetaryDirectives.id),
     policyRevisionId: uuid('policy_revision_id').references(() => monetaryPolicyRevisions.id),
+    companyDecisionId: uuid('company_decision_id').unique(),
     actorId: uuid('actor_id')
       .notNull()
       .references(() => users.id),

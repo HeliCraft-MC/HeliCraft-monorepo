@@ -18,7 +18,7 @@ async function assertLawHistory(
   const lawId = crypto.randomUUID();
   const rule: TaxRule = {
     event: 'PLAYER_TRANSFER',
-    category: 'HISTORY',
+    category: 'CONTRIBUTION',
     taxpayer: 'SENDER',
     jurisdictions: ['CITIZENSHIP'],
     recipient: 'STATE_TREASURY',

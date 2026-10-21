@@ -203,7 +203,7 @@ export type StateOffice = {
 };
 
 export type GovernancePolicy = {
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'DECLARE_WAR';
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'SET_COMPANY_REGISTRATION_POLICY' | 'REGISTER_COMPANY' | 'REGISTER_COMPANY_BRANCH' | 'PARTICIPATE_IN_COMPANY' | 'ACQUIRE_COMPANY_SHARES' | 'TRANSFER_COMPANY_SHARES' | 'MANAGE_FX_OFFERS' | 'CANCEL_FX_OFFERS' | 'APPROVE_INTERBANK_EXCHANGE' | 'DECLARE_WAR';
     mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
     officeIds: Array<string>;
     vote: OptionalVotingRules;
@@ -235,7 +235,7 @@ export type ConstitutionBlock = {
     type: 'GENERATED';
     kind: 'STATE_IDENTITY' | 'FOUNDERS' | 'CITIZENSHIP_RULES' | 'OFFICES_OVERVIEW' | 'SINGLE_OFFICE' | 'OFFICE_APPOINTMENT_RULE' | 'STATE_DECISION_RULE' | 'VOTING_RULES' | 'GOVERNANCE_SUMMARY';
     officeId: string | null;
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'DECLARE_WAR' | null;
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'SET_COMPANY_REGISTRATION_POLICY' | 'REGISTER_COMPANY' | 'REGISTER_COMPANY_BRANCH' | 'PARTICIPATE_IN_COMPANY' | 'ACQUIRE_COMPANY_SHARES' | 'TRANSFER_COMPANY_SHARES' | 'MANAGE_FX_OFFERS' | 'CANCEL_FX_OFFERS' | 'APPROVE_INTERBANK_EXCHANGE' | 'DECLARE_WAR' | null;
 };
 
 export type ReformProposal = {
@@ -305,6 +305,13 @@ export type VotingInput = {
         type: 'OFFICE_HOLDERS';
         stateId: string;
         officeIds: Array<string>;
+    } | {
+        type: 'COMPANY_SHAREHOLDERS';
+        companyId: string;
+    } | {
+        type: 'COMPANY_OFFICE_HOLDERS';
+        companyId: string;
+        officeIds: Array<string>;
     };
     rules: GovernanceVotingRules;
     resultVisibility: 'PUBLIC' | 'AFTER_CLOSE' | 'ELIGIBLE_ONLY';
@@ -343,8 +350,17 @@ export type VotingDetail = {
     input: VotingInput;
     eligible: boolean;
     hasVoted: boolean;
+    entityVoters?: Array<{
+        owner: {
+            type: 'COMPANY' | 'STATE';
+            id: string;
+        };
+        weight: string;
+        hasVoted: boolean;
+    }>;
     result: VotingResult;
     governanceRevisionId: string | null;
+    companyRevisionId: string | null;
     surveyHtml?: Array<{
         id: string;
         html: {
@@ -366,6 +382,15 @@ export type VotingResult = {
         votes: number;
         approved: boolean;
     }>;
+    weights?: {
+        eligible: string;
+        participating: string;
+        abstentions: string;
+        options: Array<{
+            id: string;
+            weight: string;
+        }>;
+    };
 } | null;
 
 export type SurveySummary = {
@@ -401,6 +426,12 @@ export type SurveyResponse = {
     answers: Array<SurveyAnswer>;
 };
 
+export type TaxCategory = {
+    code: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+};
+
 export type TransferQuote = {
     id: string;
     expiresAt: string;
@@ -412,6 +443,9 @@ export type TaxCalculation = {
     currencyId: string;
     senderId: string;
     recipientId: string;
+    senderKind?: 'PLAYER' | 'COMPANY';
+    recipientKind?: 'PLAYER' | 'COMPANY';
+    sourceBranchId?: string;
     principalMinor: string;
     totalTaxMinor: string;
     totalDebitMinor: string;
@@ -419,11 +453,13 @@ export type TaxCalculation = {
     charges: Array<TaxCharge>;
 };
 
-export type TaxableEventType = 'PLAYER_TRANSFER';
+export type TaxableEventType = 'PLAYER_TRANSFER' | 'PLAYER_COMPANY_TRANSFER' | 'COMPANY_PLAYER_TRANSFER' | 'COMPANY_TRANSFER';
 
 export type TaxCharge = {
     key: string;
     taxpayer?: 'SENDER' | 'RECIPIENT';
+    baseMinor?: string;
+    exempt?: boolean;
     claims: Array<TaxClaim>;
     treatyId: string | null;
     treatyRevisionId: string | null;
@@ -438,6 +474,13 @@ export type TaxCharge = {
         beneficiary?: {
             kind: 'TREASURY' | 'CENTRAL_BANK';
             ownerId: string;
+        };
+        accrual?: {
+            key: string;
+            denominator: '100000000';
+            exactNumerator: string;
+            remainderBefore: string;
+            remainderAfter: string;
         };
     }>;
 };
@@ -460,6 +503,11 @@ export type TaxClaim = {
     rateBps: number;
     evidence: Array<TaxJurisdictionEvidence>;
     nationalAmountMinor: string;
+    regime?: {
+        lawId: string;
+        revisionId: string;
+        mode: 'EXEMPT' | 'REPLACE' | 'ADDITIONAL';
+    };
 };
 
 export type TaxJurisdictionEvidence = {
@@ -467,12 +515,28 @@ export type TaxJurisdictionEvidence = {
     basis: 'CITIZENSHIP' | 'TERRITORIAL';
     source: 'CITIZENSHIP' | 'CITIZENSHIP_PROXY';
     membershipJoinedAt: string;
+} | {
+    stateId: string;
+    basis: 'COMPANY_REGISTRATION';
+    source: 'COMPANY_REGISTRATION';
+    companyId: string;
+    registeredAt: string;
+} | {
+    stateId: string;
+    basis: 'BRANCH_REGISTRATION';
+    source: 'APPROVED_CORPORATE_BRANCH_CONTEXT';
+    companyId: string;
+    branchId: string;
+    applicationId: string;
 };
 
 export type MoneyMinor = string;
 
 export type EconomicOperation = {
     id: string;
+    initiatorId: string;
+    actorId: string;
+    companyDecisionId: string | null;
     createdAt: string;
     calculation: TaxCalculation;
     journals: Array<{
@@ -540,6 +604,11 @@ export type TaxLawRevision = {
     number: number;
     status: 'ACTIVE' | 'REPEALED';
     rule: TaxRule;
+    regimeSubject?: {
+        companyName: LocalizedInput;
+        branchName: LocalizedInput | null;
+    };
+    categoryName?: LocalizedInput;
     name: LocalizedInput;
     description: LocalizedInput;
     document: LocalizedInput;
@@ -549,18 +618,27 @@ export type TaxLawRevision = {
 
 export type TaxRule = {
     event: TaxableEventType;
+    events?: Array<TaxableEventType>;
+    regime?: CompanyTaxRegime;
     category: string;
     taxpayer: 'SENDER' | 'RECIPIENT';
     base?: {
         kind: 'FULL_AMOUNT';
     } | {
         kind: 'EXCESS';
-        thresholdMinor: string;
+        thresholdMinor: MoneyMinor;
     };
-    jurisdictions: Array<'CITIZENSHIP' | 'TERRITORIAL'>;
+    jurisdictions: Array<'CITIZENSHIP' | 'TERRITORIAL' | 'COMPANY_REGISTRATION' | 'BRANCH_REGISTRATION'>;
     rateBps: number;
     recipient: 'STATE_TREASURY' | 'CENTRAL_BANK';
     currencyIds: Array<string>;
+};
+
+export type CompanyTaxRegime = {
+    companyId: string;
+    branchId: string | null;
+    mode: 'EXEMPT' | 'REPLACE' | 'ADDITIONAL';
+    targetLawId: string | null;
 };
 
 export type MonetaryDirective = {
@@ -571,6 +649,7 @@ export type MonetaryDirective = {
     payload: MonetaryDirectivePayload;
     payloadHash: string;
     treatyContent: OptionalDirectiveTreatyContent;
+    fxDisplay?: FxDecisionDisplay;
     status: 'PENDING' | 'APPLIED' | 'CANCELLED';
     createdAt: string;
     appliedAt: string | null;
@@ -597,6 +676,53 @@ export type MonetaryDirective = {
 };
 
 export type MonetaryDirectivePayload = {
+    kind: 'PUBLISH_FX_OFFER';
+    offerId: string;
+    terms: FxOfferTerms;
+} | {
+    kind: 'CANCEL_FX_OFFER';
+    offerId: string;
+    termsHash: string;
+} | {
+    kind: 'APPROVE_INTERBANK_EXCHANGE';
+    tradeId: string;
+    terms: InterbankExchangeTerms;
+} | {
+    kind: 'REVIEW_COMPANY_BRANCH';
+    applicationId: string;
+    branchId: string;
+    decision: 'APPROVE' | 'REJECT';
+    reason: string;
+} | {
+    kind: 'ACCEPT_SHARE_ACQUISITION';
+    operation: CompanyShareOperation;
+} | {
+    kind: 'REVOKE_SHARE_ACQUISITION';
+    consentId: string;
+} | {
+    kind: 'TRANSFER_COMPANY_SHARES';
+    operation: CompanyShareTransfer;
+    authorizationDecisionId: string | null;
+} | {
+    kind: 'VOTE_AS_SHAREHOLDER';
+    votingId: string;
+    choices: Array<string>;
+    abstain: boolean;
+} | {
+    kind: 'SET_COMPANY_REGISTRATION_POLICY';
+    baseRevisionId: string | null;
+    policy: CompanyRegistrationPolicy;
+} | {
+    kind: 'REVIEW_COMPANY_REGISTRATION';
+    applicationId: string;
+    formationHash: string;
+    decision: 'APPROVE' | 'REJECT';
+    reason: string;
+} | {
+    kind: 'CONSENT_COMPANY_FORMATION';
+    companyId: string;
+    formationHash: string;
+} | {
     kind: 'ESTABLISH_TAX_OFFICE';
     name: LocalizedInput;
     description: LocalizedInput;
@@ -684,6 +810,9 @@ export type MonetaryDirectivePayload = {
         type: 'PLAYER';
         userId: string;
     } | {
+        type: 'COMPANY';
+        companyId: string;
+    } | {
         type: 'TREASURY';
     } | {
         type: 'CENTRAL_BANK';
@@ -697,10 +826,93 @@ export type MonetaryDirectivePayload = {
         type: 'PLAYER';
         userId: string;
     } | {
+        type: 'COMPANY';
+        companyId: string;
+    } | {
         type: 'TREASURY';
     } | {
         type: 'CENTRAL_BANK';
     };
+};
+
+export type FxOfferTerms = {
+    receiveCurrencyId: string;
+    provideCurrencyId: string;
+    receivePerLotMinor: MoneyMinor;
+    providePerLotMinor: MoneyMinor;
+    totalLots: MoneyMinor;
+    minimumLots: MoneyMinor;
+    expiresAt: string;
+};
+
+export type InterbankExchangeTerms = {
+    first: {
+        stateId: string;
+        bankId: string;
+        currencyId: string;
+        amountMinor: MoneyMinor;
+    };
+    second: {
+        stateId: string;
+        bankId: string;
+        currencyId: string;
+        amountMinor: MoneyMinor;
+    };
+    expiresAt: string;
+};
+
+export type CompanyShareOperation = ({
+    kind: 'ISSUE';
+} & CompanyShareIssue) | ({
+    kind: 'TRANSFER';
+} & CompanyShareTransfer);
+
+export type CompanyShareIssue = {
+    kind: 'ISSUE';
+    operationId: string;
+    issuerId: string;
+    issuerRevisionId: string;
+    shares: CompanyShareQuantity;
+    allocations: Array<{
+        owner: LegalOwner;
+        shares: CompanyShareQuantity;
+    }>;
+};
+
+export type CompanyShareQuantity = string;
+
+export type LegalOwner = {
+    type: 'PLAYER';
+    id: string;
+} | {
+    type: 'COMPANY';
+    id: string;
+} | {
+    type: 'STATE';
+    id: string;
+};
+
+export type CompanyShareTransfer = {
+    kind: 'TRANSFER';
+    operationId: string;
+    issuerId: string;
+    issuerRevisionId: string;
+    owner: LegalOwner;
+    recipient: LegalOwner;
+    shares: CompanyShareQuantity;
+};
+
+export type CompanyRegistrationPolicy = {
+    companyMode: 'FREE' | 'APPROVAL';
+    foreignPlayerFounders: 'ALLOW' | 'DENY';
+    corporateFounders: 'ALLOW' | 'DOMESTIC_ONLY' | 'DENY';
+    stateFounders: 'ALLOW' | 'DOMESTIC_ONLY' | 'DENY';
+    branchMode: 'FREE' | 'APPROVAL' | 'DENY';
+    foreignBranches: 'ALLOW' | 'DENY';
+    registrationFee: {
+        currencyId: string;
+        amountMinor: MoneyMinor;
+    } | null;
 };
 
 export type MonetaryPolicy = {
@@ -718,6 +930,10 @@ export type OptionalDirectiveTreatyContent = {
     type: 'TAX_TREATY';
     event: TaxableEventType;
     category: string;
+    categoryMapping?: {
+        firstCategory: string;
+        secondCategory: string;
+    };
     taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
     terms: TreatyTaxTerms;
     effectiveAt: string;
@@ -734,12 +950,28 @@ export type TreatyTaxTerms = {
     firstShareBps: number;
 };
 
+export type FxDecisionDisplay = {
+    currencies: Array<{
+        id: string;
+        code: string;
+        name: LocalizedInput;
+    }>;
+    banks: Array<{
+        id: string;
+        stateId: string;
+        name: LocalizedInput;
+        stateName: LocalizedInput;
+    }>;
+};
+
 export type FinancialAccount = {
     id: string;
     currencyId: string;
-    kind: 'PLAYER' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE';
+    kind: 'PLAYER' | 'COMPANY' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE';
     ownerId: string;
     balanceMinor: string;
+    reservedMinor?: MoneyMinor;
+    availableMinor?: MoneyMinor;
 };
 
 export type NationalCurrency = {
@@ -855,6 +1087,10 @@ export type TreatyContent = {
     type: 'TAX_TREATY';
     event: TaxableEventType;
     category: string;
+    categoryMapping?: {
+        firstCategory: string;
+        secondCategory: string;
+    };
     taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
     terms: TreatyTaxTerms;
     effectiveAt: string;
@@ -902,6 +1138,11 @@ export type PublicTaxLawRevision = {
     number: number;
     status: 'ACTIVE' | 'REPEALED';
     rule: TaxRule;
+    regimeSubject?: {
+        companyName: LocalizedInput;
+        branchName: LocalizedInput | null;
+    };
+    categoryName?: LocalizedInput;
     name: LocalizedInput;
     description: LocalizedInput;
     effectiveAt: string;
@@ -931,7 +1172,11 @@ export type PublicTreaty = {
         name: LocalizedInput;
         description: LocalizedInput;
         documentHtml: string;
-        event: 'PLAYER_TRANSFER';
+        event: TaxableEventType;
+        categoryMapping?: {
+            firstCategory: string;
+            secondCategory: string;
+        };
         category: string;
         terms: TreatyTaxTerms;
         effectiveAt: string;
@@ -946,6 +1191,10 @@ export type OptionalTreatyContent = {
     type: 'TAX_TREATY';
     event: TaxableEventType;
     category: string;
+    categoryMapping?: {
+        firstCategory: string;
+        secondCategory: string;
+    };
     taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
     terms: TreatyTaxTerms;
     effectiveAt: string;
@@ -956,6 +1205,7 @@ export type OptionalTreatyContent = {
 export type StateMonetary = {
     bank: OptionalCentralBank;
     currency: OptionalNationalCurrency;
+    currencies: Array<NationalCurrency>;
     accounts: Array<FinancialAccount>;
     directives: Array<MonetaryDirective>;
     policyHistory: Array<MonetaryPolicyRevision>;
@@ -1015,15 +1265,19 @@ export type LedgerTransaction = {
     amountMinor: MoneyMinor;
     purpose: string;
     actorId: string;
+    initiatorId: string;
     directiveId: string | null;
+    companyDecisionId: string | null;
     policyRevisionId: string | null;
     createdAt: string;
     postings: Array<{
         account: {
             id: string;
             currencyId: string;
-            kind: 'PLAYER' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE';
+            kind: 'PLAYER' | 'COMPANY' | 'CENTRAL_BANK' | 'TREASURY' | 'ISSUANCE';
             ownerId: string;
+            reservedMinor?: MoneyMinor;
+            availableMinor?: MoneyMinor;
         };
         deltaMinor: string;
     }>;
@@ -1042,6 +1296,7 @@ export type WalletTransfer = {
     quoteId?: string;
     currencyId: string;
     recipientId: string;
+    recipientType?: 'PLAYER' | 'COMPANY';
     amountMinor: MoneyMinor;
     purpose: string;
 };
@@ -1079,7 +1334,7 @@ export type PublicCurrency = {
     state: {
         id: string;
         slug: string | null;
-        name: LocalizedInput & unknown;
+        name: LocalizedInput | null;
         active: boolean;
     };
     issuancePage: number;
@@ -1091,6 +1346,658 @@ export type PublicCurrency = {
         policyRevisionId: string | null;
         createdAt: string;
     }>;
+};
+
+export type FxOfferList = {
+    items: Array<FxOffer>;
+    page: number;
+    hasMore: boolean;
+    currencies?: Array<{
+        id: string;
+        code: string;
+        name: LocalizedInput;
+        status: 'ACTIVE' | 'BLOCKED';
+    }>;
+};
+
+export type FxOffer = {
+    id: string;
+    bank: {
+        id: string;
+        stateId: string;
+        name: LocalizedInput;
+        stateName: LocalizedInput;
+        available: boolean;
+    };
+    terms: FxOfferTerms;
+    termsHash: string;
+    remainingLots: MoneyMinor;
+    reservedMinor: MoneyMinor;
+    status: 'ACTIVE' | 'FILLED' | 'CANCELLED' | 'EXPIRED';
+    executable: boolean;
+    publishDirectiveId: string;
+    createdAt: string;
+    currencies: Array<{
+        id: string;
+        code: string;
+        name: LocalizedInput;
+        status: 'ACTIVE' | 'BLOCKED';
+    }>;
+};
+
+export type PublicFxOfferFills = {
+    items: Array<{
+        id: string;
+        createdAt: string;
+        lots: MoneyMinor;
+        receiveMinor: MoneyMinor;
+        provideMinor: MoneyMinor;
+    }>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type FxQuote = {
+    id: string;
+    offerId: string;
+    termsHash: string;
+    lots: MoneyMinor;
+    receiveMinor: MoneyMinor;
+    provideMinor: MoneyMinor;
+    expiresAt: string;
+    createdAt: string;
+};
+
+export type FxExchangeReceipt = {
+    id: string;
+    event: 'FX_EXCHANGE';
+    actorId: string;
+    offerId: string | null;
+    tradeId: string | null;
+    quoteId: string | null;
+    receiveCurrencyId: string;
+    provideCurrencyId: string;
+    receiveMinor: MoneyMinor;
+    provideMinor: MoneyMinor;
+    firstApprovalId: string | null;
+    secondApprovalId: string | null;
+    journals: Array<{
+        leg: 'RECEIVE' | 'PROVIDE';
+        journalId: string;
+    }>;
+    currencies: Array<{
+        id: string;
+        code: string;
+        name: LocalizedInput;
+        status: 'ACTIVE' | 'BLOCKED';
+    }>;
+    createdAt: string;
+};
+
+export type FxExchangeHistory = {
+    items: Array<FxExchangeReceipt>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type StateFx = {
+    offers: Array<FxOffer>;
+    trades: Array<InterbankExchange>;
+    decisions: Array<MonetaryDirective>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type InterbankExchange = {
+    id: string;
+    terms: InterbankExchangeTerms;
+    termsHash: string;
+    status: 'PENDING' | 'SETTLED';
+    createdAt: string;
+    approvals: Array<{
+        directiveId: string;
+        stateId: string;
+        actorId: string;
+        createdAt: string;
+    }>;
+    exchangeId: string | null;
+    currencies: Array<{
+        id: string;
+        code: string;
+        name: LocalizedInput;
+        status: 'ACTIVE' | 'BLOCKED';
+    }>;
+    banks: Array<{
+        id: string;
+        stateId: string;
+        name: LocalizedInput;
+        stateName: LocalizedInput;
+        available: boolean;
+    }>;
+};
+
+export type CompanyPersonalFormationConsent = {
+    id: string;
+    role: 'FOUNDER' | 'OFFICE_HOLDER';
+    formationHash: string;
+    createdAt: string;
+    revokedAt: string | null;
+};
+
+export type CompanyDraft = {
+    id: string;
+    companyId: string;
+    ownerId: string;
+    title: string;
+    version: number;
+    step: number;
+    configuration: CompanyConfiguration;
+    formationHash: string;
+    submittedApplicationId: string | null;
+    updatedAt: string;
+    deletedAt: string | null;
+};
+
+export type CompanyConfiguration = {
+    registrationStateId: string | null;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    categories: Array<string>;
+    totalShares: CompanyShareQuantity;
+    allocations: Array<{
+        owner: LegalOwner;
+        shares: CompanyShareQuantity;
+    }>;
+    charter: CompanyCharter;
+    document: LocalizedInput;
+};
+
+export type CompanyCharter = {
+    offices: Array<CompanyOffice>;
+    policies: Array<CompanyAuthorityPolicy>;
+    votingDefaults: GovernanceVotingRules;
+    shareTransfers: 'OWNER_CONSENT' | 'CORPORATE_APPROVAL';
+};
+
+export type CompanyOffice = {
+    id: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    maxHolders: number;
+    required: boolean;
+    termDays: number | null;
+    appointment: CompanyAuthorityProcedure;
+    removal: CompanyAuthorityProcedure;
+    initialHolderIds: Array<string>;
+};
+
+export type CompanyAuthorityProcedure = {
+    mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'SHAREHOLDER_VOTE' | 'OFFICE_VOTE' | 'COMBINED' | 'MANUAL';
+    officeIds: Array<string>;
+    vote: GovernanceVotingRules | null;
+    manualProcedure: LocalizedInput;
+};
+
+export type CompanyAuthorityPolicy = {
+    action: 'AMEND_CHARTER' | 'UPDATE_PROFILE' | 'CREATE_OFFICE' | 'UPDATE_OFFICE' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'TRANSFER_FUNDS' | 'ISSUE_SHARES' | 'AUTHORIZE_SHARE_TRANSFER' | 'TRANSFER_OWNED_SHARES' | 'FOUND_COMPANY' | 'REGISTER_BRANCH' | 'CLOSE_BRANCH' | 'CLOSE_COMPANY' | 'VOTE_AS_SHAREHOLDER' | 'ACCEPT_SHARE_ACQUISITION' | 'REVOKE_SHARE_ACQUISITION';
+    procedure: CompanyAuthorityProcedure;
+    financialBands: Array<{
+        currencyId: string;
+        upToMinor: MoneyMinor;
+        procedure: CompanyAuthorityProcedure;
+    }>;
+};
+
+export type CompanyRegistrationReview = {
+    companyId: string;
+    version: number;
+    formationHash: string;
+    policyRevisionId: string;
+    policy: CompanyRegistrationPolicy;
+    ready: boolean;
+    problem: string | null;
+};
+
+export type CompanyRegistrationApplication = {
+    id: string;
+    companyId: string;
+    draftId: string;
+    applicantId: string;
+    stateId: string;
+    formationHash: string;
+    policyRevisionId: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    companyStatus: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    reviewDirectiveId: string | null;
+    reviewedAt: string | null;
+    createdAt: string;
+    reason: string | null;
+    configuration: CompanyConfiguration;
+};
+
+export type CompanyRegistrationApplications = {
+    items: Array<CompanyRegistrationApplication>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type PublishedCompanyIdentity = {
+    id: string;
+    registrationStateId: string;
+    registrationStateName: LocalizedInput;
+    status: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    foundedAt: string;
+};
+
+export type CompanyWorkspace = {
+    id: string;
+    status: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    registrationStateId: string;
+    currentRevisionId: string;
+    issuedShares: CompanyShareQuantity;
+    availableActions: Array<'AMEND_CHARTER' | 'UPDATE_PROFILE' | 'CREATE_OFFICE' | 'UPDATE_OFFICE' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'TRANSFER_FUNDS' | 'ISSUE_SHARES' | 'AUTHORIZE_SHARE_TRANSFER' | 'TRANSFER_OWNED_SHARES' | 'FOUND_COMPANY' | 'REGISTER_BRANCH' | 'CLOSE_BRANCH' | 'CLOSE_COMPANY' | 'VOTE_AS_SHAREHOLDER' | 'ACCEPT_SHARE_ACQUISITION' | 'REVOKE_SHARE_ACQUISITION'>;
+    canReadFinance: boolean;
+    content: CompanyRevisionContent;
+    holders: Array<{
+        id: string;
+        officeId: string;
+        userId: string;
+        since: string;
+    }>;
+    shareholders: Array<{
+        owner: LegalOwner;
+        shares: CompanyShareQuantity;
+    }>;
+};
+
+export type CompanyRevisionContent = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    categories: Array<string>;
+    charter: CompanyCharter;
+    document: LocalizedInput;
+};
+
+export type CompanyDecisionSummary = {
+    id: string;
+    companyId: string;
+    revisionId: string;
+    kind: 'AMEND_CHARTER' | 'UPDATE_PROFILE' | 'CREATE_OFFICE' | 'UPDATE_OFFICE' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'TRANSFER_FUNDS' | 'ISSUE_SHARES' | 'AUTHORIZE_SHARE_TRANSFER' | 'TRANSFER_OWNED_SHARES' | 'FOUND_COMPANY' | 'REGISTER_BRANCH' | 'CLOSE_BRANCH' | 'CLOSE_COMPANY' | 'VOTE_AS_SHAREHOLDER' | 'ACCEPT_SHARE_ACQUISITION' | 'REVOKE_SHARE_ACQUISITION';
+    payloadHash: string;
+    status: 'PENDING' | 'APPLIED' | 'CANCELLED';
+    createdBy: string;
+    createdAt: string;
+    appliedAt: string | null;
+};
+
+export type CompanyDecisionPayload = {
+    kind: 'AMEND_CHARTER';
+    content: CompanyRevisionContent;
+} | {
+    kind: 'UPDATE_PROFILE';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    categories: Array<string>;
+} | {
+    kind: 'CREATE_OFFICE';
+    office: CompanyOffice;
+} | {
+    kind: 'UPDATE_OFFICE';
+    office: CompanyOffice;
+} | {
+    kind: 'APPOINT_OFFICE_HOLDER';
+    officeId: string;
+    userId: string;
+    replacedUserId: string | null;
+} | {
+    kind: 'REMOVE_OFFICE_HOLDER';
+    officeId: string;
+    userId: string;
+} | {
+    kind: 'TRANSFER_FUNDS';
+    quoteId?: string;
+    approvedDebitMinor?: MoneyMinor;
+    sourceBranchId?: string;
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    recipient: LegalOwner;
+    purpose: string;
+} | {
+    kind: 'ISSUE_SHARES';
+    operation: CompanyShareIssue;
+} | {
+    kind: 'AUTHORIZE_SHARE_TRANSFER';
+    operation: CompanyShareTransfer;
+} | {
+    kind: 'TRANSFER_OWNED_SHARES';
+    operation: CompanyShareTransfer;
+    authorizationDecisionId: string | null;
+} | {
+    kind: 'FOUND_COMPANY';
+    companyId: string;
+    formationHash: string;
+} | {
+    kind: 'REGISTER_BRANCH';
+    branchId: string;
+    stateId: string;
+    policyRevisionId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CLOSE_BRANCH';
+    branchId: string;
+    reason: string;
+} | {
+    kind: 'CLOSE_COMPANY';
+    reason: string;
+} | {
+    kind: 'VOTE_AS_SHAREHOLDER';
+    votingId: string;
+    choices: Array<string>;
+    abstain: boolean;
+} | {
+    kind: 'ACCEPT_SHARE_ACQUISITION';
+    operation: CompanyShareOperation;
+} | {
+    kind: 'REVOKE_SHARE_ACQUISITION';
+    consentId: string;
+};
+
+export type CompanyDecisionDetail = CompanyDecisionSummary & {
+    payload: CompanyDecisionPayload;
+    calculation?: TaxCalculation;
+    charter: CompanyCharter;
+    appliedBy: string | null;
+    manualReason: string | null;
+    stale: boolean;
+    ready: boolean;
+    canApply: boolean;
+    canCancel: boolean;
+    manualRequired: boolean;
+    manualProcedures: Array<LocalizedInput>;
+    executionProblem: string | null;
+    approvableOfficeIds: Array<string>;
+    approvalGroups: Array<{
+        mode: 'ANY' | 'ALL';
+        officeIds: Array<string>;
+    }>;
+    approvals: Array<{
+        id: string;
+        officeId: string;
+        actorId: string;
+        holderId: string;
+        current: boolean;
+        approvedAt: string;
+        revokedAt: string | null;
+    }>;
+    votes: Array<{
+        id: string;
+        requirementHash: string;
+        approved: boolean;
+    }>;
+};
+
+export type CompanyLifecyclePage = {
+    items: Array<CompanyLifecycleEvent>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type CompanyLifecycleEvent = {
+    id: string;
+    number: number;
+    previousStatus: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    status: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    actorId: string;
+    reason: string;
+    applicationId: string | null;
+    createdAt: string;
+};
+
+export type CompanyManualQueue = {
+    items: Array<{
+        id: string;
+        companyId: string;
+        kind: string;
+        createdAt: string;
+    }>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type ShareOperationView = {
+    id: string;
+    operation: CompanyShareOperation;
+    termsHash: string;
+    createdBy: string;
+    createdAt: string;
+    eventId: string | null;
+    consents: Array<ShareAcquisitionConsentView>;
+    termsCurrent: boolean;
+    issuerApprovalRequired: boolean;
+    availableIssuerApprovalDecisionId: string | null;
+};
+
+export type ShareAcquisitionConsentView = {
+    id: string;
+    owner: LegalOwner;
+    actorId: string;
+    companyDecisionId: string | null;
+    stateDirectiveId: string | null;
+    createdAt: string;
+    revokedAt: string | null;
+    eventId: string | null;
+    status: 'AVAILABLE' | 'REVOKED' | 'CONSUMED' | 'STALE';
+};
+
+export type SharePortfolio = {
+    items: Array<CompanySharePosition>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type CompanySharePosition = {
+    issuerId: string;
+    issuerRevisionId: string;
+    status: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    name: LocalizedInput;
+    shares: CompanyShareQuantity;
+    issuedShares: CompanyShareQuantity;
+    controls: boolean;
+};
+
+export type CompanyShareHistory = {
+    items: Array<CompanyShareHistoryEntry>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type CompanyShareHistoryEntry = {
+    id: string;
+    issuerId: string;
+    kind: 'INITIAL' | 'ISSUE' | 'TRANSFER';
+    shares: CompanyShareQuantity;
+    actorId: string;
+    createdAt: string;
+    applicationId: string | null;
+    decisionId: string | null;
+    stateDirectiveId: string | null;
+    authorizationDecisionId: string | null;
+    operation: CompanyShareIssue | CompanyShareTransfer | null;
+    postings: Array<{
+        owner: LegalOwner;
+        delta: string;
+    }>;
+};
+
+export type PublishedCompanyBranch = {
+    id: string;
+    companyId: string;
+    stateId: string;
+    status: 'ACTIVE' | 'CLOSED';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdAt: string;
+    stateName: LocalizedInput;
+};
+
+export type PublishedCompanyRegistrationPolicy = {
+    id: string;
+    stateId: string;
+    number: number;
+    directiveId: string;
+    createdAt: string;
+    policy: CompanyRegistrationPolicy;
+};
+
+export type PublishedCompanyBranchList = {
+    items: Array<PublishedCompanyBranch>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type CompanyBranchList = {
+    items: Array<CompanyBranchSummary>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type CompanyBranchSummary = {
+    id: string;
+    companyId: string;
+    stateId: string;
+    status: 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'CLOSED';
+    currentApplicationId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdAt: string;
+};
+
+export type CompanyBranchDetail = {
+    branch: CompanyBranchSummary;
+    application: CompanyBranchApplication;
+    history: CompanyBranchHistory;
+};
+
+export type CompanyBranchApplication = {
+    id: string;
+    branchId: string;
+    policyRevisionId: string;
+    companyRevisionId: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUPERSEDED' | 'CANCELLED';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    createdBy: string;
+    createdAt: string;
+    reviewDirectiveId: string | null;
+    completionDecisionId: string | null;
+    reviewedBy: string | null;
+    reviewReason: string | null;
+    reviewedAt: string | null;
+};
+
+export type CompanyBranchHistory = {
+    items: Array<{
+        id: string;
+        applicationId: string;
+        fromStatus: 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'CLOSED' | null;
+        toStatus: 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'CLOSED';
+        actorId: string;
+        companyDecisionId: string | null;
+        stateDirectiveId: string | null;
+        reason: string | null;
+        createdAt: string;
+    }>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type CompanyCatalogue = {
+    items: Array<PublishedCompanyIdentity>;
+    jurisdictions: Array<{
+        id: string;
+        name: LocalizedInput;
+    }>;
+    total: number;
+    page: number;
+    pageSize: number;
+};
+
+export type PublishedCompanyDirectory = {
+    items: Array<PublishedCompanyIdentity>;
+    nextId: string | null;
+};
+
+export type PublishedCompanyProfile = {
+    identity: PublishedCompanyIdentity;
+    revisionId: string;
+    revision: number;
+    categories: Array<string>;
+    charter: CompanyCharter;
+    documentHtml: string;
+    issuedShares: CompanyShareQuantity;
+    holders: Array<{
+        officeId: string;
+        player: {
+            owner: LegalOwner;
+            name: LocalizedInput;
+            href: string | null;
+        };
+        since: string;
+    }>;
+    owners: {
+        page: number;
+        hasMore: boolean;
+        items: Array<{
+            identity: {
+                owner: LegalOwner;
+                name: LocalizedInput;
+                href: string | null;
+            };
+            shares: CompanyShareQuantity;
+        }>;
+    };
+    holdings: {
+        page: number;
+        hasMore: boolean;
+        items: Array<{
+            identity: {
+                owner: LegalOwner;
+                name: LocalizedInput;
+                href: string | null;
+            };
+            shares: CompanyShareQuantity;
+            issuedShares: CompanyShareQuantity;
+            controls: boolean;
+        }>;
+    };
+    history: {
+        page: number;
+        hasMore: boolean;
+        items: Array<{
+            id: string;
+            kind: string;
+            appliedAt: string;
+        }>;
+    };
+};
+
+export type CompanyWallet = Wallet & {
+    companyId: string;
+};
+
+export type CompanyFinancialQuoteInput = {
+    revisionId: string;
+    payment: {
+        kind: 'TRANSFER_FUNDS';
+        sourceBranchId?: string;
+        currencyId: string;
+        amountMinor: MoneyMinor;
+        recipient: LegalOwner;
+        purpose: string;
+    };
 };
 
 export type OfficeAssignmentInput = {
@@ -1221,7 +2128,7 @@ export type DraftOffice = {
 };
 
 export type DraftPolicy = {
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'DECLARE_WAR';
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'SET_COMPANY_REGISTRATION_POLICY' | 'REGISTER_COMPANY' | 'REGISTER_COMPANY_BRANCH' | 'PARTICIPATE_IN_COMPANY' | 'ACQUIRE_COMPANY_SHARES' | 'TRANSFER_COMPANY_SHARES' | 'MANAGE_FX_OFFERS' | 'CANCEL_FX_OFFERS' | 'APPROVE_INTERBANK_EXCHANGE' | 'DECLARE_WAR';
     mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
     officeIds: Array<string>;
     vote: OptionalDraftVotingRules;
@@ -6218,11 +7125,30 @@ export type DeleteSurveyResponseResponses = {
 
 export type DeleteSurveyResponseResponse = DeleteSurveyResponseResponses[keyof DeleteSurveyResponseResponses];
 
+export type ListTaxCategoriesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/tax-categories';
+};
+
+export type ListTaxCategoriesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<TaxCategory>;
+    };
+};
+
+export type ListTaxCategoriesResponse = ListTaxCategoriesResponses[keyof ListTaxCategoriesResponses];
+
 export type QuoteWalletTransferData = {
     body?: {
         idempotencyKey: string;
         currencyId: string;
         recipientId: string;
+        recipientType?: 'PLAYER' | 'COMPANY';
         amountMinor: MoneyMinor;
         purpose: string;
     };
@@ -6482,6 +7408,9 @@ export type PreviewTaxRuleResponses = {
      */
     200: {
         amountMinor: string;
+        baseMinor: string;
+        totalDebitMinor: string;
+        recipientCreditMinor: string;
     };
 };
 
@@ -7378,6 +8307,7 @@ export type GetMonetaryVotingPayloadResponses = {
         payloadHash: string;
         code: string;
         treatyContent: OptionalTreatyContent;
+        fxDisplay?: FxDecisionDisplay;
     };
 };
 
@@ -8259,6 +9189,3692 @@ export type GetPublicCurrencyResponses = {
 };
 
 export type GetPublicCurrencyResponse = GetPublicCurrencyResponses[keyof GetPublicCurrencyResponses];
+
+export type GetFxBankData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/fx/banks/{id}';
+};
+
+export type GetFxBankErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetFxBankError = GetFxBankErrors[keyof GetFxBankErrors];
+
+export type GetFxBankResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+        stateId: string;
+        name: LocalizedInput;
+        stateName: LocalizedInput;
+        available: boolean;
+    };
+};
+
+export type GetFxBankResponse = GetFxBankResponses[keyof GetFxBankResponses];
+
+export type ListFxOffersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        search?: string;
+        receiveCode?: string;
+        provideCode?: string;
+    };
+    url: '/api/v1/public/fx/offers';
+};
+
+export type ListFxOffersErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListFxOffersError = ListFxOffersErrors[keyof ListFxOffersErrors];
+
+export type ListFxOffersResponses = {
+    /**
+     * Result
+     */
+    200: FxOfferList;
+};
+
+export type ListFxOffersResponse = ListFxOffersResponses[keyof ListFxOffersResponses];
+
+export type GetFxOfferData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/fx/offers/{id}';
+};
+
+export type GetFxOfferErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetFxOfferError = GetFxOfferErrors[keyof GetFxOfferErrors];
+
+export type GetFxOfferResponses = {
+    /**
+     * Result
+     */
+    200: FxOffer;
+};
+
+export type GetFxOfferResponse = GetFxOfferResponses[keyof GetFxOfferResponses];
+
+export type ListPublicFxOfferFillsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/public/fx/offers/{id}/fills';
+};
+
+export type ListPublicFxOfferFillsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListPublicFxOfferFillsError = ListPublicFxOfferFillsErrors[keyof ListPublicFxOfferFillsErrors];
+
+export type ListPublicFxOfferFillsResponses = {
+    /**
+     * Result
+     */
+    200: PublicFxOfferFills;
+};
+
+export type ListPublicFxOfferFillsResponse = ListPublicFxOfferFillsResponses[keyof ListPublicFxOfferFillsResponses];
+
+export type CreateFxQuoteData = {
+    body?: {
+        lots: MoneyMinor;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/fx/offers/{id}/quotes';
+};
+
+export type CreateFxQuoteErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateFxQuoteError = CreateFxQuoteErrors[keyof CreateFxQuoteErrors];
+
+export type CreateFxQuoteResponses = {
+    /**
+     * Result
+     */
+    200: FxQuote;
+};
+
+export type CreateFxQuoteResponse = CreateFxQuoteResponses[keyof CreateFxQuoteResponses];
+
+export type FillFxOfferData = {
+    body?: {
+        quoteId: string;
+        idempotencyKey: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/fx/offers/{id}/fills';
+};
+
+export type FillFxOfferErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type FillFxOfferError = FillFxOfferErrors[keyof FillFxOfferErrors];
+
+export type FillFxOfferResponses = {
+    /**
+     * Result
+     */
+    200: FxExchangeReceipt;
+};
+
+export type FillFxOfferResponse = FillFxOfferResponses[keyof FillFxOfferResponses];
+
+export type RecordFxOfferExpiryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/fx/offers/{id}/expire';
+};
+
+export type RecordFxOfferExpiryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type RecordFxOfferExpiryError = RecordFxOfferExpiryErrors[keyof RecordFxOfferExpiryErrors];
+
+export type RecordFxOfferExpiryResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RecordFxOfferExpiryResponse = RecordFxOfferExpiryResponses[keyof RecordFxOfferExpiryResponses];
+
+export type GetFxExchangeHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/fx/exchanges';
+};
+
+export type GetFxExchangeHistoryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetFxExchangeHistoryError = GetFxExchangeHistoryErrors[keyof GetFxExchangeHistoryErrors];
+
+export type GetFxExchangeHistoryResponses = {
+    /**
+     * Result
+     */
+    200: FxExchangeHistory;
+};
+
+export type GetFxExchangeHistoryResponse = GetFxExchangeHistoryResponses[keyof GetFxExchangeHistoryResponses];
+
+export type GetFxExchangeData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/fx/exchanges/{id}';
+};
+
+export type GetFxExchangeErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetFxExchangeError = GetFxExchangeErrors[keyof GetFxExchangeErrors];
+
+export type GetFxExchangeResponses = {
+    /**
+     * Result
+     */
+    200: FxExchangeReceipt;
+};
+
+export type GetFxExchangeResponse = GetFxExchangeResponses[keyof GetFxExchangeResponses];
+
+export type GetStateFxData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{id}/fx';
+};
+
+export type GetStateFxErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateFxError = GetStateFxErrors[keyof GetStateFxErrors];
+
+export type GetStateFxResponses = {
+    /**
+     * Result
+     */
+    200: StateFx;
+};
+
+export type GetStateFxResponse = GetStateFxResponses[keyof GetStateFxResponses];
+
+export type ListCompanyFormationConsentsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}/consents';
+};
+
+export type ListCompanyFormationConsentsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyFormationConsentsError = ListCompanyFormationConsentsErrors[keyof ListCompanyFormationConsentsErrors];
+
+export type ListCompanyFormationConsentsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<CompanyPersonalFormationConsent>;
+    };
+};
+
+export type ListCompanyFormationConsentsResponse = ListCompanyFormationConsentsResponses[keyof ListCompanyFormationConsentsResponses];
+
+export type ConsentToCompanyFormationData = {
+    body?: {
+        role: 'FOUNDER' | 'OFFICE_HOLDER';
+        formationHash: string;
+        idempotencyKey: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}/consents';
+};
+
+export type ConsentToCompanyFormationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ConsentToCompanyFormationError = ConsentToCompanyFormationErrors[keyof ConsentToCompanyFormationErrors];
+
+export type ConsentToCompanyFormationResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type ConsentToCompanyFormationResponse = ConsentToCompanyFormationResponses[keyof ConsentToCompanyFormationResponses];
+
+export type ListCompanyDraftsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/company-drafts';
+};
+
+export type ListCompanyDraftsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyDraftsError = ListCompanyDraftsErrors[keyof ListCompanyDraftsErrors];
+
+export type ListCompanyDraftsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<CompanyDraft>;
+    };
+};
+
+export type ListCompanyDraftsResponse = ListCompanyDraftsResponses[keyof ListCompanyDraftsResponses];
+
+export type CreateCompanyDraftData = {
+    body?: {
+        title?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/company-drafts';
+};
+
+export type CreateCompanyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateCompanyDraftError = CreateCompanyDraftErrors[keyof CreateCompanyDraftErrors];
+
+export type CreateCompanyDraftResponses = {
+    /**
+     * Result
+     */
+    200: CompanyDraft;
+};
+
+export type CreateCompanyDraftResponse = CreateCompanyDraftResponses[keyof CreateCompanyDraftResponses];
+
+export type GetCompanyFormationProjectData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/companies/{id}/formation';
+};
+
+export type GetCompanyFormationProjectErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyFormationProjectError = GetCompanyFormationProjectErrors[keyof GetCompanyFormationProjectErrors];
+
+export type GetCompanyFormationProjectResponses = {
+    /**
+     * Result
+     */
+    200: CompanyDraft;
+};
+
+export type GetCompanyFormationProjectResponse = GetCompanyFormationProjectResponses[keyof GetCompanyFormationProjectResponses];
+
+export type DeleteCompanyDraftData = {
+    body?: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}';
+};
+
+export type DeleteCompanyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type DeleteCompanyDraftError = DeleteCompanyDraftErrors[keyof DeleteCompanyDraftErrors];
+
+export type DeleteCompanyDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type DeleteCompanyDraftResponse = DeleteCompanyDraftResponses[keyof DeleteCompanyDraftResponses];
+
+export type GetCompanyDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}';
+};
+
+export type GetCompanyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyDraftError = GetCompanyDraftErrors[keyof GetCompanyDraftErrors];
+
+export type GetCompanyDraftResponses = {
+    /**
+     * Result
+     */
+    200: CompanyDraft;
+};
+
+export type GetCompanyDraftResponse = GetCompanyDraftResponses[keyof GetCompanyDraftResponses];
+
+export type SaveCompanyDraftData = {
+    body?: {
+        version: number;
+        title: string;
+        step: number;
+        configuration: CompanyConfiguration;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}';
+};
+
+export type SaveCompanyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type SaveCompanyDraftError = SaveCompanyDraftErrors[keyof SaveCompanyDraftErrors];
+
+export type SaveCompanyDraftResponses = {
+    /**
+     * Result
+     */
+    200: CompanyDraft;
+};
+
+export type SaveCompanyDraftResponse = SaveCompanyDraftResponses[keyof SaveCompanyDraftResponses];
+
+export type ReopenCompanyDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}/reopen';
+};
+
+export type ReopenCompanyDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ReopenCompanyDraftError = ReopenCompanyDraftErrors[keyof ReopenCompanyDraftErrors];
+
+export type ReopenCompanyDraftResponses = {
+    /**
+     * Result
+     */
+    200: CompanyDraft;
+};
+
+export type ReopenCompanyDraftResponse = ReopenCompanyDraftResponses[keyof ReopenCompanyDraftResponses];
+
+export type ReviewCompanyRegistrationData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}/review';
+};
+
+export type ReviewCompanyRegistrationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ReviewCompanyRegistrationError = ReviewCompanyRegistrationErrors[keyof ReviewCompanyRegistrationErrors];
+
+export type ReviewCompanyRegistrationResponses = {
+    /**
+     * Result
+     */
+    200: CompanyRegistrationReview;
+};
+
+export type ReviewCompanyRegistrationResponse = ReviewCompanyRegistrationResponses[keyof ReviewCompanyRegistrationResponses];
+
+export type SubmitCompanyRegistrationData = {
+    body?: {
+        version: number;
+        idempotencyKey: string;
+        formationHash: string;
+        policyRevisionId: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}/submit';
+};
+
+export type SubmitCompanyRegistrationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type SubmitCompanyRegistrationError = SubmitCompanyRegistrationErrors[keyof SubmitCompanyRegistrationErrors];
+
+export type SubmitCompanyRegistrationResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type SubmitCompanyRegistrationResponse = SubmitCompanyRegistrationResponses[keyof SubmitCompanyRegistrationResponses];
+
+export type RevokeCompanyFormationConsentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-consents/{id}/revoke';
+};
+
+export type RevokeCompanyFormationConsentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type RevokeCompanyFormationConsentError = RevokeCompanyFormationConsentErrors[keyof RevokeCompanyFormationConsentErrors];
+
+export type RevokeCompanyFormationConsentResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RevokeCompanyFormationConsentResponse = RevokeCompanyFormationConsentResponses[keyof RevokeCompanyFormationConsentResponses];
+
+export type ListStateCompanyDecisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{id}/company-decisions';
+};
+
+export type ListStateCompanyDecisionsErrors = {
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStateCompanyDecisionsError = ListStateCompanyDecisionsErrors[keyof ListStateCompanyDecisionsErrors];
+
+export type ListStateCompanyDecisionsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<MonetaryDirective>;
+        page: number;
+        hasMore: boolean;
+    };
+};
+
+export type ListStateCompanyDecisionsResponse = ListStateCompanyDecisionsResponses[keyof ListStateCompanyDecisionsResponses];
+
+export type GetCompanyRegistrationApplicationData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-applications/{id}';
+};
+
+export type GetCompanyRegistrationApplicationErrors = {
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyRegistrationApplicationError = GetCompanyRegistrationApplicationErrors[keyof GetCompanyRegistrationApplicationErrors];
+
+export type GetCompanyRegistrationApplicationResponses = {
+    /**
+     * Result
+     */
+    200: CompanyRegistrationApplication;
+};
+
+export type GetCompanyRegistrationApplicationResponse = GetCompanyRegistrationApplicationResponses[keyof GetCompanyRegistrationApplicationResponses];
+
+export type ListStateCompanyRegistrationApplicationsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{id}/company-applications';
+};
+
+export type ListStateCompanyRegistrationApplicationsErrors = {
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStateCompanyRegistrationApplicationsError = ListStateCompanyRegistrationApplicationsErrors[keyof ListStateCompanyRegistrationApplicationsErrors];
+
+export type ListStateCompanyRegistrationApplicationsResponses = {
+    /**
+     * Result
+     */
+    200: CompanyRegistrationApplications;
+};
+
+export type ListStateCompanyRegistrationApplicationsResponse = ListStateCompanyRegistrationApplicationsResponses[keyof ListStateCompanyRegistrationApplicationsResponses];
+
+export type ListCompanyWorkspacesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies';
+};
+
+export type ListCompanyWorkspacesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyWorkspacesError = ListCompanyWorkspacesErrors[keyof ListCompanyWorkspacesErrors];
+
+export type ListCompanyWorkspacesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<PublishedCompanyIdentity>;
+        page: number;
+        hasMore: boolean;
+    };
+};
+
+export type ListCompanyWorkspacesResponse = ListCompanyWorkspacesResponses[keyof ListCompanyWorkspacesResponses];
+
+export type GetCompanyWorkspaceData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/companies/{id}';
+};
+
+export type GetCompanyWorkspaceErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyWorkspaceError = GetCompanyWorkspaceErrors[keyof GetCompanyWorkspaceErrors];
+
+export type GetCompanyWorkspaceResponses = {
+    /**
+     * Result
+     */
+    200: CompanyWorkspace;
+};
+
+export type GetCompanyWorkspaceResponse = GetCompanyWorkspaceResponses[keyof GetCompanyWorkspaceResponses];
+
+export type ListCompanyDecisionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies/{id}/decisions';
+};
+
+export type ListCompanyDecisionsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyDecisionsError = ListCompanyDecisionsErrors[keyof ListCompanyDecisionsErrors];
+
+export type ListCompanyDecisionsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<CompanyDecisionSummary>;
+        page: number;
+        hasMore: boolean;
+    };
+};
+
+export type ListCompanyDecisionsResponse = ListCompanyDecisionsResponses[keyof ListCompanyDecisionsResponses];
+
+export type CreateCompanyDecisionData = {
+    body?: {
+        revisionId: string;
+        idempotencyKey: string;
+        payload: CompanyDecisionPayload;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/companies/{id}/decisions';
+};
+
+export type CreateCompanyDecisionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateCompanyDecisionError = CreateCompanyDecisionErrors[keyof CreateCompanyDecisionErrors];
+
+export type CreateCompanyDecisionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type CreateCompanyDecisionResponse = CreateCompanyDecisionResponses[keyof CreateCompanyDecisionResponses];
+
+export type GetCompanyDecisionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-decisions/{id}';
+};
+
+export type GetCompanyDecisionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyDecisionError = GetCompanyDecisionErrors[keyof GetCompanyDecisionErrors];
+
+export type GetCompanyDecisionResponses = {
+    /**
+     * Result
+     */
+    200: CompanyDecisionDetail;
+};
+
+export type GetCompanyDecisionResponse = GetCompanyDecisionResponses[keyof GetCompanyDecisionResponses];
+
+export type ApproveCompanyDecisionData = {
+    body?: {
+        officeId: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-decisions/{id}/approve';
+};
+
+export type ApproveCompanyDecisionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApproveCompanyDecisionError = ApproveCompanyDecisionErrors[keyof ApproveCompanyDecisionErrors];
+
+export type ApproveCompanyDecisionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApproveCompanyDecisionResponse = ApproveCompanyDecisionResponses[keyof ApproveCompanyDecisionResponses];
+
+export type RevokeCompanyDecisionApprovalData = {
+    body?: {
+        approvalId: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-decisions/{id}/revoke';
+};
+
+export type RevokeCompanyDecisionApprovalErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type RevokeCompanyDecisionApprovalError = RevokeCompanyDecisionApprovalErrors[keyof RevokeCompanyDecisionApprovalErrors];
+
+export type RevokeCompanyDecisionApprovalResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RevokeCompanyDecisionApprovalResponse = RevokeCompanyDecisionApprovalResponses[keyof RevokeCompanyDecisionApprovalResponses];
+
+export type ApplyCompanyDecisionData = {
+    body?: {
+        reason?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-decisions/{id}/apply';
+};
+
+export type ApplyCompanyDecisionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ApplyCompanyDecisionError = ApplyCompanyDecisionErrors[keyof ApplyCompanyDecisionErrors];
+
+export type ApplyCompanyDecisionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ApplyCompanyDecisionResponse = ApplyCompanyDecisionResponses[keyof ApplyCompanyDecisionResponses];
+
+export type CancelCompanyDecisionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-decisions/{id}/cancel';
+};
+
+export type CancelCompanyDecisionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CancelCompanyDecisionError = CancelCompanyDecisionErrors[keyof CancelCompanyDecisionErrors];
+
+export type CancelCompanyDecisionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type CancelCompanyDecisionResponse = CancelCompanyDecisionResponses[keyof CancelCompanyDecisionResponses];
+
+export type ListCompanyLifecycleHistoryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies/{id}/status-history';
+};
+
+export type ListCompanyLifecycleHistoryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyLifecycleHistoryError = ListCompanyLifecycleHistoryErrors[keyof ListCompanyLifecycleHistoryErrors];
+
+export type ListCompanyLifecycleHistoryResponses = {
+    /**
+     * Result
+     */
+    200: CompanyLifecyclePage;
+};
+
+export type ListCompanyLifecycleHistoryResponse = ListCompanyLifecycleHistoryResponses[keyof ListCompanyLifecycleHistoryResponses];
+
+export type ChangeCompanyStatusData = {
+    body?: {
+        previousStatus: 'ACTIVE' | 'SUSPENDED';
+        status: 'ACTIVE' | 'SUSPENDED';
+        reason: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/companies/{id}/status';
+};
+
+export type ChangeCompanyStatusErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ChangeCompanyStatusError = ChangeCompanyStatusErrors[keyof ChangeCompanyStatusErrors];
+
+export type ChangeCompanyStatusResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type ChangeCompanyStatusResponse = ChangeCompanyStatusResponses[keyof ChangeCompanyStatusResponses];
+
+export type ListCompanyManualDecisionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/admin/companies/manual-decisions';
+};
+
+export type ListCompanyManualDecisionsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyManualDecisionsError = ListCompanyManualDecisionsErrors[keyof ListCompanyManualDecisionsErrors];
+
+export type ListCompanyManualDecisionsResponses = {
+    /**
+     * Result
+     */
+    200: CompanyManualQueue;
+};
+
+export type ListCompanyManualDecisionsResponse = ListCompanyManualDecisionsResponses[keyof ListCompanyManualDecisionsResponses];
+
+export type PrepareShareOperationData = {
+    body?: {
+        idempotencyKey: string;
+        operation: CompanyShareOperation;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/share-operations';
+};
+
+export type PrepareShareOperationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type PrepareShareOperationError = PrepareShareOperationErrors[keyof PrepareShareOperationErrors];
+
+export type PrepareShareOperationResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type PrepareShareOperationResponse = PrepareShareOperationResponses[keyof PrepareShareOperationResponses];
+
+export type GetShareOperationData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/share-operations/{id}';
+};
+
+export type GetShareOperationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetShareOperationError = GetShareOperationErrors[keyof GetShareOperationErrors];
+
+export type GetShareOperationResponses = {
+    /**
+     * Result
+     */
+    200: ShareOperationView;
+};
+
+export type GetShareOperationResponse = GetShareOperationResponses[keyof GetShareOperationResponses];
+
+export type ConsentToShareAcquisitionData = {
+    body?: {
+        operationId: string;
+        termsHash: string;
+        idempotencyKey: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/share-consents';
+};
+
+export type ConsentToShareAcquisitionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ConsentToShareAcquisitionError = ConsentToShareAcquisitionErrors[keyof ConsentToShareAcquisitionErrors];
+
+export type ConsentToShareAcquisitionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type ConsentToShareAcquisitionResponse = ConsentToShareAcquisitionResponses[keyof ConsentToShareAcquisitionResponses];
+
+export type RevokeShareAcquisitionConsentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/share-consents/{id}/revoke';
+};
+
+export type RevokeShareAcquisitionConsentErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type RevokeShareAcquisitionConsentError = RevokeShareAcquisitionConsentErrors[keyof RevokeShareAcquisitionConsentErrors];
+
+export type RevokeShareAcquisitionConsentResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RevokeShareAcquisitionConsentResponse = RevokeShareAcquisitionConsentResponses[keyof RevokeShareAcquisitionConsentResponses];
+
+export type TransferPersonalSharesData = {
+    body?: {
+        operation: CompanyShareTransfer;
+        authorizationDecisionId: string | null;
+        idempotencyKey: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/share-transfers';
+};
+
+export type TransferPersonalSharesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type TransferPersonalSharesError = TransferPersonalSharesErrors[keyof TransferPersonalSharesErrors];
+
+export type TransferPersonalSharesResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type TransferPersonalSharesResponse = TransferPersonalSharesResponses[keyof TransferPersonalSharesResponses];
+
+export type GetPersonalSharePortfolioData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/shares';
+};
+
+export type GetPersonalSharePortfolioErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPersonalSharePortfolioError = GetPersonalSharePortfolioErrors[keyof GetPersonalSharePortfolioErrors];
+
+export type GetPersonalSharePortfolioResponses = {
+    /**
+     * Result
+     */
+    200: SharePortfolio;
+};
+
+export type GetPersonalSharePortfolioResponse = GetPersonalSharePortfolioResponses[keyof GetPersonalSharePortfolioResponses];
+
+export type GetCompanySharePortfolioData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies/{id}/shares';
+};
+
+export type GetCompanySharePortfolioErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanySharePortfolioError = GetCompanySharePortfolioErrors[keyof GetCompanySharePortfolioErrors];
+
+export type GetCompanySharePortfolioResponses = {
+    /**
+     * Result
+     */
+    200: SharePortfolio;
+};
+
+export type GetCompanySharePortfolioResponse = GetCompanySharePortfolioResponses[keyof GetCompanySharePortfolioResponses];
+
+export type GetStateSharePortfolioData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{id}/shares';
+};
+
+export type GetStateSharePortfolioErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetStateSharePortfolioError = GetStateSharePortfolioErrors[keyof GetStateSharePortfolioErrors];
+
+export type GetStateSharePortfolioResponses = {
+    /**
+     * Result
+     */
+    200: SharePortfolio;
+};
+
+export type GetStateSharePortfolioResponse = GetStateSharePortfolioResponses[keyof GetStateSharePortfolioResponses];
+
+export type GetCompanyShareHistoryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies/{id}/share-history';
+};
+
+export type GetCompanyShareHistoryErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyShareHistoryError = GetCompanyShareHistoryErrors[keyof GetCompanyShareHistoryErrors];
+
+export type GetCompanyShareHistoryResponses = {
+    /**
+     * Result
+     */
+    200: CompanyShareHistory;
+};
+
+export type GetCompanyShareHistoryResponse = GetCompanyShareHistoryResponses[keyof GetCompanyShareHistoryResponses];
+
+export type GetPublishedCompanyBranchData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/company-branches/{id}';
+};
+
+export type GetPublishedCompanyBranchErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublishedCompanyBranchError = GetPublishedCompanyBranchErrors[keyof GetPublishedCompanyBranchErrors];
+
+export type GetPublishedCompanyBranchResponses = {
+    /**
+     * Result
+     */
+    200: PublishedCompanyBranch;
+};
+
+export type GetPublishedCompanyBranchResponse = GetPublishedCompanyBranchResponses[keyof GetPublishedCompanyBranchResponses];
+
+export type GetPublishedCompanyRegistrationPolicyData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/states/{id}/company-registration-policy';
+};
+
+export type GetPublishedCompanyRegistrationPolicyErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublishedCompanyRegistrationPolicyError = GetPublishedCompanyRegistrationPolicyErrors[keyof GetPublishedCompanyRegistrationPolicyErrors];
+
+export type GetPublishedCompanyRegistrationPolicyResponses = {
+    /**
+     * Result
+     */
+    200: PublishedCompanyRegistrationPolicy | null;
+};
+
+export type GetPublishedCompanyRegistrationPolicyResponse = GetPublishedCompanyRegistrationPolicyResponses[keyof GetPublishedCompanyRegistrationPolicyResponses];
+
+export type ListPublishedCompanyBranchesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/public/companies/{id}/branches';
+};
+
+export type ListPublishedCompanyBranchesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListPublishedCompanyBranchesError = ListPublishedCompanyBranchesErrors[keyof ListPublishedCompanyBranchesErrors];
+
+export type ListPublishedCompanyBranchesResponses = {
+    /**
+     * Result
+     */
+    200: PublishedCompanyBranchList;
+};
+
+export type ListPublishedCompanyBranchesResponse = ListPublishedCompanyBranchesResponses[keyof ListPublishedCompanyBranchesResponses];
+
+export type ListCompanyBranchesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies/{id}/branches';
+};
+
+export type ListCompanyBranchesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyBranchesError = ListCompanyBranchesErrors[keyof ListCompanyBranchesErrors];
+
+export type ListCompanyBranchesResponses = {
+    /**
+     * Result
+     */
+    200: CompanyBranchList;
+};
+
+export type ListCompanyBranchesResponse = ListCompanyBranchesResponses[keyof ListCompanyBranchesResponses];
+
+export type ListStateCompanyBranchesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/states/{id}/company-branches';
+};
+
+export type ListStateCompanyBranchesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListStateCompanyBranchesError = ListStateCompanyBranchesErrors[keyof ListStateCompanyBranchesErrors];
+
+export type ListStateCompanyBranchesResponses = {
+    /**
+     * Result
+     */
+    200: CompanyBranchList;
+};
+
+export type ListStateCompanyBranchesResponse = ListStateCompanyBranchesResponses[keyof ListStateCompanyBranchesResponses];
+
+export type GetCompanyBranchData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/company-branches/{id}';
+};
+
+export type GetCompanyBranchErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyBranchError = GetCompanyBranchErrors[keyof GetCompanyBranchErrors];
+
+export type GetCompanyBranchResponses = {
+    /**
+     * Result
+     */
+    200: CompanyBranchDetail;
+};
+
+export type GetCompanyBranchResponse = GetCompanyBranchResponses[keyof GetCompanyBranchResponses];
+
+export type GetCompanyBranchApplicationData = {
+    body?: never;
+    path: {
+        id: string;
+        applicationId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-branches/{id}/applications/{applicationId}';
+};
+
+export type GetCompanyBranchApplicationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyBranchApplicationError = GetCompanyBranchApplicationErrors[keyof GetCompanyBranchApplicationErrors];
+
+export type GetCompanyBranchApplicationResponses = {
+    /**
+     * Result
+     */
+    200: CompanyBranchApplication;
+};
+
+export type GetCompanyBranchApplicationResponse = GetCompanyBranchApplicationResponses[keyof GetCompanyBranchApplicationResponses];
+
+export type ListCompanyCatalogueData = {
+    body?: never;
+    path?: never;
+    query?: {
+        search?: string;
+        stateId?: string | '';
+        status?: 'ALL' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
+        sort?: 'NEWEST' | 'OLDEST' | 'NAME';
+        locale?: 'ru' | 'en';
+        page?: number;
+    };
+    url: '/api/v1/public/companies/catalogue';
+};
+
+export type ListCompanyCatalogueErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyCatalogueError = ListCompanyCatalogueErrors[keyof ListCompanyCatalogueErrors];
+
+export type ListCompanyCatalogueResponses = {
+    /**
+     * Result
+     */
+    200: CompanyCatalogue;
+};
+
+export type ListCompanyCatalogueResponse = ListCompanyCatalogueResponses[keyof ListCompanyCatalogueResponses];
+
+export type ListPublishedCompaniesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        query?: string;
+        after?: string;
+    };
+    url: '/api/v1/public/companies';
+};
+
+export type ListPublishedCompaniesErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListPublishedCompaniesError = ListPublishedCompaniesErrors[keyof ListPublishedCompaniesErrors];
+
+export type ListPublishedCompaniesResponses = {
+    /**
+     * Result
+     */
+    200: PublishedCompanyDirectory;
+};
+
+export type ListPublishedCompaniesResponse = ListPublishedCompaniesResponses[keyof ListPublishedCompaniesResponses];
+
+export type GetPublishedCompanyProfileData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        locale?: 'ru' | 'en';
+        ownersPage?: number;
+        holdingsPage?: number;
+        historyPage?: number;
+    };
+    url: '/api/v1/public/companies/{id}';
+};
+
+export type GetPublishedCompanyProfileErrors = {
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublishedCompanyProfileError = GetPublishedCompanyProfileErrors[keyof GetPublishedCompanyProfileErrors];
+
+export type GetPublishedCompanyProfileResponses = {
+    /**
+     * Result
+     */
+    200: PublishedCompanyProfile;
+};
+
+export type GetPublishedCompanyProfileResponse = GetPublishedCompanyProfileResponses[keyof GetPublishedCompanyProfileResponses];
+
+export type GetPublishedCompanyIdentityData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/companies/{id}/identity';
+};
+
+export type GetPublishedCompanyIdentityErrors = {
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublishedCompanyIdentityError = GetPublishedCompanyIdentityErrors[keyof GetPublishedCompanyIdentityErrors];
+
+export type GetPublishedCompanyIdentityResponses = {
+    /**
+     * Result
+     */
+    200: PublishedCompanyIdentity;
+};
+
+export type GetPublishedCompanyIdentityResponse = GetPublishedCompanyIdentityResponses[keyof GetPublishedCompanyIdentityResponses];
+
+export type GetCompanyFinancesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/account/companies/{id}/finances';
+};
+
+export type GetCompanyFinancesErrors = {
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyFinancesError = GetCompanyFinancesErrors[keyof GetCompanyFinancesErrors];
+
+export type GetCompanyFinancesResponses = {
+    /**
+     * Result
+     */
+    200: CompanyWallet;
+};
+
+export type GetCompanyFinancesResponse = GetCompanyFinancesResponses[keyof GetCompanyFinancesResponses];
+
+export type CreateCompanyPaymentQuoteData = {
+    body?: CompanyFinancialQuoteInput;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/companies/{id}/finances/quotes';
+};
+
+export type CreateCompanyPaymentQuoteErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type CreateCompanyPaymentQuoteError = CreateCompanyPaymentQuoteErrors[keyof CreateCompanyPaymentQuoteErrors];
+
+export type CreateCompanyPaymentQuoteResponses = {
+    /**
+     * Result
+     */
+    200: TransferQuote;
+};
+
+export type CreateCompanyPaymentQuoteResponse = CreateCompanyPaymentQuoteResponses[keyof CreateCompanyPaymentQuoteResponses];
 
 export type ListOfficeAssignmentsData = {
     body?: never;

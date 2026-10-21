@@ -1,0 +1,1 @@
+ALTER TABLE "voting_ballots" ADD COLUMN "database_transaction" text DEFAULT pg_current_xact_id()::text NOT NULL;

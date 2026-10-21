@@ -4,6 +4,7 @@ import type { PublicTaxLawRevision } from '@helicraft/alhena';
 import { MarkdownContent } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
+import { TaxRuleSummary } from './rule-summary';
 import styles from '../monetary/monetary.module.scss';
 
 const PERCENT_BPS = 100;
@@ -25,13 +26,7 @@ function PublicLaw({ revision }: Readonly<{ revision: PublicTaxLawRevision }>): 
         {uiText(locale, 'Вступление в силу', 'Effective date')}:{' '}
         {new Date(revision.effectiveAt).toLocaleString(locale)}
       </p>
-      <p>
-        {uiText(
-          locale,
-          'Отправитель платит дополнительно к исходной сумме перевода. Получатель получает всю сумму.',
-          'The sender pays in addition to the original amount. The recipient receives the full transfer.',
-        )}
-      </p>
+      <TaxRuleSummary rule={revision.rule} subject={revision.regimeSubject} />
       {revision.rule.jurisdictions.includes('TERRITORIAL') && (
         <p>
           {uiText(

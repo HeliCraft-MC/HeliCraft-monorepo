@@ -11,7 +11,7 @@ import { translate } from '../locales';
 const route = getRouteApi('/app_/states/$stateId/manage');
 function Page(): ReactElement {
   const { stateId } = route.useParams();
-  const { section } = route.useSearch();
+  const { section, shareOperationId, formationDraftId, votingId } = route.useSearch();
   const { principal } = route.useRouteContext();
   return (
     <StateManagementPanel
@@ -19,6 +19,9 @@ function Page(): ReactElement {
       stateId={stateId}
       actorId={principal.id}
       section={section}
+      votingId={votingId}
+      formationDraftId={formationDraftId}
+      shareOperationId={shareOperationId}
     />
   );
 }
@@ -43,8 +46,13 @@ const Route = createFileRoute('/app_/states/$stateId/manage')({
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),
-  // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/prefer-top-level-await -- Zod catch supplies a search-schema default, not a Promise callback.
-  validateSearch: z.object({ section: z.enum(MANAGEMENT_SECTIONS).catch('overview') }),
+  validateSearch: z.object({
+    // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/prefer-top-level-await -- Zod catch supplies a search-schema default, not a Promise callback.
+    section: z.enum(MANAGEMENT_SECTIONS).catch('overview'),
+    shareOperationId: z.uuid().optional(),
+    formationDraftId: z.uuid().optional(),
+    votingId: z.uuid().optional(),
+  }),
   component: Page,
 });
 export { Route };

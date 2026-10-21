@@ -4,28 +4,43 @@ import { EconomicPayload } from '../taxation/payload';
 import { economicLabels } from '../taxation/model';
 import { monetaryLabel } from './labels';
 import type { ReactElement } from 'react';
-import type { MonetaryDirectivePayload, StateConfiguration } from '@helicraft/alhena';
+import type {
+  MonetaryDirectivePayload,
+  StateConfiguration,
+  PublishedCompanyIdentity,
+  FxDecisionDisplay,
+} from '@helicraft/alhena';
 import { MoneyAmount } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, label, uiText } from '../states/text';
-import { MonetaryPlayer } from './player';
+import { FinancialRecipient } from './financial-recipient';
 import { PolicySummary } from './policy-summary';
+import { isFxPayload } from '../fx/model';
+import { FxPayloadSummary } from '../fx/payload-summary';
+import { isCompanyStatePayload } from '../companies/state-model';
+import { CompanyStatePayloadSummary } from '../companies/state-payload-summary';
 import styles from './monetary.module.scss';
 
 function PayloadSummary({
   payload,
   code,
   configuration,
+  company,
+  fxDisplay,
 }: Readonly<{
   payload: MonetaryDirectivePayload;
   code: string;
   configuration?: StateConfiguration;
+  company?: PublishedCompanyIdentity;
+  fxDisplay?: FxDecisionDisplay;
 }>): ReactElement {
   const { text, locale } = useTranslation();
   return (
     <div className={styles.panel}>
       {economicLabels[payload.kind] === undefined && <h3>{monetaryLabel(text, payload.kind)}</h3>}
       <EconomicPayload payload={payload} />
+      {isFxPayload(payload) && <FxPayloadSummary payload={payload} display={fxDisplay} />}
+      {isCompanyStatePayload(payload) && <CompanyStatePayloadSummary payload={payload} />}
       {'name' in payload && (
         <>
           <strong>{displayText(payload.name, locale)}</strong>
@@ -42,11 +57,7 @@ function PayloadSummary({
       {'recipient' in payload && (
         <p>
           {text('monetary.recipient')}:{' '}
-          {payload.recipient.type === 'PLAYER' ? (
-            <MonetaryPlayer id={payload.recipient.userId} />
-          ) : (
-            monetaryLabel(text, payload.recipient.type)
-          )}
+          <FinancialRecipient recipient={payload.recipient} company={company} />
         </p>
       )}
       {'initialPolicies' in payload &&

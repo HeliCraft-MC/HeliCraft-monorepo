@@ -1,18 +1,22 @@
 // oxlint-disable no-await-in-loop -- Localized immutable records hydrate in order on one transaction connection.
 import { and, desc, eq, inArray, or } from 'drizzle-orm';
-import type { centralBanks, currencies } from '../../db/schema';
+import type { centralBanks } from '../../db/schema';
 import {
   economicJournals,
+  economicOperations,
   bankReviews,
   financialAccounts,
   ledgerTransactions,
   ledgerPostings,
   monetaryDirectives,
+  companyDecisions,
+  currencies,
 } from '../../db/schema';
 import type { Transaction } from '../permissions/transaction';
 import type { Account, Bank, Currency, LedgerTransaction } from './contracts';
 import { monetaryStatistics } from './statistics';
 import { currentPolicy, directiveRecord, hydratePayload } from './store';
+import { bankReservedMinor } from '../fx/reserves';
 
 const HISTORY_LIMIT = 50;
 function accountDto(record: typeof financialAccounts.$inferSelect): Account {
@@ -84,6 +88,52 @@ async function currencyDto(
     ...(await monetaryStatistics(transaction, record, policy)),
   };
 }
+async function heldCurrencyDtos(
+  transaction: Transaction,
+  currencyIds: readonly string[],
+): Promise<Currency[]> {
+  const ids = [...new Set(currencyIds)];
+  if (ids.length === 0) {
+    return [];
+  }
+  const records = await transaction.select().from(currencies).where(inArray(currencies.id, ids));
+  const result: Currency[] = [];
+  for (const currency of records) {
+    result.push(await currencyDto(transaction, currency));
+  }
+  return result;
+}
+async function journalInitiator(
+  transaction: Transaction,
+  record: typeof ledgerTransactions.$inferSelect,
+): Promise<string> {
+  if (record.companyDecisionId !== null) {
+    const [decision] = await transaction
+      .select({ createdBy: companyDecisions.createdBy })
+      .from(companyDecisions)
+      .where(eq(companyDecisions.id, record.companyDecisionId));
+    if (!decision) {
+      throw new Error('Missing corporate journal source');
+    }
+    return decision.createdBy;
+  }
+  if (record.directiveId !== null) {
+    const [directive] = await transaction
+      .select({ createdBy: monetaryDirectives.createdBy })
+      .from(monetaryDirectives)
+      .where(eq(monetaryDirectives.id, record.directiveId));
+    if (!directive) {
+      throw new Error('Missing state journal source');
+    }
+    return directive.createdBy;
+  }
+  const [operation] = await transaction
+    .select({ initiatorId: economicOperations.initiatorId })
+    .from(economicJournals)
+    .innerJoin(economicOperations, eq(economicOperations.id, economicJournals.operationId))
+    .where(eq(economicJournals.journalId, record.id));
+  return operation?.initiatorId ?? record.actorId;
+}
 async function journalDto(
   transaction: Transaction,
   record: typeof ledgerTransactions.$inferSelect,
@@ -105,7 +155,9 @@ async function journalDto(
     amountMinor: record.amountMinor,
     purpose: record.purpose,
     actorId: record.actorId,
+    initiatorId: await journalInitiator(transaction, record),
     directiveId: record.directiveId,
+    companyDecisionId: record.companyDecisionId,
     policyRevisionId: record.policyRevisionId,
     createdAt: record.createdAt.toISOString(),
     postings: postings.map((posting) => ({
@@ -162,7 +214,19 @@ async function stateAccounts(
           : and(eq(financialAccounts.kind, 'CENTRAL_BANK'), eq(financialAccounts.ownerId, bankId)),
       ),
     );
-  return records.map((record) => accountDto(record));
+  const result: Account[] = [];
+  for (const record of records) {
+    const reserved =
+      record.kind === 'CENTRAL_BANK' && record.balanceMinor !== '0'
+        ? await bankReservedMinor(transaction, record.ownerId, record.currencyId)
+        : '0';
+    result.push({
+      ...accountDto(record),
+      reservedMinor: reserved,
+      availableMinor: (BigInt(record.balanceMinor) - BigInt(reserved)).toString(),
+    });
+  }
+  return result;
 }
 async function stateDirectiveIds(
   transaction: Transaction,
@@ -183,6 +247,7 @@ export {
   accountDto,
   bankDto,
   currencyDto,
+  heldCurrencyDtos,
   journalDto,
   accountHistory,
   stateAccounts,

@@ -16,6 +16,8 @@ const managementLabels = {
   treasury: ['Казна', 'Treasury'],
   taxation: ['Налоги', 'Taxation'],
   diplomacy: ['Дипломатия', 'Diplomacy'],
+  fx: ['Валютный обмен', 'Currency exchange'],
+  companies: ['Компании и регистрация', 'Companies and registration'],
 } as const;
 
 export { managementLabels };

@@ -5,7 +5,10 @@ import type {
   TaxLawRevision,
   TaxRule,
 } from '@helicraft/alhena';
+import { moneyInputToMinor } from '@helicraft/atria';
 import { formText } from '../monetary/model';
+import { taxScopeFromForm } from './scope-form';
+import { taxRegimeFromForm } from './regime-form';
 
 type TaxKind =
   | 'ESTABLISH_TAX_OFFICE'
@@ -14,18 +17,31 @@ type TaxKind =
   | 'AMEND_TAX_LAW'
   | 'REPEAL_TAX_LAW';
 function taxRuleFromForm(form: FormData): TaxRule {
-  const basis = formText(form, 'basis');
+  const taxpayer = formText(form, 'taxpayer') || 'SENDER';
+  const recipient = formText(form, 'taxRecipient') || 'STATE_TREASURY';
+  const base = formText(form, 'taxBase') || 'FULL_AMOUNT';
+  if (
+    !['SENDER', 'RECIPIENT'].includes(taxpayer) ||
+    !['STATE_TREASURY', 'CENTRAL_BANK'].includes(recipient) ||
+    !['FULL_AMOUNT', 'EXCESS'].includes(base)
+  ) {
+    throw new Error('Invalid tax liability');
+  }
+  const thresholdMinor =
+    base === 'EXCESS' ? moneyInputToMinor(formText(form, 'taxThreshold')) : '0';
+  if (thresholdMinor === null) {
+    throw new Error('Invalid tax allowance');
+  }
+  const regime = taxRegimeFromForm(form);
   return {
-    event: 'PLAYER_TRANSFER',
+    ...taxScopeFromForm(form),
     category: formText(form, 'category'),
-    taxpayer: 'SENDER',
-    jurisdictions:
-      basis === 'BOTH'
-        ? ['CITIZENSHIP', 'TERRITORIAL']
-        : [basis === 'TERRITORIAL' ? 'TERRITORIAL' : 'CITIZENSHIP'],
+    taxpayer: taxpayer === 'RECIPIENT' ? 'RECIPIENT' : 'SENDER',
+    base: base === 'EXCESS' ? { kind: 'EXCESS', thresholdMinor } : { kind: 'FULL_AMOUNT' },
     rateBps: Number(formText(form, 'rateBps')),
-    recipient: 'STATE_TREASURY',
+    recipient: recipient === 'CENTRAL_BANK' ? 'CENTRAL_BANK' : 'STATE_TREASURY',
     currencyIds: [],
+    ...(regime === undefined ? {} : { regime }),
   };
 }
 function composeTaxPayload(

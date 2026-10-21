@@ -18,6 +18,7 @@ import { monetaryError } from '../monetary/domain';
 import { TreatyDraftSchema, TreatyEditSchema } from './contracts';
 import type { TreatyContent } from './contracts';
 import { treatyRecord, treatyRevision, parties, insertTreatyRevision } from './store';
+import { assertTreatyCategories } from './category-scope';
 
 const HISTORY_LIMIT = 50;
 
@@ -148,6 +149,7 @@ class DiplomacyService {
         monetaryError('TREATY_PARTNER_INVALID', 'Выберите другое действующее государство');
       }
       assertContentParties(input.content, [stateId, partner.id]);
+      assertTreatyCategories(input.content);
       const id = crypto.randomUUID();
       const revisionId = crypto.randomUUID();
       await transaction
@@ -194,6 +196,7 @@ class DiplomacyService {
       }
       assertContentParties(input.content, participants);
       const previous = await treatyRevision(transaction, input.baseRevisionId);
+      assertTreatyCategories(input.content, previous.content);
       const revisionId = crypto.randomUUID();
       await insertTreatyRevision(transaction, {
         id: revisionId,

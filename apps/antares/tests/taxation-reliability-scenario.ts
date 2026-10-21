@@ -57,7 +57,7 @@ async function assertTaxReliability(
   });
   await directives.create(first.stateId, actor, {
     idempotencyKey: crypto.randomUUID(),
-    payload: transferLaw(100, 'OTHER'),
+    payload: transferLaw(100, 'INCOME'),
   });
   await directives.create(
     third.stateId,

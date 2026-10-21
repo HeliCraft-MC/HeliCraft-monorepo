@@ -2,6 +2,8 @@
 import type { ru } from './ru';
 
 const en = {
+  'companies.navigation': 'Companies',
+  'fx.navigation': 'Exchange',
   'monetary.loading': 'Loading monetary data…',
   'monetary.authorityReformHint': 'Change financial authority through the ordinary reform process.',
   'monetary.policyRevisionNumber': 'Monetary policy revision #',
@@ -35,6 +37,7 @@ const en = {
   'monetary.code': 'Currency code',
   'monetary.amount': 'Amount',
   'monetary.purpose': 'Payment purpose',
+  'monetary.companyAccount': 'Company account',
   'monetary.recipient': 'Recipient',
   'monetary.player': 'Player',
   'monetary.transfer': 'Transfer',

@@ -1,0 +1,66 @@
+.page {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: 2rem;
+  max-width: 72rem;
+  margin-inline: auto;
+  min-width: 0;
+  pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+}
+.grid,
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.filters {
+  align-items: end;
+  padding: 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  background: var(--bg-panel);
+  > :nth-child(2) {
+    grid-column: 1 / -1;
+  }
+}
+.card {
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 1rem;
+  overflow-wrap: anywhere;
+  h2 {
+    margin-block: 0 1rem;
+  }
+}
+.facts {
+  display: grid;
+  gap: 1rem;
+  dt {
+    color: var(--text-muted);
+  }
+  dd {
+    margin: 0.25rem 0 0;
+  }
+}
+.actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+@media (max-width: 60rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 40rem) {
+  .grid,
+  .filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

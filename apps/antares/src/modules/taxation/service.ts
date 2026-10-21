@@ -13,6 +13,7 @@ import type { Locale } from '../localized-content/contracts';
 import { renderMarkdown } from '../content/markdown';
 import { HISTORY_LIMIT } from '../monetary/read-models';
 import { stateTaxationDto, stateLawRevisions, taxOfficeDto, currentStateLaws } from './read-models';
+import { assertOperationReader } from './operation-access';
 import type {
   StateTaxationSchema,
   PublicTaxationSchema,
@@ -71,22 +72,27 @@ class TaxationService {
   public async operation(
     id: string,
     actorId: string,
+    admin = false,
   ): Promise<z.infer<typeof EconomicOperationSchema>> {
     return await this.db.transaction(async (transaction) => {
-      await monetaryActor(transaction, { id: actorId, admin: false });
+      await monetaryActor(transaction, { id: actorId, admin });
       const [operation] = await transaction
         .select()
         .from(economicOperations)
-        .where(and(eq(economicOperations.id, id), eq(economicOperations.actorId, actorId)));
+        .where(eq(economicOperations.id, id));
       if (!operation) {
         throw new DomainError(HTTP.notFound, 'OPERATION_NOT_FOUND', 'Операция не найдена');
       }
+      await assertOperationReader(transaction, operation, { id: actorId, admin });
       const links = await transaction
         .select()
         .from(economicJournals)
         .where(eq(economicJournals.operationId, id));
       return {
         id,
+        initiatorId: operation.initiatorId,
+        actorId: operation.actorId,
+        companyDecisionId: operation.companyDecisionId,
         createdAt: operation.createdAt.toISOString(),
         calculation: operation.calculation,
         journals: links.map((link) => ({

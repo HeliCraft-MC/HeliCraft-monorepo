@@ -37,6 +37,7 @@ export function AdminLayout(): ReactElement {
             ) : null}
             {principal.permissions.includes('states.manage') && (
               <>
+                <Link to="/admin/companies">{uiText(locale, 'Компании', 'Companies')}</Link>
                 <Link to="/admin/states">{text('states.title')}</Link>
                 <Link
                   to="/admin/institutions"

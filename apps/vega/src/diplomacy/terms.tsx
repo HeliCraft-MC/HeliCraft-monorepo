@@ -5,6 +5,7 @@ import type { TreatyContent } from '@helicraft/alhena';
 import { Alert, FormField, Select, TextField } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
+import { TreatyScopeFields } from './scope-fields';
 
 const DEFAULT_SHARED_RATE_BPS = 600;
 
@@ -54,23 +55,7 @@ function TreatyTerms({
           </option>
         </Select>
       </FormField>
-      <FormField
-        label={uiText(locale, 'Категория налоговых требований', 'National claim category')}
-        htmlFor="treaty-category"
-        help={uiText(
-          locale,
-          'Договор применяется только к совпадающим требованиям обеих сторон в этой категории личных переводов. Он не создаёт обязательств для посторонних лиц и не отменяет налоги третьих стран.',
-          'The treaty applies only when both parties have national claims in this personal-transfer category. It creates no claim against other people and preserves third-state taxes.',
-        )}
-      >
-        <TextField
-          id="treaty-category"
-          name="category"
-          defaultValue={content?.category ?? 'TRANSFER'}
-          pattern="[A-Z][A-Z0-9_]{0,63}"
-          required
-        />
-      </FormField>
+      <TreatyScopeFields firstLabel={firstLabel} secondLabel={secondLabel} content={content} />
       {mode === 'EXCLUSIVE' ? (
         <FormField
           label={uiText(locale, 'Государство с исключительным правом', 'Exclusive taxing state')}
@@ -94,8 +79,8 @@ function TreatyTerms({
             htmlFor="treaty-rate"
             help={uiText(
               locale,
-              '100 пунктов = 1%; налог округляется вниз до минимальной единицы.',
-              '100 points = 1%; tax rounds down to the minor unit.',
+              '100 пунктов = 1%; точные дробные обязательства накапливаются между платежами.',
+              '100 points = 1%; exact fractional obligations accumulate across payments.',
             )}
           >
             <TextField

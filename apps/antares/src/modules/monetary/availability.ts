@@ -4,8 +4,13 @@ import { TaxDirectiveSchema } from '../taxation/contracts';
 import { TreatyDirectiveSchema } from '../diplomacy/contracts';
 import { assertTaxDirective } from '../taxation/laws';
 import { assertTreatyDirective } from '../diplomacy/availability';
+import { CompanyStateDirectiveSchema } from '../companies/registration-contracts';
+import { assertCompanyStateDirective } from '../companies/state-directives';
+import { FxDirectiveSchema } from '../fx/contracts';
+import { assertFxDirective } from '../fx/directives';
+import { assertAvailableBankFunds } from '../fx/reserves';
 import { and, eq } from 'drizzle-orm';
-import { financialAccounts, users } from '../../db/schema';
+import { financialAccounts, users, companies } from '../../db/schema';
 import type { Transaction } from '../permissions/transaction';
 import { DomainError } from '../errors';
 import type { DirectivePayload } from './contracts';
@@ -34,14 +39,25 @@ async function assertRecipient(transaction: Transaction, payload: FinancialPaylo
       monetaryError('RECIPIENT_UNAVAILABLE', 'Получатель не найден или его аккаунт недоступен');
     }
   }
+  if (payload.recipient.type === 'COMPANY') {
+    const [company] = await transaction
+      .select({ status: companies.status })
+      .from(companies)
+      .where(eq(companies.id, payload.recipient.companyId));
+    if (company?.status !== 'ACTIVE') {
+      monetaryError(
+        'RECIPIENT_UNAVAILABLE',
+        'Компания не найдена или её деятельность приостановлена',
+      );
+    }
+  }
 }
 async function assertFunded(
   transaction: Transaction,
-  currency: CurrencyRecord,
-  payload: FinancialPayload,
+  input: Readonly<{ currency: CurrencyRecord; payload: FinancialPayload; ownerId: string }>,
 ): Promise<void> {
+  const { currency, payload, ownerId } = input;
   const kind = payload.kind === 'TREASURY_TRANSFER' ? 'TREASURY' : 'CENTRAL_BANK';
-  const ownerId = kind === 'TREASURY' ? currency.stateId : currency.bankId;
   const [source] = await transaction
     .select({ balance: financialAccounts.balanceMinor })
     .from(financialAccounts)
@@ -55,6 +71,41 @@ async function assertFunded(
   if (BigInt(source?.balance ?? '0') < BigInt(payload.amountMinor)) {
     monetaryError('INSUFFICIENT_FUNDS', 'Недостаточно средств на счёте');
   }
+  if (kind === 'CENTRAL_BANK') {
+    await assertAvailableBankFunds(transaction, {
+      bankId: ownerId,
+      currencyId: currency.id,
+      balanceMinor: source?.balance ?? '0',
+      amountMinor: payload.amountMinor,
+    });
+  }
+}
+async function assertDomainDirective(
+  transaction: Transaction,
+  stateId: string,
+  payload: DirectivePayload,
+): Promise<boolean> {
+  const fx = FxDirectiveSchema.safeParse(payload);
+  if (fx.success) {
+    await assertFxDirective(transaction, stateId, fx.data);
+    return true;
+  }
+  const tax = TaxDirectiveSchema.safeParse(payload);
+  const company = CompanyStateDirectiveSchema.safeParse(payload);
+  if (company.success) {
+    await assertCompanyStateDirective(transaction, stateId, company.data);
+    return true;
+  }
+  if (tax.success) {
+    await assertTaxDirective(transaction, stateId, tax.data);
+    return true;
+  }
+  const treaty = TreatyDirectiveSchema.safeParse(payload);
+  if (treaty.success) {
+    await assertTreatyDirective(transaction, stateId, treaty.data);
+    return true;
+  }
+  return false;
 }
 async function assertExecutable(
   transaction: Transaction,
@@ -67,17 +118,10 @@ async function assertExecutable(
   ) {
     await institutionConfiguration(transaction, stateId, payload);
   }
-  const tax = TaxDirectiveSchema.safeParse(payload);
-  if (tax.success) {
-    await assertTaxDirective(transaction, stateId, tax.data);
+  if (await assertDomainDirective(transaction, stateId, payload)) {
     return;
   }
-  const treaty = TreatyDirectiveSchema.safeParse(payload);
-  if (treaty.success) {
-    await assertTreatyDirective(transaction, stateId, treaty.data);
-    return;
-  }
-  const { currency } = await assertBankCurrency(transaction, stateId, payload);
+  const { bank, currency } = await assertBankCurrency(transaction, stateId, payload);
   if (currency === null || !('amountMinor' in payload)) {
     return;
   }
@@ -89,7 +133,14 @@ async function assertExecutable(
       gross: await grossIssuance30d(transaction, currency.id),
     });
   } else {
-    await assertFunded(transaction, currency, payload);
+    if (bank === null) {
+      throw new Error('Executing bank missing');
+    }
+    await assertFunded(transaction, {
+      currency,
+      payload,
+      ownerId: payload.kind === 'TREASURY_TRANSFER' ? stateId : bank.id,
+    });
   }
   await assertRecipient(transaction, payload);
 }

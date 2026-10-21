@@ -13,6 +13,7 @@ import {
 import { users } from './core-schema';
 import { states, localizedTexts } from './state-schema';
 import { monetaryDirectives, currencies, ledgerTransactions } from './monetary-schema';
+import { legalSubjects } from './company-identity-schema';
 import type { TaxRule, TaxCalculation, TaxCharge } from '../modules/taxation/contracts';
 
 const economicDirectiveDocuments = pgTable('economic_directive_documents', {
@@ -120,16 +121,25 @@ const economicOperations = pgTable(
     actorId: uuid('actor_id')
       .notNull()
       .references(() => users.id),
-    recipientId: uuid('recipient_id')
+    initiatorId: uuid('initiator_id')
       .notNull()
       .references(() => users.id),
+    senderId: uuid('sender_id')
+      .notNull()
+      .references(() => legalSubjects.id),
+    senderKind: text('sender_kind').$type<'PLAYER' | 'COMPANY'>().notNull().default('PLAYER'),
+    recipientKind: text('recipient_kind').$type<'PLAYER' | 'COMPANY'>().notNull().default('PLAYER'),
+    companyDecisionId: uuid('company_decision_id').unique(),
+    recipientId: uuid('recipient_id')
+      .notNull()
+      .references(() => legalSubjects.id),
     currencyId: uuid('currency_id')
       .notNull()
       .references(() => currencies.id),
     idempotencyKey: uuid('idempotency_key').notNull(),
     commandHash: text('command_hash').notNull(),
     quoteId: uuid('quote_id').references(() => transferQuotes.id),
-    event: text('event').$type<'PLAYER_TRANSFER'>().notNull(),
+    event: text('event').$type<TaxCalculation['event']>().notNull(),
     calculation: jsonb('calculation').$type<TaxCalculation>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     databaseTransaction: text('database_transaction')
@@ -150,7 +160,7 @@ const taxAssessments = pgTable(
     assessmentKey: text('assessment_key').notNull(),
     taxpayerId: uuid('taxpayer_id')
       .notNull()
-      .references(() => users.id),
+      .references(() => legalSubjects.id),
     currencyId: uuid('currency_id')
       .notNull()
       .references(() => currencies.id),
@@ -176,6 +186,7 @@ const taxAssessmentClaims = pgTable(
     revisionId: uuid('revision_id')
       .notNull()
       .references(() => taxLawRevisions.id),
+    regimeRevisionId: uuid('regime_revision_id').references(() => taxLawRevisions.id),
   },
   (table) => [uniqueIndex('tax_law_once_per_event').on(table.operationId, table.lawId)],
 );

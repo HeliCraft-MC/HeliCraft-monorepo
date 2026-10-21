@@ -46,7 +46,7 @@ async function assertTreatyHistory(
     partnerStateId: second.stateId,
     content: {
       ...original,
-      category: 'EXPIRED',
+      category: 'CONTRIBUTION',
       effectiveAt: '2020-01-01T00:00:00.000Z',
       expiresAt: '2020-01-02T00:00:00.000Z',
     },

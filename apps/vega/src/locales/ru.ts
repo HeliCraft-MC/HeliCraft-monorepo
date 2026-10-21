@@ -1,5 +1,7 @@
 // oxlint-disable max-lines -- Each language keeps its complete message catalog in one file.
 const ru = {
+  'companies.navigation': 'Компании',
+  'fx.navigation': 'Обмен валют',
   'monetary.loading': 'Загрузка денежных данных…',
   'monetary.authorityReformHint':
     'Изменить финансовые полномочия можно через обычный проект реформы.',
@@ -34,6 +36,7 @@ const ru = {
   'monetary.code': 'Код валюты',
   'monetary.amount': 'Сумма',
   'monetary.purpose': 'Назначение платежа',
+  'monetary.companyAccount': 'Счёт компании',
   'monetary.recipient': 'Получатель',
   'monetary.player': 'Игрок',
   'monetary.transfer': 'Перевести',

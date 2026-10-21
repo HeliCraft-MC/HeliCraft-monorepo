@@ -2,7 +2,7 @@
 
 # Monetary system V1
 
-Antares owns national currencies, central banks, monetary policy, exact balances and an append-only double-entry journal. Vega operates the system through generated Alhena REST methods. No Minecraft process is required. There is no universal currency, conversion, backing requirement, mandatory transfer fee, lending, deposits, market or monetary administration faucet.
+Antares owns national currencies, central banks, monetary policy, exact balances and an append-only double-entry journal. Vega operates the system through generated Alhena REST methods. No Minecraft process is required. There is no universal currency, implicit conversion, backing requirement, mandatory transfer fee, lending, deposits, market or monetary administration faucet. [Companies](companies.md) extend official account ownership and protected spending; [Currency exchange](currency-exchange.md) adds explicit two-currency settlement, foreign central-bank holdings and finite reserved offers without changing national issuance authority.
 
 ## Authority and decisions
 

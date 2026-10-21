@@ -1,10 +1,12 @@
 import { useCallback, useId, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 import { FormField, Select, TextField } from '@helicraft/atria';
+import { CompanyPicker } from '../company-picker';
 import { PlayerPicker } from '../player-picker';
 import type { SelectedPlayer } from '../player-picker';
 import { IssuanceStatus } from './issuance-status';
-import type { NationalCurrency } from '@helicraft/alhena';
+import { HeldCurrencyField } from './held-currency-field';
+import type { PublishedCompanyIdentity, NationalCurrency } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
 import type { DirectiveKind } from './model';
 import styles from './monetary.module.scss';
@@ -14,9 +16,15 @@ function FinancialFields({
   players,
   onPlayers,
   currency,
+  currencies,
+  company,
+  onCompany,
 }: Readonly<{
   kind: DirectiveKind;
   currency: NationalCurrency | null;
+  currencies: readonly NationalCurrency[];
+  company: PublishedCompanyIdentity | null;
+  onCompany: (company: PublishedCompanyIdentity | null) => void;
   players: SelectedPlayer[];
   onPlayers: (players: SelectedPlayer[]) => void;
 }>): ReactElement {
@@ -34,6 +42,7 @@ function FinancialFields({
   const help = helps[kind] ?? text('monetary.directiveHelp');
   return (
     <div className={styles.form}>
+      {transfer && <HeldCurrencyField currencies={currencies} defaultId={currency?.id} />}
       {kind === 'ISSUE' && currency !== null && <IssuanceStatus currency={currency} />}
       <FormField label={text('monetary.amount')} htmlFor={`${id}-amount`} help={help}>
         <TextField
@@ -50,6 +59,7 @@ function FinancialFields({
           <FormField label={text('monetary.recipient')} htmlFor={`${id}-recipient`}>
             <Select id={`${id}-recipient`} name="recipientType" value={recipient} onChange={change}>
               <option value="PLAYER">{text('monetary.player')}</option>
+              <option value="COMPANY">{text('monetary.companyAccount')}</option>
               {kind === 'BANK_TRANSFER' ? (
                 <option value="TREASURY">{text('monetary.treasury')}</option>
               ) : (
@@ -57,6 +67,7 @@ function FinancialFields({
               )}
             </Select>
           </FormField>
+          {recipient === 'COMPANY' && <CompanyPicker value={company} onChange={onCompany} />}
           {recipient === 'PLAYER' && (
             <PlayerPicker
               label={text('monetary.recipient')}

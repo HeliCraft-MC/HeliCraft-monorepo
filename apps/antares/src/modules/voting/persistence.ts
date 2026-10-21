@@ -10,16 +10,26 @@ import {
   votingEligibleVoters,
   adminAuditLog,
 } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { Transaction } from '../permissions/transaction';
 import { createText, readText } from '../localized-content/service';
 import { DomainError, HTTP } from '../errors';
-import { eligibleUsers } from './eligibility';
+import { frozenVoters } from './electorates';
 import { validateVoting } from './domain';
 import type { VotingInput, VotingSubject } from './contracts';
 
 type VotingRecord = typeof votings.$inferSelect;
 async function lockedVoting(transaction: Transaction, id: string): Promise<VotingRecord> {
+  const [context] = await transaction
+    .select({ configuration: votings.configuration })
+    .from(votings)
+    .where(eq(votings.id, id));
+  if (context !== undefined && 'companyId' in context.configuration.electorate) {
+    // Corporate commands lock authorization and ownership before their voting row; legacy state workflows keep their existing state/row order.
+    await transaction.execute(
+      sql`select pg_advisory_xact_lock(741022), pg_advisory_xact_lock(741023)`,
+    );
+  }
   const [record] = await transaction.select().from(votings).where(eq(votings.id, id)).for('update');
   if (!record) {
     throw new DomainError(HTTP.notFound, 'VOTING_NOT_FOUND', 'Голосование не найдено');
@@ -32,11 +42,17 @@ async function advance(
   now: Date,
 ): Promise<VotingRecord> {
   if (record.status === 'SCHEDULED' && record.opensAt <= now) {
-    const ids = await eligibleUsers(transaction, record.configuration.electorate);
-    if (ids.length > 0) {
-      await transaction
-        .insert(votingEligibleVoters)
-        .values(ids.map((userId) => ({ votingId: record.id, userId })));
+    const voters = await frozenVoters(transaction, record.configuration.electorate);
+    if (voters.length > 0) {
+      await transaction.insert(votingEligibleVoters).values(
+        voters.map((voter) => ({
+          votingId: record.id,
+          voterId: voter.voterId,
+          userId: voter.userId,
+          subjectId: voter.subjectId,
+          weight: voter.weight,
+        })),
+      );
     }
     const status =
       record.configuration.survey?.manualClose !== true && record.closesAt <= now
@@ -187,6 +203,7 @@ type PublicationOptions = Readonly<{
   now?: Date;
   subject?: VotingSubject;
   governanceRevisionId?: string;
+  companyRevisionId?: string;
 }>;
 async function validatePublication(
   transaction: Transaction,
@@ -196,6 +213,18 @@ async function validatePublication(
   const input = await hydrateInput(transaction, record);
   validateVoting(input);
   validateSurvey(input, true);
+  if (
+    'companyId' in input.electorate &&
+    (options.subject?.type !== 'COMPANY_DECISION' ||
+      options.companyRevisionId === undefined ||
+      options.governanceRevisionId !== undefined)
+  ) {
+    throw new DomainError(
+      HTTP.conflict,
+      'CORPORATE_VOTING_BINDING_REQUIRED',
+      'Корпоративное голосование должно быть связано с точным решением и уставом',
+    );
+  }
   if (
     input.survey &&
     (options.subject ||
@@ -247,6 +276,7 @@ async function publishVoting(
       status: 'SCHEDULED',
       subject: options.subject ?? null,
       governanceRevisionId: options.governanceRevisionId ?? null,
+      companyRevisionId: options.companyRevisionId ?? null,
     })
     .where(eq(votings.id, id));
   await advance(
@@ -256,6 +286,7 @@ async function publishVoting(
       status: 'SCHEDULED',
       subject: options.subject ?? null,
       governanceRevisionId: options.governanceRevisionId ?? null,
+      companyRevisionId: options.companyRevisionId ?? null,
     },
     now,
   );

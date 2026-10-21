@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import type { TreatyContent } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
+import { taxEventLabel } from '../taxation/event-labels';
 
 const PERCENT_BPS = 100;
 const BASIS_POINTS = 10_000;
@@ -13,11 +14,9 @@ function TreatyDecisionContent({ content }: Readonly<{ content: TreatyContent }>
       <p>{displayText(content.description, locale)}</p>
       <p>
         {uiText(locale, 'Область действия', 'Scope')}: {content.category} ·{' '}
-        {uiText(
-          locale,
-          'Личные переводы при налоговых требованиях обеих сторон',
-          'Personal transfers with national claims from both parties',
-        )}
+        {taxEventLabel(content.event, locale)} ·{' '}
+        {content.categoryMapping?.firstCategory ?? content.category} ↔{' '}
+        {content.categoryMapping?.secondCategory ?? content.category}
       </p>
       {content.terms.mode === 'SHARED' ? (
         <p>

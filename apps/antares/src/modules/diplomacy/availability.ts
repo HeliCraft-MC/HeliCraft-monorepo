@@ -4,6 +4,7 @@ import type { Transaction } from '../permissions/transaction';
 import { monetaryError } from '../monetary/domain';
 import type { TreatyDirective, TreatyContent } from './contracts';
 import { treatyRecord, treatyRevision, parties } from './store';
+import { overlappingTreatyClaims } from './category-scope';
 
 function assertOfferNotExpired(payload: TreatyDirective, expiry: string | null): void {
   if (
@@ -90,9 +91,13 @@ async function assertTreatyConflicts(
     if (row.treaty.activeRevisionId !== null) {
       // oxlint-disable-next-line no-await-in-loop -- Prospective active revisions hydrate on the locked transaction connection.
       const revision = await treatyRevision(transaction, row.treaty.activeRevisionId);
+      // oxlint-disable-next-line no-await-in-loop -- Immutable party order defines each side of the ratified category mapping.
+      const otherParticipants = await parties(transaction, row.treaty.id);
       if (
-        revision.content.category === content.category &&
-        revision.content.event === content.event &&
+        overlappingTreatyClaims(
+          { content, parties: participants },
+          { content: revision.content, parties: otherParticipants },
+        ) &&
         windowsOverlap(content, revision.content)
       ) {
         monetaryError(

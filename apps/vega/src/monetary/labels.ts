@@ -9,6 +9,7 @@ const labelKeys: Readonly<Record<string, string>> = {
   TREASURY_TRANSFER: 'monetary.treasuryTransfer',
   TRANSFER: 'monetary.transferMoney',
   PLAYER: 'monetary.playerAccount',
+  COMPANY: 'monetary.companyAccount',
   CENTRAL_BANK: 'monetary.centralBankAccount',
   TREASURY: 'monetary.treasuryAccount',
   ISSUANCE: 'monetary.issuanceAccount',

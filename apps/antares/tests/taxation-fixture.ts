@@ -95,6 +95,7 @@ async function establishTaxOffice(
 async function establishMoney(
   db: Database['db'],
   fixture: Readonly<{ stateId: string; founderId: string; adminId: string }>,
+  code = 'TAX',
 ): Promise<string> {
   const actor = { id: fixture.founderId, admin: false };
   const directives = new MonetaryDirectiveService(db);
@@ -121,7 +122,7 @@ async function establishMoney(
   });
   await command({
     kind: 'CREATE_CURRENCY',
-    code: 'TAX',
+    code,
     name: { en: 'Tax test currency' },
     description: {},
   });

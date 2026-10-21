@@ -17,6 +17,27 @@ const labels: Readonly<Record<string, readonly [string, string]>> = {
   AMEND_TAX_LAW: ['Изменение налогового закона', 'Amend tax law'],
   AMEND_TREATY: ['Изменение договора', 'Amend treaty'],
   DENOUNCE_TREATY: ['Прекращение договора', 'Terminate treaty'],
+  SET_COMPANY_REGISTRATION_POLICY: ['правила регистрации компаний', 'company registration rules'],
+  REGISTER_COMPANY: ['одобрение регистрации компаний', 'approving company registrations'],
+  REGISTER_COMPANY_BRANCH: [
+    'одобрение регистрации филиалов',
+    'approving company branch registrations',
+  ],
+  PARTICIPATE_IN_COMPANY: [
+    'учреждение компаний и голосование от государства',
+    'state company formation and shareholder voting',
+  ],
+  ACQUIRE_COMPANY_SHARES: ['приобретение акций государством', 'state share acquisitions'],
+  TRANSFER_COMPANY_SHARES: ['передача государственных акций', 'transferring state-owned shares'],
+  MANAGE_FX_OFFERS: [
+    'публикация обеспеченных валютных предложений',
+    'publishing reserved currency offers',
+  ],
+  CANCEL_FX_OFFERS: ['отмена валютных предложений', 'cancelling currency offers'],
+  APPROVE_INTERBANK_EXCHANGE: [
+    'утверждение межбанковского обмена',
+    'approving interbank exchanges',
+  ],
   ESTABLISH_CENTRAL_BANK: ['Учреждение Центрального банка', 'Establish central bank'],
   CHANGE_BANK_CHARTER: ['Изменение устава банка', 'Change bank charter'],
   CREATE_CURRENCY: ['Создание валюты', 'Create currency'],

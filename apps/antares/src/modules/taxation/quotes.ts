@@ -1,17 +1,34 @@
 import { eq } from 'drizzle-orm';
-import { transferQuotes, users } from '../../db/schema';
+import { transferQuotes } from '../../db/schema';
 import type { Transaction } from '../permissions/transaction';
 import type { WalletTransfer } from '../monetary/contracts';
 import { monetaryHash, monetaryError } from '../monetary/domain';
 import { currencyRecord } from '../monetary/store';
 import { transferCalculation } from './context';
 import type { TaxCalculation } from './contracts';
+import { assertFinancialParty } from './party-store';
 
 const QUOTE_TTL_MS = 300_000;
 function transferCommandHash(input: WalletTransfer): string {
   const { quoteId: unused, ...command } = input;
   void unused;
   return monetaryHash(command);
+}
+async function storeTransferQuote(
+  transaction: Transaction,
+  input: Readonly<{ actorId: string; commandHash: string; calculation: TaxCalculation }>,
+): Promise<{ id: string; expiresAt: string; calculation: TaxCalculation }> {
+  const expiresAt = new Date(Date.now() + QUOTE_TTL_MS);
+  const id = crypto.randomUUID();
+  await transaction.insert(transferQuotes).values({
+    id,
+    actorId: input.actorId,
+    commandHash: input.commandHash,
+    calculationHash: monetaryHash(input.calculation),
+    calculation: input.calculation,
+    expiresAt,
+  });
+  return { id, calculation: input.calculation, expiresAt: expiresAt.toISOString() };
 }
 async function createQuote(
   transaction: Transaction,
@@ -22,25 +39,17 @@ async function createQuote(
   if (currency.status !== 'ACTIVE' || input.recipientId === actorId) {
     monetaryError('TRANSFER_UNAVAILABLE', 'Выберите другого получателя и действующую валюту');
   }
-  const [recipient] = await transaction
-    .select({ status: users.status })
-    .from(users)
-    .where(eq(users.id, input.recipientId));
-  if (recipient?.status !== 'ACTIVE') {
-    monetaryError('RECIPIENT_UNAVAILABLE', 'Получатель не найден или его аккаунт недоступен');
-  }
+  await assertFinancialParty(transaction, { kind: 'PLAYER', id: actorId });
+  await assertFinancialParty(transaction, {
+    kind: input.recipientType ?? 'PLAYER',
+    id: input.recipientId,
+  });
   const calculation = await transferCalculation(transaction, actorId, input);
-  const expiresAt = new Date(Date.now() + QUOTE_TTL_MS);
-  const id = crypto.randomUUID();
-  await transaction.insert(transferQuotes).values({
-    id,
+  return await storeTransferQuote(transaction, {
     actorId,
     commandHash: transferCommandHash(input),
-    calculationHash: monetaryHash(calculation),
     calculation,
-    expiresAt,
   });
-  return { id, calculation, expiresAt: expiresAt.toISOString() };
 }
 async function confirmQuote(
   transaction: Transaction,
@@ -69,4 +78,4 @@ async function confirmQuote(
   }
   return calculation;
 }
-export { createQuote, confirmQuote, transferCommandHash };
+export { createQuote, confirmQuote, storeTransferQuote, transferCommandHash };

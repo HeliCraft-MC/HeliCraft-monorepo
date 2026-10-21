@@ -13,6 +13,14 @@ const ElectorateSchema = z.discriminatedUnion('type', [
     stateId: z.uuid(),
     officeIds: z.array(z.uuid()).min(1).max(100),
   }),
+  z.object({ type: z.literal('COMPANY_SHAREHOLDERS'), companyId: z.uuid() }).strict(),
+  z
+    .object({
+      type: z.literal('COMPANY_OFFICE_HOLDERS'),
+      companyId: z.uuid(),
+      officeIds: z.array(z.uuid()).min(1).max(100),
+    })
+    .strict(),
 ]);
 const VotingInputSchema = z
   .object({
@@ -59,6 +67,16 @@ const VotingResultSchema = z
     abstentions: z.number(),
     quorumMet: z.boolean(),
     options: z.array(z.object({ id: z.uuid(), votes: z.number(), approved: z.boolean() })),
+    weights: z
+      .object({
+        eligible: z.string().regex(/^(?:0|[1-9][0-9]*)$/u),
+        participating: z.string().regex(/^(?:0|[1-9][0-9]*)$/u),
+        abstentions: z.string().regex(/^(?:0|[1-9][0-9]*)$/u),
+        options: z.array(
+          z.object({ id: z.uuid(), weight: z.string().regex(/^(?:0|[1-9][0-9]*)$/u) }),
+        ),
+      })
+      .optional(),
   })
   .openapi('VotingResult');
 const VotingSubjectSchema = z
@@ -71,8 +89,18 @@ const VotingDetailSchema = z
     input: VotingInputSchema,
     eligible: z.boolean(),
     hasVoted: z.boolean(),
+    entityVoters: z
+      .array(
+        z.object({
+          owner: z.object({ type: z.enum(['COMPANY', 'STATE']), id: z.uuid() }),
+          weight: z.string().regex(/^[1-9][0-9]*$/u),
+          hasVoted: z.boolean(),
+        }),
+      )
+      .optional(),
     result: VotingResultSchema.nullable(),
     governanceRevisionId: z.uuid().nullable(),
+    companyRevisionId: z.uuid().nullable(),
     surveyHtml: z
       .array(
         z.object({

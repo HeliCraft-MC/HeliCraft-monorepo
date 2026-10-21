@@ -4,17 +4,25 @@ import { useCallback, useState } from 'react';
 import type { ReactElement, SubmitEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { createTreatyDraft, editTreatyDraft } from '@helicraft/alhena';
-import type { LocalizedInput, Treaty, TreatyContent } from '@helicraft/alhena';
+import type { LocalizedInput, Treaty, TreatyContent, TaxableEventType } from '@helicraft/alhena';
 import { Alert, Button, FieldHelp } from '@helicraft/atria';
 import { LocalizedInputField } from '../localized-input';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { formText } from '../monetary/model';
+import { isTaxEvent } from '../taxation/event-labels';
 import { TreatyPartner } from './partner';
 import { TreatyTerms } from './terms';
 import styles from '../monetary/monetary.module.scss';
 
+function treatyEventFromForm(form: FormData): TaxableEventType {
+  const event = formText(form, 'event');
+  if (!isTaxEvent(event)) {
+    throw new Error('Select a supported event');
+  }
+  return event;
+}
 const PERCENT_BPS = 100;
 const BASIS_POINTS = 10_000;
 
@@ -94,13 +102,18 @@ function TreatyWizard({
       try {
         const form = new FormData(event.currentTarget);
         const expiresAt = formText(form, 'expiresAt');
+        const taxableEvent = treatyEventFromForm(form);
         setContent({
           name,
           description,
           document,
           type: 'TAX_TREATY',
-          event: 'PLAYER_TRANSFER',
-          category: formText(form, 'category'),
+          event: taxableEvent,
+          category: formText(form, 'firstCategory'),
+          categoryMapping: {
+            firstCategory: formText(form, 'firstCategory'),
+            secondCategory: formText(form, 'secondCategory'),
+          },
           taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS',
           terms:
             formText(form, 'mode') === 'SHARED'
@@ -146,8 +159,8 @@ function TreatyWizard({
             <p>
               {uiText(
                 locale,
-                'Налоговое соглашение · личные переводы',
-                'Tax treaty · personal transfers',
+                'Налоговое соглашение · официальные переводы',
+                'Tax treaty · official transfers',
               )}
             </p>
             <LocalizedInputField

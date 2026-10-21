@@ -1,6 +1,7 @@
 // oxlint-disable import/max-dependencies -- The voting card composes the shared voting and survey controls over one SDK read model.
 import { VotingSubjectDetails } from './voting-subject-details';
 import { VotingSummary } from './voting-summary';
+import { EntityVotingLinks } from '../companies/entity-voting-links';
 import { VotingResults } from './voting-results';
 import { VotingDraftEditor } from './voting-draft-editor';
 import { VotingAdminActions } from './voting-admin-actions';
@@ -84,6 +85,7 @@ function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): Re
         <VotingDraftEditor id={id} input={voting.input} />
       )}
       <VotingSubjectDetails subject={voting.subject} votingId={id} />
+      <EntityVotingLinks voting={voting} />
       <VotingParticipationPanel voting={voting} admin={admin} />
       {voting.result &&
         (survey ? (

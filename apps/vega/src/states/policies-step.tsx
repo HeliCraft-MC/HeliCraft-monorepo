@@ -88,6 +88,15 @@ function PoliciesStep(props: StateWizardStepProps): ReactElement {
               'SIGN_TREATY',
               'AMEND_TREATY',
               'DENOUNCE_TREATY',
+              'SET_COMPANY_REGISTRATION_POLICY',
+              'REGISTER_COMPANY',
+              'REGISTER_COMPANY_BRANCH',
+              'PARTICIPATE_IN_COMPANY',
+              'ACQUIRE_COMPANY_SHARES',
+              'TRANSFER_COMPANY_SHARES',
+              'MANAGE_FX_OFFERS',
+              'CANCEL_FX_OFFERS',
+              'APPROVE_INTERBANK_EXCHANGE',
             ].includes(action)
           ) {
             return (

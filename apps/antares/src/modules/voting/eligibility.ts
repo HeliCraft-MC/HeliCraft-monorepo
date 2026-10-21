@@ -13,9 +13,10 @@ import { DomainError, HTTP } from '../errors';
 import type { VotingInput } from './contracts';
 
 type Electorate = VotingInput['electorate'];
+type OrdinaryElectorate = Exclude<Electorate, { companyId: string }>;
 async function assertElectorateAvailable(
   transaction: Transaction,
-  electorate: Readonly<Electorate>,
+  electorate: Readonly<OrdinaryElectorate>,
 ): Promise<void> {
   if (electorate.type === 'GLOBAL_USERS' || electorate.type === 'SPECIFIC_USERS') {
     return;
@@ -46,7 +47,7 @@ async function assertElectorateAvailable(
 // oxlint-disable-next-line max-lines-per-function -- Explicit electorate adapters snapshot identities in the opening transaction.
 async function eligibleUsers(
   transaction: Transaction,
-  electorate: Readonly<Electorate>,
+  electorate: Readonly<OrdinaryElectorate>,
 ): Promise<string[]> {
   await assertElectorateAvailable(transaction, electorate);
   if (electorate.type === 'GLOBAL_USERS' || electorate.type === 'SPECIFIC_USERS') {
@@ -115,4 +116,4 @@ async function eligibleUsers(
   });
   return [...new Set(eligible.map((row) => row.id))];
 }
-export { eligibleUsers, assertElectorateAvailable };
+export { eligibleUsers, assertElectorateAvailable, type OrdinaryElectorate };

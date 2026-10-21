@@ -12,7 +12,7 @@ export const Route = createFileRoute('/app')({
     try {
       return { principal: await currentAccount() };
     } catch {
-      throw redirect({ to: '/login', search: { returnTo: location.pathname } });
+      throw redirect({ to: '/login', search: { returnTo: location.href } });
     }
   },
   head: ({ match, loaderData }) => ({

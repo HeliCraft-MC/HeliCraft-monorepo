@@ -19,6 +19,7 @@ import { directiveContext } from './directive-context';
 import {
   bankDto,
   currencyDto,
+  heldCurrencyDtos,
   accountDto,
   accountHistory,
   stateAccounts,
@@ -50,6 +51,10 @@ class MonetaryService {
         .from(currencies)
         .where(eq(currencies.stateId, stateId));
       const accounts = await stateAccounts(transaction, stateId, bank?.id ?? null);
+      const currencyViews = await heldCurrencyDtos(transaction, [
+        ...accounts.map((account) => account.currencyId),
+        ...(currency === undefined ? [] : [currency.id]),
+      ]);
       const directives: z.infer<typeof StateMonetarySchema>['directives'] = [];
       const ids = await stateDirectiveIds(transaction, stateId, page);
       const history = await accountHistory(transaction, accounts, page);
@@ -61,6 +66,7 @@ class MonetaryService {
       return {
         bank: bank === null ? null : await bankDto(transaction, bank),
         currency: currency ? await currencyDto(transaction, currency) : null,
+        currencies: currencyViews,
         accounts,
         directives,
         policyHistory: policies.slice(0, HISTORY_LIMIT),

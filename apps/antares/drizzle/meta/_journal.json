@@ -141,6 +141,167 @@
       "when": 1792322418144,
       "tag": "0019_harsh_thunderbolts",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792357118952,
+      "tag": "0020_tax_liability_settlement",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792357535238,
+      "tag": "0021_majestic_boom_boom",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792357587786,
+      "tag": "0022_tax_fractional_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792360614944,
+      "tag": "0023_reflective_microchip",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792360669073,
+      "tag": "0024_company_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792361799257,
+      "tag": "0025_overconfident_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792361888511,
+      "tag": "0026_white_zarda",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792361952811,
+      "tag": "0027_voting_subject_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792419893505,
+      "tag": "0028_sturdy_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792419938551,
+      "tag": "0029_company_charter_sources",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792421448477,
+      "tag": "0030_giant_rictor",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792421914173,
+      "tag": "0031_blue_argent",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792422034766,
+      "tag": "0032_share_acquisition_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792423651437,
+      "tag": "0033_glamorous_lenny_balinger",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792423778403,
+      "tag": "0034_third_franklin_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792423853211,
+      "tag": "0035_company_branch_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792424698383,
+      "tag": "0036_pretty_magneto",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792424915683,
+      "tag": "0037_company_financial_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792439132021,
+      "tag": "0038_chemical_marvel_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792439258547,
+      "tag": "0039_typed_tax_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792504917149,
+      "tag": "0040_good_moon_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792505249790,
+      "tag": "0041_lowly_hammerhead",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792505368174,
+      "tag": "0042_fx_integrity",
+      "breakpoints": true
     }
   ]
 }

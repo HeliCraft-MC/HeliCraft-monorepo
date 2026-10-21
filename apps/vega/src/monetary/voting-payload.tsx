@@ -26,7 +26,11 @@ function MonetaryVotingPayload({ id }: Readonly<{ id: string }>): ReactElement {
       {query.isPending && <output>{text('monetary.loading')}</output>}
       {query.data && (
         <>
-          <PayloadSummary payload={query.data.payload} code={query.data.code} />
+          <PayloadSummary
+            payload={query.data.payload}
+            code={query.data.code}
+            fxDisplay={query.data.fxDisplay}
+          />
           {query.data.treatyContent !== null && (
             <TreatyDecisionContent content={query.data.treatyContent} />
           )}

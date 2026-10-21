@@ -154,6 +154,7 @@ async function publicRevision(
     description: content.description,
     documentHtml: await renderMarkdown(resolveText(content.document, locale).value),
     event: content.event,
+    categoryMapping: content.categoryMapping,
     category: content.category,
     terms: content.terms,
     effectiveAt: content.effectiveAt,

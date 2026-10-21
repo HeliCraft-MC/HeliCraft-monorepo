@@ -1,5 +1,14 @@
 // oxlint-disable import/group-exports -- Drizzle's schema entry point re-exports explicit tables from separate domain files.
 export {
+  fxOffers,
+  fxInterbankTrades,
+  fxInterbankApprovals,
+  fxQuotes,
+  fxExchanges,
+  fxExchangeJournals,
+  fxOfferEvents,
+} from './fx-schema';
+export {
   galleryImages,
   userStatus,
   roleName,
@@ -91,3 +100,42 @@ export {
 export { siteSettings } from './site-schema';
 
 export { institutionPolicyTexts } from './institution-policy-schema';
+export { taxFractionalBalances, taxFractionalMovements } from './tax-accrual-schema';
+export {
+  companies,
+  legalSubjects,
+  companyDrafts,
+  companyRevisions,
+  companyRevisionTexts,
+  companyOffices,
+  companyOfficeHolders,
+  companyRegistrationPolicyRevisions,
+  companyRegistrationApplications,
+  companyFormationConsents,
+  companyConsentRevocations,
+  companyStatusHistory,
+} from './company-schema';
+export {
+  companyDecisions,
+  companyDecisionTexts,
+  companyDecisionApprovals,
+  companyApprovalRevocations,
+  companyDecisionVotes,
+} from './company-governance-schema';
+export {
+  companyShareBalances,
+  companyShareEvents,
+  companySharePostings,
+} from './company-ownership-schema';
+export {
+  companyShareOperations,
+  companyShareConsents,
+  companyShareConsentRevocations,
+  companyShareAcceptances,
+} from './company-share-consent-schema';
+
+export {
+  companyBranches,
+  companyBranchApplications,
+  companyBranchEvents,
+} from './company-branch-schema';
