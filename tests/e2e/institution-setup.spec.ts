@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 // oxlint-disable max-lines-per-function -- The institution lifecycle verifies scoped authority, initial procedure publication and preserved history together.
 import { expect } from '@playwright/test';
 import { test } from './fixtures';
@@ -94,7 +95,12 @@ test('state management explains missing diplomacy, blocks office-holder departur
     await expect(
       page.getByRole('heading', { name: 'Предложения о государственном устройстве', exact: true }),
     ).toBeVisible();
-    await nav.getByRole('link', { name: 'Центральный банк', exact: true }).click();
+    await nav.getByRole('link', { name: 'Институты', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Институты государства', exact: true })
+      .getByRole('link', { name: /^Центральный банк/u })
+      .click();
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Название · Русский', { exact: true }).fill(`Банк ${suffix}`);
     const settings = page
       .getByRole('heading', { name: 'Создание валюты', exact: true })
@@ -118,7 +124,11 @@ test('state management explains missing diplomacy, blocks office-holder departur
         );
       })
       .toBe(true);
-    await expect(nav.getByRole('link', { name: 'Валюта', exact: true })).toBeVisible();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Инструменты институтов', exact: true })
+        .getByRole('link', { name: 'Валюта', exact: true }),
+    ).toBeVisible();
     await nav.getByRole('link', { name: 'История изменений', exact: true }).click();
     await expect(
       page.getByText('Первоначальные процедуры института утверждены', { exact: true }),

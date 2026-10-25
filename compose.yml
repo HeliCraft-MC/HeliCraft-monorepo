@@ -30,6 +30,7 @@ services:
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
       COMMUNITY_LINKS: '${COMMUNITY_LINKS:-[]}'
       SITE_PHASE: ${SITE_PHASE:-PRELAUNCH}
+      MINECRAFT_SERVICE_ACTORS: '${MINECRAFT_SERVICE_ACTORS:-[]}'
       MINECRAFT_ADDRESS: ${MINECRAFT_ADDRESS:-}
     depends_on:
       migrate: { condition: service_completed_successfully }

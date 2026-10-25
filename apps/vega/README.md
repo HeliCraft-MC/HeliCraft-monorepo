@@ -42,3 +42,7 @@ Interface translations live in `src/locales/ru.ts` and `src/locales/en.ts`, usin
 [Domain model, Governance, exact accounting, API, screens and verification](../../docs/economy/monetary.md).
 
 Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/economy/taxation.md) and [Diplomacy](../../docs/states/diplomacy.md).
+
+## Minecraft Integration V1
+
+[Architecture](../../docs/architecture/minecraft-integration.md) · [development and tests](../../docs/development/minecraft-plugins.md) · [player authentication](../../docs/development/minecraft-authentication.md) · [verification](../../docs/verification/minecraft-integration-2026-10-25.md). Antares owns identity/challenges/leases/events; protected Vega `/app/minecraft` confirms the code and shows private presence.

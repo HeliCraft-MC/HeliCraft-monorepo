@@ -3,6 +3,12 @@
   "compilerOptions": {
     "types": ["bun"]
   },
-  "include": ["scripts/**/*.ts", "infra/**/*.ts", "playwright.config.ts", "tests/e2e/**/*.ts"],
+  "include": [
+    "scripts/**/*.ts",
+    "infra/**/*.ts",
+    "playwright.config.ts",
+    "tests/e2e/**/*.ts",
+    "tests/minecraft/**/*.ts"
+  ],
   "exclude": ["archive", "node_modules"]
 }

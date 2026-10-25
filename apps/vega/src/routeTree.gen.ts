@@ -31,6 +31,7 @@ import { Route as AdminTaxOfficesRouteImport } from './routes/admin.tax-offices'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppMinecraftRouteImport } from './routes/app.minecraft'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppSharesRouteImport } from './routes/app.shares'
 import { Route as AppVotingsRouteImport } from './routes/app.votings'
@@ -195,6 +196,11 @@ const AdminVotingsRoute = AdminVotingsRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMinecraftRoute = AppMinecraftRouteImport.update({
+  id: '/minecraft',
+  path: '/minecraft',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
@@ -498,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/minecraft': typeof AppMinecraftRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
@@ -571,6 +578,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/minecraft': typeof AppMinecraftRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
@@ -651,6 +659,7 @@ export interface FileRoutesById {
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/minecraft': typeof AppMinecraftRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
@@ -732,6 +741,7 @@ export interface FileRouteTypes {
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
+    | '/app/minecraft'
     | '/app/notifications'
     | '/app/shares'
     | '/app/votings'
@@ -805,6 +815,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/tax-offices'
     | '/admin/votings'
+    | '/app/minecraft'
     | '/app/notifications'
     | '/app/shares'
     | '/app/votings'
@@ -884,6 +895,7 @@ export interface FileRouteTypes {
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
+    | '/app/minecraft'
     | '/app/notifications'
     | '/app/shares'
     | '/app/votings'
@@ -1129,6 +1141,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/minecraft': {
+      id: '/app/minecraft'
+      path: '/minecraft'
+      fullPath: '/app/minecraft'
+      preLoaderRoute: typeof AppMinecraftRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/notifications': {
@@ -1602,6 +1621,7 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
+  AppMinecraftRoute: typeof AppMinecraftRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppSharesRoute: typeof AppSharesRoute
   AppVotingsRoute: typeof AppVotingsRoute
@@ -1629,6 +1649,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppMinecraftRoute: AppMinecraftRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppSharesRoute: AppSharesRoute,
   AppVotingsRoute: AppVotingsRoute,

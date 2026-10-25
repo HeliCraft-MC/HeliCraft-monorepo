@@ -1,3 +1,4 @@
+import { invalidateMinecraft } from '../minecraft/lifecycle';
 import { isOperatorName } from '../permissions/operators';
 import { randomBytes } from 'node:crypto';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -147,6 +148,7 @@ export class IdentityService {
           );
         }
         const now = new Date();
+        await invalidateMinecraft(transaction, userId, 'USERNAME_CHANGED');
         await transaction
           .update(users)
           .set({ username, usernameNormalized: username.toLowerCase(), updatedAt: now })
@@ -193,6 +195,7 @@ export class IdentityService {
         throw new DomainError(HTTP.forbidden, 'WRONG_PASSWORD', 'Текущий пароль неверен');
       }
       const now = new Date();
+      await invalidateMinecraft(transaction, userId, 'CREDENTIALS_CHANGED');
       await transaction
         .update(userCredentials)
         .set({ passwordHash, updatedAt: now })

@@ -4,6 +4,65 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type MinecraftIssuedChallenge = MinecraftChallenge & {
+    accountId: string;
+    verifier: string;
+    code: string;
+    confirmationUrl: string;
+    serverName: string;
+};
+
+export type MinecraftChallenge = {
+    id: string;
+    username: string;
+    createdAt: string;
+    expiresAt: string;
+    status: 'WAITING_AUTH' | 'APPROVED' | 'CONSUMED' | 'REJECTED' | 'EXPIRED' | 'DISCONNECTED';
+};
+
+export type PlatformError = {
+    message: string;
+    code?: string;
+};
+
+export type MinecraftAdmission = {
+    session: MinecraftSession;
+    backendId: string;
+} | null;
+
+export type MinecraftSession = {
+    id: string;
+    accountId: string;
+    username: string;
+    joinedAt: string | null;
+    endedAt: string | null;
+    expiresAt: string;
+    online: boolean;
+};
+
+export type AccountMinecraft = {
+    accountId: string;
+    username: string;
+    challenges: Array<MinecraftChallenge>;
+    session: MinecraftSession & ({
+        [key: string]: unknown;
+    } | null);
+    lastJoinedAt: string | null;
+    events: Array<{
+        id: string;
+        type: 'MINECRAFT_SESSION_STARTED' | 'MINECRAFT_SESSION_ENDED';
+        occurredAt: string;
+        reason: string | null;
+    }>;
+};
+
+export type MinecraftProfile = {
+    accountId: string;
+    username: string;
+    serverName: string;
+    states: Array<string>;
+};
+
 export type Principal = {
     id: string;
     username: string;
@@ -12,11 +71,6 @@ export type Principal = {
     currentSkinId: string | null;
     roles: Array<'PLAYER' | 'EDITOR' | 'MODERATOR' | 'ADMIN' | 'OWNER'>;
     permissions: Array<string>;
-};
-
-export type PlatformError = {
-    message: string;
-    code?: string;
 };
 
 export type Success = {
@@ -2273,6 +2327,720 @@ export type ApiError = {
 export type Readiness = {
     status: 'ready';
 };
+
+export type CreateMinecraftChallengeData = {
+    body: {
+        username: string;
+        connectionId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/challenges';
+};
+
+export type CreateMinecraftChallengeErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type CreateMinecraftChallengeError = CreateMinecraftChallengeErrors[keyof CreateMinecraftChallengeErrors];
+
+export type CreateMinecraftChallengeResponses = {
+    /**
+     * Result
+     */
+    200: MinecraftIssuedChallenge;
+};
+
+export type CreateMinecraftChallengeResponse = CreateMinecraftChallengeResponses[keyof CreateMinecraftChallengeResponses];
+
+export type StatusMinecraftChallengeData = {
+    body: {
+        connectionId: string;
+        verifier: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/internal/minecraft/challenges/{id}/status';
+};
+
+export type StatusMinecraftChallengeErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type StatusMinecraftChallengeError = StatusMinecraftChallengeErrors[keyof StatusMinecraftChallengeErrors];
+
+export type StatusMinecraftChallengeResponses = {
+    /**
+     * Result
+     */
+    200: {
+        challenge: MinecraftChallenge;
+        admission: MinecraftAdmission;
+    };
+};
+
+export type StatusMinecraftChallengeResponse = StatusMinecraftChallengeResponses[keyof StatusMinecraftChallengeResponses];
+
+export type ConsumeMinecraftChallengeData = {
+    body: {
+        connectionId: string;
+        verifier: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/internal/minecraft/challenges/{id}/consume';
+};
+
+export type ConsumeMinecraftChallengeErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type ConsumeMinecraftChallengeError = ConsumeMinecraftChallengeErrors[keyof ConsumeMinecraftChallengeErrors];
+
+export type ConsumeMinecraftChallengeResponses = {
+    /**
+     * Result
+     */
+    200: {
+        challenge: MinecraftChallenge;
+        admission: MinecraftAdmission;
+    };
+};
+
+export type ConsumeMinecraftChallengeResponse = ConsumeMinecraftChallengeResponses[keyof ConsumeMinecraftChallengeResponses];
+
+export type CancelMinecraftChallengeData = {
+    body: {
+        connectionId: string;
+        verifier: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/internal/minecraft/challenges/{id}/cancel';
+};
+
+export type CancelMinecraftChallengeErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type CancelMinecraftChallengeError = CancelMinecraftChallengeErrors[keyof CancelMinecraftChallengeErrors];
+
+export type CancelMinecraftChallengeResponses = {
+    /**
+     * Result
+     */
+    200: {
+        challenge: MinecraftChallenge;
+        admission: MinecraftAdmission;
+    };
+};
+
+export type CancelMinecraftChallengeResponse = CancelMinecraftChallengeResponses[keyof CancelMinecraftChallengeResponses];
+
+export type GetAccountMinecraftData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/account/minecraft';
+};
+
+export type GetAccountMinecraftErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type GetAccountMinecraftError = GetAccountMinecraftErrors[keyof GetAccountMinecraftErrors];
+
+export type GetAccountMinecraftResponses = {
+    /**
+     * Result
+     */
+    200: AccountMinecraft;
+};
+
+export type GetAccountMinecraftResponse = GetAccountMinecraftResponses[keyof GetAccountMinecraftResponses];
+
+export type DecideMinecraftChallengeData = {
+    body: {
+        decision: 'APPROVE' | 'REJECT';
+        code?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/minecraft/challenges/{id}/decision';
+};
+
+export type DecideMinecraftChallengeErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type DecideMinecraftChallengeError = DecideMinecraftChallengeErrors[keyof DecideMinecraftChallengeErrors];
+
+export type DecideMinecraftChallengeResponses = {
+    /**
+     * Result
+     */
+    200: MinecraftChallenge;
+};
+
+export type DecideMinecraftChallengeResponse = DecideMinecraftChallengeResponses[keyof DecideMinecraftChallengeResponses];
+
+export type GetMinecraftAdmissionData = {
+    body: {
+        accountId: string;
+        username: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/paper/admission';
+};
+
+export type GetMinecraftAdmissionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type GetMinecraftAdmissionError = GetMinecraftAdmissionErrors[keyof GetMinecraftAdmissionErrors];
+
+export type GetMinecraftAdmissionResponses = {
+    /**
+     * Result
+     */
+    200: MinecraftAdmission;
+};
+
+export type GetMinecraftAdmissionResponse = GetMinecraftAdmissionResponses[keyof GetMinecraftAdmissionResponses];
+
+export type GetMinecraftProfileData = {
+    body: {
+        accountId: string;
+        username: string;
+        locale: 'ru' | 'en';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/paper/profile';
+};
+
+export type GetMinecraftProfileErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type GetMinecraftProfileError = GetMinecraftProfileErrors[keyof GetMinecraftProfileErrors];
+
+export type GetMinecraftProfileResponses = {
+    /**
+     * Result
+     */
+    200: MinecraftProfile;
+};
+
+export type GetMinecraftProfileResponse = GetMinecraftProfileResponses[keyof GetMinecraftProfileResponses];
+
+export type HeartbeatRigelMinecraftSessionData = {
+    body: {
+        sessionId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/rigel/heartbeat';
+};
+
+export type HeartbeatRigelMinecraftSessionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type HeartbeatRigelMinecraftSessionError = HeartbeatRigelMinecraftSessionErrors[keyof HeartbeatRigelMinecraftSessionErrors];
+
+export type HeartbeatRigelMinecraftSessionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        admission: MinecraftAdmission;
+    };
+};
+
+export type HeartbeatRigelMinecraftSessionResponse = HeartbeatRigelMinecraftSessionResponses[keyof HeartbeatRigelMinecraftSessionResponses];
+
+export type CloseRigelMinecraftSessionData = {
+    body: {
+        sessionId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/rigel/close';
+};
+
+export type CloseRigelMinecraftSessionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type CloseRigelMinecraftSessionError = CloseRigelMinecraftSessionErrors[keyof CloseRigelMinecraftSessionErrors];
+
+export type CloseRigelMinecraftSessionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        admission: MinecraftAdmission;
+    };
+};
+
+export type CloseRigelMinecraftSessionResponse = CloseRigelMinecraftSessionResponses[keyof CloseRigelMinecraftSessionResponses];
+
+export type HeartbeatDenebMinecraftSessionData = {
+    body: {
+        sessionId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/deneb/heartbeat';
+};
+
+export type HeartbeatDenebMinecraftSessionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type HeartbeatDenebMinecraftSessionError = HeartbeatDenebMinecraftSessionErrors[keyof HeartbeatDenebMinecraftSessionErrors];
+
+export type HeartbeatDenebMinecraftSessionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        admission: MinecraftAdmission;
+    };
+};
+
+export type HeartbeatDenebMinecraftSessionResponse = HeartbeatDenebMinecraftSessionResponses[keyof HeartbeatDenebMinecraftSessionResponses];
+
+export type CloseDenebMinecraftSessionData = {
+    body: {
+        sessionId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/deneb/close';
+};
+
+export type CloseDenebMinecraftSessionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type CloseDenebMinecraftSessionError = CloseDenebMinecraftSessionErrors[keyof CloseDenebMinecraftSessionErrors];
+
+export type CloseDenebMinecraftSessionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        admission: MinecraftAdmission;
+    };
+};
+
+export type CloseDenebMinecraftSessionResponse = CloseDenebMinecraftSessionResponses[keyof CloseDenebMinecraftSessionResponses];
+
+export type JoinDenebMinecraftSessionData = {
+    body: {
+        sessionId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/deneb/join';
+};
+
+export type JoinDenebMinecraftSessionErrors = {
+    /**
+     * Result
+     */
+    400: PlatformError;
+    /**
+     * Result
+     */
+    401: PlatformError;
+    /**
+     * Result
+     */
+    403: PlatformError;
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: PlatformError;
+    /**
+     * Result
+     */
+    429: PlatformError;
+    /**
+     * Result
+     */
+    503: PlatformError;
+};
+
+export type JoinDenebMinecraftSessionError = JoinDenebMinecraftSessionErrors[keyof JoinDenebMinecraftSessionErrors];
+
+export type JoinDenebMinecraftSessionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        admission: MinecraftAdmission;
+    };
+};
+
+export type JoinDenebMinecraftSessionResponse = JoinDenebMinecraftSessionResponses[keyof JoinDenebMinecraftSessionResponses];
 
 export type RegisterData = {
     body: {

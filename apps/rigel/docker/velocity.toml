@@ -1,14 +1,15 @@
 config-version = "2.7"
 bind = "0.0.0.0:25565"
-motd = "HeliCraft / Rigel"
+motd = "Minecraft"
 show-max-players = 20
-online-mode = true
-force-key-authentication = true
+online-mode = false
+force-key-authentication = false
 player-info-forwarding-mode = "modern"
 forwarding-secret-file = "forwarding.secret"
 [servers]
 deneb = "deneb:25566"
 try = ["deneb"]
+[forced-hosts]
 [advanced]
 connection-timeout = 5000
 read-timeout = 30000

@@ -1,0 +1,5 @@
+main:
+  pre-limbo-profile-request-plugins: [rigel]
+  prepare-min-version: '26_1'
+  prepare-max-version: '26_3'
+  logging-enabled: false

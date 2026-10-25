@@ -13,6 +13,8 @@ Start with the audience and the question. Current system contracts, product inte
 - **Interface verification — 2026-10-22:** [companies, shared forms and navigation](verification/company-interface-2026-10-22.md).
 - **Workspace UX — 2026-10-23, follow-up 2026-10-25:** [responsive workspaces and poll workflows](verification/workspace-ux-2026-10-23.md).
 
+- **Minecraft:** [architecture](architecture/minecraft-integration.md), [plugin development](development/minecraft-plugins.md), [signing in](development/minecraft-authentication.md), [verification 2026-10-25](verification/minecraft-integration-2026-10-25.md).
+
 ## Reference map
 
 | Section                                | Contents and entry points                                                                                                                                                                         |

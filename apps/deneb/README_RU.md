@@ -4,24 +4,28 @@
 
 **Материализовать HeliCraft внутри Minecraft.**
 
-Java 25 · Paper 26.2 · Gradle Kotlin DSL · Adventure · JTS · Caffeine
+Java 25 · Paper 26.2 build 129 · Gradle Kotlin DSL · Adventure · JTS · Caffeine
 
-Deneb — тонкий адаптер Paper для будущих физических правил мира. `/deneb` отправляет приветствие Adventure; независимый от фреймворка `WorldGeometry` использует JTS и Caffeine. `ANTARES_URL` задаёт неблокирующую HTTP-проверку API. Работа с БД и защита игровых территорий пока не реализованы.
+Денеб проверяет точный допуск UUID/имени Антареса, переданный Velocity, до игры. Он подтверждает реальные входы в Paper, поддерживает lease с TTL и закрывает точную сессию при выходе. Игрок видит название из настроек, проверенный профиль и все действительные гражданства либо нейтральный ответ. Команды: `/heli`, `/heli status`, `/heli profile`. Гражданство не означает физическое местоположение.
 
 ```sh
 bun run build:deneb
 bun run test:deneb
 bun run dev:deneb
+bun run minecraft:up
+bun run minecraft:logs deneb
+bun run test:minecraft:contracts
+bun run test:minecraft
 ```
 
-Нужен JDK 25. Артефакт: `apps/deneb/build/libs/deneb.jar`. Continuous mode Gradle пересобирает исходники, но не перезагружает работающий плагин. Paper API и Adventure — compile-only; JTS/Caffeine включаются и изолируются через Shadow. JUnit 5 проверяет пространственный примитив. Координаты здесь лежат в плоскости x/z Minecraft, в отличие от примерного SRID 4326 в PostGIS.
+JAR: `apps/deneb/build/libs/deneb.jar`. Используйте Java 25 и корневой Gradle 9.1.0 wrapper. Paper/Adventure подключены compile-only; JTS, Caffeine и Gson общего клиента включены и изолированы. `WorldGeometry` остаётся независимым пространственным примитивом на будущее, без территориальных полномочий. Общий [Java-клиент](../../packages/minecraft-client/README_RU.md) выполняет ограниченный REST с приватными `DENEB_SERVICE_TOKEN`, `ANTARES_URL`. Действия Bukkit/игрока возвращаются на главный поток; явно асинхронный pre-login может ожидать ограниченный запрос.
 
-Сборка в контейнере из корня: `docker compose -f apps/deneb/compose.yml build deneb`. Compose использует только стадию `build` Dockerfile; jar плагина находится в образе по пути `/workspace/apps/deneb/build/libs/deneb.jar`. Minecraft-серверы не скачиваются и не запускаются, зависимости Antares не поднимаются. Установите jar на отдельно управляемый сервер и перезапустите его после изменения плагина.
+У Денеба нет регистрации/login/паролей, прямого PostgreSQL/S3 и экономических полномочий. Будущие территории/claims используют проверенные локальные snapshots, без HTTP на каждый movement/block event. Paper остаётся приватным с modern forwarding и случайным secret. Disposable Docker собирает свежие исходники и принимает тестовую EULA по явному разрешению владельца. Gradle continuous mode только пересобирает; после изменения нужен перезапуск Paper.
 
-Будущие задачи: границы, юрисдикции, защищённая собственность, физические учреждения, геология, залежи и реальные товары. Игровой процесс должен оставаться обычным Minecraft, а не набором меню.
+[Архитектура](../../docs/architecture/minecraft-integration_RU.md) · [разработка/runtime/debugging](../../docs/development/minecraft-plugins_RU.md) · [авторизация](../../docs/development/minecraft-authentication_RU.md) · [проверки](../../docs/verification/minecraft-integration-2026-10-25_RU.md) · [правила агента](AGENTS.md)
 
-Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/development/setup-research_RU.md).
+Обязательны JUnit, строгие TS/Java проверки и реальные contract/runtime tests; компиляция не доказывает игровой допуск. У MockBukkit есть ветка 26.2, но V1 проверяет чистую логику и настоящий Paper без ещё одной изменяемой snapshot-зависимости.
 
 ## Название
 
-Денеб — α Лебедя, звезда в созвездии Лебедя. [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/).
+Денеб — α Лебедя. [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/).

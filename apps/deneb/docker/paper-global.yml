@@ -1,6 +1,6 @@
-_version: 32
+_version: 31
 proxies:
   velocity:
     enabled: true
-    online-mode: true
+    online-mode: false
     secret: '__FORWARDING_SECRET__'

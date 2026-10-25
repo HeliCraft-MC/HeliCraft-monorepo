@@ -12,3 +12,5 @@ Current cross-cutting contracts and application boundaries belong here. Domain r
 | Publishing and files | [Editorial Markdown](content.md), [gallery](gallery.md), [skin storage](skin-storage.md)                                                                                                        |
 | Site identity        | [Public server settings and display branding](site-settings.md)                                                                                                                                 |
 | Quality              | [Requirements and narrowly scoped exceptions](../development/quality.md)                                                                                                                        |
+
+- [Minecraft Integration V1](minecraft-integration.md) — single identity, authentication, forwarding, sessions and events.

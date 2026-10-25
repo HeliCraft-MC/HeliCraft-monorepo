@@ -1,3 +1,4 @@
+import { invalidateMinecraft } from '../minecraft/lifecycle';
 import { activeOwners, targetRoles as rolesOfTarget } from './invariants';
 import { and, eq, isNull } from 'drizzle-orm';
 
@@ -89,6 +90,7 @@ class AdministrationService extends AdministrationReader {
         throw new DomainError(HTTP.notFound, 'USER_NOT_FOUND', 'Пользователь не найден');
       }
       if (status !== 'ACTIVE') {
+        await invalidateMinecraft(transaction, id, 'ACCOUNT_UNAVAILABLE');
         await transaction
           .update(authSessions)
           .set({ revokedAt: new Date() })
@@ -119,6 +121,7 @@ class AdministrationService extends AdministrationReader {
       if (!activeRoles.includes('OWNER') && highest(targetRoles) >= highest(activeRoles)) {
         throw new DomainError(HTTP.forbidden, 'ROLE_BOUNDARY', 'Недостаточно полномочий');
       }
+      await invalidateMinecraft(transaction, id, 'SESSIONS_REVOKED');
       await transaction
         .update(authSessions)
         .set({ revokedAt: new Date() })

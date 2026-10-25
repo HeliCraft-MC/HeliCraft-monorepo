@@ -8,7 +8,7 @@ if (
 ) {
   throw new Error('Invalid Java task');
 }
-const names = target === 'all' ? ['deneb', 'rigel'] : [target];
+const names = target === 'all' ? ['minecraft-client', 'deneb', 'rigel'] : [target];
 const taskNames: Record<string, string[]> = {
   build: ['build'],
   test: ['test'],

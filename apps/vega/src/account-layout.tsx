@@ -12,6 +12,7 @@ function accountSectionLabel(
   locale: ReturnType<typeof useTranslation>['locale'],
 ): string {
   const sections = [
+    ['/app/minecraft', text('minecraft.title')],
     ['/app/states', text('states.title')],
     ['/app/notifications', locale === 'ru' ? 'Входящие' : 'Inbox'],
     ['/app/companies', locale === 'ru' ? 'Компании' : 'Companies'],
@@ -48,6 +49,10 @@ function AccountLayout(): ReactElement {
             <Link to="/app" activeOptions={exact}>
               <Icon name="overview" />
               {text('common.overview')}
+            </Link>
+            <Link to="/app/minecraft">
+              <Icon name="user" />
+              {text('minecraft.title')}
             </Link>
             <Link to="/app/notifications">
               <Icon name="inbox" />

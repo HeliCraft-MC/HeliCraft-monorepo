@@ -37,6 +37,11 @@ export function AccountHome(): ReactElement {
         <AccountTasks />
         <ActionPanel title={locale === 'ru' ? 'Профиль и настройки' : 'Profile and settings'}>
           <div className={styles.actionGrid}>
+            <Link className={styles.actionCard} to="/app/minecraft">
+              <h2>{text('minecraft.title')}</h2>
+              <p>{text('minecraft.pending')}</p>
+              <Icon name="arrowRight" />
+            </Link>
             <Link className={styles.actionCard} to="/app/settings/profile">
               <h2>{text('account.profile')}</h2>
               <p>{text('account.profileHint')}</p>

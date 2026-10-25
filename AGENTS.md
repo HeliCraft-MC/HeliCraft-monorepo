@@ -3,7 +3,7 @@
 ## Repository
 
 - Active Bun workspaces: `apps/vega`, `apps/antares`, `packages/atria`, `packages/alhena`. Install once at the root; use the root lockfile and `workspace:*` for internal packages.
-- `apps/deneb` and `apps/rigel`: Java 25 Gradle Kotlin DSL plugins, built with the root wrapper. Use JUnit 5.
+- `apps/deneb`, `apps/rigel` and shared `packages/minecraft-client`: Java 25 Gradle Kotlin DSL plugins, built with the root wrapper. Use JUnit 5.
 - `apps/altair`: documentation only until explicitly requested for implementation.
 - `archive/`: preserved Vesper, Teapot, Soon and old docs. Archived local AGENTS.md apply only there. Do not include archived projects in active builds or rewrite their files without a specific request.
 - Keep README.md and README_RU.md in sync, with language switches at the top. Product roles are in `docs/product-map.md`.
@@ -20,7 +20,7 @@
 - Do not import application implementation into another application's runtime. Shared UI comes from Atria; TS API consumers use Alhena.
 - Code generation and tests may inspect/import API contracts to export OpenAPI or exercise the real app. No published internal packages are required.
 - Antares is the source of truth for social, political, legal and economic world state. Keep handlers thin and business logic framework-independent.
-- Rigel's custom identity authentication is not implemented. Preserve secure standard authentication until a reviewed identity flow exists.
+- Rigel uses the Antares connection-bound admission flow. Offline proxy mode requires the pinned Limbo gate, guarded backend transitions, Deneb admission checks and private modern-forwarding Paper; never fall back to anonymous/offline identity.
 
 ## Code and validation
 
@@ -33,14 +33,14 @@
 - Use Bun for JS scripts/CLIs. Run `build:ts`, `typecheck`, `lint`, `format:check`, `test:unit` for TS changes; relevant Playwright/Testcontainers tests for integration changes.
 - Java changes: build and relevant JUnit tests through Gradle. Continuous build does not reload live plugins.
 - Target database is `helicraft` (PostgreSQL). Review generated SQL and apply migrations; do not run schema push against live databases.
-- Validate root and affected per-app Compose definitions. Never accept Minecraft EULA on the user's behalf.
+- Validate root and affected per-app Compose definitions. Never accept production Minecraft EULA implicitly. The explicitly authorized isolated Minecraft test environment accepts EULA automatically; never reuse user worlds.
 - Report unavailable Docker/browser/native tooling separately from code regressions.
 
 ## Web foundation
 
 - `docs/GDD/` is authoritative for game systems. Account UUIDs, editorial content and game/world events are separate domains; do not invent live game state for public UI.
 - Vega uses TanStack Start SSR for public pages and CSR for protected `/app` and `/admin`. Public content and metadata must exist in the HTML response without JavaScript. Never forward session cookies into public SSR loaders.
-- Antares owns identity. Player UUIDs are immutable; names are mutable labels. Rigel/Velocity identity authentication requires a separate security review before implementation.
+- Antares owns identity. Player UUIDs are immutable; names are mutable labels. Rigel/Velocity identity changes require review of connection binding, one-time consumption and fail-closed forwarding, plus the documented security/runtime tests.
 - Server display identity must come only from Antares public site settings. Use `useSiteBranding().serverName` or `{serverName}` UI messages and loader-provided identity for metadata; never hardcode a server display name. Keep package, cookie and infrastructure identifiers stable.
 - Reusable UI belongs in Atria, with meaningful documentation and Storybook states. Vega contains product composition. Preserve keyboard navigation, labelled fields and reduced motion.
 - Consult Context7, official documentation and installed sources when framework APIs or compatibility are uncertain.

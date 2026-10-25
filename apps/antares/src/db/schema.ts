@@ -140,3 +140,5 @@ export {
   companyBranchEvents,
 } from './company-branch-schema';
 export { companyMedia } from './company-media-schema';
+
+export { minecraftChallenges, minecraftSessions, minecraftEvents } from './minecraft-schema';

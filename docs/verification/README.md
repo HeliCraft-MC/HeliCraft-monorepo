@@ -16,3 +16,5 @@ Evidence of specific completed runs, not a promise that tooling or deployment is
 | [Workspace UX — 2026-10-23](workspace-ux-2026-10-23.md) / [Русский](workspace-ux-2026-10-23_RU.md)                          | Responsive layouts, SPA/draft retention, institutions, automatic voting completion and Storybook; follow-up 2026-10-25                                |
 
 Some reports reference local `run/` logs and screenshots. Those are run artifacts, may be untracked, and are not guaranteed to exist in a fresh checkout. Missing artifacts must not be described as newly inspected evidence.
+
+- [Minecraft Integration V1 — 2026-10-25](minecraft-integration-2026-10-25.md) — security contracts, real Compose, Java, browser and Minecraft protocol.

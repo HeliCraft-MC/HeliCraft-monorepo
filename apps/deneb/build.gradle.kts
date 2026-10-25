@@ -10,6 +10,7 @@ repositories {
 }
 java { toolchain.languageVersion.set(JavaLanguageVersion.of(25)) }
 dependencies {
+    implementation(project(":minecraft-client"))
     compileOnly("io.papermc.paper:paper-api:26.2.build.129-stable")
     compileOnly("net.kyori:adventure-api:4.25.0")
     implementation("org.locationtech.jts:jts-core:1.20.0")
@@ -19,6 +20,7 @@ dependencies {
 }
 tasks.test { useJUnitPlatform() }
 tasks.shadowJar {
+    relocate("com.google.gson", "io.helicraft.deneb.libs.gson")
     archiveFileName.set("deneb.jar")
     relocate("org.locationtech.jts", "io.helicraft.deneb.libs.jts"); relocate("com.github.benmanes.caffeine", "io.helicraft.deneb.libs.caffeine")
 }

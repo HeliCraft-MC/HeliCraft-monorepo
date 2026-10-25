@@ -10,6 +10,8 @@ repositories {
 }
 java { toolchain.languageVersion.set(JavaLanguageVersion.of(25)) }
 dependencies {
+    implementation(project(":minecraft-client"))
+    compileOnly(files(rootProject.layout.buildDirectory.file("minecraft/limboapi.jar")))
     compileOnly("com.velocitypowered:velocity-api:4.2.0")
     annotationProcessor("com.velocitypowered:velocity-api:4.2.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
@@ -17,6 +19,7 @@ dependencies {
 }
 tasks.test { useJUnitPlatform() }
 tasks.shadowJar {
+    relocate("com.google.gson", "io.helicraft.rigel.libs.gson")
     archiveFileName.set("rigel.jar")
     
 }
@@ -41,3 +44,5 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(listOf("-Xlint:all,-processing", "-Werror"))
 }
+
+tasks.compileJava { dependsOn(rootProject.tasks.named("downloadLimbo")) }

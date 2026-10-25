@@ -4,23 +4,27 @@
 
 **Make HeliCraft tangible inside Minecraft.**
 
-Java 25 · Paper 26.2 · Gradle Kotlin DSL · Adventure · JTS · Caffeine
+Java 25 · Paper 26.2 build 129 · Gradle Kotlin DSL · Adventure · JTS · Caffeine
 
-Deneb is the thin Paper adapter for future physical world rules. `/deneb` sends an Adventure greeting; `WorldGeometry` uses JTS and Caffeine in a framework-independent class. `ANTARES_URL` configures the nonblocking HTTP health probe. No database access or gameplay protection is implemented.
+Deneb verifies the exact Antares UUID/name admission forwarded by Velocity before gameplay. It attests real Paper joins, maintains an expiring lease and closes the exact session on quit. Players receive configured server branding, their verified profile and all active citizenships or a neutral message. `/heli`, `/heli status` and `/heli profile` are the small user-facing command surface. Citizenship does not represent physical location.
 
 ```sh
 bun run build:deneb
 bun run test:deneb
 bun run dev:deneb
+bun run minecraft:up
+bun run minecraft:logs deneb
+bun run test:minecraft:contracts
+bun run test:minecraft
 ```
 
-JDK 25 is required. Artifact: `apps/deneb/build/libs/deneb.jar`. Gradle continuous mode rebuilds on source changes; it does not reload a running plugin. Paper API and Adventure are compile-only; JTS/Caffeine are bundled and relocated by Shadow. JUnit 5 tests the spatial primitive. Coordinates here are the Minecraft x/z plane, distinct from the sample PostGIS SRID 4326.
+Artifact: `apps/deneb/build/libs/deneb.jar`. Use Java 25 and the root Gradle 9.1.0 wrapper. Paper/Adventure are compile-only; JTS, Caffeine and shared-client Gson are bundled/relocated. `WorldGeometry` remains a framework-independent future spatial primitive, not territorial authority. The shared [Java client](../../packages/minecraft-client/README.md) performs bounded REST with private `DENEB_SERVICE_TOKEN` and `ANTARES_URL`. Bukkit/player work returns to the main thread; the explicitly asynchronous pre-login event may wait for a bounded request.
 
-Container build from root: `docker compose -f apps/deneb/compose.yml build deneb`. Compose uses only the Dockerfile `build` stage to build the plugin jar at `/workspace/apps/deneb/build/libs/deneb.jar` inside the image. It does not download or start Minecraft servers and does not start Antares dependencies. Deploy the jar to your separately managed server and restart it after plugin changes.
+Deneb has no registration/login/password system, direct PostgreSQL/S3 access or economy authority. Future territory/claims use verified local snapshots, not HTTP on each movement/block event. Paper stays private with modern forwarding and a generated secret. The disposable Docker runtime rebuilds fresh source and accepts test EULA under explicit owner authorization. Gradle continuous mode only rebuilds; restart Paper after changes.
 
-Future scope: borders, jurisdictions, protected property, physical institutions, geology, deposits and market goods. Gameplay should remain ordinary Minecraft rather than becoming a collection of menus.
+[Architecture](../../docs/architecture/minecraft-integration.md) · [development/runtime/debugging](../../docs/development/minecraft-plugins.md) · [authentication](../../docs/development/minecraft-authentication.md) · [verification](../../docs/verification/minecraft-integration-2026-10-25.md) · [agent rules](AGENTS.md)
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
+Run JUnit and root strict TS/Java quality gates plus meaningful real contract/runtime tests; compilation alone does not prove Paper admission. MockBukkit has a 26.2 branch, but V1 tests pure logic and the real Paper runtime instead of adding another mutable snapshot dependency.
 
 ## Name
 

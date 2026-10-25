@@ -2,6 +2,41 @@
 import type { ru } from './ru';
 
 const en = {
+  'minecraft.codeRejected':
+    'The code does not match your Minecraft client. Check all 16 characters.',
+  'minecraft.expired':
+    'This request expired, was rejected or was revoked. Reconnect in Minecraft for a new code.',
+  'minecraft.rateLimited': 'Too many attempts. Wait before trying again.',
+  'minecraft.signInAgain':
+    'Your website session expired. Sign in again before confirming Minecraft.',
+
+  'minecraft.title': 'Minecraft',
+  'minecraft.intro':
+    'Connect using your account username. Confirm each game connection here using the code displayed in your Minecraft client. Your account UUID stays the same after a rename.',
+  'minecraft.requested': 'Requested:',
+  'minecraft.expires': 'Expires:',
+  'minecraft.warning':
+    'Approve only a connection you started yourself. Enter the code you see in your own Minecraft client. A link or username alone does not prove ownership.',
+  'minecraft.code': 'Code from Minecraft',
+  'minecraft.codeHint':
+    'Enter all 16 characters from your game client. Do not enter your account password.',
+  'minecraft.approve': 'Confirm Minecraft sign-in',
+  'minecraft.reject': 'Reject sign-in',
+  'minecraft.unavailable':
+    'Minecraft information is unavailable. Wait and try again. Expired requests require a new game connection.',
+  'minecraft.identity': 'Game identity',
+  'minecraft.online': 'Online in Minecraft',
+  'minecraft.offline': 'Offline in Minecraft',
+  'minecraft.lastJoined': 'Last successful connection',
+  'minecraft.never': 'No connections yet',
+  'minecraft.pending': 'Pending sign-ins',
+  'minecraft.noPending':
+    'No pending requests. Approved, rejected or expired requests disappear here. Reconnect in Minecraft to request a new code.',
+  'minecraft.activity': 'Recent private activity',
+  'minecraft.noActivity': 'No game activity yet.',
+  'minecraft.joined': 'Entered Minecraft',
+  'minecraft.left': 'Left Minecraft',
+
   'companies.navigation': 'Companies',
   'fx.navigation': 'Exchange',
   'monetary.loading': 'Loading monetary data…',

@@ -1,0 +1,7 @@
+# Vega agent guide
+
+- Root rules apply. Public pages use SSR without session cookies; `/app` and `/admin` remain protected CSR. Use Alhena for API, Atria for reusable UI and central site settings for display identity. Never put secrets in Vite variables.
+- Minecraft UI lives at `/app/minecraft`; [architecture](../../docs/architecture/minecraft-integration.md). Existing account sessions and exact-Origin mutations apply. Show only the owner's attempts. Require an explicit decision and code entered from their own game client. A link/name is never sufficient; never auto-approve on mount/navigation. Do not ask for an account password in this flow.
+- Keep loading/error/expiry/rejection states and locale support. Private identity, session/history/challenges never enter public loaders, sitemap, public profiles or service-worker caches. Names may change; UUIDs cannot.
+- Root validation: `bun run generate`, `build:ts`, `typecheck`, `lint`, `format:check`, `test:unit`, relevant `test:e2e`, and `test:minecraft` for the full browser/game flow. Existing Atria components need no duplicate Storybook implementation; changes to reusable components must follow Atria's guide.
+- Local web: `bun run dev:vega` (terminal logs), or `bun run dev` for API too. Disposable Minecraft staging: `minecraft:up`, web `http://localhost:8096`, game `localhost:25575`; logs `minecraft:logs vega`; stop `minecraft:down`; disposable-only cleanup `minecraft:clean`. Native-client and translated protocol acceptance remain distinct. Never change user DB/worlds to make a browser test pass.

@@ -42,3 +42,7 @@ bun run test:e2e
 [Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/economy/monetary_RU.md).
 
 Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/economy/taxation_RU.md), [Diplomacy](../../docs/states/diplomacy_RU.md).
+
+## Minecraft Integration V1
+
+[Архитектура](../../docs/architecture/minecraft-integration_RU.md) · [разработка и тесты](../../docs/development/minecraft-plugins_RU.md) · [авторизация игрока](../../docs/development/minecraft-authentication_RU.md) · [проверки](../../docs/verification/minecraft-integration-2026-10-25_RU.md). Антарес владеет identity/challenges/leases/events; защищённая Вега `/app/minecraft` подтверждает код и показывает приватное присутствие.

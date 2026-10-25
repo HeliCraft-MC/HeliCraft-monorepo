@@ -12,3 +12,5 @@
 | Публикация и файлы | [Редакционный Markdown](content_RU.md), [галерея](gallery_RU.md), [хранение скинов](skin-storage_RU.md)                                                                     |
 | Идентичность сайта | [Общие настройки и отображаемое имя сервера](site-settings.md)                                                                                                              |
 | Качество           | [Требования и адресные исключения](../development/quality.md)                                                                                                               |
+
+- [Minecraft Integration V1](minecraft-integration_RU.md) — единая identity, авторизация, forwarding, сессии и события.

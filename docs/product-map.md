@@ -2,7 +2,7 @@
 
 # HeliCraft product map
 
-This is the target product model. The web implementation already includes public SSR, accounts and sessions, account/skin settings, CMS, RBAC, gallery, states and Governance, voting, companies, money, taxation, tax treaties and currency exchange. Connecting these systems to Minecraft, territories, goods markets, World Engine and custom Rigel game authentication remain future work. See the [administration overview (Russian)](overview/administration_RU.md) and [documentation index](README.md).
+This is the target product model. The web implementation already includes public SSR, accounts and sessions, account/skin settings, CMS, RBAC, gallery, states and Governance, voting, companies, money, taxation, tax treaties and currency exchange. [Minecraft Integration V1](architecture/minecraft-integration.md) connects the existing account to browser-confirmed game entry, stable UUID and private presence. Territories, goods markets and World Engine remain future work. See the [administration overview (Russian)](overview/administration_RU.md) and [documentation index](README.md).
 
 ## Vega
 
@@ -36,7 +36,7 @@ HeliCraft plans to support official Minecraft accounts and players without a lic
 
 Buying Minecraft and linking an official account later preserves the same identity, property, history, citizenship, companies, money and achievements. Rigel is the permanent game identity system.
 
-This flow is not implemented in the baseline. Velocity retains standard official-account authentication until an identity API and reviewed access flow exist.
+The current flow uses the single Antares account and explicit Vega browser confirmation. Rigel with pinned LimboAPI gates Paper admission and forwards the Antares UUID. Official-account linking and additional factors remain future work; never disable standard authentication without the complete Antares/Limbo/Deneb boundary.
 
 ## Atria
 

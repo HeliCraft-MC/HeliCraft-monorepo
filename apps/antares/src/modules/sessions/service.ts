@@ -1,3 +1,4 @@
+import { invalidateMinecraft } from '../minecraft/lifecycle';
 import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { Database } from '../../db';
@@ -93,17 +94,33 @@ class SessionService {
   }
 
   public async revoke(sessionId: string, userId: string): Promise<void> {
-    await this.db
-      .update(authSessions)
-      .set({ revokedAt: new Date() })
-      .where(and(eq(authSessions.id, sessionId), eq(authSessions.userId, userId)));
+    await this.db.transaction(async (transaction) => {
+      await transaction
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, userId))
+        .for('update');
+      await invalidateMinecraft(transaction, userId, 'SESSION_REVOKED', sessionId);
+      await transaction
+        .update(authSessions)
+        .set({ revokedAt: new Date() })
+        .where(and(eq(authSessions.id, sessionId), eq(authSessions.userId, userId)));
+    });
   }
 
   public async revokeAll(userId: string): Promise<void> {
-    await this.db
-      .update(authSessions)
-      .set({ revokedAt: new Date() })
-      .where(and(eq(authSessions.userId, userId), isNull(authSessions.revokedAt)));
+    await this.db.transaction(async (transaction) => {
+      await transaction
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, userId))
+        .for('update');
+      await invalidateMinecraft(transaction, userId, 'SESSIONS_REVOKED');
+      await transaction
+        .update(authSessions)
+        .set({ revokedAt: new Date() })
+        .where(and(eq(authSessions.userId, userId), isNull(authSessions.revokedAt)));
+    });
   }
 }
 

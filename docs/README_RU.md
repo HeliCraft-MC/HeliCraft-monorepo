@@ -13,6 +13,8 @@
 - **Проверка интерфейса — 22 октября 2026 года:** [компании, общие формы и навигация](verification/company-interface-2026-10-22_RU.md).
 - **UX рабочих экранов — 23 октября, дополнение 25 октября 2026 года:** [адаптивные разделы и сценарии опросов](verification/workspace-ux-2026-10-23_RU.md).
 
+- **Minecraft:** [архитектура](architecture/minecraft-integration_RU.md), [разработка плагинов](development/minecraft-plugins_RU.md), [вход](development/minecraft-authentication_RU.md), [проверки 25 октября 2026 года](verification/minecraft-integration-2026-10-25_RU.md).
+
 ## Карта разделов
 
 | Раздел                                    | Содержание и точки входа                                                                                                                                                                            |

@@ -1,0 +1,16 @@
+[
+  {
+    "project": "ViaVersion (test only)",
+    "version": "5.12.1",
+    "url": "https://github.com/ViaVersion/ViaVersion/releases/download/5.12.1/ViaVersion-5.12.1.jar",
+    "sha256": "b8033807e7182c35003a45962352dd642c1e91880ca281da3a43cb6f481a95a2",
+    "file": "ViaVersion.jar"
+  },
+  {
+    "project": "ViaBackwards (test only)",
+    "version": "5.12.1",
+    "url": "https://github.com/ViaVersion/ViaBackwards/releases/download/5.12.1/ViaBackwards-5.12.1.jar",
+    "sha256": "29d94d3a26c85c8a327574b2322db4078992ae457f0173325431a12aac384911",
+    "file": "ViaBackwards.jar"
+  }
+]

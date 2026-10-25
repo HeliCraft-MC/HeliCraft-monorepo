@@ -57,11 +57,20 @@
     "format:check": "bun run format:check:ts",
     "format:check:ts": "bunx --bun oxfmt --check .",
     "format:check:java": "bun scripts/java.ts format-check all",
-    "admin:bootstrap-owner": "bun run --cwd apps/antares admin:bootstrap-owner"
+    "admin:bootstrap-owner": "bun run --cwd apps/antares admin:bootstrap-owner",
+    "minecraft:prepare": "bun --no-env-file scripts/minecraft.ts prepare",
+    "minecraft:up": "bun --no-env-file scripts/minecraft.ts up",
+    "minecraft:down": "bun --no-env-file scripts/minecraft.ts down",
+    "minecraft:logs": "bun --no-env-file scripts/minecraft.ts logs",
+    "minecraft:clean": "bun --no-env-file scripts/minecraft.ts clean",
+    "minecraft:config": "bun --no-env-file scripts/minecraft.ts config",
+    "test:minecraft": "bun --no-env-file scripts/minecraft.ts test",
+    "test:minecraft:contracts": "bun run --cwd apps/antares test:integration tests/minecraft.integration.test.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "@types/bun": "1.4.2",
+    "minecraft-protocol": "1.68.0",
     "oxfmt": "0.71.0",
     "oxlint": "1.86.0",
     "oxlint-tsgolint": "7.0.2003",

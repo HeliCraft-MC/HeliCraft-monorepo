@@ -1,5 +1,38 @@
 // oxlint-disable max-lines -- Each language keeps its complete message catalog in one file.
 const ru = {
+  'minecraft.codeRejected':
+    'Код не совпадает с вашим Minecraft-клиентом. Проверьте все 16 символов.',
+  'minecraft.expired':
+    'Запрос истёк, отклонён или отозван. Подключитесь к Minecraft заново для нового кода.',
+  'minecraft.rateLimited': 'Слишком много попыток. Подождите перед повторным входом.',
+  'minecraft.signInAgain': 'Сессия сайта истекла. Войдите снова перед подтверждением Minecraft.',
+
+  'minecraft.title': 'Minecraft',
+  'minecraft.intro':
+    'Подключитесь с именем своего аккаунта. Подтвердите каждый игровой вход здесь кодом из своего Minecraft-клиента. UUID аккаунта сохраняется при переименовании.',
+  'minecraft.requested': 'Запрос создан:',
+  'minecraft.expires': 'Действителен до:',
+  'minecraft.warning':
+    'Подтверждайте только подключение, которое начали сами. Введите код из своего Minecraft-клиента. Ссылка или имя игрока сами по себе не доказывают владение аккаунтом.',
+  'minecraft.code': 'Код из Minecraft',
+  'minecraft.codeHint': 'Введите все 16 символов из игры. Пароль аккаунта здесь не нужен.',
+  'minecraft.approve': 'Подтвердить вход в Minecraft',
+  'minecraft.reject': 'Отклонить вход',
+  'minecraft.unavailable':
+    'Данные Minecraft недоступны. Повторите позже. Для истёкшего запроса подключитесь к игре заново.',
+  'minecraft.identity': 'Игровая идентичность',
+  'minecraft.online': 'В сети Minecraft',
+  'minecraft.offline': 'Не в сети Minecraft',
+  'minecraft.lastJoined': 'Последнее успешное подключение',
+  'minecraft.never': 'Подключений ещё не было',
+  'minecraft.pending': 'Ожидающие запросы',
+  'minecraft.noPending':
+    'Ожидающих запросов нет. Подтверждённые, отклонённые и истёкшие запросы исчезают. Для нового кода подключитесь к Minecraft заново.',
+  'minecraft.activity': 'Недавняя приватная активность',
+  'minecraft.noActivity': 'Игровой активности ещё нет.',
+  'minecraft.joined': 'Вход в Minecraft',
+  'minecraft.left': 'Выход из Minecraft',
+
   'companies.navigation': 'Компании',
   'fx.navigation': 'Обмен валют',
   'monetary.loading': 'Загрузка денежных данных…',

@@ -9,6 +9,8 @@ WORKDIR /workspace
 COPY gradlew gradlew.bat settings.gradle.kts build.gradle.kts gradle.properties ./
 COPY gradle ./gradle
 COPY config ./config
+COPY packages/minecraft-client ./packages/minecraft-client
+COPY infra/minecraft ./infra/minecraft
 COPY apps/deneb ./apps/deneb
 COPY apps/rigel ./apps/rigel
 RUN ./gradlew :deneb:shadowJar --no-daemon

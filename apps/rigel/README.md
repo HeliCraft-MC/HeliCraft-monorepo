@@ -4,23 +4,27 @@
 
 **Know who enters the world and protect player identity.**
 
-Java 25 · Velocity 4.2.0 · Gradle Kotlin DSL
+Java 25 · Velocity 4.2.0 build 30 · pinned LimboAPI · Gradle Kotlin DSL
 
-Rigel is a Velocity plugin foundation for permanent HeliCraft identity. It logs initialization and checks Antares asynchronously. The framework-independent `Identity` record separates a stable UUID from an entry credential. It does **not** authenticate unofficial clients, link accounts, implement MFA or authorize logins yet. Keep Velocity `online-mode=true` and Paper modern forwarding enabled.
+Rigel resolves the existing Antares account, assigns its immutable UUID before the auth lobby, waits for explicit browser/code confirmation and consumes a connection-bound approval once. `LoginEvent` and every backend transition fail closed. LimboAPI supplies the virtual waiting space; no unauthenticated player enters Paper. No separate registration, mandatory `/link`, password database, premium bypass or password `/login` exists.
 
 ```sh
 bun run build:rigel
 bun run test:rigel
 bun run dev:rigel
+bun run minecraft:up
+bun run minecraft:logs rigel
+bun run test:minecraft:contracts
+bun run test:minecraft
 ```
 
-JDK 25 is required. Artifact: `apps/rigel/build/libs/rigel.jar`. The Velocity API is compile-only; its annotation processor generates `velocity-plugin.json`. JUnit 5 checks identity invariants. Continuous build rebuilds jars without proxy hot reload. `ANTARES_URL` sets the health probe destination.
+Artifact: `apps/rigel/build/libs/rigel.jar`. Java 25 and the root Gradle 9.1.0 wrapper are used. The Velocity annotation processor generates the descriptor. The shared Java [client](../../packages/minecraft-client/README.md) provides bounded asynchronous REST. Configure private `RIGEL_SERVICE_TOKEN`, `ANTARES_URL` and `SITE_ORIGIN`; service role/backend binding is owned by Antares. Never use user cookies or expose secrets through Vite.
 
-Container build from root: `docker compose -f apps/rigel/compose.yml build rigel`. Compose uses only the Dockerfile `build` stage to build the plugin jar at `/workspace/apps/rigel/build/libs/rigel.jar` inside the image. It does not download or start Minecraft servers and does not start Antares dependencies. Deploy the jar to your separately managed server and restart it after plugin changes.
+LimboAPI `1.1.27-SNAPSHOT` is pinned by commit/checksum in `infra/minecraft/limboapi.properties`. Its MIT API is compile-only; the AGPL-3.0 runtime is installed separately, never shaded. Keep `rigel` in the pre-limbo profile handler list. Use private modern-forwarding Paper and matching secrets; offline mode is safe only with the complete documented admission boundary. Do not hot-reload authentication; rebuild/restart. The disposable Docker runtime rebuilds current source and automatically accepts test EULA under explicit owner authorization.
 
-Future credentials include official Minecraft accounts, additional factors, confirmation through Vega and optional Altair. A player can later link an official account without changing HeliCraft identity, assets, citizenship or history. This requires an Antares identity API and an explicit secure login flow before disabling official-account checks.
+[Architecture](../../docs/architecture/minecraft-integration.md) · [development/runtime/debugging](../../docs/development/minecraft-plugins.md) · [authentication](../../docs/development/minecraft-authentication.md) · [verification](../../docs/verification/minecraft-integration-2026-10-25.md) · [agent rules](AGENTS.md)
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
+Mandatory root quality gates include `build:ts`, `typecheck`, `lint`, `format:check`, `test:unit`, `lint:java`, `format:check:java` and relevant integration/browser/runtime tests. A successful JAR build alone does not establish working login.
 
 ## Name
 

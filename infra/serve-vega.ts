@@ -77,6 +77,7 @@ async function staticResponse(request: Request, url: URL): Promise<Response | un
 
 Bun.serve({
   port,
+  hostname: process.env.WEB_HOST ?? '0.0.0.0',
   async fetch(request) {
     const url = new URL(request.url);
     if (url.pathname === '/manifest.webmanifest') {

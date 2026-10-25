@@ -4,6 +4,8 @@ import { cors } from 'hono/cors';
 import { bodyLimit } from 'hono/body-limit';
 import { except } from 'hono/combine';
 import type { Database } from './db';
+import { minecraftRoutes } from './modules/minecraft/routes';
+import type { ServiceActor } from './modules/minecraft/contracts';
 import { identityRoutes } from './modules/identity/routes';
 import { validateBrowserMutation } from './modules/sessions/security';
 import { DomainError } from './modules/errors';
@@ -37,6 +39,7 @@ import { publicFxRoutes } from './modules/fx/public-routes';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 interface Dependencies {
+  readonly minecraftActors?: readonly ServiceActor[];
   readonly checkReady: () => Promise<void>;
   readonly db?: Database['db'];
   readonly siteOrigin?: string;
@@ -105,10 +108,21 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   app.use('/api/*', async (context, next) => {
     context.header('Cache-Control', 'no-store');
     context.header('X-Content-Type-Options', 'nosniff');
-    validateBrowserMutation(context.req.raw, siteOrigin);
+    if (!context.req.path.startsWith('/api/v1/internal/minecraft/')) {
+      validateBrowserMutation(context.req.raw, siteOrigin);
+    }
     // oxlint-disable-next-line node/callback-return -- Hono next is Promise<void>; awaiting it preserves response headers and error propagation.
     await next();
   });
+  app.route(
+    '/api/v1',
+    minecraftRoutes({
+      db: dependencies.db,
+      actors: dependencies.minecraftActors ?? [],
+      siteOrigin,
+      secureCookies,
+    }),
+  );
   app.route(
     '/api/v1',
     identityRoutes(dependencies.db, {

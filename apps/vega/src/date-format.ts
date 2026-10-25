@@ -7,4 +7,7 @@ function formatDate(value: string | null | undefined, locale: Locale = 'ru'): st
         new Date(value),
       );
 }
-export { formatDate };
+function formatDateTime(value: string, locale: Locale = 'ru'): string {
+  return `${new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'UTC' }).format(new Date(value))} UTC`;
+}
+export { formatDate, formatDateTime };

@@ -4,7 +4,7 @@
 
 HeliCraft — постоянный социальный, политический и экономический мир Minecraft. Minecraft позволяет физически жить в нём, Vega становится второй половиной игры, а Antares обеспечивает последовательное состояние всех продуктов.
 
-Репозиторий содержит рабочий web foundation: публичный SSR-сайт, аккаунты с UUID и серверными сессиями, кабинет со скинами, Markdown CMS, ролевую админку и общий UI-kit. Территории, рынки, World Engine и собственный игровой вход через Ригель остаются будущей работой.
+Репозиторий содержит рабочий web foundation: публичный SSR-сайт, аккаунты с UUID и серверными сессиями, кабинет со скинами, Markdown CMS, ролевую админку и общий UI-kit. Minecraft Integration V1 добавляет подтверждение через браузер, постоянный UUID и приватное присутствие через Ригель/Денеб. Территории, рынки товаров и World Engine остаются будущей работой. См. [руководство Minecraft](docs/development/minecraft-plugins_RU.md).
 
 Система государств включает серверные черновики с продолжением работы, мультиязычные тексты, независимые Minecraft-баннеры/PNG-флаги, сооснователей, настраиваемое устройство, неизменяемые редакции, необязательную блочную Конституцию, гибридные анкеты сообщества/голосования по решениям и административную проверку. Документация: [States](docs/states/overview.md), [Governance](docs/states/governance.md), [Constitution](docs/states/constitution.md), [Creation flow](docs/states/creation-flow.md), [Localized content](docs/platform/localized-content.md) и [Voting](docs/platform/voting.md).
 Личный кабинет и администрация используют постоянную боковую навигацию. Панель государства, отдельное чтение конституции, общие карточки с цветом государства, подсказки и многоязычный ввод описаны в [Workspace design](docs/design/workspaces.md). Опросы сообщества поддерживают несколько вопросов; снимки галереи — связи с государствами. Панель государства поддерживает отдельные предложения о должностях с действующими одобрениями, общими голосованиями с одним вопросом и проверяемой ручной процедурой.
@@ -97,15 +97,19 @@ Compose Денеба/Ригеля собирает только выбранны
 
 Скопируйте `.env.example` в игнорируемый `.env`. `DATABASE_URL` указывает на **helicraft**, а не на архивные MySQL-базы. Compose формирует контейнерный URL из `POSTGRES_PASSWORD`; локальные миграции берут `DATABASE_URL` — эти значения должны согласовываться. Спецсимволы пароля в URL нужно кодировать. Только Antares обращается к PostgreSQL и S3; интерфейсы и плагины используют REST API. Секреты не экспортируются через Vite-переменные.
 
-S3-адаптер принимает endpoint, регион, ключ, секрет и бакет, используя path-style addressing. Compose предоставляет постоянное хранилище SeaweedFS на одном узле с авторизацией и автоматическим созданием бакета. Подключение к другому S3-совместимому сервису задаётся окружением Antares. Web identity и приватная загрузка скинов реализованы; публичные presigned URL и игровая интеграция с Ригелем остаются будущей работой.
+S3-адаптер принимает endpoint, регион, ключ, секрет и бакет, используя path-style addressing. Compose предоставляет постоянное хранилище SeaweedFS на одном узле с авторизацией и автоматическим созданием бакета. Подключение к другому S3-совместимому сервису задаётся окружением Antares. Web identity и приватная загрузка скинов реализованы; публичные presigned URL остаются будущей работой. [Minecraft identity](docs/architecture/minecraft-integration_RU.md) использует существующий аккаунт.
 
-Deneb включает и изолирует JTS и Caffeine, Adventure предоставляет Paper. Rigel генерирует дескриптор плагина через annotation processor Velocity. Оба плагина неблокирующе запрашивают health у `ANTARES_URL`, драйверов БД в них нет. После замены jar перезапускайте Minecraft-сервис; hot reload не используется для авторизации и правил мира.
+Deneb включает и изолирует JTS и Caffeine, Adventure предоставляет Paper. Rigel генерирует дескриптор плагина через annotation processor Velocity. Оба плагина используют ограниченный асинхронный REST Антареса: Ригель контролирует identity, Денеб подтверждает реальную игру. Драйверов БД в них нет. После замены jar перезапускайте Minecraft-сервис; hot reload не используется для авторизации и правил мира.
 
 ## Качество кода
 
 Проекты используют TypeScript 7.0.2. Только генератор Alhena получает изолированный TypeScript 6 для совместимости Compiler API; проверка и декларации SDK используют корневой TS7. Все категории oxlint включены как ошибки с проверками типов и запретом предупреждений. Совместимые со стеком исключения перечислены в [исследовании](docs/development/setup-research_RU.md). Java: Checkstyle, Spotless/google-java-format и предупреждения компилятора как ошибки.
 
 В прежних прогонах с Docker, Testcontainers и Chromium на временном стенде проверялись Web Compose, миграции, PostgreSQL/S3 и browser-сценарии; см. [validation](docs/verification/web-foundation_RU.md).
+
+## Minecraft development
+
+`bun run minecraft:up` собирает отдельный disposable стек (Вега `http://localhost:8096`, Minecraft `localhost:25575`); `minecraft:logs`, `minecraft:down`, `minecraft:clean` управляют только тестовым проектом. `bun run test:minecraft` собирает свежие плагины/веб и проверяет настоящий браузерный/протокольный сценарий. [Разработка, версии, безопасность и приёмка обычным клиентом](docs/development/minecraft-plugins_RU.md).
 
 ## Документация
 
@@ -129,7 +133,7 @@ Vesper, Teapot и Soon перенесены в `archive/apps/` вместе с �
 
 См. [rendering](docs/architecture/web-rendering_RU.md), [identity](docs/architecture/identity_RU.md), [authorization](docs/architecture/authorization_RU.md), [skins](docs/architecture/skin-storage_RU.md), [CMS](docs/architecture/content_RU.md), [landing](docs/design/landing-page_RU.md) и [quality](docs/development/quality.md).
 
-Для локальной разработки SITE_ORIGIN=http://localhost:5173. Перед production Compose установите SITE_ORIGIN=http://localhost:8080 (или настоящий HTTPS origin и SECURE_COOKIES=true). Регистрация создаёт только PLAYER. Первый OWNER: зарегистрируйте аккаунт, скопируйте UUID и выполните `bun run admin:bootstrap-owner <UUID> --confirm <тот же UUID>`. По умолчанию PRELAUNCH; адрес Minecraft показывается только в OPEN и при заданном MINECRAFT_ADDRESS. Не принимаем EULA автоматически.
+Для локальной разработки SITE_ORIGIN=http://localhost:5173. Перед production Compose установите SITE_ORIGIN=http://localhost:8080 (или настоящий HTTPS origin и SECURE_COOKIES=true). Регистрация создаёт только PLAYER. Первый OWNER: зарегистрируйте аккаунт, скопируйте UUID и выполните `bun run admin:bootstrap-owner <UUID> --confirm <тот же UUID>`. По умолчанию PRELAUNCH; адрес Minecraft показывается только в OPEN и при заданном MINECRAFT_ADDRESS. Отдельный изолированный Minecraft-стенд принимает тестовую EULA по явному разрешению владельца; production EULA автоматически не принимается.
 
 Публичная главная использует фотографии мира; `/gallery` и `/gallery/:id` отображаются через SSR, а авторизованные игроки публикуют и удаляют свои снимки через `/app/gallery/new`. Галерея хранится отдельным доменом Antares в PostgreSQL/private S3. Главная показывает реальные одобренные государства и ведёт на `/states` с поиском, фильтрами по гражданству/конституции и сортировкой. Экономика остаётся подписанным демонстрационным примером. [Архитектура галереи](docs/architecture/gallery_RU.md).
 

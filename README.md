@@ -4,7 +4,7 @@
 
 HeliCraft is a persistent social, political and economic Minecraft world. Minecraft is where players physically live; Vega is the other half of the game; Antares keeps every product consistent.
 
-The repository contains a working web foundation: public SSR pages, UUID accounts and server sessions, account/skin settings, a Markdown CMS, role-based administration and a shared UI kit. Territories, markets, World Engine and custom Rigel game login remain future work.
+The repository contains a working web foundation: public SSR pages, UUID accounts and server sessions, account/skin settings, a Markdown CMS, role-based administration and a shared UI kit. Minecraft Integration V1 adds account-based browser confirmation, stable UUID forwarding and private presence through Rigel/Deneb. Territories, goods markets and World Engine remain future work. See the [Minecraft guide](docs/development/minecraft-plugins.md).
 
 The state system includes resumable server drafts, multilingual content, independent Minecraft banners/PNG flags, cofounders, configurable governance, immutable revisions, optional block constitutions, hybrid community surveys/decision voting and administrative review. See [States](docs/states/overview.md), [Governance](docs/states/governance.md), [Constitution](docs/states/constitution.md), [Creation flow](docs/states/creation-flow.md), [Localized content](docs/platform/localized-content.md) and [Voting](docs/platform/voting.md).
 Account and administration use persistent sidebar workspaces. State management, separate constitution reading, state-colored shared cards, contextual field help and multilingual inputs are described in [Workspace design](docs/design/workspaces.md). Community polls support multiple questions; gallery photos can link related states. State workspaces support separate office proposals with current approvals, generic single-question votes and reviewed manual procedures.
@@ -97,15 +97,19 @@ Deneb/Rigel Compose builds only the selected plugin, without Antares dependencie
 
 Copy `.env.example` into the ignored `.env`. `DATABASE_URL` targets **helicraft**, not the archived MySQL databases. Compose derives the container URL from `POSTGRES_PASSWORD`; local migrations use `DATABASE_URL`, so keep them consistent. URL-encode special characters in database passwords when constructing a connection URL. Only Antares accesses PostgreSQL and S3; clients and plugins use its REST API. No secrets are exported through Vite variables.
 
-The S3 adapter accepts an endpoint, region, access key, secret and bucket and uses path-style addressing. Compose supplies a persistent single-node SeaweedFS store with credentials and automatic bucket creation. A managed S3-compatible service can be substituted through Antares environment settings. Web identity and private skin uploads are implemented; public presigned uploads and Rigel game identity integration remain future work.
+The S3 adapter accepts an endpoint, region, access key, secret and bucket and uses path-style addressing. Compose supplies a persistent single-node SeaweedFS store with credentials and automatic bucket creation. A managed S3-compatible service can be substituted through Antares environment settings. Web identity and private skin uploads are implemented; public presigned uploads remain future work. [Minecraft identity](docs/architecture/minecraft-integration.md) uses the existing account.
 
-Deneb bundles/relocates JTS and Caffeine; Paper supplies Adventure. Rigel uses the Velocity annotation processor for its plugin descriptor. Both plugins issue nonblocking HTTP health requests to `ANTARES_URL`. They contain no database driver. Restart a Minecraft service after rebuilding/replacing its plugin jar; do not rely on hot reload for authentication or world rules.
+Deneb bundles/relocates JTS and Caffeine; Paper supplies Adventure. Rigel uses the Velocity annotation processor for its plugin descriptor. Both plugins use scoped asynchronous Antares REST; Rigel gates identity and Deneb attests actual gameplay. They contain no database driver. Restart a Minecraft service after rebuilding/replacing its plugin jar; do not rely on hot reload for authentication or world rules.
 
 ## Code quality
 
 Projects use TypeScript 7.0.2. Only the Alhena generator has isolated TypeScript 6 for Compiler API compatibility; SDK checks/declarations explicitly use root TS7. All oxlint categories are errors, with type checking and zero warnings. Stack compatibility exceptions are documented in [setup research](docs/development/setup-research.md). Java uses Checkstyle, Spotless/google-java-format and compiler warnings as errors.
 
 Earlier verification used Docker, Testcontainers and Chromium on disposable infrastructure for web Compose, migrations, PostgreSQL/S3 integration and dev/production browser journeys; see [validation](docs/verification/web-foundation.md).
+
+## Minecraft development
+
+`bun run minecraft:up` builds a disposable full stack (Vega `http://localhost:8096`, Minecraft `localhost:25575`); `minecraft:logs`, `minecraft:down` and `minecraft:clean` manage only that test project. `bun run test:minecraft` builds fresh plugins/web and verifies the real browser/protocol flow. [Development, version pins, security boundaries and native-client checklist](docs/development/minecraft-plugins.md).
 
 ## Documentation
 
@@ -129,7 +133,7 @@ The root [LICENSE](LICENSE) is PolyForm Noncommercial 1.0.0. Archived apps retai
 
 See [rendering](docs/architecture/web-rendering.md), [identity](docs/architecture/identity.md), [authorization](docs/architecture/authorization.md), [skins](docs/architecture/skin-storage.md), [CMS](docs/architecture/content.md), [landing](docs/design/landing-page.md) and [quality](docs/development/quality.md).
 
-For local development use SITE_ORIGIN=http://localhost:5173. Before production Compose set SITE_ORIGIN=http://localhost:8080 (or your actual HTTPS origin and SECURE_COOKIES=true). Registration grants only PLAYER. First OWNER: register an account, copy its UUID and run `bun run admin:bootstrap-owner <UUID> --confirm <same UUID>`. PRELAUNCH is the default; Minecraft address is shown only when OPEN and MINECRAFT_ADDRESS is configured. EULA is never accepted automatically.
+For local development use SITE_ORIGIN=http://localhost:5173. Before production Compose set SITE_ORIGIN=http://localhost:8080 (or your actual HTTPS origin and SECURE_COOKIES=true). Registration grants only PLAYER. First OWNER: register an account, copy its UUID and run `bun run admin:bootstrap-owner <UUID> --confirm <same UUID>`. PRELAUNCH is the default; Minecraft address is shown only when OPEN and MINECRAFT_ADDRESS is configured. The separately isolated Minecraft test environment accepts EULA automatically under explicit owner authorization; production EULA is not accepted implicitly.
 
 The public home uses world photographs; `/gallery` and `/gallery/:id` render with SSR, while authenticated players publish and remove their photographs through `/app/gallery/new`. Gallery is a separate Antares PostgreSQL/private S3 domain. The homepage shows real approved states and links to `/states`, with search, citizenship/constitution filters and sorting. Economy previews remain labelled local demonstrations. [Gallery architecture](docs/architecture/gallery.md).
 

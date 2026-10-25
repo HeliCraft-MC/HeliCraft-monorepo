@@ -39,4 +39,34 @@ describe('deployment security configuration', () => {
     ).toThrow();
     expect(() => readConfig({ ...environment, COMMUNITY_LINKS: '{broken' })).toThrow();
   });
+  it('allows only explicitly disposable Minecraft test databases and validates service scopes', () => {
+    const testDatabase = {
+      ...environment,
+      DATABASE_URL: 'postgresql://fixture:fixture@localhost/helicraft_minecraft_test',
+    };
+    expect(() => readConfig(testDatabase)).toThrow();
+    expect(readConfig({ ...testDatabase, MINECRAFT_DISPOSABLE: 'true' }).MINECRAFT_DISPOSABLE).toBe(
+      true,
+    );
+    const actor = { id: 'rigel-test', role: 'RIGEL', backendId: 'deneb', token: 't'.repeat(43) };
+    expect(
+      readConfig({ ...environment, MINECRAFT_SERVICE_ACTORS: JSON.stringify([actor]) })
+        .MINECRAFT_SERVICE_ACTORS,
+    ).toStrictEqual([actor]);
+    expect(() =>
+      readConfig({
+        ...environment,
+        MINECRAFT_SERVICE_ACTORS: JSON.stringify([{ ...actor, role: 'ADMIN' }]),
+      }),
+    ).toThrow();
+    expect(() =>
+      readConfig({ ...environment, MINECRAFT_SERVICE_ACTORS: JSON.stringify([actor, actor]) }),
+    ).toThrow();
+    expect(() =>
+      readConfig({
+        ...environment,
+        MINECRAFT_SERVICE_ACTORS: JSON.stringify([{ ...actor, token: 'short' }]),
+      }),
+    ).toThrow();
+  });
 });

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ServiceActorSchema } from './modules/minecraft/contracts';
 
 const MAX_PORT = 65_535;
 const DEFAULT_PORT = 3000;
@@ -27,10 +28,36 @@ const CommunityLinks = z
 const EnvSchema = z
   .object({
     COMMUNITY_LINKS: CommunityLinks,
+    MINECRAFT_DISPOSABLE: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
+    MINECRAFT_SERVICE_ACTORS: z
+      .string()
+      .default('[]')
+      .transform((value, context): unknown => {
+        try {
+          const parsed: unknown = JSON.parse(value);
+          return parsed;
+        } catch {
+          context.addIssue({ code: 'custom', message: 'MINECRAFT_SERVICE_ACTORS must be JSON' });
+          return z.NEVER;
+        }
+      })
+      .pipe(z.array(ServiceActorSchema))
+      .refine(
+        (actors) =>
+          new Set(actors.map((actor) => actor.token)).size === actors.length &&
+          new Set(actors.map((actor) => actor.id)).size === actors.length,
+        'Service IDs and tokens must be unique',
+      ),
     PORT: z.coerce.number().int().min(1).max(MAX_PORT).default(DEFAULT_PORT),
     DATABASE_URL: z.url().refine((value) => {
       const url = new URL(value);
-      return ['postgres:', 'postgresql:'].includes(url.protocol) && url.pathname === '/helicraft';
+      return (
+        ['postgres:', 'postgresql:'].includes(url.protocol) &&
+        ['/helicraft', '/helicraft_minecraft_test'].includes(url.pathname)
+      );
     }, 'DATABASE_URL must target PostgreSQL database helicraft'),
     S3_ENDPOINT: z.url(),
     S3_REGION: z.string().default('us-east-1'),
@@ -63,7 +90,14 @@ const EnvSchema = z
   .refine((value) => !value.SITE_ORIGIN.startsWith('https:') || value.SECURE_COOKIES, {
     path: ['SECURE_COOKIES'],
     message: 'HTTPS requires SECURE_COOKIES=true',
-  });
+  })
+  .refine(
+    (value) => new URL(value.DATABASE_URL).pathname === '/helicraft' || value.MINECRAFT_DISPOSABLE,
+    {
+      path: ['DATABASE_URL'],
+      message: 'The Minecraft test database requires MINECRAFT_DISPOSABLE=true',
+    },
+  );
 export type Config = z.infer<typeof EnvSchema>;
 export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return EnvSchema.parse(env);

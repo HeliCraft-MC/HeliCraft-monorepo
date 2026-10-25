@@ -2,6 +2,9 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
+  minecraftChallenges,
+  minecraftSessions,
+  minecraftEvents,
   fxOffers,
   fxInterbankTrades,
   fxInterbankApprovals,
@@ -109,6 +112,9 @@ import {
 } from './schema';
 
 const schema = {
+  minecraftChallenges,
+  minecraftSessions,
+  minecraftEvents,
   fxOffers,
   fxInterbankTrades,
   fxInterbankApprovals,

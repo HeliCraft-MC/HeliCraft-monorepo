@@ -4,24 +4,28 @@
 
 **Знать, кто входит в мир, и защищать личность игрока.**
 
-Java 25 · Velocity 4.2.0 · Gradle Kotlin DSL
+Java 25 · Velocity 4.2.0 build 30 · pinned LimboAPI · Gradle Kotlin DSL
 
-Rigel — основа Velocity-плагина для постоянной идентичности HeliCraft. Он сообщает о запуске и асинхронно проверяет Antares. Независимый от фреймворка record `Identity` отделяет постоянный UUID от способа входа. Он **пока не** авторизует неофициальные клиенты, не связывает аккаунты, не реализует MFA и не проверяет право входа. Сохраняйте `online-mode=true` у Velocity и modern forwarding у Paper.
+Ригель определяет существующий аккаунт Антареса, назначает неизменяемый UUID до auth lobby, ожидает явное подтверждение в браузере с кодом и однократно использует допуск конкретного соединения. `LoginEvent` и каждый переход на backend закрыты при ошибках. LimboAPI предоставляет виртуальное ожидание; неавторизованный игрок не попадает в Paper. Отдельной регистрации, обязательной `/link`, парольной БД, premium bypass и парольной `/login` нет.
 
 ```sh
 bun run build:rigel
 bun run test:rigel
 bun run dev:rigel
+bun run minecraft:up
+bun run minecraft:logs rigel
+bun run test:minecraft:contracts
+bun run test:minecraft
 ```
 
-Нужен JDK 25. Артефакт: `apps/rigel/build/libs/rigel.jar`. Velocity API подключён compile-only; annotation processor создаёт `velocity-plugin.json`. JUnit 5 проверяет инварианты идентичности. Continuous build пересобирает jar без hot reload прокси. `ANTARES_URL` задаёт адрес health-запроса.
+JAR: `apps/rigel/build/libs/rigel.jar`. Используются Java 25 и корневой Gradle 9.1.0 wrapper. Дескриптор генерируется annotation processor Velocity. Общий Java-[клиент](../../packages/minecraft-client/README_RU.md) предоставляет ограниченный асинхронный REST. Настройте приватные `RIGEL_SERVICE_TOKEN`, `ANTARES_URL`, `SITE_ORIGIN`; role/backend binding задаёт Антарес. User cookies и экспорт секретов через Vite запрещены.
 
-Сборка в контейнере из корня: `docker compose -f apps/rigel/compose.yml build rigel`. Compose использует только стадию `build` Dockerfile; jar плагина находится в образе по пути `/workspace/apps/rigel/build/libs/rigel.jar`. Minecraft-серверы не скачиваются и не запускаются, зависимости Antares не поднимаются. Установите jar на отдельно управляемый сервер и перезапустите его после изменения плагина.
+LimboAPI `1.1.27-SNAPSHOT` фиксируется commit/checksum в `infra/minecraft/limboapi.properties`. MIT API подключается compile-only, AGPL-3.0 runtime устанавливается отдельно, без Shadow. Сохраните `rigel` в pre-limbo profile list. Paper должен оставаться приватным с modern forwarding и одинаковыми secrets; offline mode допустим только при полной описанной границе допуска. Hot reload авторизации запрещён: пересоберите и перезапустите. Disposable Docker собирает текущие исходники и принимает тестовую EULA по явному разрешению владельца.
 
-Будущие способы входа: официальный Minecraft-аккаунт, дополнительные факторы, подтверждение через Vega и необязательный Altair. Поздняя привязка официального аккаунта не должна менять личность HeliCraft, имущество, гражданство и историю. До отключения стандартной проверки аккаунтов нужен identity API Antares и явный безопасный процесс входа.
+[Архитектура](../../docs/architecture/minecraft-integration_RU.md) · [разработка/runtime/debugging](../../docs/development/minecraft-plugins_RU.md) · [авторизация](../../docs/development/minecraft-authentication_RU.md) · [проверки](../../docs/verification/minecraft-integration-2026-10-25_RU.md) · [правила агента](AGENTS.md)
 
-Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/development/setup-research_RU.md).
+Обязательны корневые `build:ts`, `typecheck`, `lint`, `format:check`, `test:unit`, `lint:java`, `format:check:java` и соответствующие integration/browser/runtime tests. Компиляции JAR недостаточно для проверки входа.
 
 ## Название
 
-Ригель — β Ориона, звезда в созвездии Ориона. [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/).
+Ригель — β Ориона. [Каталог названий звёзд IAU](https://iauarchive.eso.org/public/themes/naming_stars/).

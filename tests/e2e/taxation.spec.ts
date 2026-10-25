@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 // oxlint-disable max-lines, max-lines-per-function, max-statements -- Real-browser two-state lifecycle verifies the complete tax/treaty result and historical receipts.
 import { expect } from '@playwright/test';
 import { test } from './fixtures';
@@ -28,15 +29,16 @@ async function establishOffice(
   input: Readonly<{ stateId: string; name: string }>,
 ): Promise<void> {
   await page.goto(`/app/states/${input.stateId}/manage?section=taxation`);
+  await openWorkspaceAction(page, 'Учредить налоговую службу');
   await page.getByLabel('Название · Русский', { exact: true }).fill(input.name);
   await page
     .getByLabel('Описание · Русский', { exact: true })
     .fill('Налоговая служба для государственных законов и прозрачного учёта');
   await confirmDecision(page);
   await adminPage.goto('/admin/tax-offices');
-  const card = adminPage
-    .getByRole('heading', { name: input.name, exact: true })
-    .locator('xpath=..');
+  const card = adminPage.getByRole('article').filter({
+    has: adminPage.getByRole('heading', { name: input.name, exact: true }),
+  });
   await card.getByLabel('Статус', { exact: true }).selectOption('ACTIVE');
   await card
     .getByLabel('Обоснование', { exact: true })

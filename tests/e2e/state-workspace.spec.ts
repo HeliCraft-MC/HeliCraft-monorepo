@@ -79,7 +79,12 @@ test('state workspace is separate, themed, interactive and scoped to current aut
     await expect(page.getByRole('heading', { name: 'Обзор', exact: true })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Мой аккаунт', exact: true })).toHaveCount(0);
     const nav = page.getByRole('navigation', { name: 'Управление государством', exact: true });
-    await expect(nav.getByRole('link', { name: 'Казна', exact: true })).toBeVisible();
+    await nav.getByRole('link', { name: 'Институты', exact: true }).click();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Институты государства', exact: true })
+        .getByRole('link', { name: /^Казна/u }),
+    ).toBeVisible();
     await expect(page.getByLabel('Текущее государство')).toBeEnabled();
     expect(
       await page
@@ -120,7 +125,8 @@ test('state workspace is separate, themed, interactive and scoped to current aut
       exact: true,
     });
     await expect(citizenNav.getByRole('link', { name: 'Обзор', exact: true })).toBeVisible();
-    await expect(citizenNav.getByRole('link', { name: 'Казна', exact: true })).toHaveCount(0);
+    await citizen.goto(`/app/states/${first}/manage?section=institutions`);
+    await expect(citizen.locator('nav a[href$="?section=treasury"]')).toHaveCount(0);
     await citizen.goto(`/app/states/${first}/manage?section=treasury`);
     await expect(citizen.getByText(/Этот раздел недоступен/u)).toBeVisible();
     expect(await citizen.locator('main').textContent()).not.toContain('Governance');

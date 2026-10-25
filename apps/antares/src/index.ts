@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { createApp } from './app';
 import { readConfig } from './config';
 import { createDatabase } from './db';
+import { expireMinecraft } from './modules/minecraft/lifecycle';
 import { VotingService } from './modules/voting/service';
 import { createStorage } from './storage';
 
@@ -11,6 +12,7 @@ const { pool, db } = createDatabase(config.DATABASE_URL);
 const storage = createStorage(config);
 const app = createApp({
   db,
+  minecraftActors: config.MINECRAFT_SERVICE_ACTORS,
   sitePhase: config.SITE_PHASE,
   communityLinks: config.COMMUNITY_LINKS,
   minecraftAddress: config.MINECRAFT_ADDRESS,
@@ -36,6 +38,7 @@ async function runVotingTick(): Promise<void> {
   votingTickRunning = true;
   try {
     await voting.tick();
+    await expireMinecraft(db);
   } catch (error) {
     console.error('Voting scheduler failed', error instanceof Error ? error.name : 'Unknown');
   } finally {

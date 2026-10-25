@@ -9,6 +9,8 @@ WORKDIR /workspace
 COPY gradlew gradlew.bat settings.gradle.kts build.gradle.kts gradle.properties ./
 COPY gradle ./gradle
 COPY config ./config
+COPY packages/minecraft-client ./packages/minecraft-client
+COPY infra/minecraft ./infra/minecraft
 COPY apps/deneb ./apps/deneb
 COPY apps/rigel ./apps/rigel
 RUN ./gradlew :rigel:shadowJar --no-daemon
@@ -19,6 +21,8 @@ WORKDIR /data
 COPY --from=download /download/server.jar /opt/server.jar
 COPY --from=build /workspace/apps/rigel/build/libs/rigel.jar /opt/rigel.jar
 COPY apps/rigel/docker/ ./bootstrap/
+COPY --from=build /workspace/build/minecraft/limboapi.jar /opt/limboapi.jar
+COPY infra/minecraft/limbo-config.yml /opt/limbo-config.yml
 COPY infra/start-minecraft.sh /opt/start.sh
 RUN chmod +x /opt/start.sh
 USER helicraft
