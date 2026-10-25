@@ -39,6 +39,9 @@ function StateCompanyReview({
             'Решение сохранено. Одобрения и исполнение доступны ниже.',
             'Decision saved. Approvals and outcome are shown below.',
           )}
+          <a href={`/app/state-decisions/${submission.savedId}`}>
+            {uiText(locale, 'Открыть решение и одобрить', 'Open decision and approve')}
+          </a>
         </Alert>
       )}
     </>

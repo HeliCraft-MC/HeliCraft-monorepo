@@ -1,7 +1,7 @@
 import { useCallback, useId, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 import type { CompanyWorkspace } from '@helicraft/alhena';
-import { Alert, Button, FormField, Select } from '@helicraft/atria';
+import { ActionPanel, Alert, Button, FormField, Select } from '@helicraft/atria';
 import { PlayerPicker } from '../player-picker';
 import type { SelectedPlayer } from '../player-picker';
 import { useTranslation } from '../i18n';
@@ -55,8 +55,7 @@ function CompanyOfficeAppointment({
     propose({ kind: 'REMOVE_OFFICE_HOLDER', officeId, userId: removed });
   }, [officeId, removed, propose]);
   return (
-    <section>
-      <h3>{uiText(locale, 'Назначения и освобождения', 'Appointments and removals')}</h3>
+    <ActionPanel title={uiText(locale, 'Назначения и освобождения', 'Appointments and removals')}>
       <FormField htmlFor={`${id}-office`} label={uiText(locale, 'Должность', 'Corporate office')}>
         <Select id={`${id}-office`} value={officeId} onChange={office}>
           <option value="">{uiText(locale, 'Выберите должность', 'Choose an office')}</option>
@@ -132,7 +131,7 @@ function CompanyOfficeAppointment({
         )}
       </Alert>
       <CompanyDecisionReview workspace={workspace} submission={submission} />
-    </section>
+    </ActionPanel>
   );
 }
 export { CompanyOfficeAppointment };

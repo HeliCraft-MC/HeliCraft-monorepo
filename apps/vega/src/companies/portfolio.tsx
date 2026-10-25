@@ -5,6 +5,7 @@ import { getCompanySharePortfolio } from '@helicraft/alhena';
 import type { CompanyWorkspace, LegalOwner } from '@helicraft/alhena';
 import { Alert, FieldHelp } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
+import { CompanyName } from '../company-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { MonetaryPagination } from '../monetary/pagination';
@@ -38,6 +39,7 @@ function CompanySharePortfolio({
     <section>
       <h2>{uiText(locale, 'Доли в других компаниях', 'Corporate share holdings')}</h2>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Дочерняя компания', 'Subsidiary')}
         content={uiText(
           locale,
@@ -52,7 +54,7 @@ function CompanySharePortfolio({
       <ul>
         {query.data?.items.map((position) => (
           <li key={position.issuerId}>
-            <a href={`/companies/${position.issuerId}`}>{displayText(position.name, locale)}</a>:{' '}
+            <CompanyName id={position.issuerId} name={displayText(position.name, locale)} />:{' '}
             {position.shares} / {position.issuedShares}
             {position.controls && (
               <strong> · {uiText(locale, 'Дочерняя компания', 'Subsidiary')}</strong>

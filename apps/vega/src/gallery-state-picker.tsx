@@ -4,6 +4,7 @@ import type { ChangeEvent, ComponentProps, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient, listStates } from '@helicraft/alhena';
 import { Alert, Button, FormField, Select, TextField } from '@helicraft/atria';
+import { StateName } from './state-name';
 import { useTranslation } from './i18n';
 import { displayText, uiText } from './states/text';
 import { usePropCache, rowKey } from './states/use-prop-cache';
@@ -78,7 +79,8 @@ function GalleryStatePicker({
         {value.map((state) => (
           <li key={`${state.stateId}:${state.role}`}>
             <span>
-              {state.name} · {galleryStateRole(state.role, locale)}
+              <StateName id={state.stateId} name={state.name} /> ·{' '}
+              {galleryStateRole(state.role, locale)}
             </span>
             <Button
               tone="quiet"

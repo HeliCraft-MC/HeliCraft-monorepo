@@ -30,7 +30,7 @@ function StateCompanyApplications({
     },
   });
   return (
-    <section>
+    <section id="company-applications">
       <h2>{uiText(locale, 'Регистрационные заявки', 'Registration applications')}</h2>
       {query.data?.items.length === 0 && (
         <p>{uiText(locale, 'Заявок пока нет.', 'No applications yet.')}</p>

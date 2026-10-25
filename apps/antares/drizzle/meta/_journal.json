@@ -302,6 +302,13 @@
       "when": 1792505368174,
       "tag": "0042_fx_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1792617079785,
+      "tag": "0043_company_branding",
+      "breakpoints": true
     }
   ]
 }

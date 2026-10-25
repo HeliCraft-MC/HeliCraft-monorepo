@@ -12,7 +12,7 @@ import {
 import type { Transaction } from '../permissions/transaction';
 import { DomainError, HTTP } from '../errors';
 import { assertVotingElectorate } from './electorates';
-import { lockedVoting, advance } from './persistence';
+import { lockedVoting, advance, closeCompletedVoting } from './persistence';
 import { validateBallot } from './domain';
 import { validateSurveyAnswers } from './survey-domain';
 import type { SurveyAnswer } from './survey-contracts';
@@ -151,6 +151,7 @@ async function castBallotInTransaction(
       .insert(votingBallotChoices)
       .values(selected.map((option) => ({ ballotId, optionId: option.id })));
   }
+  await closeCompletedVoting(transaction, record);
 }
 async function castBallot(
   db: Database['db'],

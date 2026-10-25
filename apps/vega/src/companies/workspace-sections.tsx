@@ -4,8 +4,8 @@ import type { CompanyWorkspace } from '@helicraft/alhena';
 import { Alert } from '@helicraft/atria';
 import type { SelectedPlayer } from '../player-picker';
 import { useTranslation } from '../i18n';
-import { displayText, uiText } from '../states/text';
-import { CompanyStateIdentity } from './state-identity';
+import { uiText } from '../states/text';
+import { CompanyOverview } from './overview';
 import { CompanyGovernanceWorkspace } from './governance-workspace';
 import { CompanyOfficesWorkspace } from './offices-workspace';
 import { CompanyOwnershipWorkspace } from './ownership-workspace';
@@ -132,22 +132,6 @@ function CompanyWorkspaceSection({
       />
     );
   }
-  return (
-    <section>
-      <h2>{uiText(locale, 'Юридическая идентичность', 'Legal identity')}</h2>
-      <p>{displayText(workspace.content.description, locale)}</p>
-      <CompanyStateIdentity id={workspace.registrationStateId} />
-      <p>
-        {uiText(locale, 'Выпущено акций', 'Issued shares')}: {workspace.issuedShares}
-      </p>
-      <p>
-        {uiText(
-          locale,
-          'Должности, доли и финансы управляются независимыми процедурами устава.',
-          'Offices, ownership and finances follow independent charter procedures.',
-        )}
-      </p>
-    </section>
-  );
+  return <CompanyOverview workspace={workspace} />;
 }
 export { CompanyWorkspaceSection, COMPANY_SECTIONS, type CompanySection };

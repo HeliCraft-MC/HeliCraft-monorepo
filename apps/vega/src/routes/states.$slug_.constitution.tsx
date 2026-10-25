@@ -1,7 +1,7 @@
 import { createFileRoute, getRouteApi, notFound } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import type { ReactElement, CSSProperties } from 'react';
-import { PageContainer } from '@helicraft/atria';
+import { Icon, PageContainer } from '@helicraft/atria';
 import { loadPublicState } from '../states/public-data';
 import { ConstitutionDocument } from '../states/constitution';
 import { displayText, uiText } from '../states/text';
@@ -25,7 +25,7 @@ function Page(): ReactElement {
         {state && (
           <article className={styles.page} style={accent}>
             <a href={`/states/${state.slug}`} className={styles.back}>
-              ← {displayText(state.configuration.name, locale)}
+              <Icon name="arrowLeft" /> {displayText(state.configuration.name, locale)}
             </a>
             <h1>{uiText(locale, 'Конституция', 'Constitution')}</h1>
             <div className={styles.paper}>

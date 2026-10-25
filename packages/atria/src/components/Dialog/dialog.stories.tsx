@@ -5,14 +5,14 @@ import { Dialog } from './dialog';
 import { Button } from '../Button/button';
 
 const meta = {
-  title: 'Components/Dialog',
+  title: 'Overlays/Dialog',
   component: Dialog,
   tags: ['autodocs'],
   parameters: {
     docs: {
       description: {
         component:
-          'Focus-managed modal with Escape dismissal. Fullscreen provides a scrollable document workspace with a bounded reading width, content aligned to the top and a compact close control. For public documents also provide a normal SSR document route.',
+          'Focus-managed modal with Escape dismissal. Fullscreen provides a scrollable document workspace with a bounded reading width, content aligned to the top and a compact close control. Pass non-interactive content as trigger: Dialog creates the trigger button itself. Use controlled open/onOpenChange for external Button controls. Its portalled surface inherits WorkspaceLayout accents. For public documents also provide a normal SSR document route.',
       },
     },
   },

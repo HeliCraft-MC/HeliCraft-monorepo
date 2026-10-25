@@ -1,3 +1,4 @@
+import { isInstitutionSection } from './institution-sections';
 import type { StateDetail } from '@helicraft/alhena';
 import { availableKinds } from '../monetary/model';
 import type { DirectiveKind } from '../monetary/model';
@@ -55,6 +56,9 @@ function managementSections(state: StateDetail, actorId: string): ManagementSect
     ) {
       sections.push('fx');
     }
+  }
+  if (sections.some((section) => isInstitutionSection(section))) {
+    sections.push('institutions');
   }
   return [...sections, 'history', 'citizenship'];
 }

@@ -20,7 +20,7 @@ Container build from root: `docker compose -f apps/rigel/compose.yml build rigel
 
 Future credentials include official Minecraft accounts, additional factors, confirmation through Vega and optional Altair. A player can later link an official account without changing HeliCraft identity, assets, citizenship or history. This requires an Antares identity API and an explicit secure login flow before disabling official-account checks.
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
+From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 
 ## Name
 

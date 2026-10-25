@@ -1,4 +1,5 @@
 // oxlint-disable max-lines, max-lines-per-function, max-statements -- Real browser lifecycle covers the monetary system without Minecraft or mock financial endpoints.
+import { openWorkspaceAction } from './workspace-browser-helpers';
 import { assertOfficeAssignmentPages } from './office-assignments';
 import { expect } from '@playwright/test';
 import { test } from './fixtures';
@@ -206,14 +207,13 @@ test('operates a national monetary system through the web and renders public cur
     await expect(
       page.getByText('Центральный банк ещё не учреждён.', { exact: false }),
     ).toBeVisible();
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Название · Русский', { exact: true }).fill(`Центральный банк ${code}`);
-    const nameField = page
-      .getByLabel('Название · Русский', { exact: true })
-      .locator('xpath=ancestor::fieldset[1]');
-    await nameField.getByRole('combobox', { name: 'Язык перевода' }).selectOption('en');
+    await page.getByLabel('Язык содержимого', { exact: true }).selectOption('en');
     await page
       .getByLabel('Название · English', { exact: true })
       .fill(`Central bank ${code} for national finance and public monetary policy`);
+    await page.getByLabel('Язык содержимого', { exact: true }).selectOption('ru');
     await page
       .getByLabel('Описание и устав · Русский', { exact: true })
       .fill('Устав веб-института');
@@ -242,12 +242,14 @@ test('operates a national monetary system through the web and renders public cur
     await bankCard.getByRole('button', { name: 'Принять административное решение' }).click();
     await expect(bankCard).not.toBeVisible();
     await page.reload();
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Действие', { exact: true }).selectOption('CREATE_CURRENCY');
     await page
       .getByLabel('Название · Русский', { exact: true })
       .fill(`Национальная валюта ${code}`);
     await page.getByLabel('Код валюты', { exact: true }).fill(code);
     await submitDirective(page);
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Действие', { exact: true }).selectOption('CHANGE_POLICY');
     await page.getByLabel('Максимальная денежная масса', { exact: true }).selectOption('LIMITED');
     await page
@@ -268,6 +270,7 @@ test('operates a national monetary system through the web and renders public cur
       fullPage: true,
     });
     await submitDirective(page);
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Действие', { exact: true }).selectOption('ISSUE');
     await page.getByLabel('Сумма', { exact: true }).fill('10000.00');
     await page.getByLabel('Назначение платежа', { exact: true }).fill('Первая эмиссия');
@@ -290,10 +293,12 @@ test('operates a national monetary system through the web and renders public cur
       fullPage: true,
     });
     await page.goto(workspace);
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Действие', { exact: true }).selectOption('BANK_TRANSFER');
     await page.getByLabel('Сумма', { exact: true }).fill('4000.00');
     await page.getByLabel('Получатель', { exact: true }).first().selectOption('TREASURY');
     await submitDirective(page);
+    await openWorkspaceAction(page, 'Новое государственное решение');
     await page.getByLabel('Действие', { exact: true }).selectOption('TREASURY_TRANSFER');
     await page.getByLabel('Сумма', { exact: true }).fill('2000.00');
     await page.getByLabel('Получатель', { exact: true }).last().fill(founderName);
@@ -408,6 +413,7 @@ test('operates a national monetary system through the web and renders public cur
     ).toBeVisible();
     const successorPage = await recipientContext.newPage();
     await successorPage.goto(`/app/states/${stateId}/manage?section=issuance`);
+    await openWorkspaceAction(successorPage, 'Новое государственное решение');
     await expect(successorPage.getByLabel('Действие', { exact: true })).toHaveValue('ISSUE');
     await successorPage.close();
   } finally {

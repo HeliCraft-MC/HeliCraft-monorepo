@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { CompanyWorkspace } from '@helicraft/alhena';
-import { FieldHelp } from '@helicraft/atria';
+import { ActionPanel, FieldHelp } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { CompanyOwnerIdentity } from './owner-identity';
@@ -26,25 +26,25 @@ function CompanyOwnershipWorkspace({
       <h2>{uiText(locale, 'Собственность и акции', 'Ownership and shares')}</h2>
       <CompanyShareAction workspace={workspace} operationId={shareOperationId} onSaved={onSaved} />
       {workspace.availableActions.includes('ISSUE_SHARES') && (
-        <details>
-          <summary>
-            {uiText(
-              locale,
-              'Подготовить дополнительный выпуск',
-              'Prepare additional share issuance',
-            )}
-          </summary>
+        <ActionPanel
+          title={uiText(
+            locale,
+            'Подготовить дополнительный выпуск',
+            'Prepare additional share issuance',
+          )}
+        >
           <ShareIssueComposer
             key={workspace.currentRevisionId}
             workspace={workspace}
             onSaved={onSaved}
           />
-        </details>
+        </ActionPanel>
       )}
       <p>
         {uiText(locale, 'Выпущено акций', 'Issued shares')}: {workspace.issuedShares}
       </p>
       <FieldHelp
+        showLabel
         label={uiText(
           locale,
           'Акции не дают доступа к деньгам',

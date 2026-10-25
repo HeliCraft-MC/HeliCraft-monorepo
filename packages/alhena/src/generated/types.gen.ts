@@ -216,6 +216,7 @@ export type OptionalVotingRules = {
     thresholdPercent: number;
     thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
     allowAbstain: boolean;
+    closeWhenDecided?: boolean;
 } | null;
 
 export type GovernanceVotingRules = {
@@ -224,6 +225,7 @@ export type GovernanceVotingRules = {
     thresholdPercent: number;
     thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
     allowAbstain: boolean;
+    closeWhenDecided?: boolean;
 };
 
 export type ConstitutionBlock = {
@@ -1476,6 +1478,24 @@ export type InterbankExchange = {
     }>;
 };
 
+export type CompanyInboxPage = {
+    items: Array<{
+        id: string;
+        title: LocalizedInput;
+        href: string;
+        action: string;
+    }>;
+    nextId: string | null;
+};
+
+export type CompanyFormationProgress = {
+    items: Array<{
+        owner: LegalOwner;
+        role: 'FOUNDER' | 'OFFICE_HOLDER';
+        confirmed: boolean;
+    }>;
+};
+
 export type CompanyPersonalFormationConsent = {
     id: string;
     role: 'FOUNDER' | 'OFFICE_HOLDER';
@@ -1500,6 +1520,7 @@ export type CompanyDraft = {
 
 export type CompanyConfiguration = {
     registrationStateId: string | null;
+    branding?: CompanyBranding;
     name: LocalizedInput;
     description: LocalizedInput;
     categories: Array<string>;
@@ -1510,6 +1531,12 @@ export type CompanyConfiguration = {
     }>;
     charter: CompanyCharter;
     document: LocalizedInput;
+};
+
+export type CompanyBranding = {
+    color: string;
+    logoMediaId: string | null;
+    coverMediaId: string | null;
 };
 
 export type CompanyCharter = {
@@ -1569,6 +1596,7 @@ export type CompanyRegistrationApplication = {
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
     companyStatus: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
     reviewDirectiveId: string | null;
+    pendingReviewDirectiveId?: string | null;
     reviewedAt: string | null;
     createdAt: string;
     reason: string | null;
@@ -1586,6 +1614,9 @@ export type PublishedCompanyIdentity = {
     registrationStateId: string;
     registrationStateName: LocalizedInput;
     status: 'DRAFT' | 'PENDING_REGISTRATION' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED' | 'CLOSED';
+    branding?: CompanyBranding;
+    registrationStateSlug?: string;
+    registrationStateColor?: string;
     name: LocalizedInput;
     description: LocalizedInput;
     foundedAt: string;
@@ -1614,6 +1645,7 @@ export type CompanyWorkspace = {
 
 export type CompanyRevisionContent = {
     name: LocalizedInput;
+    branding?: CompanyBranding;
     description: LocalizedInput;
     categories: Array<string>;
     charter: CompanyCharter;
@@ -1637,6 +1669,7 @@ export type CompanyDecisionPayload = {
     content: CompanyRevisionContent;
 } | {
     kind: 'UPDATE_PROFILE';
+    branding?: CompanyBranding;
     name: LocalizedInput;
     description: LocalizedInput;
     categories: Array<string>;
@@ -2141,6 +2174,7 @@ export type OptionalDraftVotingRules = {
     thresholdPercent: number;
     thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
     allowAbstain: boolean;
+    closeWhenDecided?: boolean;
 } | null;
 
 export type DraftVotingRules = {
@@ -2149,6 +2183,7 @@ export type DraftVotingRules = {
     thresholdPercent: number;
     thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
     allowAbstain: boolean;
+    closeWhenDecided?: boolean;
 };
 
 export type StateDetail = {
@@ -9859,6 +9894,426 @@ export type GetStateFxResponses = {
 };
 
 export type GetStateFxResponse = GetStateFxResponses[keyof GetStateFxResponses];
+
+export type UploadCompanyMediaData = {
+    body?: {
+        file: Blob | File;
+    };
+    path: {
+        id: string;
+    };
+    query: {
+        kind: 'LOGO' | 'COVER';
+    };
+    url: '/api/v1/account/companies/{id}/media';
+};
+
+export type UploadCompanyMediaErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type UploadCompanyMediaError = UploadCompanyMediaErrors[keyof UploadCompanyMediaErrors];
+
+export type UploadCompanyMediaResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+        width: number;
+        height: number;
+    };
+};
+
+export type UploadCompanyMediaResponse = UploadCompanyMediaResponses[keyof UploadCompanyMediaResponses];
+
+export type GetCompanyMediaPreviewData = {
+    body?: never;
+    path: {
+        id: string;
+        mediaId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/companies/{id}/media/{mediaId}';
+};
+
+export type GetCompanyMediaPreviewErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyMediaPreviewError = GetCompanyMediaPreviewErrors[keyof GetCompanyMediaPreviewErrors];
+
+export type GetCompanyMediaPreviewResponses = {
+    /**
+     * Company image
+     */
+    200: Blob | File;
+};
+
+export type GetCompanyMediaPreviewResponse = GetCompanyMediaPreviewResponses[keyof GetCompanyMediaPreviewResponses];
+
+export type GetPublishedCompanyMediaData = {
+    body?: never;
+    path: {
+        id: string;
+        mediaId: string;
+    };
+    query?: never;
+    url: '/api/v1/public/companies/{id}/media/{mediaId}';
+};
+
+export type GetPublishedCompanyMediaErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetPublishedCompanyMediaError = GetPublishedCompanyMediaErrors[keyof GetPublishedCompanyMediaErrors];
+
+export type GetPublishedCompanyMediaResponses = {
+    /**
+     * Company image
+     */
+    200: Blob | File;
+};
+
+export type GetPublishedCompanyMediaResponse = GetPublishedCompanyMediaResponses[keyof GetPublishedCompanyMediaResponses];
+
+export type GetCompanyDecisionMediaData = {
+    body?: never;
+    path: {
+        id: string;
+        mediaId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-decisions/{id}/media/{mediaId}';
+};
+
+export type GetCompanyDecisionMediaErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyDecisionMediaError = GetCompanyDecisionMediaErrors[keyof GetCompanyDecisionMediaErrors];
+
+export type GetCompanyDecisionMediaResponses = {
+    /**
+     * Private company review image
+     */
+    200: Blob | File;
+};
+
+export type GetCompanyDecisionMediaResponse = GetCompanyDecisionMediaResponses[keyof GetCompanyDecisionMediaResponses];
+
+export type GetCompanyApplicationMediaData = {
+    body?: never;
+    path: {
+        id: string;
+        mediaId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-applications/{id}/media/{mediaId}';
+};
+
+export type GetCompanyApplicationMediaErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    413: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyApplicationMediaError = GetCompanyApplicationMediaErrors[keyof GetCompanyApplicationMediaErrors];
+
+export type GetCompanyApplicationMediaResponses = {
+    /**
+     * Private company review image
+     */
+    200: Blob | File;
+};
+
+export type GetCompanyApplicationMediaResponse = GetCompanyApplicationMediaResponses[keyof GetCompanyApplicationMediaResponses];
+
+export type ListCompanyInboxData = {
+    body?: never;
+    path?: never;
+    query: {
+        kind: 'FORMATION' | 'REGISTRATION' | 'STATE_DECISION' | 'COMPANY_DECISION' | 'SHARES';
+        after?: string;
+    };
+    url: '/api/v1/account/company-inbox';
+};
+
+export type ListCompanyInboxErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type ListCompanyInboxError = ListCompanyInboxErrors[keyof ListCompanyInboxErrors];
+
+export type ListCompanyInboxResponses = {
+    /**
+     * Result
+     */
+    200: CompanyInboxPage;
+};
+
+export type ListCompanyInboxResponse = ListCompanyInboxResponses[keyof ListCompanyInboxResponses];
+
+export type GetCompanyFormationProgressData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/company-drafts/{id}/progress';
+};
+
+export type GetCompanyFormationProgressErrors = {
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetCompanyFormationProgressError = GetCompanyFormationProgressErrors[keyof GetCompanyFormationProgressErrors];
+
+export type GetCompanyFormationProgressResponses = {
+    /**
+     * Result
+     */
+    200: CompanyFormationProgress;
+};
+
+export type GetCompanyFormationProgressResponse = GetCompanyFormationProgressResponses[keyof GetCompanyFormationProgressResponses];
 
 export type ListCompanyFormationConsentsData = {
     body?: never;

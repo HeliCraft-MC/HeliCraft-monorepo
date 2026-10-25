@@ -7,7 +7,7 @@ import { getRouteApi, useRouter } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import type { SubmitEvent, ReactElement } from 'react';
 import { changeUsername } from '@helicraft/alhena';
-import { Alert, Button, FormField, PasswordField, TextField } from '@helicraft/atria';
+import { PageHeader, Alert, Button, FormField, PasswordField, TextField } from '@helicraft/atria';
 
 import { browserClient, errorMessage } from './account-api';
 import { useCopyText } from './use-copy-text';
@@ -60,7 +60,7 @@ export function ProfileSettings(): ReactElement {
   const handleCopy = useCopyText(principal.id, setMessage);
   return (
     <>
-      <h1>{text('account.profile')}</h1>
+      <PageHeader title={text('account.profile')} />
       <section className={styles.section}>
         <div className={styles.profile}>
           <div>

@@ -1,3 +1,4 @@
+// oxlint-disable import/max-dependencies -- Registration outcome composition combines localized lifecycle reasons with immutable formation and resubmission controls.
 import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -6,6 +7,7 @@ import { Alert, Button } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
+import { companyLifecycleReason } from './lifecycle-reason';
 import { CompanyFormationSummary } from './formation-summary';
 import { companyRegistrationStatus } from './wizard-labels';
 import styles from './companies.module.scss';
@@ -58,8 +60,12 @@ function CompanyApplicationPage({
       {query.data !== undefined && (
         <>
           <output>{companyRegistrationStatus(query.data.status, locale)}</output>
-          {query.data.reason !== null && <p>{query.data.reason}</p>}
-          <CompanyFormationSummary configuration={query.data.configuration} />
+          {query.data.reason !== null && <p>{companyLifecycleReason(query.data.reason, locale)}</p>}
+          <CompanyFormationSummary
+            configuration={query.data.configuration}
+            companyId={query.data.companyId}
+            applicationId={query.data.id}
+          />
           {query.data.status === 'APPROVED' && (
             <a href={`/app/companies/${query.data.companyId}`}>
               {uiText(locale, 'Открыть управление компанией', 'Open company workspace')}

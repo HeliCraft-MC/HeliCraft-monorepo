@@ -4,11 +4,18 @@ import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { CompanyOwnerIdentity } from './owner-identity';
 import { CompanyStateIdentity } from './state-identity';
+import { CompanyAppearancePreview } from './appearance-preview';
 import { CompanyCharterSummary } from './charter-summary';
 
 function CompanyFormationSummary({
   configuration,
-}: Readonly<{ configuration: CompanyConfiguration }>): ReactElement {
+  companyId,
+  applicationId,
+}: Readonly<{
+  configuration: CompanyConfiguration;
+  companyId?: string;
+  applicationId?: string;
+}>): ReactElement {
   const { locale } = useTranslation();
   return (
     <section>
@@ -21,6 +28,11 @@ function CompanyFormationSummary({
         <CompanyStateIdentity id={configuration.registrationStateId} />
       )}
       <p>{configuration.categories.join(', ')}</p>
+      <CompanyAppearancePreview
+        companyId={companyId}
+        applicationId={applicationId}
+        branding={configuration.branding}
+      />
       <h3>{uiText(locale, 'Первоначальная собственность', 'Initial ownership')}</h3>
       <p>
         {uiText(locale, 'Выпуск акций', 'Issued shares')}: {configuration.totalShares}

@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 import { expect } from '@playwright/test';
 import type { Browser, Page } from '@playwright/test';
 import { CompanyWalletSchema } from '../../apps/antares/src/modules/companies/finance';
@@ -29,6 +30,7 @@ async function taxation(
 }
 async function establishOffice(page: Page, admin: Page, stateId: string): Promise<void> {
   await page.goto(`/app/states/${stateId}/manage?section=taxation&lang=en`);
+  await openWorkspaceAction(page, 'Establish a tax office');
   await page.getByLabel('Name · English', { exact: true }).fill('Corporate browser tax office');
   await page
     .getByLabel('Description · English', { exact: true })
@@ -76,6 +78,7 @@ async function companyPayment(
   input: Readonly<{ companyId: string; currencyId: string; debit: string; balance: string }>,
 ): Promise<void> {
   await page.goto(`/app/companies/${input.companyId}?section=finance&lang=en`);
+  await openWorkspaceAction(page, 'New payment');
   await page.getByLabel('Payment currency', { exact: true }).selectOption(input.currencyId);
   await page.getByLabel('Payment amount', { exact: true }).fill('0.20');
   await page.getByLabel('Find recipient', { exact: true }).fill('MoneyFounderFxB');

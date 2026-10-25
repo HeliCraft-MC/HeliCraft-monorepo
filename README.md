@@ -11,7 +11,7 @@ Account and administration use persistent sidebar workspaces. State management, 
 
 Public state pages present flags, founders, citizenship, current offices, decision procedures and the Constitution in a responsive layout. Player nicknames link to public profiles at `/players/<UUID>`, showing registration date and affiliations with active states. Profiles never expose sessions, account roles or private state drafts.
 
-The [monetary system V1](docs/architecture/monetary.md) adds Governance-controlled central banks, administrative ratification, national currencies, immutable monetary policies, a double-entry ledger, treasury spending and personal wallets. Operate it entirely through Vega without Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` and public SSR `/currencies`. Monetary authority must be explicitly configured through a reform.
+The [monetary system V1](docs/economy/monetary.md) adds Governance-controlled central banks, administrative ratification, national currencies, immutable monetary policies, a double-entry ledger, treasury spending and personal wallets. Operate it entirely through Vega without Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` and public SSR `/currencies`. Monetary authority must be explicitly configured through a reform.
 
 ## Projects
 
@@ -103,14 +103,17 @@ Deneb bundles/relocates JTS and Caffeine; Paper supplies Adventure. Rigel uses t
 
 ## Code quality
 
-Projects use TypeScript 7.0.2. Only the Alhena generator has isolated TypeScript 6 for Compiler API compatibility; SDK checks/declarations explicitly use root TS7. All oxlint categories are errors, with type checking and zero warnings. Stack compatibility exceptions are documented in [setup research](docs/setup-research.md). Java uses Checkstyle, Spotless/google-java-format and compiler warnings as errors.
+Projects use TypeScript 7.0.2. Only the Alhena generator has isolated TypeScript 6 for Compiler API compatibility; SDK checks/declarations explicitly use root TS7. All oxlint categories are errors, with type checking and zero warnings. Stack compatibility exceptions are documented in [setup research](docs/development/setup-research.md). Java uses Checkstyle, Spotless/google-java-format and compiler warnings as errors.
 
-Docker, Testcontainers and Chromium are available. Web Compose, migrations, PostgreSQL/S3 integration and dev/production browser journeys were verified on disposable infrastructure; see [validation](docs/architecture/validation.md).
+Earlier verification used Docker, Testcontainers and Chromium on disposable infrastructure for web Compose, migrations, PostgreSQL/S3 integration and dev/production browser journeys; see [validation](docs/verification/web-foundation.md).
 
 ## Documentation
 
+- [Documentation index](docs/README.md) / [Навигация по документации](docs/README_RU.md)
+- [Administration overview with Mermaid diagrams (Russian)](docs/overview/administration_RU.md)
+- [Documentation rules for agents](docs/AGENTS.md)
 - [Product map](docs/product-map.md) / [Карта продуктов](docs/product-map_RU.md)
-- [Setup decisions and official sources](docs/setup-research.md) / [Решения и источники](docs/setup-research_RU.md)
+- [Setup decisions and official sources](docs/development/setup-research.md) / [Решения и источники](docs/development/setup-research_RU.md)
 - [Agent guide](AGENTS.md)
 - [Archived applications and old documentation](archive/README.md)
 
@@ -124,7 +127,7 @@ The root [LICENSE](LICENSE) is PolyForm Noncommercial 1.0.0. Archived apps retai
 
 ## Web foundation
 
-See [rendering](docs/architecture/web-rendering.md), [identity](docs/architecture/identity.md), [authorization](docs/architecture/authorization.md), [skins](docs/architecture/skin-storage.md), [CMS](docs/architecture/content.md), [landing](docs/design/landing-page.md) and [quality](docs/architecture/quality.md).
+See [rendering](docs/architecture/web-rendering.md), [identity](docs/architecture/identity.md), [authorization](docs/architecture/authorization.md), [skins](docs/architecture/skin-storage.md), [CMS](docs/architecture/content.md), [landing](docs/design/landing-page.md) and [quality](docs/development/quality.md).
 
 For local development use SITE_ORIGIN=http://localhost:5173. Before production Compose set SITE_ORIGIN=http://localhost:8080 (or your actual HTTPS origin and SECURE_COOKIES=true). Registration grants only PLAYER. First OWNER: register an account, copy its UUID and run `bun run admin:bootstrap-owner <UUID> --confirm <same UUID>`. PRELAUNCH is the default; Minecraft address is shown only when OPEN and MINECRAFT_ADDRESS is configured. EULA is never accepted automatically.
 
@@ -136,9 +139,9 @@ Operators are listed by nickname in root `ops.json` (`ms0ur` initially). They re
 
 ## Taxation and diplomacy
 
-State tax offices, immutable transfer-tax laws, bilateral tax treaties and exact atomic settlement run through Antares and Vega. Personal transfers show a server-calculated tax quote before confirmation. Institutions and laws use published Governance; administration ratifies institutions without setting tax rates. See [taxation](docs/architecture/taxation.md), [diplomacy](docs/architecture/diplomacy.md) and [verification](docs/architecture/taxation-verification.md). Minecraft geography and debt collection remain outside this implementation.
+State tax offices, immutable transfer-tax laws, bilateral tax treaties and exact atomic settlement run through Antares and Vega. Personal transfers show a server-calculated tax quote before confirmation. Institutions and laws use published Governance; administration ratifies institutions without setting tax rates. See [taxation](docs/economy/taxation.md), [diplomacy](docs/states/diplomacy.md) and [verification](docs/verification/taxation.md). Minecraft geography and debt collection remain outside this implementation.
 
-[Current taxation improvements](docs/architecture/taxation-improvements.md) add sender/recipient liability, exact tax-free allowances, approved treasury/central-bank beneficiaries and accumulated fractional obligations. Office suspension preserves enacted laws; state suspension stops new assessments prospectively. The shared engine also covers company transfers, registration/confirmed-branch jurisdiction, explicit categories and national corporate regimes. [Companies](docs/architecture/companies.md) provide resumable registration, flexible Governance, exact shares, subsidiaries, branches, official finance and public SSR profiles. [Currency exchange](docs/architecture/currency-exchange.md) provides bilateral central-bank swaps and finite reserved player offers. See the [acceptance map](docs/architecture/companies-fx-taxation-verification.md) and [verification results](docs/architecture/companies-fx-taxation-plan.md).
+[Tax settings and corporate regimes](docs/economy/taxation-settings.md) add sender/recipient liability, exact tax-free allowances, approved treasury/central-bank beneficiaries and accumulated fractional obligations. Office suspension preserves enacted laws; state suspension stops new assessments prospectively. The shared engine also covers company transfers, registration/confirmed-branch jurisdiction, explicit categories and national corporate regimes. [Companies](docs/economy/companies.md) provide resumable registration, flexible Governance, exact shares, subsidiaries, branches, official finance and public SSR profiles. [Currency exchange](docs/economy/currency-exchange.md) provides bilateral central-bank swaps and finite reserved player offers. See the [acceptance map](docs/verification/companies-fx-taxation.md) and [verification results](docs/history/2026-10-18-companies-fx-taxation.md).
 
 ## Stand deployment
 

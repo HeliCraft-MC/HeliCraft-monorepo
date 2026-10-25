@@ -1,7 +1,8 @@
 .page {
   display: grid;
+  align-content: start;
   gap: 1.5rem;
-  padding-block: 2rem;
+  padding-block: 1.5rem;
   max-width: 72rem;
   margin-inline: auto;
   min-width: 0;
@@ -20,9 +21,9 @@
 .filters {
   align-items: end;
   padding: 1.25rem;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--workspace-border, var(--border-strong));
   border-radius: 1rem;
-  background: var(--bg-panel);
+  background: var(--workspace-surface, var(--bg-panel));
   > :nth-child(2) {
     grid-column: 1 / -1;
   }
@@ -30,9 +31,10 @@
 .card {
   min-width: 0;
   padding: 1.25rem;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--workspace-border, var(--border-strong));
   border-radius: 1rem;
   overflow-wrap: anywhere;
+  background: var(--workspace-surface, var(--bg-panel));
   h2 {
     margin-block: 0 1rem;
   }
@@ -62,5 +64,351 @@
   .grid,
   .filters {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+.page,
+.stateWorkspace,
+.workspaceShell {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  :where(section, article, form, fieldset) {
+    min-width: 0;
+  }
+  :where(section, article, form) {
+    display: grid;
+    align-content: start;
+    gap: 1.25rem;
+  }
+  :where(h1, h2, h3, h4, p, dl, ul, ol) {
+    margin-block: 0;
+  }
+  :where(h2, h3, h4) {
+    line-height: 1.3;
+  }
+  :where(h3, h4) {
+    margin-top: 0.5rem;
+  }
+  :where(ul, ol) {
+    display: grid;
+    gap: 1rem;
+    padding-inline-start: 1.25rem;
+  }
+  :where(li) {
+    min-width: 0;
+  }
+  :where(li > p) {
+    margin-top: 0.5rem;
+  }
+  :where(button) {
+    justify-self: start;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    max-width: 100%;
+    min-width: 0;
+  }
+  :where(details:not([class])) {
+    border: 1px solid var(--workspace-border, var(--border-subtle));
+    border-radius: var(--radius-medium);
+    padding: 1rem;
+    min-width: 0;
+    > summary {
+      cursor: pointer;
+      font-weight: 550;
+    }
+    > summary + * {
+      margin-top: 1rem;
+    }
+  }
+  :where(fieldset) {
+    margin: 0;
+  }
+}
+.stateWorkspace {
+  display: grid;
+  gap: 1.5rem;
+  > section,
+  > article {
+    padding: clamp(1rem, 2vw, 1.5rem);
+    border: 1px solid var(--workspace-border, var(--border-subtle));
+    border-radius: 0.8rem;
+    background: var(--workspace-surface, var(--bg-panel));
+  }
+}
+.workspaceHeader {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1.5rem;
+  border: 1px solid var(--workspace-border, var(--border-subtle));
+  border-radius: 1rem;
+  background: var(--workspace-surface, var(--bg-panel));
+}
+.workspaceLayout {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.workspaceNav {
+  position: sticky;
+  top: 7rem;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--workspace-border, var(--border-subtle));
+  border-radius: 0.8rem;
+  background: var(--workspace-surface, var(--bg-panel));
+  a {
+    padding: 0.65rem 0.8rem;
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    &[aria-current='page'] {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 650;
+    }
+    &:hover {
+      background: var(--bg-elevated);
+    }
+  }
+}
+.workspaceContent {
+  min-width: 0;
+  display: grid;
+  gap: 1.5rem;
+}
+@media (max-width: 60rem) {
+  .workspaceLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspaceNav {
+    position: static;
+    display: block;
+  }
+}
+.branded {
+  --primary: color-mix(in srgb, var(--company-accent) 35%, var(--text-primary));
+  --primary-hover: color-mix(in srgb, var(--company-accent) 20%, var(--text-primary));
+  --color-heli-primary: var(--primary);
+  --color-heli-primary-hover: var(--primary-hover);
+  --color-heli-surface: color-mix(in srgb, var(--company-accent) 14%, var(--bg-panel));
+  --color-heli-surface-hover: color-mix(in srgb, var(--company-accent) 20%, var(--bg-hover));
+  --border-subtle: color-mix(in srgb, var(--company-accent) 28%, var(--border-strong));
+  --focus: var(--primary);
+  background: color-mix(in srgb, var(--company-accent) 3%, var(--bg-base));
+  .card,
+  .workspaceHeader,
+  .workspaceNav,
+  .profileHero {
+    background: color-mix(in srgb, var(--company-accent) 9%, var(--bg-panel));
+  }
+}
+.brandingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1.5rem;
+}
+.imageField {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-width: 0;
+}
+.logo {
+  display: block;
+  width: 6rem;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 1px solid var(--workspace-border, var(--border-subtle));
+}
+.cover {
+  display: block;
+  width: 100%;
+  max-height: 20rem;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+.profileHero {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--workspace-border, var(--border-subtle));
+  border-radius: 1rem;
+}
+.inboxList {
+  list-style: none;
+  padding: 0 !important;
+  li > a {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--workspace-border, var(--border-subtle));
+    border-radius: 0.65rem;
+    text-decoration: none;
+    span {
+      color: var(--text-secondary);
+    }
+    &:hover {
+      background: var(--bg-elevated);
+      border-color: var(--primary);
+    }
+  }
+}
+.consentList {
+  list-style: none;
+  padding: 0 !important;
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--workspace-border, var(--border-subtle));
+    border-radius: 0.5rem;
+  }
+  span {
+    color: var(--text-secondary);
+  }
+  strong {
+    margin-inline-start: auto;
+    font-size: 0.85rem;
+  }
+}
+.workspacePage {
+  max-width: 100rem;
+  padding: 1.5rem clamp(1rem, 2vw, 2rem);
+  h1 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.2;
+  }
+}
+.workspaceHeader {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.workspaceIdentity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  > div {
+    min-width: 0;
+  }
+  h1 {
+    margin-block: 0.2rem;
+  }
+  > div > span {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .logo {
+    width: 4rem;
+    flex: none;
+  }
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+  > a {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--workspace-border, var(--border-subtle));
+    border-radius: 0.8rem;
+    text-decoration: none;
+    min-width: 0;
+    background: var(--workspace-surface, var(--bg-panel));
+  }
+  strong {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    overflow-wrap: anywhere;
+  }
+  span {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+}
+.colorSwatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--workspace-border, var(--border-strong));
+  border-radius: 0.25rem;
+  vertical-align: middle;
+}
+
+.profileIdentity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    line-height: 1.2;
+  }
+  .logo {
+    flex: none;
+    width: clamp(3rem, 12vw, 6rem);
+  }
+}
+.policyList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.workspaceContent {
+  align-content: start;
+}
+@media (max-width: 40rem) {
+  .workspacePage {
+    padding-block: 1rem;
+    gap: 1rem;
+  }
+  .workspaceHeader {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .actions {
+    gap: 0.65rem;
+  }
+}
+
+.workspaceBody {
+  min-width: 0;
+  .workspaceHeader {
+    border-radius: 0;
+    border-inline: 0;
+    border-top: 0;
+    margin: 0;
+    padding: 1.25rem clamp(1rem, 2vw, 2rem);
+    background: var(--workspace-surface);
+  }
+  .workspaceContent {
+    padding: clamp(1rem, 2vw, 2rem);
+  }
+}
+.workspaceNav {
+  top: 5.5rem;
+  border-radius: 0;
+  margin: 0;
+  max-height: calc(100dvh - 5.5rem);
+  overflow-y: auto;
+  background: var(--workspace-surface);
+}
+@media (max-width: 60rem) {
+  .workspaceNav {
+    max-height: none;
+    overflow: visible;
   }
 }

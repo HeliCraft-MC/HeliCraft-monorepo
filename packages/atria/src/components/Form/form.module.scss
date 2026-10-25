@@ -1,0 +1,50 @@
+.form {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+.languageBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+  label {
+    font-weight: 600;
+  }
+  select {
+    width: auto;
+    min-width: 9rem;
+  }
+  p {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+}
+.section {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+  > header {
+    display: grid;
+    gap: 0.5rem;
+    h3,
+    p {
+      margin: 0;
+    }
+    p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+  }
+}

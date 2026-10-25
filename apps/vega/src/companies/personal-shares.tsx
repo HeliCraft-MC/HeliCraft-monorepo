@@ -3,8 +3,9 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPersonalSharePortfolio } from '@helicraft/alhena';
 import type { LegalOwner } from '@helicraft/alhena';
-import { Alert } from '@helicraft/atria';
+import { PageHeader, Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
+import { CompanyName } from '../company-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { MonetaryPagination } from '../monetary/pagination';
@@ -31,14 +32,14 @@ function PersonalCompanyShares({ actorId }: Readonly<{ actorId: string }>): Reac
   }, [refetch]);
   return (
     <section>
-      <h1>{uiText(locale, 'Мои доли в компаниях', 'My company shares')}</h1>
+      <PageHeader title={uiText(locale, 'Мои доли в компаниях', 'My company shares')} />
       {query.data?.items.length === 0 && (
         <p>{uiText(locale, 'Долей пока нет.', 'No shares yet.')}</p>
       )}
       {query.data?.items.map((position) => (
         <article key={position.issuerId}>
           <h2>
-            <a href={`/companies/${position.issuerId}`}>{displayText(position.name, locale)}</a>
+            <CompanyName id={position.issuerId} name={displayText(position.name, locale)} />
           </h2>
           <p>
             {position.shares} / {position.issuedShares}

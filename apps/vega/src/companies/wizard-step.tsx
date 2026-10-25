@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { CompanyConfiguration, CompanyDraft, Principal } from '@helicraft/alhena';
 import type { SelectedPlayer } from '../player-picker';
-import { LocalizedInputField } from '../localized-input';
+import { LocalizedForm } from '../localized-form';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { CompanyIdentityFields } from './identity-fields';
@@ -14,6 +14,7 @@ const GOVERNANCE_STEP = 2;
 const DOCUMENT_STEP = 3;
 function CompanyWizardStep({
   step,
+  companyId,
   configuration,
   onChange,
   players,
@@ -21,6 +22,7 @@ function CompanyWizardStep({
   flush,
 }: Readonly<{
   step: number;
+  companyId: string;
   configuration: CompanyConfiguration;
   onChange: (configuration: CompanyConfiguration) => void;
   players: readonly SelectedPlayer[];
@@ -40,8 +42,22 @@ function CompanyWizardStep({
     },
     [configuration, onChange],
   );
+  const documentFields = useMemo(
+    () => [
+      {
+        name: 'document',
+        label: uiText(locale, 'Формальный устав', 'Formal charter'),
+        value: configuration.document,
+        onChange: document,
+        multiline: true,
+      },
+    ],
+    [locale, configuration.document, document],
+  );
   if (step === 0) {
-    return <CompanyIdentityFields value={configuration} onChange={onChange} />;
+    return (
+      <CompanyIdentityFields companyId={companyId} value={configuration} onChange={onChange} />
+    );
   }
   if (step === 1) {
     return <CompanyAllocationsEditor value={configuration} onChange={onChange} />;
@@ -66,12 +82,7 @@ function CompanyWizardStep({
             'Formal Markdown text does not change machine-readable authority.',
           )}
         </p>
-        <LocalizedInputField
-          label={uiText(locale, 'Формальный устав', 'Formal charter')}
-          value={configuration.document}
-          onChange={document}
-          multiline
-        />
+        <LocalizedForm fields={documentFields} />
       </>
     );
   }

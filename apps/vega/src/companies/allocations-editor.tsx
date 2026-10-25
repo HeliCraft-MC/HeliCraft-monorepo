@@ -75,6 +75,7 @@ function CompanyAllocationsEditor({
         />
       </FormField>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Собственность и согласие', 'Ownership and consent')}
         content={uiText(
           locale,

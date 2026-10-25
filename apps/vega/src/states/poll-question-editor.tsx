@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ComponentProps, ReactElement } from 'react';
 import type { VotingInput } from '@helicraft/alhena';
-import { Button, FormField, TextField } from '@helicraft/atria';
+import { Button, FormField, TextField, Icon, IconButton } from '@helicraft/atria';
 import { LocalizedInputField } from './localized-input';
 import { usePropCache, rowKey } from './use-prop-cache';
 import { changeQuestion, removeQuestion, moveQuestion, MAX_OPTIONS } from './poll-questions-model';
@@ -36,33 +36,36 @@ function PollQuestionEditor({
           {uiText(locale, 'Вопрос', 'Question')} {index + 1}
         </h3>
         <div className={styles.actions}>
-          <Button
+          <IconButton
+            label={uiText(locale, 'Выше', 'Move up')}
             tone="quiet"
             disabled={index === 0}
             onClick={button('up', () => {
               onChange(moveQuestion(input, question.id, MOVE_UP));
             })}
           >
-            {uiText(locale, 'Выше', 'Move up')}
-          </Button>
-          <Button
+            <Icon name="arrowUp" />
+          </IconButton>
+          <IconButton
+            label={uiText(locale, 'Ниже', 'Move down')}
             tone="quiet"
             disabled={index + 1 === input.questions?.length}
             onClick={button('down', () => {
               onChange(moveQuestion(input, question.id, 1));
             })}
           >
-            {uiText(locale, 'Ниже', 'Move down')}
-          </Button>
-          <Button
+            <Icon name="arrowDown" />
+          </IconButton>
+          <IconButton
+            label={uiText(locale, 'Удалить вопрос', 'Remove question')}
             tone="quiet"
             disabled={input.questions?.length === 1}
             onClick={button('remove', () => {
               onChange(removeQuestion(input, question));
             })}
           >
-            {uiText(locale, 'Удалить вопрос', 'Remove question')}
-          </Button>
+            <Icon name="delete" />
+          </IconButton>
         </div>
       </div>
       <LocalizedInputField
@@ -75,7 +78,7 @@ function PollQuestionEditor({
       {input.options
         .filter((option) => question.optionIds.includes(option.id))
         .map((option, position) => (
-          <div key={option.id} className={styles.editor}>
+          <div key={option.id} className={styles.optionRow}>
             <LocalizedInputField
               label={`${uiText(locale, 'Ответ', 'Answer')} ${position + 1}`}
               value={option.label}
@@ -88,7 +91,8 @@ function PollQuestionEditor({
                 });
               })}
             />
-            <Button
+            <IconButton
+              label={uiText(locale, 'Удалить ответ', 'Remove answer')}
               tone="quiet"
               disabled={question.optionIds.length <= MIN_OPTIONS}
               onClick={button(rowKey('delete', option.id), () => {
@@ -103,8 +107,8 @@ function PollQuestionEditor({
                 });
               })}
             >
-              {uiText(locale, 'Удалить ответ', 'Remove answer')}
-            </Button>
+              <Icon name="close" />
+            </IconButton>
           </div>
         ))}
       <Button
@@ -119,6 +123,7 @@ function PollQuestionEditor({
           onChange({ ...next, options: [...input.options, option] });
         })}
       >
+        <Icon name="add" />
         {uiText(locale, 'Добавить ответ', 'Add answer')}
       </Button>
       <FormField

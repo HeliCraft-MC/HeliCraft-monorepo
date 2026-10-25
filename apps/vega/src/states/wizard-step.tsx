@@ -1,5 +1,6 @@
 // oxlint-disable react/no-multi-comp -- The wrapper adds common step guidance to the existing step composition.
 // oxlint-disable import/max-dependencies -- This composition module connects typed platform services and reusable UI; domain logic remains in separate modules.
+import { ContentLanguageScope } from '../content-language-scope';
 import { StateStepHelp } from './step-help';
 import { STEPS } from './wizard-steps';
 import { useCallback, useMemo } from 'react';
@@ -88,7 +89,15 @@ function StateWizardStep(props: StateWizardStepProps): ReactElement {
   return (
     <>
       <StateStepHelp step={props.step} />
-      <StateWizardContent {...props} />
+      {[STEPS.OFFICES, STEPS.OFFICE_RULES, STEPS.CITIZENSHIP_AUTHORITY, STEPS.DECISIONS].some(
+        (step) => step === props.step,
+      ) ? (
+        <ContentLanguageScope>
+          <StateWizardContent {...props} />
+        </ContentLanguageScope>
+      ) : (
+        <StateWizardContent {...props} />
+      )}
     </>
   );
 }

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
-import { ActionLink, Dialog } from '@helicraft/atria';
+import { Icon, ActionLink, Dialog } from '@helicraft/atria';
 import { StateCitizens } from './citizens';
 import { uiText } from './text';
 import { StateOverview } from './state-overview';
@@ -40,7 +40,7 @@ function PublicStateDetail({
   return (
     <article className={styles.page} style={accent}>
       <a className={styles.back} href={backHref ?? (publicView ? '/states' : '/app')}>
-        ←{' '}
+        <Icon name="arrowLeft" />{' '}
         {backLabel ??
           uiText(
             locale,

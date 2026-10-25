@@ -69,14 +69,59 @@ function BlockEditor({
           update({ ...block, title });
         })}
       />
-      <LocalizedInputField
-        label={uiText(locale, 'Подсказка', 'Description')}
-        value={block.description}
-        onChange={localized('description', (description) => {
-          update({ ...block, description });
-        })}
-        multiline
-      />
+      <details>
+        <summary>
+          {uiText(
+            locale,
+            'Подсказка и дополнительные настройки',
+            'Description and advanced settings',
+          )}
+        </summary>
+        <div className={styles.editor}>
+          <LocalizedInputField
+            label={uiText(locale, 'Подсказка', 'Description')}
+            value={block.description}
+            onChange={localized('description', (description) => {
+              update({ ...block, description });
+            })}
+            multiline
+          />
+          {['SHORT_TEXT', 'PARAGRAPH'].includes(block.type) && (
+            <div className={styles.toolbar}>
+              <FormField
+                htmlFor={`${block.id}-min`}
+                label={uiText(locale, 'Минимум символов', 'Minimum length')}
+              >
+                <TextField
+                  id={`${block.id}-min`}
+                  type="number"
+                  min={0}
+                  max={block.maxLength}
+                  value={block.minLength}
+                  onChange={text('min', (event) => {
+                    update({ ...block, minLength: Number(event.currentTarget.value) });
+                  })}
+                />
+              </FormField>
+              <FormField
+                htmlFor={`${block.id}-max`}
+                label={uiText(locale, 'Максимум символов', 'Maximum length')}
+              >
+                <TextField
+                  id={`${block.id}-max`}
+                  type="number"
+                  min={1}
+                  max={10_000}
+                  value={block.maxLength}
+                  onChange={text('max', (event) => {
+                    update({ ...block, maxLength: Number(event.currentTarget.value) });
+                  })}
+                />
+              </FormField>
+            </div>
+          )}
+        </div>
+      </details>
       {!decorative && (
         <Checkbox
           label={uiText(locale, 'Обязательный вопрос', 'Required question')}
@@ -85,40 +130,6 @@ function BlockEditor({
             update({ ...block, required: event.currentTarget.checked });
           })}
         />
-      )}
-      {['SHORT_TEXT', 'PARAGRAPH'].includes(block.type) && (
-        <div className={styles.toolbar}>
-          <FormField
-            htmlFor={`${block.id}-min`}
-            label={uiText(locale, 'Минимум символов', 'Minimum length')}
-          >
-            <TextField
-              id={`${block.id}-min`}
-              type="number"
-              min={0}
-              max={block.maxLength}
-              value={block.minLength}
-              onChange={text('min', (event) => {
-                update({ ...block, minLength: Number(event.currentTarget.value) });
-              })}
-            />
-          </FormField>
-          <FormField
-            htmlFor={`${block.id}-max`}
-            label={uiText(locale, 'Максимум символов', 'Maximum length')}
-          >
-            <TextField
-              id={`${block.id}-max`}
-              type="number"
-              min={1}
-              max={10_000}
-              value={block.maxLength}
-              onChange={text('max', (event) => {
-                update({ ...block, maxLength: Number(event.currentTarget.value) });
-              })}
-            />
-          </FormField>
-        </div>
       )}
       {['SINGLE_CHOICE', 'CHECKBOX', 'DROPDOWN'].includes(block.type) && (
         <ChoiceEditor input={input} block={block} onChange={onChange} />

@@ -18,6 +18,9 @@ function StateDraftPage({
 }: Readonly<{ id: string; principal: Principal }>): ReactElement {
   const { locale } = useTranslation();
   const query = useQuery({
+    // An editor must initialize from a fresh version after returning from approvals or another draft.
+    staleTime: 0,
+    gcTime: 0,
     queryKey: ['state-draft', id],
     queryFn: async () => {
       const { data } = await getStateDraft({

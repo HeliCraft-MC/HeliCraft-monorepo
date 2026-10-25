@@ -1,0 +1,17 @@
+#storybook-root {
+  max-width: 76rem;
+  margin-inline: auto;
+  line-height: 1.6;
+}
+#storybook-root :where(section, article, fieldset, form) {
+  min-width: 0;
+}
+#storybook-root :where(h1, h2, h3, p) {
+  margin-block: 0 1rem;
+}
+#storybook-root :where(button) {
+  margin: 0.25rem;
+}
+.sbdocs-content {
+  max-width: 76rem;
+}

@@ -8,6 +8,7 @@ const VotingRulesSchema = z
     thresholdPercent: z.number().min(1).max(100),
     thresholdKind: z.enum(['PERCENT', 'SIMPLE_MAJORITY', 'ABSOLUTE_MAJORITY', 'UNANIMOUS']),
     allowAbstain: z.boolean(),
+    closeWhenDecided: z.boolean().optional(),
   })
   .openapi('GovernanceVotingRules');
 export { VotingRulesSchema };

@@ -3,6 +3,7 @@ import type { CompanyDraft } from '@helicraft/alhena';
 import { FieldHelp } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
+import { CompanyFormationProgress } from './formation-progress';
 import { FormationConsent } from './formation-consent';
 import { EntityFormationConsents } from './entity-formation-consents';
 
@@ -21,6 +22,7 @@ function CompanyFormationConsents({
     <section>
       <h3>{uiText(locale, 'Согласия участников', 'Participant consents')}</h3>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Неизменяемые условия согласия', 'Exact formation consent')}
         content={uiText(
           locale,
@@ -28,6 +30,14 @@ function CompanyFormationConsents({
           'Consent covers the saved draft. Changes to identity, shares, offices or governance require fresh consent. Share this draft link with selected participants; only participants can read it.',
         )}
       />
+      <CompanyFormationProgress draft={draft} />
+      <a href="/app/notifications">
+        {uiText(
+          locale,
+          'Участники найдут свои запросы во «Входящих»',
+          'Participants can find their requests in the approval inbox',
+        )}
+      </a>
       <EntityFormationConsents draft={draft} />
       {founder && (
         <FormationConsent

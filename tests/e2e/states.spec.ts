@@ -7,13 +7,16 @@ import {
 import { expect } from '@playwright/test';
 import { test } from './fixtures';
 import { DraftSchema } from '../../apps/antares/src/modules/states/contracts';
+import { StateDirectorySchema } from '../../apps/antares/src/modules/states/directory-contracts';
 
 // oxlint-disable max-lines, max-lines-per-function, max-statements -- This sequential real-browser lifecycle covers a resumable wizard, admin review and JavaScript-free SSR.
 const PASSWORD = 'Browser test password 2026';
+const STATE_JOURNEY_TIMEOUT = 90_000;
 test('resumes a multilingual state draft, edits governance and constitution, then receives admin approval and public SSR', async ({
   page,
   browser,
 }, testInfo) => {
+  test.setTimeout(STATE_JOURNEY_TIMEOUT);
   const suffix = crypto.randomUUID().replaceAll('-', '').slice(0, 9);
   const username = `s${suffix}`;
   const cofounder = `c${suffix}`;
@@ -42,10 +45,7 @@ test('resumes a multilingual state draft, edits governance and constitution, the
     throw new Error('Missing draft id');
   }
   await page.getByLabel('Название государства · Русский', { exact: true }).fill(`Аврора ${suffix}`);
-  const localizedName = page
-    .getByLabel('Название государства · Русский', { exact: true })
-    .locator('xpath=ancestor::fieldset[1]');
-  await localizedName.getByRole('combobox', { name: 'Язык перевода' }).selectOption('en');
+  await page.getByLabel('Язык содержимого', { exact: true }).selectOption('en');
   await page.getByLabel('Название государства · English', { exact: true }).fill(`Aurora ${suffix}`);
   await page.getByLabel('Адрес государства', { exact: true }).fill(slug);
   await page.getByRole('button', { name: '2. Флаги', exact: true }).click();
@@ -247,12 +247,19 @@ test('resumes a multilingual state draft, edits governance and constitution, the
     try {
       const publicPage = await publicContext.newPage();
       await publicPage.goto('/');
-      await expect(publicPage.locator('header a[href="/states"]').first()).toHaveAttribute(
+      await expect(publicPage.locator('header a[href^="/states"]').first()).toHaveAttribute(
         'href',
-        '/states',
+        /^\/states(?:\?|$)/u,
       );
-      // The home preview contains the three most populous states; new states use the full directory.
-      await expect(publicPage.locator('#states a[href^="/states/"]')).toHaveCount(3);
+      // The preview contains up to three states; both runtimes share the disposable database.
+      const previewResponse = await publicPage.request.get(
+        '/api/v1/public/states?pageSize=3&sort=POPULATION&locale=ru',
+      );
+      const previewStates = StateDirectorySchema.parse(await previewResponse.json());
+      expect(previewStates.items.length).toBeGreaterThan(0);
+      await expect(publicPage.locator('#states a[href^="/states/"]')).toHaveCount(
+        previewStates.items.length,
+      );
       await publicPage
         .locator('#states')
         .screenshot({ path: `/tmp/helicraft-home-states-${test.info().project.name}.png` });

@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import type { MonetaryDirective, StateDetail } from '@helicraft/alhena';
-import { FieldHelp } from '@helicraft/atria';
+import { Icon, FieldHelp } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
-import { displayText } from '../states/text';
+import { displayText, uiText } from '../states/text';
 
 function DirectiveEvidence({
   directive,
@@ -20,7 +20,11 @@ function DirectiveEvidence({
       </summary>
       {directive.approvalGroups.map((group) => (
         <p key={`${group.mode}-${group.officeIds.join('|')}`}>
-          {group.mode === 'ALL' ? '∧' : '∨'}{' '}
+          {uiText(
+            locale,
+            group.mode === 'ALL' ? 'Все должности:' : 'Любая должность:',
+            group.mode === 'ALL' ? 'All offices:' : 'Any office:',
+          )}{' '}
           {group.officeIds
             .map((officeId) =>
               displayText(
@@ -45,7 +49,7 @@ function DirectiveEvidence({
               )?.name ?? {},
               locale,
             )}
-            : {approval.current ? '✓' : '—'}
+            : {approval.current ? <Icon name="check" /> : '—'}
           </li>
         ))}
       </ul>

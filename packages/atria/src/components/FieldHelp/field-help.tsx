@@ -1,13 +1,15 @@
 import { Popover } from '@base-ui/react/popover';
 import { useCallback, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
+import { CircleHelp } from 'lucide-react';
 import styles from './field-help.module.scss';
 
 interface FieldHelpProps {
   readonly label: string;
   readonly content: string;
+  readonly showLabel?: boolean;
 }
-function FieldHelp({ label, content }: FieldHelpProps): ReactElement | null {
+function FieldHelp({ label, content, showLabel = false }: FieldHelpProps): ReactElement | null {
   const [open, setOpen] = useState(false);
   const pinned = useRef(false);
   const changeOpen = useCallback(
@@ -39,10 +41,11 @@ function FieldHelp({ label, content }: FieldHelpProps): ReactElement | null {
         openOnHover
         delay={0}
         closeDelay={0}
-        className={styles.trigger}
+        className={[styles.trigger, showLabel ? styles.labelled : ''].filter(Boolean).join(' ')}
         aria-label={`ⓘ ${label}`}
       >
-        <span aria-hidden="true">ⓘ</span>
+        <CircleHelp size={16} aria-hidden="true" />
+        {showLabel && <span>{label}</span>}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8}>

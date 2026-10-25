@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { FxOffer } from '@helicraft/alhena';
 import { FieldHelp, MoneyAmount } from '@helicraft/atria';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import styles from '../monetary/monetary.module.scss';
@@ -23,7 +24,8 @@ function OfferSummary({ offer }: Readonly<{ offer: FxOffer }>): ReactElement {
   return (
     <article className={styles.card}>
       <h2>
-        {displayText(offer.bank.name, locale)} · {displayText(offer.bank.stateName, locale)}
+        {displayText(offer.bank.name, locale)} ·{' '}
+        <StateName id={offer.bank.stateId} name={displayText(offer.bank.stateName, locale)} />
       </h2>
       <p>{uiText(locale, ...statuses[offer.status])}</p>
       <p>

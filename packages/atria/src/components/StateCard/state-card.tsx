@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StateFacts } from './state-facts';
 import { StateVisual } from './state-visual';
+import { StateName } from '../StateName/state-name';
 import { Icon } from '../icon';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import styles from './state-card.module.scss';
@@ -50,7 +51,14 @@ function StateCard(props: StateCardProps): ReactElement {
       />
       <div className={styles.body}>
         <p className={styles.government}>{government ?? 'Устройство определяется конституцией'}</p>
-        <h3>{name}</h3>
+        <h3>
+          <StateName
+            name={name}
+            color={color ?? 'var(--primary)'}
+            href={href ?? ''}
+            linked={false}
+          />
+        </h3>
         {description !== undefined && description !== '' && (
           <p className={styles.description}>{description}</p>
         )}

@@ -9,7 +9,15 @@ import type { ChangeEvent, ReactElement } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { listUsers } from '@helicraft/alhena';
-import { Alert, Pagination, Table, TextField, Select, FormField } from '@helicraft/atria';
+import {
+  PageHeader,
+  Alert,
+  Pagination,
+  Table,
+  TextField,
+  Select,
+  FormField,
+} from '@helicraft/atria';
 import { z } from 'zod';
 import { browserClient } from './account-api';
 import styles from './account.module.scss';
@@ -49,14 +57,14 @@ export function UserList(): ReactElement {
   });
   return (
     <>
-      <h1>{text('admin.users')}</h1>
-      <p className={styles.paragraph}>
-        {uiText(
+      <PageHeader
+        title={text('admin.users')}
+        description={uiText(
           locale,
           'Найдите игрока по нику или UUID. Фильтры помогают проверить статусы и роли; управление открывается отдельно для каждого аккаунта.',
           'Find a player by name or UUID. Filter by status and role, then open an account to manage it.',
         )}
-      </p>
+      />
       <div className={styles.filters}>
         <FormField label={text('users.searchLabel')} htmlFor="user-search">
           <TextField id="user-search" type="search" value={search} onChange={handleSearch} />

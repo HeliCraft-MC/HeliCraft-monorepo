@@ -1,8 +1,17 @@
-import { useCallback, useId } from 'react';
+import { useCallback, useId, useMemo } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
-import type { CompanyConfiguration } from '@helicraft/alhena';
-import { FormField, TextField } from '@helicraft/atria';
-import { LocalizedInputField } from '../localized-input';
+import type { CompanyConfiguration, CompanyBranding } from '@helicraft/alhena';
+import {
+  Form,
+  FormModel,
+  FormField,
+  TextField,
+  useFormModel,
+  useFormStore,
+} from '@helicraft/atria';
+import { z } from 'zod';
+import { formLanguages } from '../form-languages';
+import { CompanyBrandingEditor } from './branding-editor';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { CompanyJurisdictionPicker } from './jurisdiction-picker';
@@ -11,55 +20,76 @@ import { RegistrationPolicySummary } from './registration-policy-summary';
 function CompanyIdentityFields({
   value,
   onChange,
+  companyId,
 }: Readonly<{
+  companyId: string;
   value: CompanyConfiguration;
   onChange: (configuration: CompanyConfiguration) => void;
 }>): ReactElement {
   const { locale } = useTranslation();
   const id = useId();
-  const name = useCallback(
-    (next: CompanyConfiguration['name']): void => {
-      onChange({ ...value, name: next });
-    },
-    [value, onChange],
+  const model = useMemo(
+    () =>
+      new FormModel<CompanyConfiguration>({
+        defaultValues: value,
+        schema: z.object({
+          name: z.record(z.string(), z.string().optional()),
+          description: z.record(z.string(), z.string().optional()),
+        }),
+        fields: [
+          {
+            kind: 'localized',
+            name: 'name',
+            label: uiText(locale, 'Название компании', 'Company name'),
+          },
+          {
+            kind: 'localized-multiline',
+            name: 'description',
+            label: uiText(locale, 'Описание компании', 'Company description'),
+          },
+        ],
+      }),
+    [value, locale],
   );
-  const description = useCallback(
-    (next: CompanyConfiguration['description']): void => {
-      onChange({ ...value, description: next });
-    },
-    [value, onChange],
-  );
+  const form = useFormModel({ model, onSubmit: onChange, onValuesChange: onChange });
+  const values = useFormStore(form.store, (state) => state.values);
   const state = useCallback(
     (registrationStateId: string): void => {
-      onChange({ ...value, registrationStateId });
+      form.setFieldValue('registrationStateId', registrationStateId);
     },
-    [value, onChange],
+    [form],
+  );
+  const branding = useCallback(
+    (next: CompanyBranding): void => {
+      form.setFieldValue('branding', next);
+    },
+    [form],
   );
   const categories = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
-      onChange({
-        ...value,
-        categories: event.currentTarget.value
+      form.setFieldValue(
+        'categories',
+        event.currentTarget.value
           .split(',')
           .map((item) => item.trim())
-          .filter((item) => item !== ''),
-      });
+          .filter(Boolean),
+      );
     },
-    [value, onChange],
+    [form],
   );
   return (
-    <>
-      <LocalizedInputField
-        label={uiText(locale, 'Название компании', 'Company name')}
-        value={value.name}
-        onChange={name}
-      />
-      <LocalizedInputField
-        label={uiText(locale, 'Описание компании', 'Company description')}
-        value={value.description}
-        onChange={description}
-        multiline
-      />
+    <Form
+      form={form}
+      model={model}
+      languages={formLanguages}
+      defaultLanguage={locale}
+      languageLabel={uiText(locale, 'Язык содержимого', 'Content language')}
+      translationHint={uiText(
+        locale,
+        'Название и описание переключаются вместе. Все переводы сохраняются в проекте.',
+        'Name and description switch together. All translations are saved in the draft.',
+      )}
+    >
       <FormField
         label={uiText(
           locale,
@@ -73,17 +103,18 @@ function CompanyIdentityFields({
           'Categories grant no authority and do not change financial behavior.',
         )}
       >
-        <TextField id={id} defaultValue={value.categories.join(', ')} onBlur={categories} />
+        <TextField id={id} defaultValue={values.categories.join(', ')} onBlur={categories} />
       </FormField>
       <CompanyJurisdictionPicker
-        value={value.registrationStateId}
+        value={values.registrationStateId}
         onChange={state}
         label={uiText(locale, 'Государство регистрации', 'Registration jurisdiction')}
       />
-      {value.registrationStateId !== null && (
-        <RegistrationPolicySummary stateId={value.registrationStateId} />
+      {values.registrationStateId !== null && (
+        <RegistrationPolicySummary stateId={values.registrationStateId} />
       )}
-    </>
+      <CompanyBrandingEditor companyId={companyId} value={values.branding} onChange={branding} />
+    </Form>
   );
 }
 export { CompanyIdentityFields };

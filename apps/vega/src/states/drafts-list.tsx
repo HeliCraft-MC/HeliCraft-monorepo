@@ -13,7 +13,7 @@ import {
   listMyStates,
 } from '@helicraft/alhena';
 import type { StateDraft } from '@helicraft/alhena';
-import { Alert, Button, ActionLink, EmptyState } from '@helicraft/atria';
+import { PageHeader, Alert, Button, ActionLink, EmptyState } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import styles from './states.module.scss';
@@ -66,14 +66,14 @@ function StateDraftsList(): ReactElement {
   return (
     <section className={styles.page}>
       <header>
-        <h1>{uiText(locale, 'Мои государства', 'My states')}</h1>
-        <p className={styles.hint}>
-          {uiText(
+        <PageHeader
+          title={uiText(locale, 'Мои государства', 'My states')}
+          description={uiText(
             locale,
             'Все ваши гражданства в одном месте. Откройте государство для голосований, предложений и управления. Возможность нескольких гражданств определяется правилами каждого государства.',
             'All your citizenships in one place. Open a state for voting, proposals and management. Each state determines whether multiple citizenships are allowed.',
           )}
-        </p>
+        />
       </header>
       {states.isPending && (
         <output>{uiText(locale, 'Загрузка государств…', 'Loading states…')}</output>

@@ -8,7 +8,7 @@ A state exists only after its creation draft is submitted. Submission creates fo
 
 `CREATED` awaits administrative review. Allowed transitions are `CREATED → ACTIVE`, `CREATED → REJECTED`, `ACTIVE → SUSPENDED`, and `SUSPENDED → ACTIVE`. Administrative decisions require a reason and produce audit entries. Suspended/rejected records remain in history. Public endpoints expose only ACTIVE states; founders and administrators can inspect pending configuration. Future DORMANT/DISSOLVED enum values do not introduce additional transitions yet.
 
-Territories, claims, general institution/law CRUD, markets, diplomacy, courts and war remain outside States V1. Central banks, currencies and treasury are implemented by the separate [monetary system V1](../architecture/monetary.md), using explicit Governance policies rather than presets as authority.
+Territories, claims, general institution/law CRUD, markets, courts and war remain outside States V1. Bilateral tax diplomacy is implemented by the separate [treaty domain](diplomacy.md); other treaty types remain future work. Central banks, currencies and treasury are implemented by the separate [monetary system V1](../economy/monetary.md), using explicit Governance policies rather than presets as authority.
 
 ```mermaid
 erDiagram

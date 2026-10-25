@@ -96,7 +96,9 @@ test('filter submission, pagination, reset and mobile keyboard access keep publi
       (item) => item.query.page === '2' && item.query.stateId === STATE_ID,
     ),
   ).toBe(true);
-  expect(observed.observations.every((item) => item.cookie === null)).toBe(true);
+  // Same-origin image elements use browser cookies; public content fetches must omit them.
+  const contentRequests = observed.observations.filter((item) => !item.path.includes('/media/'));
+  expect(contentRequests.every((item) => item.cookie === null)).toBe(true);
   await page.getByRole('link', { name: 'Reset', exact: true }).click();
   await expect(page.getByLabel('Search', { exact: true })).toHaveValue('');
   await catalogueScreenshots(page, testInfo);

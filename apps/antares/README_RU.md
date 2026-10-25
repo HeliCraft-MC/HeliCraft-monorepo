@@ -24,7 +24,7 @@ S3 использует AWS SDK v3 с endpoint и path-style addressing. Инт�
 
 Продакшен из корня: `docker compose --env-file .env -f apps/antares/compose.yml up -d --build`. Внешние dev-сервисы: `docker compose --env-file .env -f apps/antares/compose.dev.yml up -d --wait`. Отдельный prod-compose публикует API на localhost:3000; корневой продакшен предоставляет его через Vega. При изменении API регенерируйте Alhena. Старые маршруты Teapot, аккаунты и данные не перенесены.
 
-Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/setup-research_RU.md).
+Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/development/setup-research_RU.md).
 
 ## Название
 
@@ -42,6 +42,6 @@ S3 использует AWS SDK v3 с endpoint и path-style addressing. Инт�
 
 ## Monetary system V1
 
-[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/architecture/monetary_RU.md).
+[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/economy/monetary_RU.md).
 
-Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/architecture/taxation_RU.md), [Diplomacy](../../docs/architecture/diplomacy_RU.md).
+Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/economy/taxation_RU.md), [Diplomacy](../../docs/states/diplomacy_RU.md).

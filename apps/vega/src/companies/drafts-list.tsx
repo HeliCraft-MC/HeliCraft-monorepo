@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createCompanyDraft, listCompanyDrafts } from '@helicraft/alhena';
-import { Alert, Button } from '@helicraft/atria';
+import { PageHeader, Alert, Button } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
@@ -42,9 +42,12 @@ function CompanyDraftsList({ actorId }: Readonly<{ actorId: string }>): ReactEle
   }, [mutate]);
   return (
     <section className={styles.page}>
-      <h1>{uiText(locale, 'Мои компании и проекты', 'My companies and drafts')}</h1>
+      <PageHeader title={uiText(locale, 'Мои компании и проекты', 'My companies and drafts')} />
       <a href="/app/shares">
         {uiText(locale, 'Мои доли и участие в компаниях', 'My shares and company participation')}
+      </a>
+      <a href="/app/notifications">
+        {uiText(locale, 'Открыть входящие согласования', 'Open approval inbox')}
       </a>
       <CompanyWorkspaceDirectory actorId={actorId} />
       <Button onClick={create} disabled={mutation.isPending}>

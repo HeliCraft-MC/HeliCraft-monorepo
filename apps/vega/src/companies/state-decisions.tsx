@@ -30,7 +30,7 @@ function StateCompanyDecisions({
     },
   });
   return (
-    <section>
+    <section id="company-decisions">
       <h2>
         {uiText(locale, 'Государственные корпоративные решения', 'State corporate decisions')}
       </h2>

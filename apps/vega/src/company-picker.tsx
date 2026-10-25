@@ -3,7 +3,8 @@ import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient, listPublishedCompanies } from '@helicraft/alhena';
 import type { PublishedCompanyIdentity } from '@helicraft/alhena';
-import { Alert, Button, FormField, TextField } from '@helicraft/atria';
+import { Icon, Alert, Button, FormField, TextField } from '@helicraft/atria';
+import { CompanyPickerIdentity } from './company-picker-identity';
 import { useTranslation } from './i18n';
 import type { Locale } from './locales';
 import { displayText, uiText } from './states/text';
@@ -105,16 +106,14 @@ function CompanyPicker({
       </FormField>
       {value !== null && (
         <div className={styles.playerChips}>
-          <span>
-            {displayText(value.name, locale)} · {displayText(value.registrationStateName, locale)}
-          </span>
+          <CompanyPickerIdentity company={value} />
           <Button
             tone="quiet"
             disabled={disabled}
             onClick={clear}
             aria-label={`${text('common.remove')}: ${displayText(value.name, locale)}`}
           >
-            ×
+            <Icon name="close" />
           </Button>
         </div>
       )}
@@ -142,10 +141,7 @@ function CompanyPicker({
             {search.data?.items.map((company) => (
               <li key={company.id}>
                 <Button tone="quiet" value={company.id} onClick={choose} disabled={disabled}>
-                  <span>
-                    {displayText(company.name, locale)} ·{' '}
-                    {displayText(company.registrationStateName, locale)}
-                  </span>
+                  <CompanyPickerIdentity company={company} />
                 </Button>
               </li>
             ))}

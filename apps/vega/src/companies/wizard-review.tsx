@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { reviewCompanyRegistration, submitCompanyRegistration } from '@helicraft/alhena';
@@ -58,6 +58,9 @@ function CompanyWizardReview({
   });
   const { mutate: check } = preview;
   const { mutate: apply } = submit;
+  useEffect(() => {
+    check();
+  }, [check]);
   const review = useCallback((): void => {
     check();
   }, [check]);
@@ -86,7 +89,10 @@ function CompanyWizardReview({
       </Button>
       {saved !== null && (
         <>
-          <CompanyFormationSummary configuration={saved.configuration} />
+          <CompanyFormationSummary
+            configuration={saved.configuration}
+            companyId={saved.companyId}
+          />
           <CompanyFormationConsents draft={saved} actorId={actorId} />
         </>
       )}
@@ -117,7 +123,10 @@ function CompanyWizardReview({
       >
         {confirmation !== null && (
           <>
-            <CompanyFormationSummary configuration={confirmation.draft.configuration} />
+            <CompanyFormationSummary
+              configuration={confirmation.draft.configuration}
+              companyId={confirmation.draft.companyId}
+            />
             <PolicyTerms policy={confirmation.review.policy} />
             <p>
               {uiText(

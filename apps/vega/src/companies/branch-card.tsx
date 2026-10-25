@@ -46,10 +46,7 @@ function CompanyBranchCard({
       </details>
       {['REJECTED', 'PENDING_REGISTRATION'].includes(branch.status) &&
         workspace.availableActions.includes('REGISTER_BRANCH') && (
-          <details>
-            <summary>{uiText(locale, 'Исправить заявку', 'Revise branch application')}</summary>
-            <CompanyBranchComposer workspace={workspace} branch={branch} onSaved={onSaved} />
-          </details>
+          <CompanyBranchComposer workspace={workspace} branch={branch} onSaved={onSaved} />
         )}
       {branch.status !== 'CLOSED' && workspace.availableActions.includes('CLOSE_BRANCH') && (
         <details>

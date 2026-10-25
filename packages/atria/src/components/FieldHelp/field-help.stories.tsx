@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FieldHelp } from './field-help';
 
 const meta = {
-  title: 'Components/FieldHelp',
+  title: 'Forms/FieldHelp',
   component: FieldHelp,
   tags: ['autodocs'],
   parameters: {
@@ -20,6 +20,7 @@ const meta = {
   },
 } satisfies Meta<typeof FieldHelp>;
 const Default: StoryObj<typeof meta> = {};
+const Labelled: StoryObj<typeof meta> = { args: { showLabel: true } };
 const RedundantHelp: StoryObj<typeof meta> = { args: { label: 'Название', content: 'Название' } };
-export { Default, RedundantHelp };
+export { Default, Labelled, RedundantHelp };
 export default meta;

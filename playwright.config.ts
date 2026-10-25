@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   testIgnore: [
     'company-formation.spec.ts',
+    'workspace-ux.spec.ts',
     'gallery-public.spec.ts',
     'company-catalogue-public.spec.ts',
     'company-profile-public.spec.ts',

@@ -1,3 +1,4 @@
+import { Icon } from '@helicraft/atria';
 import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
@@ -60,7 +61,9 @@ function StateOverview({ state }: Readonly<{ state: StateDetail }>): ReactElemen
                 : 'Citizenship in multiple states is not allowed.',
             )}
           </p>
-          <a href="#state-citizens">{uiText(locale, 'Посмотреть граждан', 'View citizens')} →</a>
+          <a href="#state-citizens">
+            {uiText(locale, 'Посмотреть граждан', 'View citizens')} <Icon name="arrowRight" />
+          </a>
         </section>
         <figure className={styles.symbol}>
           <BannerPreview design={configuration.verticalBanner} label={verticalLabel} />

@@ -37,7 +37,10 @@ function CompanyFormationReference({
         </Alert>
       )}
       {formationHash === query.data.formationHash && (
-        <CompanyFormationSummary configuration={query.data.configuration} />
+        <CompanyFormationSummary
+          configuration={query.data.configuration}
+          companyId={query.data.companyId}
+        />
       )}
       <a href={`/app/companies/drafts/${query.data.id}`}>
         {displayText(query.data.configuration.name, locale) || query.data.title}

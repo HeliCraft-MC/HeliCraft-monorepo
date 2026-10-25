@@ -1,7 +1,9 @@
 import type { ReactElement } from 'react';
 import type { PublishedCompanyIdentity } from '@helicraft/alhena';
+import { CompanyName } from '../company-name';
 import { useTranslation } from '../i18n';
 import { displayText, label, uiText } from '../states/text';
+import { RegistrationStateName } from './registration-state-name';
 import styles from './companies.module.scss';
 
 function PublicCompanyCard({
@@ -11,13 +13,20 @@ function PublicCompanyCard({
   return (
     <article className={styles.card}>
       <h2>
-        <a href={`/companies/${company.id}`}>{displayText(company.name, locale)}</a>
+        <CompanyName
+          id={company.id}
+          name={displayText(company.name, locale)}
+          branding={company.branding}
+          description={displayText(company.description, locale)}
+        />
       </h2>
       <p>{displayText(company.description, locale)}</p>
       <dl className={styles.facts}>
         <div>
           <dt>{uiText(locale, 'Государство регистрации', 'Registration jurisdiction')}</dt>
-          <dd>{displayText(company.registrationStateName, locale)}</dd>
+          <dd>
+            <RegistrationStateName company={company} />
+          </dd>
         </div>
         <div>
           <dt>{uiText(locale, 'Статус', 'Status')}</dt>

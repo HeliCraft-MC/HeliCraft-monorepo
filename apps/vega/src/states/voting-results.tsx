@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { VotingInput, VotingResult } from '@helicraft/alhena';
-import { FieldHelp } from '@helicraft/atria';
+import { Icon, FieldHelp } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from './text';
 
@@ -51,7 +51,7 @@ function VotingResults({
                     input.options.find((item) => item.id === option.id)?.label ?? {},
                     locale,
                   )}
-                  : {option.votes} {option.approved ? '✓' : ''}
+                  : {option.votes} {option.approved && <Icon name="check" />}
                 </li>
               ))}
           </ul>

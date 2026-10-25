@@ -1,8 +1,8 @@
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useId } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
-import { Select } from '../Select/select';
 import { TextField } from '../TextField/text-field';
 import { Textarea } from '../Textarea/textarea';
+import { useFormTranslation } from '../Form/form-context';
 import styles from './localizable-text-input.module.scss';
 
 interface InputLanguage {
@@ -19,7 +19,7 @@ interface LocalizableTextInputProps {
   readonly progressLabel: string;
   readonly multiline?: boolean;
 }
-// oxlint-disable-next-line max-lines-per-function -- The controlled multilingual field keeps accessible language selection and input composition together.
+// oxlint-disable-next-line max-lines-per-function -- Standalone and form-wide translation modes share accessible field rendering without duplicating values.
 function LocalizableTextInput({
   label,
   value,
@@ -31,59 +31,68 @@ function LocalizableTextInput({
   multiline = false,
 }: LocalizableTextInputProps): ReactElement {
   const id = useId();
-  const [selected, setSelected] = useState(defaultLanguage);
-  const language = languages.find((item) => item.code === selected) ?? languages[0];
-  const selectLanguage = useCallback((event: ChangeEvent<HTMLSelectElement>): void => {
-    setSelected(event.currentTarget.value);
-  }, []);
+  const shared = useFormTranslation();
+  const primary =
+    languages.find((item) => item.code === (shared?.language ?? defaultLanguage)) ?? languages[0];
+  const translations = languages.filter((item) => item.code !== primary?.code);
   const change = useCallback(
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-      if (language !== undefined) {
-        onChange({ ...value, [language.code]: event.currentTarget.value });
+      const code = event.currentTarget.dataset.language;
+      if (code !== undefined) {
+        onChange({ ...value, [code]: event.currentTarget.value });
       }
     },
-    [language, value, onChange],
+    [value, onChange],
   );
+  const ordered = primary === undefined ? [] : [primary, ...translations];
+  const fields = ordered.map((language) => (
+    <div key={language.code} className={styles.translation}>
+      <label
+        htmlFor={`${id}-${language.code}`}
+        className={shared === null ? '' : styles.inputLabel}
+      >
+        <span>{language.label}</span>
+        <span className={styles.inputLabel}>
+          {label} · {language.label}
+        </span>
+      </label>
+      {multiline ? (
+        <Textarea
+          id={`${id}-${language.code}`}
+          aria-label={`${label} · ${language.label}`}
+          lang={language.code}
+          data-language={language.code}
+          value={value[language.code] ?? ''}
+          onChange={change}
+          rows={3}
+        />
+      ) : (
+        <TextField
+          id={`${id}-${language.code}`}
+          aria-label={`${label} · ${language.label}`}
+          lang={language.code}
+          data-language={language.code}
+          value={value[language.code] ?? ''}
+          onChange={change}
+        />
+      )}
+    </div>
+  ));
   const translated = languages.filter((item) => (value[item.code] ?? '').trim() !== '').length;
   return (
     <fieldset className={styles.field}>
       <legend>{label}</legend>
-      <div className={styles.toolbar}>
-        <label htmlFor={`${id}-language`}>{languageLabel}</label>
-        <Select id={`${id}-language`} value={language?.code ?? ''} onChange={selectLanguage}>
-          {languages.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.label}
-              {(value[item.code] ?? '').trim() === '' ? '' : ' ✓'}
-            </option>
-          ))}
-        </Select>
-        <small
-          id={`${id}-progress`}
-          aria-label={`${progressLabel}: ${translated}/${languages.length}`}
-          title={progressLabel}
-        >
-          ✓ {translated}/{languages.length}
-        </small>
-      </div>
-      <label className={styles.inputLabel} htmlFor={id}>
-        {label} · {language?.label}
-      </label>
-      {multiline ? (
-        <Textarea
-          id={id}
-          value={value[language?.code ?? ''] ?? ''}
-          onChange={change}
-          rows={4}
-          aria-describedby={`${id}-progress`}
-        />
-      ) : (
-        <TextField
-          id={id}
-          value={value[language?.code ?? ''] ?? ''}
-          onChange={change}
-          aria-describedby={`${id}-progress`}
-        />
+      {fields[0]}
+      {shared === null && translations.length > 0 && (
+        <details className={styles.translations}>
+          <summary>
+            <span>{languageLabel}</span>
+            <small aria-label={`${progressLabel}: ${translated}/${languages.length}`}>
+              {translated}/{languages.length}
+            </small>
+          </summary>
+          <div className={styles.translationGrid}>{fields.slice(1)}</div>
+        </details>
       )}
     </fieldset>
   );

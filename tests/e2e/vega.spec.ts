@@ -155,3 +155,37 @@ test('production serves public assets and never caches private API responses', a
     )
     .toBe('activated');
 });
+
+test('grouped navigation supports keyboard dismissal and mobile selection', async ({ page }) => {
+  const hydrated = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === '/api/v1/auth/me',
+  );
+  await page.goto('/');
+  await hydrated;
+  await expect(page.getByRole('link', { name: 'Исследовать мир' })).toHaveCSS(
+    'border-radius',
+    '0px',
+  );
+  const desktop = page.getByRole('navigation', { name: 'Основная навигация', exact: true });
+  const world = desktop.locator('summary').filter({ hasText: /^Мир$/u });
+  await world.focus();
+  await page.keyboard.press('Enter');
+  const states = desktop.getByRole('link', { name: 'Государства', exact: true });
+  await expect(states).toBeVisible();
+  await states.focus();
+  await page.keyboard.press('Escape');
+  await expect(states).not.toBeVisible();
+  await expect(world).toBeFocused();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const menu = page.getByRole('button', { name: 'Меню', exact: true });
+  await menu.click();
+  const mobile = page.getByRole('navigation', { name: 'Мобильная навигация', exact: true });
+  await mobile
+    .locator('summary')
+    .filter({ hasText: /^Мир$/u })
+    .click();
+  await mobile.getByRole('link', { name: 'Государства', exact: true }).click();
+  await expect(page).toHaveURL(/\/states(?:\?|$)/u);
+  await expect(menu).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('heading', { name: 'Государства', exact: true })).toBeVisible();
+});

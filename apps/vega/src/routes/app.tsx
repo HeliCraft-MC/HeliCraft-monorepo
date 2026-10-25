@@ -7,6 +7,7 @@ import { AccountLayout } from '../account-layout';
 
 export const Route = createFileRoute('/app')({
   ssr: false,
+  staleTime: 30_000,
   loader: async () => await loadPublicSite(),
   beforeLoad: async ({ location }) => {
     try {

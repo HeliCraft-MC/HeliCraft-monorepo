@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ComponentProps, ReactElement } from 'react';
 import type { SurveyBlock, VotingInput } from '@helicraft/alhena';
-import { Button, FormField, TextField } from '@helicraft/atria';
+import { Button, FormField, TextField, Icon, IconButton } from '@helicraft/atria';
 import { LocalizedInputField } from '../localized-input';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -29,7 +29,7 @@ function ChoiceEditor({
   return (
     <div className={styles.editor}>
       {block.optionIds.map((id, index) => (
-        <div key={id}>
+        <div key={id} className={styles.optionRow}>
           <LocalizedInputField
             label={`${uiText(locale, 'Вариант', 'Option')} ${index + 1}`}
             value={input.options.find((option) => option.id === id)?.label ?? EMPTY_TEXT}
@@ -42,7 +42,8 @@ function ChoiceEditor({
               });
             })}
           />
-          <Button
+          <IconButton
+            label={uiText(locale, 'Удалить вариант', 'Remove option')}
             tone="quiet"
             disabled={block.optionIds.length <= MIN_OPTIONS}
             onClick={click(id, () => {
@@ -55,8 +56,8 @@ function ChoiceEditor({
               onChange({ ...next, options: input.options.filter((option) => option.id !== id) });
             })}
           >
-            {uiText(locale, 'Удалить вариант', 'Remove option')}
-          </Button>
+            <Icon name="close" />
+          </IconButton>
         </div>
       ))}
       <Button
@@ -68,6 +69,7 @@ function ChoiceEditor({
           onChange({ ...next, options: [...input.options, option] });
         })}
       >
+        <Icon name="add" />
         {uiText(locale, 'Добавить вариант', 'Add option')}
       </Button>
       {block.type === 'CHECKBOX' && (

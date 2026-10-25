@@ -1,7 +1,13 @@
 // oxlint-disable import/max-dependencies -- Protected registration projections combine immutable legal terms, participant access and the existing state workspace authorization.
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../db';
-import { companies, companyRegistrationApplications, companyStatusHistory } from '../../db/schema';
+import {
+  companies,
+  companyRegistrationApplications,
+  companyStatusHistory,
+  monetaryDirectives,
+  states,
+} from '../../db/schema';
 import type { Transaction } from '../permissions/transaction';
 import { DomainError, HTTP } from '../errors';
 import { assignmentState } from '../states/office-assignment-context';
@@ -14,6 +20,26 @@ import type { CompanyApplication } from './application-contracts';
 
 const PAGE_SIZE = 20;
 type ApplicationRecord = typeof companyRegistrationApplications.$inferSelect;
+async function pendingApplicationReview(
+  transaction: Transaction,
+  record: ApplicationRecord,
+): Promise<string | null> {
+  const [pendingReview] = await transaction
+    .select({ id: monetaryDirectives.id })
+    .from(monetaryDirectives)
+    .innerJoin(states, eq(states.currentRevisionId, monetaryDirectives.governanceRevisionId))
+    .where(
+      and(
+        eq(states.id, record.stateId),
+        eq(monetaryDirectives.status, 'PENDING'),
+        sql`${monetaryDirectives.payload}->>'kind' = 'REVIEW_COMPANY_REGISTRATION'`,
+        sql`${monetaryDirectives.payload}->>'applicationId' = ${record.id}`,
+      ),
+    )
+    .orderBy(desc(monetaryDirectives.createdAt), desc(monetaryDirectives.id))
+    .limit(1);
+  return pendingReview?.id ?? null;
+}
 async function applicationDto(
   transaction: Transaction,
   record: ApplicationRecord,
@@ -32,8 +58,10 @@ async function applicationDto(
   if (company === undefined) {
     throw new Error('Registered application company missing');
   }
+  const pendingReviewDirectiveId = await pendingApplicationReview(transaction, record);
   return {
     id: record.id,
+    pendingReviewDirectiveId,
     companyId: record.companyId,
     draftId: record.draftId,
     applicantId: record.applicantId,

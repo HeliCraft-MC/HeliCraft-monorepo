@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import type { SubmitEvent, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { changePassword, logout, logoutAll, getSessions, revokeSession } from '@helicraft/alhena';
-import { Alert, Button, FormField, PasswordField } from '@helicraft/atria';
+import { PageHeader, Alert, Button, FormField, PasswordField } from '@helicraft/atria';
 import { browserClient, errorMessage } from './account-api';
 import { SessionRow } from './session-row';
 import styles from './account.module.scss';
@@ -82,7 +82,7 @@ export function SecuritySettings(): ReactElement {
   }, [leave]);
   return (
     <>
-      <h1>{text('account.security')}</h1>
+      <PageHeader title={text('account.security')} />
       <p className={styles.paragraph}>{text('security.passwordChangeHint')}</p>
       <form method="post" className={styles.form} onSubmit={handleSubmit}>
         <FormField label={text('auth.currentPassword')} htmlFor="current-password">

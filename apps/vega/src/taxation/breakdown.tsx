@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { TaxCalculation } from '@helicraft/alhena';
-import { MoneyAmount, Alert } from '@helicraft/atria';
+import { Icon, MoneyAmount, Alert } from '@helicraft/atria';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import styles from '../monetary/monetary.module.scss';
@@ -68,9 +69,16 @@ function TaxBreakdown({
                   ? uiText(locale, 'Центральный банк', 'Central bank')
                   : uiText(locale, 'Казна', 'Treasury')}{' '}
                 ·{' '}
-                <a href={`/states/${claim?.stateSlug ?? ''}`}>
-                  {displayText(claim?.stateName ?? {}, locale)}
-                </a>
+                {claim === undefined ? (
+                  uiText(locale, 'Государство недоступно', 'State unavailable')
+                ) : (
+                  <StateName
+                    name={displayText(claim.stateName, locale)}
+                    slug={claim.stateSlug}
+                    href={`/states/${claim.stateSlug}`}
+                    color="var(--primary)"
+                  />
+                )}
                 : <MoneyAmount minor={allocation.amountMinor} code={code} locale={locale} /> ·{' '}
                 {allocation.shareBps / PERCENT_BPS}%
                 {allocation.accrual !== undefined && (
@@ -82,8 +90,9 @@ function TaxBreakdown({
                       'Точный остаток минимальной единицы',
                       'Exact remainder of a minor unit',
                     )}
-                    : {allocation.accrual.remainderBefore}/{allocation.accrual.denominator} →{' '}
-                    {allocation.accrual.remainderAfter}/{allocation.accrual.denominator}
+                    : {allocation.accrual.remainderBefore}/{allocation.accrual.denominator}{' '}
+                    <Icon name="arrowRight" /> {allocation.accrual.remainderAfter}/
+                    {allocation.accrual.denominator}
                   </small>
                 )}
               </p>

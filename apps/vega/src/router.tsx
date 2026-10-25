@@ -6,7 +6,7 @@ import { RouteLoading } from './route-loading';
 
 // oxlint-disable-next-line typescript/explicit-function-return-type, typescript/explicit-module-boundary-types -- Router inference registers the generated tree without a recursive annotation.
 function getRouter() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 15_000 } } });
   return createRouter({
     routeTree,
     context: { queryClient },

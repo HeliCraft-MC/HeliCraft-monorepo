@@ -54,6 +54,7 @@ function ShareIssueComposer({
     <section>
       <h3>{uiText(locale, 'Дополнительный выпуск акций', 'Additional share issuance')}</h3>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Размытие долей', 'Dilution')}
         content={uiText(
           locale,

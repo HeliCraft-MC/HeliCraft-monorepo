@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { FxOffer, PublicFxOfferFills } from '@helicraft/alhena';
-import { PageContainer, MoneyAmount } from '@helicraft/atria';
+import { Icon, PageContainer, MoneyAmount } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { OfferSummary } from './offer-summary';
@@ -72,7 +72,8 @@ function PublicFxOfferPage({
                         {new Date(fill.createdAt).toLocaleString(locale, { timeZone: 'UTC' })} UTC
                       </time>{' '}
                       · {fill.lots} {uiText(locale, 'лотов', 'lots')}:{' '}
-                      <MoneyAmount minor={fill.receiveMinor} code={receiveCode} locale={locale} /> →{' '}
+                      <MoneyAmount minor={fill.receiveMinor} code={receiveCode} locale={locale} />{' '}
+                      <Icon name="arrowRight" />{' '}
                       <MoneyAmount minor={fill.provideMinor} code={provideCode} locale={locale} />
                     </li>
                   ))}

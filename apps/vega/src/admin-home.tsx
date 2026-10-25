@@ -4,7 +4,7 @@ import { getRouteApi, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { getAdminStats } from '@helicraft/alhena';
-import { Alert } from '@helicraft/atria';
+import { PageHeader, Alert } from '@helicraft/atria';
 import { browserClient } from './account-api';
 
 import styles from './account.module.scss';
@@ -26,14 +26,14 @@ export function AdminHome(): ReactElement {
   });
   return (
     <>
-      <h1>{text('admin.workspace')}</h1>
-      <p className={styles.paragraph}>
-        {uiText(
+      <PageHeader
+        title={text('admin.workspace')}
+        description={uiText(
           locale,
           'Рабочее пространство для публикаций, игроков и государственных решений. Выберите раздел; доступные действия зависят от ваших полномочий.',
           'Manage publications, players and state decisions. Choose a section; available actions follow your permissions.',
         )}
-      </p>
+      />
       {stats.data ? (
         <dl className={styles.metrics}>
           {stats.data.users === null ? null : (

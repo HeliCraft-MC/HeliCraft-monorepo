@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ComponentProps, ReactElement } from 'react';
 import type { MinecraftBanner } from '@helicraft/alhena';
-import { Button } from '@helicraft/atria';
+import { Icon, Button } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from './text';
 import { BannerPreview } from './banner-preview';
@@ -87,7 +87,7 @@ function BannerLayers({
                   onMove(position, MOVE_UP);
                 })}
               >
-                ↑
+                <Icon name="arrowUp" />
               </Button>
               <Button
                 tone="quiet"
@@ -97,7 +97,7 @@ function BannerLayers({
                   onMove(position, 1);
                 })}
               >
-                ↓
+                <Icon name="arrowDown" />
               </Button>
               <Button
                 tone="quiet"
@@ -106,7 +106,7 @@ function BannerLayers({
                   onRemove(position);
                 })}
               >
-                ×
+                <Icon name="close" />
               </Button>
             </div>
           </li>

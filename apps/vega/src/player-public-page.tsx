@@ -2,7 +2,7 @@ import { useSiteBranding } from './site-branding';
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { PublicPlayerProfile } from '@helicraft/alhena';
-import { MinecraftAvatar, StateCard } from '@helicraft/atria';
+import { Icon, MinecraftAvatar, StateCard } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { displayText, uiText } from './states/text';
 import { formatDate } from './date-format';
@@ -33,7 +33,7 @@ function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>)
   return (
     <article className={styles.page}>
       <a className={styles.back} href="/">
-        ← {serverName}
+        <Icon name="arrowLeft" /> {serverName}
       </a>
       <header className={styles.hero}>
         <div className={styles.portrait}>
@@ -79,7 +79,10 @@ function PublicPlayerPage({ player }: Readonly<{ player: PublicPlayerProfile }>)
                 'This player has no citizenships or founded public states yet.',
               )}
             </p>
-            <a href="/states">{uiText(locale, 'Открыть каталог государств', 'Browse states')} →</a>
+            <a href="/states">
+              {uiText(locale, 'Открыть каталог государств', 'Browse states')}{' '}
+              <Icon name="arrowRight" />
+            </a>
           </div>
         ) : (
           <div className={styles.grid}>

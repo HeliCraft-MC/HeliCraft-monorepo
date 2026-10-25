@@ -1,3 +1,4 @@
+import { openWorkspaceAction, selectCompanyStage } from './workspace-browser-helpers';
 import { expect } from '@playwright/test';
 import type { Browser, Page } from '@playwright/test';
 import { CompanyApplicationSchema } from '../../apps/antares/src/modules/companies/application-contracts';
@@ -20,6 +21,7 @@ async function fundSubsidiary(
   const before = await wallet(page, input.childId);
   expect(before.accounts).toEqual([]);
   await page.goto(`/app/companies/${input.parentId}?section=finance&lang=en`);
+  await openWorkspaceAction(page, 'New payment');
   await page.getByLabel('Payment currency', { exact: true }).selectOption(input.currencyId);
   await page.getByLabel('Payment amount', { exact: true }).fill('0.25');
   await page.getByLabel('Recipient type', { exact: true }).selectOption('COMPANY');
@@ -59,6 +61,7 @@ async function verifyForeignSubsidiary(
   }>,
 ): Promise<void> {
   await page.goto(`/app/companies/${input.parentId}?section=subsidiaries&lang=en`);
+  await openWorkspaceAction(page, 'Found a subsidiary');
   await page.getByRole('button', { name: 'Prepare subsidiary draft', exact: true }).click();
   await page.getByRole('link', { name: 'Open subsidiary wizard', exact: true }).click();
   await page
@@ -70,14 +73,19 @@ async function verifyForeignSubsidiary(
   await page
     .getByLabel('Registration jurisdiction', { exact: true })
     .selectOption(input.hostStateId);
-  await page.getByRole('button', { name: '2. Ownership', exact: true }).click();
+  await selectCompanyStage(page, '2. Ownership');
   await page.getByLabel('Initial share issuance', { exact: true }).fill('29');
   await page.getByLabel('Share quantity', { exact: true }).fill('29');
-  await page.getByRole('button', { name: '3. Governance', exact: true }).click();
+  await selectCompanyStage(page, '3. Governance');
   await page
     .getByLabel('Start from a preset (replaces current draft)', { exact: true })
     .selectOption('OFFICER');
-  await page.getByRole('button', { name: '5. Review and submit', exact: true }).click();
+  await page.getByRole('button', { name: 'Apply preset…', exact: true }).click();
+  await page
+    .getByRole('dialog', { name: 'Replace governance settings?', exact: true })
+    .getByRole('button', { name: 'Replace settings', exact: true })
+    .click();
+  await selectCompanyStage(page, '5. Review and submit');
   await page.getByRole('button', { name: 'Save and review registration', exact: true }).click();
   await page.getByRole('button', { name: 'Consent to initial office', exact: true }).click();
   await page.getByRole('link', { name: 'Consent through founder Governance', exact: true }).click();
@@ -111,7 +119,20 @@ async function verifyForeignSubsidiary(
   const host = await context.newPage();
   try {
     await login(host, 'FxB');
-    await host.goto(`/app/states/${input.hostStateId}/manage?section=companies&lang=en`);
+    await host.goto('/app/notifications?lang=en');
+    await host
+      .getByRole('link', {
+        name: 'Browser foreign subsidiary Review registration',
+        exact: true,
+      })
+      .click();
+    await expect(
+      host.getByRole('heading', { name: 'Registration review', exact: true }),
+    ).toBeVisible();
+    await host.screenshot({
+      path: `/tmp/company-state-review-${input.project}.png`,
+      fullPage: true,
+    });
     await host
       .getByLabel('Decision reason', { exact: true })
       .fill('Reviewed foreign corporate founder and immutable charter');

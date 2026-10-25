@@ -3,7 +3,11 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   outputDir: 'apps/vega/test-results/company-catalogue',
-  testMatch: ['company-catalogue-public.spec.ts', 'company-profile-public.spec.ts'],
+  testMatch: [
+    'company-catalogue-public.spec.ts',
+    'company-profile-public.spec.ts',
+    'workspace-ux.spec.ts',
+  ],
   workers: 1,
   use: { ...devices['Desktop Chrome'], trace: 'retain-on-failure' },
   projects: [

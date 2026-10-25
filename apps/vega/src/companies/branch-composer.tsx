@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient, getPublishedCompanyRegistrationPolicy } from '@helicraft/alhena';
 import type { CompanyWorkspace, CompanyBranchSummary } from '@helicraft/alhena';
-import { Alert, Button, FieldHelp } from '@helicraft/atria';
+import { ActionPanel, Alert, Button, FieldHelp } from '@helicraft/atria';
 import { LocalizedInputField } from '../localized-input';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -56,12 +56,13 @@ function CompanyBranchComposer({
     }
   }, [stateId, policy.data, branch?.id, name, description, propose]);
   return (
-    <section>
-      <h3>
-        {branch === undefined
+    <ActionPanel
+      title={
+        branch === undefined
           ? uiText(locale, 'Открыть филиал', 'Open a branch')
-          : uiText(locale, 'Повторная регистрация филиала', 'Resubmit branch registration')}
-      </h3>
+          : uiText(locale, 'Повторная регистрация филиала', 'Resubmit branch registration')
+      }
+    >
       {branch === undefined && (
         <CompanyJurisdictionPicker
           value={stateId}
@@ -81,6 +82,7 @@ function CompanyBranchComposer({
         multiline
       />
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Правовой статус филиала', 'Branch legal status')}
         content={uiText(
           locale,
@@ -118,7 +120,7 @@ function CompanyBranchComposer({
         {uiText(locale, 'Проверить регистрацию филиала', 'Review branch registration')}
       </Button>
       <CompanyDecisionReview workspace={workspace} submission={submission} />
-    </section>
+    </ActionPanel>
   );
 }
 export { CompanyBranchComposer };

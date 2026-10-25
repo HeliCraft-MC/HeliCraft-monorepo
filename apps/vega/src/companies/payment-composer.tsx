@@ -4,7 +4,7 @@ import type { ReactElement, SubmitEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { createCompanyPaymentQuote } from '@helicraft/alhena';
 import type { CompanyWallet, CompanyWorkspace, LegalOwner } from '@helicraft/alhena';
-import { Alert, Button } from '@helicraft/atria';
+import { ActionPanel, Alert, Button } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -78,8 +78,7 @@ function CompanyPaymentComposer({
       ? (wallet.currencies.find((currency) => currency.id === payload.currencyId)?.code ?? '')
       : '';
   return (
-    <section>
-      <h3>{uiText(locale, 'Новый платёж', 'New payment')}</h3>
+    <ActionPanel title={uiText(locale, 'Новый платёж', 'New payment')}>
       <form onSubmit={submit}>
         <CompanyPaymentFields
           wallet={wallet}
@@ -97,7 +96,7 @@ function CompanyPaymentComposer({
       </form>
       {preview.error !== null && <Alert tone="danger">{errorMessage(preview.error)}</Alert>}
       <CompanyDecisionReview workspace={workspace} submission={submission} code={code} />
-    </section>
+    </ActionPanel>
   );
 }
 export { CompanyPaymentComposer };

@@ -4,6 +4,8 @@ import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { Button, LoadingState } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
+import { StateInstitutions } from './institutions';
+import { isInstitutionSection } from './institution-sections';
 import { ManagementOverview } from './management-overview';
 import { ManagementCitizens } from './management-citizens';
 import { ManagementMembership } from './management-membership';
@@ -12,25 +14,9 @@ import { PublicGovernment } from './public-government';
 import { uiText } from './text';
 import styles from './states.module.scss';
 
-const TaxationWorkspace = lazy(async () => {
-  const module = await import('../taxation/workspace');
-  return { default: module.TaxationWorkspace };
-});
 const DiplomacyWorkspace = lazy(async () => {
   const module = await import('../diplomacy/workspace');
   return { default: module.DiplomacyWorkspace };
-});
-const StateMonetaryWorkspace = lazy(async () => {
-  const module = await import('../monetary/state-workspace');
-  return { default: module.StateMonetaryWorkspace };
-});
-const StateFxWorkspace = lazy(async () => {
-  const module = await import('../fx/state-workspace');
-  return { default: module.StateFxWorkspace };
-});
-const StateCompanyWorkspace = lazy(async () => {
-  const module = await import('../companies/state-workspace');
-  return { default: module.StateCompanyWorkspace };
 });
 const OfficeAssignments = lazy(async () => {
   const module = await import('./office-assignments');
@@ -51,6 +37,7 @@ const MANAGEMENT_SECTIONS = [
   'proposals',
   'citizenship',
   'history',
+  'institutions',
   'bank',
   'currency',
   'monetary-policy',
@@ -90,31 +77,19 @@ function ManagementSections({
   let content: ReactElement = (
     <ManagementOverview state={state} actorId={actorId} onReform={onReform} pending={pending} />
   );
-  if (section === 'taxation') {
-    content = <TaxationWorkspace state={state} actorId={actorId} />;
-  } else if (section === 'diplomacy') {
-    content = <DiplomacyWorkspace state={state} actorId={actorId} />;
-  } else if (section === 'fx') {
-    content = <StateFxWorkspace state={state} actorId={actorId} />;
-  } else if (section === 'companies') {
+  if (section === 'institutions' || isInstitutionSection(section)) {
     content = (
-      <StateCompanyWorkspace
+      <StateInstitutions
         state={state}
         actorId={actorId}
+        section={section}
         votingId={votingId}
         formationDraftId={formationDraftId}
         shareOperationId={shareOperationId}
       />
     );
-  } else if (
-    section === 'bank' ||
-    section === 'currency' ||
-    section === 'monetary-policy' ||
-    section === 'issuance' ||
-    section === 'bank-finances' ||
-    section === 'treasury'
-  ) {
-    content = <StateMonetaryWorkspace state={state} actorId={actorId} section={section} />;
+  } else if (section === 'diplomacy') {
+    content = <DiplomacyWorkspace state={state} actorId={actorId} />;
   } else if (section === 'appointments') {
     content = <OfficeAssignments state={state} />;
   } else if (section === 'proposals') {

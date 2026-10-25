@@ -308,6 +308,7 @@ describe('corporate Governance and generic Voting', () => {
             ...configuration.charter.votingDefaults,
             thresholdKind: 'SIMPLE_MAJORITY',
             quorumPercent: 50,
+            closeWhenDecided: false,
           },
           manualProcedure: {},
         },
@@ -367,7 +368,7 @@ describe('corporate Governance and generic Voting', () => {
     await voting.cast(vote.id, fixture.citizenId, { choices: [no.id], abstain: false });
     await expect(
       voting.cast(vote.id, actor.id, { choices: [no.id], abstain: false }),
-    ).rejects.toMatchObject({ code: 'ALREADY_VOTED' });
+    ).rejects.toMatchObject({ code: 'VOTING_NOT_OPEN' });
     await expect(
       db
         .update(votingEligibleVoters)
@@ -528,12 +529,13 @@ describe('corporate Governance and generic Voting', () => {
       },
     };
     const parentDecision = await decisions.create(parent.companyId, actor, command);
+    expect((await new VotingService(db).detail(vote.id, actor.id, false)).status).toBe('CLOSED');
     await expect(
       decisions.create(parent.companyId, other, {
         ...command,
         idempotencyKey: crypto.randomUUID(),
       }),
-    ).rejects.toMatchObject({ code: 'ALREADY_VOTED' });
+    ).rejects.toMatchObject({ code: 'ENTITY_BALLOT_UNAVAILABLE' });
     const ballots = await db
       .select()
       .from(votingBallots)
@@ -552,7 +554,6 @@ describe('corporate Governance and generic Voting', () => {
           ),
         ),
     ).toHaveLength(0);
-    await closeVote(vote.id);
     expect((await decisions.proof(id, actor)).ready).toBe(true);
     await decisions.apply(id, actor);
   });

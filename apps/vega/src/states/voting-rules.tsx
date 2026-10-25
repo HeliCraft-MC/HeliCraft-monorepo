@@ -37,8 +37,8 @@ function VotingRulesEditor({
           label={uiText(locale, 'Продолжительность, часов', 'Duration in hours')}
           help={uiText(
             locale,
-            'Сколько часов участники смогут голосовать после открытия. После завершения новые ответы не принимаются.',
-            'How many hours participants can vote after opening. No answers are accepted after closing.',
+            'Максимальное время после открытия. Голосование может завершиться раньше по правилам; после завершения новые бюллетени не принимаются.',
+            'Maximum time after opening. Completion rules may close voting earlier; closed votes accept no further ballots.',
           )}
         >
           <TextField
@@ -130,6 +130,24 @@ function VotingRulesEditor({
           <option value="UNANIMOUS">{uiText(locale, 'Единогласно', 'Unanimous')}</option>
         </Select>
       </FormField>
+      <Checkbox
+        label={uiText(
+          locale,
+          'Завершать, когда решение уже невозможно изменить',
+          'Close when the outcome can no longer change',
+        )}
+        checked={value.closeWhenDecided === true}
+        onChange={cacheCheckboxOnChange('early-close', (event) => {
+          onChange({ ...value, closeWhenDecided: event.currentTarget.checked });
+        })}
+      />
+      <p className={styles.hint}>
+        {uiText(
+          locale,
+          'Учитываются оставшиеся голоса, кворум, воздержания и вес акций. При 100% явке обычное голосование завершается автоматически. Правило фиксируется при публикации.',
+          'Remaining votes, quorum, abstentions and share weights are considered. Choice voting closes automatically at full turnout. The rule is fixed at publication.',
+        )}
+      </p>
       <Checkbox
         label={uiText(locale, 'Разрешить воздержаться', 'Allow abstention')}
         checked={value.allowAbstain}

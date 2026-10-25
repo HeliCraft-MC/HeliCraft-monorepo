@@ -53,6 +53,7 @@ function EntityVotingForm({
     <section>
       <h3>{uiText(locale, 'Голосование от юридического лица', 'Legal entity voting')}</h3>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Отдельное решение владельца', 'Separate owner decision')}
         content={uiText(
           locale,

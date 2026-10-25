@@ -21,7 +21,7 @@ async function companyIdentity(
   }
   const revision = await readCompanyRevision(transaction, company.currentRevisionId);
   const [state] = await transaction
-    .select({ revisionId: states.currentRevisionId })
+    .select({ revisionId: states.currentRevisionId, slug: states.slug })
     .from(states)
     .where(eq(states.id, company.registrationStateId));
   const jurisdiction =
@@ -33,6 +33,9 @@ async function companyIdentity(
     registrationStateId: company.registrationStateId,
     registrationStateName: jurisdiction?.configuration.name ?? {},
     status: company.status,
+    ...(revision.content.branding === undefined ? {} : { branding: revision.content.branding }),
+    registrationStateSlug: state?.slug,
+    registrationStateColor: jurisdiction?.configuration.color,
     name: revision.content.name,
     description: revision.content.description,
     foundedAt: company.foundedAt.toISOString(),

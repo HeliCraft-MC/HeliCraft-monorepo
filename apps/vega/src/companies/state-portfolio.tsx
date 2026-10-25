@@ -1,3 +1,4 @@
+// oxlint-disable import/max-dependencies -- State portfolio entries compose the shared company identity with independent Governance share actions.
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -5,6 +6,7 @@ import { getStateSharePortfolio } from '@helicraft/alhena';
 import type { StateDetail, LegalOwner } from '@helicraft/alhena';
 import { Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
+import { CompanyName } from '../company-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { economicAuthority } from '../taxation/model';
@@ -43,7 +45,7 @@ function StateCompanyPortfolio({
       {query.data?.items.map((position) => (
         <article key={position.issuerId}>
           <h3>
-            <a href={`/companies/${position.issuerId}`}>{displayText(position.name, locale)}</a>
+            <CompanyName id={position.issuerId} name={displayText(position.name, locale)} />
           </h3>
           <p>
             {position.shares} / {position.issuedShares}

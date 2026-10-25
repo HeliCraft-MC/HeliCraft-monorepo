@@ -96,4 +96,4 @@ function calculateWeights(
     }),
   };
 }
-export { calculateWeights, type WeightedBallot, type VotingWeights };
+export { approvedWeight, calculateWeights, type WeightedBallot, type VotingWeights };

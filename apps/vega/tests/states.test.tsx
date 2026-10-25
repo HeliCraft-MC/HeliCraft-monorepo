@@ -77,13 +77,9 @@ describe('state editor', () => {
     fireEvent.change(screen.getByLabelText('Name · English'), {
       target: { value: 'Aurora Republic' },
     });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Translation language' }), {
-      target: { value: 'ru' },
-    });
+    fireEvent.click(screen.getByText('Translations'));
     expect(screen.getByLabelText('Name · Русский')).toHaveValue('Аврора');
-    fireEvent.change(screen.getByRole('combobox', { name: 'Translation language' }), {
-      target: { value: 'en' },
-    });
+    fireEvent.click(screen.getByText('Translations'));
     expect(screen.getByLabelText('Name · English')).toHaveValue('Aurora Republic');
   });
   it('confirms replacement before applying a different governance preset', async () => {

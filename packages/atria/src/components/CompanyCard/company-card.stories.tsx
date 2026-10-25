@@ -3,7 +3,7 @@ import { Building2 } from 'lucide-react';
 import { CompanyCard } from './company-card';
 
 const meta = {
-  title: 'Atria/CompanyCard',
+  title: 'Data display/CompanyCard',
   component: CompanyCard,
   tags: ['autodocs'],
   args: {

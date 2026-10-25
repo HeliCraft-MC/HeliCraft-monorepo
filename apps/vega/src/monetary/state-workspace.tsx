@@ -9,7 +9,7 @@ import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { PublicGovernment } from '../states/public-government';
 import { DirectiveComposer } from './directive-composer';
-import { DirectiveCard } from './directive-card';
+import { DirectiveList } from './directive-list';
 import { MonetaryPagination } from './pagination';
 import { MonetaryHistory } from './history';
 import styles from './monetary.module.scss';
@@ -81,25 +81,13 @@ function StateMonetaryWorkspace({
         monetary={data}
         onSaved={refresh}
       />
-      <section className={styles.panel}>
-        <h2>{text('monetary.directives')}</h2>
-        {data.directives.length === 0 && <p>{text('monetary.emptyDirectives')}</p>}
-        {data.directives.map((directive) => (
-          <DirectiveCard
-            key={directive.id}
-            directive={directive}
-            state={state}
-            actorId={actorId}
-            code={
-              data.currencies.find(
-                (currency) =>
-                  'currencyId' in directive.payload && currency.id === directive.payload.currencyId,
-              )?.code ?? ''
-            }
-            onSaved={refresh}
-          />
-        ))}
-      </section>
+      <DirectiveList
+        items={data.directives}
+        state={state}
+        actorId={actorId}
+        currencies={currencyList}
+        onSaved={refresh}
+      />
       <MonetaryHistory transactions={data.transactions} currencies={currencyList} />
       <MonetaryPagination page={data.page} hasMore={data.hasMore} onPage={setPage} />
     </section>

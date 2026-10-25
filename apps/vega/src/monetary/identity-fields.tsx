@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { LocalizedInput } from '@helicraft/alhena';
 import { FormField, TextField } from '@helicraft/atria';
-import { LocalizedInputField } from '../localized-input';
+import { LocalizedForm } from '../localized-form';
 import { useTranslation } from '../i18n';
 
 function IdentityFields({
@@ -20,15 +21,22 @@ function IdentityFields({
   id: string;
 }>): ReactElement {
   const { text } = useTranslation();
+  const fields = useMemo(
+    () => [
+      { name: 'name', label: text('monetary.name'), value: name, onChange: onName },
+      {
+        name: 'description',
+        label: text('monetary.description'),
+        value: description,
+        onChange: onDescription,
+        multiline: true,
+      },
+    ],
+    [name, description, onName, onDescription, text],
+  );
   return (
     <>
-      <LocalizedInputField label={text('monetary.name')} value={name} onChange={onName} />
-      <LocalizedInputField
-        label={text('monetary.description')}
-        multiline
-        value={description}
-        onChange={onDescription}
-      />
+      <LocalizedForm fields={fields} />
       {currency && (
         <FormField label={text('monetary.code')} htmlFor={`${id}-code`}>
           <TextField

@@ -1,6 +1,9 @@
 import { Dialog as Primitive } from '@base-ui/react/dialog';
 import type { ReactElement, ReactNode } from 'react';
+import { useWorkspaceTheme } from '../Workspace/workspace-theme';
+import { X } from 'lucide-react';
 import styles from '../../overlays.module.scss';
+import themeStyles from '../Workspace/workspace.module.scss';
 
 interface DialogProps {
   readonly trigger?: ReactNode;
@@ -22,6 +25,7 @@ function Dialog({
   closeLabel = 'Закрыть',
   size = 'default',
 }: DialogProps): ReactElement {
+  const theme = useWorkspaceTheme();
   return (
     <Primitive.Root open={open} onOpenChange={onOpenChange}>
       {trigger === undefined ? null : (
@@ -30,14 +34,19 @@ function Dialog({
       <Primitive.Portal>
         <Primitive.Backdrop className={styles.backdrop} />
         <Primitive.Popup
-          className={`${styles.dialog} ${size === 'fullscreen' ? styles.dialogFullscreen : ''}`}
+          style={theme}
+          className={`${styles.dialog} ${size === 'fullscreen' ? styles.dialogFullscreen : ''} ${theme === undefined ? '' : themeStyles.theme}`}
         >
-          <Primitive.Title>{title}</Primitive.Title>
+          <header className={styles.dialogHeader}>
+            <Primitive.Title>{title}</Primitive.Title>
+            <Primitive.Close className={styles.dialogClose} aria-label={closeLabel}>
+              <X size={20} aria-hidden="true" />
+            </Primitive.Close>
+          </header>
           {description === undefined ? null : (
             <Primitive.Description>{description}</Primitive.Description>
           )}
           {children}
-          <Primitive.Close className={styles.trigger}>{closeLabel}</Primitive.Close>
         </Primitive.Popup>
       </Primitive.Portal>
     </Primitive.Root>

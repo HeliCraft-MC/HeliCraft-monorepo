@@ -7,7 +7,7 @@ import type {
   StateDetail,
   StateMonetary,
 } from '@helicraft/alhena';
-import { Alert, Button, Dialog } from '@helicraft/atria';
+import { ActionPanel, Alert, Button, Dialog } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { errorMessage } from '../account-api';
@@ -76,8 +76,7 @@ function OfferComposer({
     [monetary, receive, state, setReview, locale],
   );
   return (
-    <section className={styles.card}>
-      <h2>{uiText(locale, 'Новое обеспеченное предложение', 'New reserved offer')}</h2>
+    <ActionPanel title={uiText(locale, 'Новое обеспеченное предложение', 'New reserved offer')}>
       <form onSubmit={submit} className={styles.form}>
         <OfferFields held={held} receive={receive} onReceive={setReceive} />
         <Button type="submit" disabled={held.length === 0 || monetary.bank?.status !== 'ACTIVE'}>
@@ -108,7 +107,7 @@ function OfferComposer({
           )}
         </Alert>
       )}
-    </section>
+    </ActionPanel>
   );
 }
 export { OfferComposer };

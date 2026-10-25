@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MoneyAmount } from './money-amount';
 
 const meta = {
-  title: 'Components/MoneyAmount',
+  title: 'Data display/MoneyAmount',
   component: MoneyAmount,
   tags: ['autodocs'],
   args: { minor: '123456789', code: 'HCM', locale: 'ru' },

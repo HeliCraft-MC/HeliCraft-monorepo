@@ -14,6 +14,11 @@ test('company wizard resumes exact ownership and persisted consent before submit
   baseURL,
 }, testInfo) => {
   const errors: string[] = [];
+  page.on('response', (response) => {
+    if (response.url().includes('/api/v1/public/states?') && response.status() >= 400) {
+      errors.push(`State directory HTTP ${response.status()}`);
+    }
+  });
   page.on('pageerror', (error) => {
     errors.push(error.message);
   });
@@ -37,6 +42,11 @@ test('company wizard resumes exact ownership and persisted consent before submit
   await page
     .getByLabel('Start from a preset (replaces current draft)', { exact: true })
     .selectOption('OFFICER');
+  await page.getByRole('button', { name: 'Apply preset…', exact: true }).click();
+  await page
+    .getByRole('dialog', { name: 'Replace governance settings?', exact: true })
+    .getByRole('button', { name: 'Replace settings', exact: true })
+    .click();
   await expect(page.getByLabel('Office name · English', { exact: true })).toHaveValue(
     'Authorized representative',
   );
@@ -49,12 +59,46 @@ test('company wizard resumes exact ownership and persisted consent before submit
   await expect(
     page.getByRole('heading', { name: 'Browser corporate entity', exact: true }),
   ).toBeVisible();
+  const inboxPage = await page.context().newPage();
+  await inboxPage.goto('/app/notifications?lang=en');
+  await expect(
+    inboxPage.getByRole('heading', { name: 'Approval inbox', exact: true }),
+  ).toBeVisible();
+  const founderRequest = inboxPage.getByRole('link', {
+    name: 'Browser corporate entity Founder consent',
+    exact: true,
+  });
+  await expect(founderRequest).toBeVisible();
+  await inboxPage.screenshot({
+    path: `/tmp/company-inbox-${testInfo.project.name}.png`,
+    fullPage: true,
+  });
+  await founderRequest.click();
+  await expect(
+    inboxPage.getByRole('heading', { name: 'Company formation', exact: true }),
+  ).toBeVisible();
+  await expect(
+    inboxPage.getByRole('button', { name: 'Consent to initial ownership', exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Consent to initial ownership', exact: true }).click();
   await expect(
     page.getByRole('button', { name: 'Consent to initial ownership', exact: true }),
   ).toBeDisabled();
   await page.getByRole('button', { name: 'Consent to initial office', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Revoke consent', exact: true })).toHaveCount(2);
+  await inboxPage.goto('/app/notifications?lang=en');
+  await expect(
+    inboxPage
+      .getByRole('region', { name: 'Formation and appointments', exact: true })
+      .getByText('No pending actions.', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    inboxPage.getByRole('link', {
+      name: 'Browser corporate entity Founder consent',
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await inboxPage.close();
   await page.reload();
   await page.getByRole('button', { name: 'Save and review registration', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Revoke consent', exact: true })).toHaveCount(2);
@@ -88,6 +132,22 @@ test('company wizard resumes exact ownership and persisted consent before submit
   expect(application.configuration.totalShares).toBe('900719925474099312345');
   expect(application.configuration.allocations[0]?.shares).toBe('900719925474099312345');
   expect(application.status).toBe('APPROVED');
+  await page.getByRole('link', { name: 'Open company workspace', exact: true }).click();
+  await page.getByRole('button', { name: /Company workspace sections/u }).click();
+  await expect(
+    page.getByRole('navigation', { name: 'Company workspace sections', exact: true }),
+  ).toBeVisible();
+  await page.evaluate(() => {
+    document.documentElement.dataset.companyNavigationProbe = 'persisted';
+  });
+  await page
+    .getByRole('navigation', { name: 'Company workspace sections', exact: true })
+    .getByRole('link', { name: 'Offices', exact: true })
+    .click();
+  await expect(
+    page.getByRole('heading', { name: 'Offices and current appointments', exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-company-navigation-probe', 'persisted');
   await verifyCompanyFinance(page, {
     companyId: application.companyId,
     currencyId: data.firstCurrency,

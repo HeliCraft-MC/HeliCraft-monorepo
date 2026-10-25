@@ -6,11 +6,10 @@
 .block {
   display: grid;
   gap: 1rem;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 2vw, 1.5rem);
   border: 1px solid var(--border-subtle, #ffffff25);
-  border-top: 3px solid var(--accent, #d65757);
   border-radius: 1rem;
-  background: var(--surface, #15151b);
+  background: var(--bg-panel);
   min-width: 0;
 }
 .toolbar {
@@ -95,4 +94,38 @@
 }
 .radio input {
   accent-color: var(--accent, #d65757);
+}
+.blockMenu {
+  margin-inline-start: auto;
+  summary {
+    cursor: pointer;
+    padding: 0.75rem;
+  }
+  > div {
+    padding: 0.75rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+  }
+}
+.block details[open] > div {
+  margin-top: 1rem;
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.optionRow > button {
+  margin-bottom: 0.1rem;
+}
+.toolbar > button:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.75rem;
+  color: var(--text-secondary);
+  cursor: grab;
 }

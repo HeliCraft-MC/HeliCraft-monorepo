@@ -1,0 +1,29 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction/Design principles" />
+
+# Design principles
+
+## Workspaces stay in place
+
+Changing a section preserves navigation and entity identity. Use WorkspaceLayout for the same surface, spacing and accent tokens across tools and portalled dialogs. Never make capabilities depend on a color or government preset.
+
+## Forms preserve work
+
+Use FormModel and Form for model fields, validation and shared localization. A language change never copies a fallback translation. Split long tasks into meaningful stages with a visible current stage, back navigation and review. Save status must distinguish saving, saved and failure.
+
+## Every action has a name
+
+Use Lucide icons for visual controls and readable text for important actions. An icon-only button has an accessible label. Keep destructive actions away from primary progression.
+
+## Small screens are first-class
+
+Test at 360px as well as desktop. Menus become labelled disclosures. Forms and cards have a minimum width of zero; tables scroll inside their container. Content has natural height. Do not stretch short explanations or buttons to fill the viewport.
+
+## States tell the truth
+
+Loading, no records, insufficient authority and a failed request are separate states. Do not populate examples with invented live balances or claims that Minecraft integration exists.
+
+## Accessibility is an acceptance criterion
+
+Use visible labels, logical headings, focus rings, Escape dismissal, focus return and reduced motion. Test keyboard behavior rather than assuming a mouse screenshot proves accessibility.

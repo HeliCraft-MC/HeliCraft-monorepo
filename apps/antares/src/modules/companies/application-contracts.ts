@@ -14,6 +14,7 @@ const CompanyApplicationSchema = z
     status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
     companyStatus: CompanyStatusSchema,
     reviewDirectiveId: z.uuid().nullable(),
+    pendingReviewDirectiveId: z.uuid().nullable().optional(),
     reviewedAt: z.iso.datetime().nullable(),
     createdAt: z.iso.datetime(),
     reason: z.string().nullable(),

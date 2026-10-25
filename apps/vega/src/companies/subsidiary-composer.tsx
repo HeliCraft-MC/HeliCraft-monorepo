@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { createCompanyDraft, saveCompanyDraft } from '@helicraft/alhena';
 import type { CompanyWorkspace } from '@helicraft/alhena';
-import { Alert, Button, FieldHelp } from '@helicraft/atria';
+import { ActionPanel, Alert, Button, FieldHelp } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -48,9 +48,9 @@ function SubsidiaryComposer({
     mutate();
   }, [mutate]);
   return (
-    <section>
-      <h3>{uiText(locale, 'Учредить дочернюю компанию', 'Found a subsidiary')}</h3>
+    <ActionPanel title={uiText(locale, 'Учредить дочернюю компанию', 'Found a subsidiary')}>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Отдельная юридическая идентичность', 'Separate legal identity')}
         content={uiText(
           locale,
@@ -67,7 +67,7 @@ function SubsidiaryComposer({
         </a>
       )}
       {mutation.error !== null && <Alert tone="danger">{errorMessage(mutation.error)}</Alert>}
-    </section>
+    </ActionPanel>
   );
 }
 export { SubsidiaryComposer };

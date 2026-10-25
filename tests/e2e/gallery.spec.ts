@@ -60,6 +60,18 @@ async function photoScreenshots(page: Page, projectName: string): Promise<void> 
   await page.setViewportSize({ width: 1280, height: 720 });
 }
 
+async function clickWithoutReload(page: Page, name: string): Promise<void> {
+  const previousUrl = page.url();
+  await page.evaluate(() => {
+    document.documentElement.dataset.galleryDocument = 'preserved';
+  });
+  await page.getByRole('button', { name, exact: true }).click();
+  await expect(page).not.toHaveURL(previousUrl);
+  expect(await page.evaluate(() => document.documentElement.dataset.galleryDocument)).toBe(
+    'preserved',
+  );
+}
+
 test('player uploads a photograph, guests see SSR detail and owner removes it', async ({
   page,
   request,
@@ -86,7 +98,7 @@ test('player uploads a photograph, guests see SSR detail and owner removes it', 
   await page.getByLabel('Язык текста').selectOption('ru');
   await expect(page.locator('[name="title"]')).toHaveValue('Наш город');
   await tagPlayers(page);
-  await page.getByRole('button', { name: 'Опубликовать снимок' }).click();
+  await clickWithoutReload(page, 'Опубликовать снимок');
   await expect(page).toHaveURL(/\/gallery\/[\da-f-]+$/u);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Наш город');
   await photoScreenshots(page, test.info().project.name);
@@ -106,7 +118,7 @@ test('player uploads a photograph, guests see SSR detail and owner removes it', 
   await expect(page.getByRole('status')).toContainText('Сохранено');
   expect(await (await request.get(`${detailUrl}?lang=en`)).text()).toContain('Our harbour');
   await page.getByRole('button', { name: 'Удалить мой снимок' }).click();
-  await page.getByRole('button', { name: 'Да, удалить' }).click();
+  await clickWithoutReload(page, 'Да, удалить');
   await expect(page).toHaveURL((url) => url.pathname === '/gallery');
   expect((await request.get(detailUrl)).status()).toBe(404);
 });

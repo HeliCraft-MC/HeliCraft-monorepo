@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import type { VotingInput } from '@helicraft/alhena';
-import { Button } from '@helicraft/atria';
+import { Button, Icon } from '@helicraft/atria';
 import { PollQuestionEditor } from './poll-question-editor';
 import { addQuestion, MAX_OPTIONS, MAX_QUESTIONS } from './poll-questions-model';
 import { useTranslation } from '../i18n';
@@ -36,6 +36,7 @@ function PollQuestionsEditor({
         }
         onClick={add}
       >
+        <Icon name="add" />
         {uiText(locale, 'Добавить вопрос', 'Add question')}
       </Button>
     </div>

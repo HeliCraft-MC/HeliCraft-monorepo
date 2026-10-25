@@ -1,3 +1,4 @@
+// oxlint-disable import/max-dependencies -- The administration directory composes shared company and state identities with public catalogue filtering.
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +7,8 @@ import { Alert, Button, FormField, TextField } from '@helicraft/atria';
 import { errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
+import { CompanyName } from '../company-name';
+import { RegistrationStateName } from './registration-state-name';
 import { companyStatusLabel } from './labels';
 import { MonetaryPagination } from '../monetary/pagination';
 
@@ -48,11 +51,14 @@ function AdminCompanyDirectory({ search }: Readonly<{ search: string }>): ReactE
       <ul>
         {query.data?.items.map((company) => (
           <li key={company.id}>
-            <a href={`/admin/companies?companyId=${company.id}`}>
-              {displayText(company.name, locale)}
-            </a>{' '}
+            <CompanyName
+              id={company.id}
+              href={`/admin/companies?companyId=${company.id}`}
+              name={displayText(company.name, locale)}
+              branding={company.branding}
+            />{' '}
             · {companyStatusLabel(company.status, locale)} ·{' '}
-            {displayText(company.registrationStateName, locale)}
+            <RegistrationStateName company={company} />
           </li>
         ))}
       </ul>

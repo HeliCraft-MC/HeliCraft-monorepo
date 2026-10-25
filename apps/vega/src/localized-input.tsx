@@ -33,7 +33,7 @@ function LocalizedInputField({
       languages={languages}
       defaultLanguage={locale}
       multiline={multiline}
-      languageLabel={uiText(locale, 'Язык перевода', 'Translation language')}
+      languageLabel={uiText(locale, 'Переводы', 'Translations')}
       progressLabel={uiText(locale, 'Заполнено переводов', 'Translations completed')}
     />
   );

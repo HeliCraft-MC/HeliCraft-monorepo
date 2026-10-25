@@ -7,6 +7,7 @@ import { AdminLayout } from '../admin-layout';
 
 export const Route = createFileRoute('/admin')({
   ssr: false,
+  staleTime: 30_000,
   loader: async () => await loadPublicSite(),
   beforeLoad: async ({ location }) => {
     let principal: Awaited<ReturnType<typeof currentAccount>> | null = null;

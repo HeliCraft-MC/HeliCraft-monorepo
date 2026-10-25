@@ -9,16 +9,22 @@ import { VotingParticipationPanel } from './voting-participation-panel';
 import { SurveyAdminActions } from '../surveys/admin-actions';
 import { SurveyStatistics } from '../surveys/statistics';
 import { SurveyResponses } from '../surveys/responses';
-import { uiText, displayText, label } from './text';
+import { uiText } from './text';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getVoting, getAdminVoting } from '@helicraft/alhena';
-import { Alert, ActionLink } from '@helicraft/atria';
+import { Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import styles from './states.module.scss';
+import { VotingHeading } from './voting-heading';
+import { VotingDirectoryItem } from './voting-directory-item';
 
-function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): ReactElement {
+function VotingCard({
+  id,
+  admin,
+  compact = false,
+}: Readonly<{ id: string; admin: boolean; compact?: boolean }>): ReactElement {
   const { locale } = useTranslation();
   const query = useQuery({
     queryKey: ['voting', id, admin],
@@ -41,24 +47,12 @@ function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): Re
   }
   const voting = query.data;
   const survey = voting.input.survey !== undefined;
+  if (compact) {
+    return <VotingDirectoryItem voting={voting} admin={admin} />;
+  }
   return (
     <section className={styles.card}>
-      <h2>{displayText(voting.input.title, locale)}</h2>
-      <p>{displayText(voting.input.description, locale)}</p>
-      <p>
-        {label(`VOTING_${voting.status}`, locale)} ·{' '}
-        <time dateTime={voting.input.opensAt}>
-          {new Date(voting.input.opensAt).toLocaleString(locale)}
-        </time>{' '}
-        —{' '}
-        {voting.input.survey?.manualClose === true ? (
-          uiText(locale, 'До ручного закрытия', 'Until closed manually')
-        ) : (
-          <time dateTime={voting.input.closesAt}>
-            {new Date(voting.input.closesAt).toLocaleString(locale)}
-          </time>
-        )}
-      </p>
+      <VotingHeading voting={voting} />
       {!survey && (
         <details>
           <summary>{uiText(locale, 'Правила голосования', 'Voting rules')}</summary>
@@ -76,11 +70,6 @@ function VotingCard({ id, admin }: Readonly<{ id: string; admin: boolean }>): Re
       )}
       {admin && <VotingAdminActions id={id} status={voting.status} />}
       {admin && survey && <SurveyAdminActions voting={voting} />}
-      {!['DRAFT', 'ARCHIVED', 'CANCELLED'].includes(voting.status) && (
-        <ActionLink href={`/app/votings/${id}`}>
-          {uiText(locale, 'Открыть по ссылке', 'Open direct link')}
-        </ActionLink>
-      )}
       {admin && voting.status === 'DRAFT' && voting.subject === null && (
         <VotingDraftEditor id={id} input={voting.input} />
       )}

@@ -1,3 +1,4 @@
+import { PageHeader } from '@helicraft/atria';
 import type { ReactElement } from 'react';
 import { LanguageSwitcher } from './language-switcher';
 import { useTranslation } from './i18n';
@@ -7,7 +8,7 @@ function AccountPreferences(): ReactElement {
   const { text } = useTranslation();
   return (
     <>
-      <h1>{text('account.preferences')}</h1>
+      <PageHeader title={text('account.preferences')} />
       <p className={styles.paragraph}>{text('settings.description')}</p>
       <section className={styles.section}>
         <h2>{text('settings.language')}</h2>

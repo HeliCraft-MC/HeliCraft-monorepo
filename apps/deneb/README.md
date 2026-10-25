@@ -20,7 +20,7 @@ Container build from root: `docker compose -f apps/deneb/compose.yml build deneb
 
 Future scope: borders, jurisdictions, protected property, physical institutions, geology, deposits and market goods. Gameplay should remain ordinary Minecraft rather than becoming a collection of menus.
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
+From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 
 ## Name
 

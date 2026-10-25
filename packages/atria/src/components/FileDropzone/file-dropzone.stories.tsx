@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FileDropzone } from './file-dropzone';
 
 const meta = {
-  title: 'Atria/FileDropzone',
+  title: 'Forms/FileDropzone',
   component: FileDropzone,
   tags: ['autodocs'],
   args: {

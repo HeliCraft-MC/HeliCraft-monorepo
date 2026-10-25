@@ -11,7 +11,7 @@ HeliCraft — постоянный социальный, политически�
 
 Страница государства показывает флаги, основателей, гражданство, действующие должности, порядок принятия решений и Конституцию в адаптивной компоновке. Ники ведут на публичные профили `/players/<UUID>` с датой регистрации и участием в активных государствах. Сессии, роли аккаунта и непубличные черновики в профили не попадают.
 
-[Денежная система V1](docs/architecture/monetary_RU.md): Центральные банки через Governance и административное одобрение, национальные валюты, неизменяемые политики, двойная запись, казна и личные кошельки. Весь сценарий доступен в Веге без Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` и публичные SSR-страницы `/currencies`. Финансовые полномочия настраиваются явно через реформу.
+[Денежная система V1](docs/economy/monetary_RU.md): Центральные банки через Governance и административное одобрение, национальные валюты, неизменяемые политики, двойная запись, казна и личные кошельки. Весь сценарий доступен в Веге без Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` и публичные SSR-страницы `/currencies`. Финансовые полномочия настраиваются явно через реформу.
 
 ## Проекты
 
@@ -103,14 +103,17 @@ Deneb включает и изолирует JTS и Caffeine, Adventure пред
 
 ## Качество кода
 
-Проекты используют TypeScript 7.0.2. Только генератор Alhena получает изолированный TypeScript 6 для совместимости Compiler API; проверка и декларации SDK используют корневой TS7. Все категории oxlint включены как ошибки с проверками типов и запретом предупреждений. Совместимые со стеком исключения перечислены в [исследовании](docs/setup-research_RU.md). Java: Checkstyle, Spotless/google-java-format и предупреждения компилятора как ошибки.
+Проекты используют TypeScript 7.0.2. Только генератор Alhena получает изолированный TypeScript 6 для совместимости Compiler API; проверка и декларации SDK используют корневой TS7. Все категории oxlint включены как ошибки с проверками типов и запретом предупреждений. Совместимые со стеком исключения перечислены в [исследовании](docs/development/setup-research_RU.md). Java: Checkstyle, Spotless/google-java-format и предупреждения компилятора как ошибки.
 
-Docker, Testcontainers и Chromium доступны. Web Compose, миграции, PostgreSQL/S3 и browser-сценарии проверены на временном стенде; см. [validation](docs/architecture/validation_RU.md).
+В прежних прогонах с Docker, Testcontainers и Chromium на временном стенде проверялись Web Compose, миграции, PostgreSQL/S3 и browser-сценарии; см. [validation](docs/verification/web-foundation_RU.md).
 
 ## Документация
 
+- [Навигация по документации](docs/README_RU.md) / [Documentation index](docs/README.md)
+- [Обзор для администрации с Mermaid-схемами](docs/overview/administration_RU.md)
+- [Правила документации для агентов](docs/AGENTS.md)
 - [Карта продуктов](docs/product-map_RU.md) / [Product map](docs/product-map.md)
-- [Решения и официальные источники](docs/setup-research_RU.md) / [Setup research](docs/setup-research.md)
+- [Решения и официальные источники](docs/development/setup-research_RU.md) / [Setup research](docs/development/setup-research.md)
 - [Правила работы с репозиторием](AGENTS.md)
 - [Старые приложения и документация](archive/README.md)
 
@@ -124,7 +127,7 @@ Vesper, Teapot и Soon перенесены в `archive/apps/` вместе с �
 
 ## Web foundation
 
-См. [rendering](docs/architecture/web-rendering_RU.md), [identity](docs/architecture/identity_RU.md), [authorization](docs/architecture/authorization_RU.md), [skins](docs/architecture/skin-storage_RU.md), [CMS](docs/architecture/content_RU.md), [landing](docs/design/landing-page_RU.md) и [quality](docs/architecture/quality.md).
+См. [rendering](docs/architecture/web-rendering_RU.md), [identity](docs/architecture/identity_RU.md), [authorization](docs/architecture/authorization_RU.md), [skins](docs/architecture/skin-storage_RU.md), [CMS](docs/architecture/content_RU.md), [landing](docs/design/landing-page_RU.md) и [quality](docs/development/quality.md).
 
 Для локальной разработки SITE_ORIGIN=http://localhost:5173. Перед production Compose установите SITE_ORIGIN=http://localhost:8080 (или настоящий HTTPS origin и SECURE_COOKIES=true). Регистрация создаёт только PLAYER. Первый OWNER: зарегистрируйте аккаунт, скопируйте UUID и выполните `bun run admin:bootstrap-owner <UUID> --confirm <тот же UUID>`. По умолчанию PRELAUNCH; адрес Minecraft показывается только в OPEN и при заданном MINECRAFT_ADDRESS. Не принимаем EULA автоматически.
 
@@ -136,9 +139,9 @@ Vesper, Teapot и Soon перенесены в `archive/apps/` вместе с �
 
 ## Taxation and diplomacy
 
-Государственные налоговые службы, неизменяемые законы о налогах на переводы, двусторонние налоговые договоры и точное атомарное исполнение работают через Антарес и Вегу. До подтверждения личного перевода показывается серверный расчёт налогов. Учреждения и законы следуют опубликованному Governance; администрация ратифицирует учреждения, не назначая ставки. См. [Taxation](docs/architecture/taxation_RU.md), [Diplomacy](docs/architecture/diplomacy_RU.md) и [проверки](docs/architecture/taxation-verification.md). География Minecraft и взыскание задолженности остаются за пределами реализации.
+Государственные налоговые службы, неизменяемые законы о налогах на переводы, двусторонние налоговые договоры и точное атомарное исполнение работают через Антарес и Вегу. До подтверждения личного перевода показывается серверный расчёт налогов. Учреждения и законы следуют опубликованному Governance; администрация ратифицирует учреждения, не назначая ставки. См. [Taxation](docs/economy/taxation_RU.md), [Diplomacy](docs/states/diplomacy_RU.md) и [проверки](docs/verification/taxation.md). География Minecraft и взыскание задолженности остаются за пределами реализации.
 
-[Текущие улучшения налогов](docs/architecture/taxation-improvements_RU.md) добавляют выбор отправителя или получателя как плательщика, точный необлагаемый порог, утверждённое направление в казну или ЦБ и накопление дробных обязательств. Приостановка налоговой службы сохраняет действующие законы; приостановка государства прекращает новые начисления без пересчёта прошлого. Общий движок также учитывает корпоративные переводы, регистрацию/подтверждённый филиал, явные категории и национальные корпоративные режимы. [Companies](docs/architecture/companies_RU.md) предоставляют возобновляемую регистрацию, гибкий Governance, точные акции, дочерние компании, филиалы, официальные финансы и публичные SSR-профили. [Обмен валют](docs/architecture/currency-exchange_RU.md) поддерживает двусторонние сделки ЦБ и конечные обеспеченные предложения игрокам. См. [таблицу приёмки](docs/architecture/companies-fx-taxation-verification_RU.md) и [результаты проверок](docs/architecture/companies-fx-taxation-plan.md).
+[Настройки налогов и корпоративные режимы](docs/economy/taxation-settings_RU.md) добавляют выбор отправителя или получателя как плательщика, точный необлагаемый порог, утверждённое направление в казну или ЦБ и накопление дробных обязательств. Приостановка налоговой службы сохраняет действующие законы; приостановка государства прекращает новые начисления без пересчёта прошлого. Общий движок также учитывает корпоративные переводы, регистрацию/подтверждённый филиал, явные категории и национальные корпоративные режимы. [Companies](docs/economy/companies_RU.md) предоставляют возобновляемую регистрацию, гибкий Governance, точные акции, дочерние компании, филиалы, официальные финансы и публичные SSR-профили. [Обмен валют](docs/economy/currency-exchange_RU.md) поддерживает двусторонние сделки ЦБ и конечные обеспеченные предложения игрокам. См. [таблицу приёмки](docs/verification/companies-fx-taxation_RU.md) и [результаты проверок](docs/history/2026-10-18-companies-fx-taxation.md).
 
 ## Stand deployment
 

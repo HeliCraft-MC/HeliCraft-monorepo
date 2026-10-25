@@ -9,6 +9,7 @@ import {
 import type { PublishedCompanyBranch } from '@helicraft/alhena';
 import { Alert, FormField, Select } from '@helicraft/atria';
 import { MonetaryPagination } from '../monetary/pagination';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 
@@ -105,7 +106,8 @@ function CompanyBranchPicker({
           </option>
           {valid !== null && (
             <option value={valid.id}>
-              {displayText(valid.name, locale)} · {displayText(valid.stateName, locale)}
+              {displayText(valid.name, locale)} ·{' '}
+              <StateName id={valid.stateId} name={displayText(valid.stateName, locale)} />
             </option>
           )}
           {query.data?.items

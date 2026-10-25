@@ -10,12 +10,20 @@ import { CompanyPlayerIdentity } from './player-identity';
 import { CompanyRevisionSummary } from './revision-summary';
 import { CompanyProcedureSummary } from './procedure-summary';
 import { ShareOperationSummary } from './share-operation-summary';
+import { CompanyAppearancePreview } from './appearance-preview';
 import { CurrencyName } from './currency-name';
 
 function CompanyDecisionPayloadSummary({
   payload,
   charter,
-}: Readonly<{ payload: CompanyDecisionPayload; charter: CompanyCharter }>): ReactElement {
+  companyId,
+  decisionId,
+}: Readonly<{
+  payload: CompanyDecisionPayload;
+  charter: CompanyCharter;
+  companyId?: string;
+  decisionId?: string;
+}>): ReactElement {
   const { locale } = useTranslation();
   if ('operation' in payload) {
     return <ShareOperationSummary operation={payload.operation} />;
@@ -45,11 +53,22 @@ function CompanyDecisionPayloadSummary({
         <h3>{displayText(payload.name, locale)}</h3>
         <p>{displayText(payload.description, locale)}</p>
         <p>{payload.categories.join(', ')}</p>
+        <CompanyAppearancePreview
+          companyId={companyId}
+          decisionId={decisionId}
+          branding={payload.branding}
+        />
       </section>
     );
   }
   if (payload.kind === 'AMEND_CHARTER') {
-    return <CompanyRevisionSummary content={payload.content} />;
+    return (
+      <CompanyRevisionSummary
+        content={payload.content}
+        companyId={companyId}
+        decisionId={decisionId}
+      />
+    );
   }
   if (payload.kind === 'CREATE_OFFICE' || payload.kind === 'UPDATE_OFFICE') {
     return (

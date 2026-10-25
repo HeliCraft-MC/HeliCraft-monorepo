@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { CompanyWalletSchema } from '../../apps/antares/src/modules/companies/finance';
@@ -38,6 +39,7 @@ async function verifyCompanyFinance(
     })
     .toBe('100');
   await page.goto(`/app/companies/${companyId}?section=finance&lang=en`);
+  await openWorkspaceAction(page, 'New payment');
   await page.getByLabel('Payment currency', { exact: true }).selectOption(currencyId);
   await page.getByLabel('Payment amount', { exact: true }).fill('0.25');
   await page.getByLabel('Find recipient', { exact: true }).fill('MoneyFounderFxB');

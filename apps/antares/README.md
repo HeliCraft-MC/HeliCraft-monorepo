@@ -24,7 +24,7 @@ S3 uses AWS SDK v3 with an endpoint and path-style addressing. Integration tests
 
 Production from root: `docker compose --env-file .env -f apps/antares/compose.yml up -d --build`. Development external services: `docker compose --env-file .env -f apps/antares/compose.dev.yml up -d --wait`. The first exposes API on localhost:3000; root production exposes it through Vega only. API changes must regenerate Alhena. Old Teapot endpoints, credentials and data are not migrated.
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
+From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 
 ## Name
 
@@ -42,6 +42,6 @@ Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing s
 
 ## Monetary system V1
 
-[Domain model, Governance, exact accounting, API, screens and verification](../../docs/architecture/monetary.md).
+[Domain model, Governance, exact accounting, API, screens and verification](../../docs/economy/monetary.md).
 
-Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/architecture/taxation.md) and [Diplomacy](../../docs/architecture/diplomacy.md).
+Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/economy/taxation.md) and [Diplomacy](../../docs/states/diplomacy.md).

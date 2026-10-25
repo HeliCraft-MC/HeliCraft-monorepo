@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
-import { Users, Landmark, UserCheck, Armchair } from 'lucide-react';
+import { Users, Landmark, UserCheck, Armchair, ArrowRight } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from './text';
 import { ManagementIdentity } from './management-identity';
@@ -99,7 +99,7 @@ function ManagementOverview({
                   <span>
                     {uiText(locale, managementLabels[item][0], managementLabels[item][1])}
                   </span>
-                  <span aria-hidden="true">→</span>
+                  <ArrowRight size={18} aria-hidden="true" />
                 </ManagementSectionLink>
               ))}
           </div>
@@ -112,7 +112,7 @@ function ManagementOverview({
         <div className={styles.cardHeading}>
           <h2>{uiText(locale, 'Действующие должности', 'Current offices')}</h2>
           <ManagementSectionLink stateId={state.id} section="government">
-            {uiText(locale, 'Все правила →', 'All rules →')}
+            {uiText(locale, 'Все правила', 'All rules')}
           </ManagementSectionLink>
         </div>
         {offices.length === 0 && (

@@ -2,6 +2,7 @@ import { useExpired } from '../use-expired';
 import type { ReactElement } from 'react';
 import type { FxOffer, FxQuote } from '@helicraft/alhena';
 import { Alert, Button, Dialog, MoneyAmount } from '@helicraft/atria';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { uiText, displayText } from '../states/text';
 import { errorMessage } from '../account-api';
@@ -43,7 +44,10 @@ function FxQuoteReview({
         <>
           <p>
             {displayText(review.offer.bank.name, locale)} ·{' '}
-            {displayText(review.offer.bank.stateName, locale)}
+            <StateName
+              id={review.offer.bank.stateId}
+              name={displayText(review.offer.bank.stateName, locale)}
+            />
           </p>
           <p>
             {uiText(locale, 'Вы отдаёте', 'You pay')}:{' '}

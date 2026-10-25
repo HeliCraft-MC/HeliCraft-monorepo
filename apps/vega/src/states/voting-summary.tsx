@@ -16,6 +16,20 @@ function VotingSummary({ rules }: Readonly<{ rules: GovernanceVotingRules }>): R
   return (
     <dl className={styles.votingFacts}>
       <div>
+        <dt>{uiText(locale, 'Досрочное завершение', 'Early completion')}</dt>
+        <dd>
+          {uiText(
+            locale,
+            rules.closeWhenDecided === true
+              ? 'При неизменяемом результате или 100% явке'
+              : 'При 100% явке',
+            rules.closeWhenDecided === true
+              ? 'Irreversible result or full turnout'
+              : 'Full turnout',
+          )}
+        </dd>
+      </div>
+      <div>
         <dt>
           {uiText(locale, 'Кворум', 'Quorum')}
           <FieldHelp
@@ -66,7 +80,7 @@ function VotingSummary({ rules }: Readonly<{ rules: GovernanceVotingRules }>): R
         </div>
       )}
       <div>
-        <dt>{uiText(locale, 'Продолжительность', 'Duration')}</dt>
+        <dt>{uiText(locale, 'Максимальная продолжительность', 'Maximum duration')}</dt>
         <dd>
           {rules.durationHours} {uiText(locale, 'часов', 'hours')}
         </dd>

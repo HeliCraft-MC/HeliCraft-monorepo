@@ -60,6 +60,7 @@ function CompanyPaymentFields({
         onChange={onRecipient}
       />
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Корпоративный платёж', 'Corporate payment')}
         content={uiText(
           locale,

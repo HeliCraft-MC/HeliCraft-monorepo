@@ -6,6 +6,7 @@ import { monetaryHash } from '../monetary/domain';
 import { DomainError, HTTP } from '../errors';
 import type { CompanyRevisionContent } from './contracts';
 import { extractCompanyTexts, hydrateCompanyTexts } from './localized-snapshot';
+import { assertCompanyBrandingMedia } from './media-integrity';
 import { assertCompanyCharter } from './domain';
 
 async function readCompanyRevision(
@@ -73,6 +74,7 @@ async function publishCompanyRevision(
   }>,
 ): Promise<string> {
   assertCompanyCharter(input.content.charter);
+  await assertCompanyBrandingMedia(transaction, input.companyId, input.content.branding);
   const [previous] = await transaction
     .select()
     .from(companyRevisions)

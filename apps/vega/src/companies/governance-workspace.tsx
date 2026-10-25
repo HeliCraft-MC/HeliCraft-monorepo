@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { CompanyWorkspace, CompanyCharter } from '@helicraft/alhena';
-import { Button, FieldHelp } from '@helicraft/atria';
+import { ActionPanel, Button, FieldHelp } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import type { SelectedPlayer } from '../player-picker';
@@ -26,13 +26,12 @@ function CompanyGovernanceWorkspace({
   return (
     <section>
       <h2>{uiText(locale, 'Корпоративное управление', 'Corporate governance')}</h2>
-      <CompanyCharterSummary charter={workspace.content.charter} />
       {workspace.availableActions.includes('AMEND_CHARTER') && (
-        <details>
-          <summary>
-            {uiText(locale, 'Подготовить изменение устава', 'Prepare charter amendment')}
-          </summary>
+        <ActionPanel
+          title={uiText(locale, 'Подготовить изменение устава', 'Prepare charter amendment')}
+        >
           <FieldHelp
+            showLabel
             label={uiText(locale, 'Назначения отдельными решениями', 'Separate appointments')}
             content={uiText(
               locale,
@@ -50,8 +49,11 @@ function CompanyGovernanceWorkspace({
           <Button onClick={review}>
             {uiText(locale, 'Проверить изменение устава', 'Review charter amendment')}
           </Button>
-        </details>
+        </ActionPanel>
       )}
+      <ActionPanel title={uiText(locale, 'Действующий устав', 'Current charter')}>
+        <CompanyCharterSummary charter={workspace.content.charter} />
+      </ActionPanel>
       <CompanyDecisionReview workspace={workspace} submission={submission} />
     </section>
   );

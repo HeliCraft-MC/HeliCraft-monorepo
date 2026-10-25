@@ -1,7 +1,9 @@
 // oxlint-disable import/max-dependencies -- The public profile composes separate legal identity, governance, ownership and published history sections.
+import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type { PublishedCompanyProfile, PublishedCompanyBranchList } from '@helicraft/alhena';
 import { PageContainer } from '@helicraft/atria';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { displayText, label, uiText } from '../states/text';
 import { EntityMarkdown } from '../entity-markdown';
@@ -10,6 +12,8 @@ import { ProfileOwnership } from './profile-ownership';
 import { ProfilePagination } from './profile-pagination';
 import { companyActionLabel } from './labels';
 import type { ProfileSearch } from './profile-search';
+import { companyTheme } from './theme';
+import { CompanyProfileHeader } from './profile-header';
 import styles from './companies.module.scss';
 
 function CompanyProfilePage({
@@ -24,6 +28,10 @@ function CompanyProfilePage({
   missing: boolean;
 }>): ReactElement {
   const { locale } = useTranslation();
+  const accent = useMemo(
+    () => companyTheme(profile?.identity.branding),
+    [profile?.identity.branding],
+  );
   if (profile === null) {
     return (
       <main id="main-content">
@@ -43,29 +51,8 @@ function CompanyProfilePage({
   return (
     <main id="main-content">
       <PageContainer>
-        <article className={styles.page}>
-          <header>
-            <a href="/companies">{uiText(locale, 'Все компании', 'All companies')}</a>
-            <a href={`/app/companies/${profile.identity.id}`}>
-              {uiText(locale, 'Рабочее пространство компании', 'Company workspace')}
-            </a>
-            <h1>{displayText(profile.identity.name, locale)}</h1>
-            <p>{displayText(profile.identity.description, locale)}</p>
-            <p>
-              {displayText(profile.identity.registrationStateName, locale)} ·{' '}
-              {label(profile.identity.status, locale)} ·{' '}
-              <time dateTime={profile.identity.foundedAt}>
-                {new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(
-                  new Date(profile.identity.foundedAt),
-                )}
-              </time>
-            </p>
-            <ul>
-              {profile.categories.map((category) => (
-                <li key={category}>{category}</li>
-              ))}
-            </ul>
-          </header>
+        <article className={`${styles.page} ${styles.branded}`} style={accent}>
+          <CompanyProfileHeader identity={profile.identity} categories={profile.categories} />
           <ProfileGovernance profile={profile} />
           <section className={styles.card}>
             <h2>
@@ -102,7 +89,8 @@ function CompanyProfilePage({
             <ul>
               {branches?.items.map((branch) => (
                 <li key={branch.id}>
-                  {displayText(branch.name, locale)} · {displayText(branch.stateName, locale)} ·{' '}
+                  {displayText(branch.name, locale)} ·{' '}
+                  <StateName id={branch.stateId} name={displayText(branch.stateName, locale)} /> ·{' '}
                   {label(branch.status, locale)}
                   <p>{displayText(branch.description, locale)}</p>
                 </li>

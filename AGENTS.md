@@ -8,6 +8,12 @@
 - `archive/`: preserved Vesper, Teapot, Soon and old docs. Archived local AGENTS.md apply only there. Do not include archived projects in active builds or rewrite their files without a specific request.
 - Keep README.md and README_RU.md in sync, with language switches at the top. Product roles are in `docs/product-map.md`.
 
+## Documentation
+
+- Read `docs/AGENTS.md` before editing documentation; use `docs/README.md` / `docs/README_RU.md` as the entry point.
+- Keep current contracts in their domain, cross-cutting contracts in `docs/architecture/`, dated evidence in `docs/verification/`, and completed implementation records in `docs/history/`. Update active incoming links and language pairs when moving documents.
+- Explain current implementation separately from product intent and future Minecraft integration. Never present historical test runs as fresh verification.
+
 ## Boundaries
 
 - Only Antares accesses PostgreSQL/PostGIS and S3. Vega and plugins communicate through REST.
@@ -39,7 +45,7 @@
 - Reusable UI belongs in Atria, with meaningful documentation and Storybook states. Vega contains product composition. Preserve keyboard navigation, labelled fields and reduced motion.
 - Consult Context7, official documentation and installed sources when framework APIs or compatibility are uncertain.
 - Markdown is rendered and sanitized by Antares. Drafts and protected data must never enter public loaders, sitemaps or service-worker caches.
-- Exercise meaningful identity, authorization, storage, publishing and SSR scenarios. Keep strict oxlint/oxfmt, build and tests mandatory; document narrowly scoped exceptions in `docs/architecture/quality.md`.
+- Exercise meaningful identity, authorization, storage, publishing and SSR scenarios. Keep strict oxlint/oxfmt, build and tests mandatory; document narrowly scoped exceptions in `docs/development/quality.md`.
 
 ## States and shared platform services
 

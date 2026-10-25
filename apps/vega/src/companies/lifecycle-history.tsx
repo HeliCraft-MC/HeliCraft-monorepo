@@ -1,13 +1,15 @@
+// oxlint-disable import/max-dependencies -- Lifecycle history composes actual player identities, pagination and translated system reasons.
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listCompanyLifecycleHistory } from '@helicraft/alhena';
-import { Alert } from '@helicraft/atria';
+import { Icon, Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { MonetaryPagination } from '../monetary/pagination';
 import { CompanyPlayerIdentity } from './player-identity';
+import { companyLifecycleReason } from './lifecycle-reason';
 import { companyStatusLabel } from './labels';
 
 function CompanyLifecycleHistory({
@@ -38,13 +40,13 @@ function CompanyLifecycleHistory({
       <ol>
         {query.data?.items.map((event) => (
           <li key={event.id}>
-            {companyStatusLabel(event.previousStatus, locale)} →{' '}
+            {companyStatusLabel(event.previousStatus, locale)} <Icon name="arrowRight" />{' '}
             {companyStatusLabel(event.status, locale)} ·{' '}
             <time dateTime={event.createdAt}>
               {new Date(event.createdAt).toLocaleString(locale)}
             </time>{' '}
             · <CompanyPlayerIdentity id={event.actorId} />
-            <p>{event.reason}</p>
+            <p>{companyLifecycleReason(event.reason, locale)}</p>
           </li>
         ))}
       </ol>

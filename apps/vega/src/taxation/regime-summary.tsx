@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import type { TaxRule, TaxLawRevision } from '@helicraft/alhena';
+import { CompanyName } from '../company-name';
 import { MonetaryCompany } from '../monetary/company';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
@@ -26,9 +27,7 @@ function TaxRegimeSummary({
         {subject === undefined ? (
           <MonetaryCompany id={rule.regime.companyId} />
         ) : (
-          <a href={`/companies/${rule.regime.companyId}`}>
-            {displayText(subject.companyName, locale)}
-          </a>
+          <CompanyName id={rule.regime.companyId} name={displayText(subject.companyName, locale)} />
         )}
       </p>
       {subject?.branchName !== null && subject?.branchName !== undefined && (

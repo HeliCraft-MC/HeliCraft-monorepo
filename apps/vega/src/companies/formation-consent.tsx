@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import type { ReactElement } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   consentToCompanyFormation,
   listCompanyFormationConsents,
@@ -17,6 +17,7 @@ function FormationConsent({
   consentRole,
 }: Readonly<{ draft: CompanyDraft; consentRole: 'FOUNDER' | 'OFFICE_HOLDER' }>): ReactElement {
   const { locale } = useTranslation();
+  const queries = useQueryClient();
   const query = useQuery({
     queryKey: ['company-formation-consents', draft.id],
     queryFn: async () => {
@@ -63,6 +64,8 @@ function FormationConsent({
     },
     onSuccess: async () => {
       await refetch();
+      await queries.invalidateQueries({ queryKey: ['company-formation-progress', draft.id] });
+      await queries.invalidateQueries({ queryKey: ['company-inbox'] });
     },
   });
   const { mutate } = mutation;

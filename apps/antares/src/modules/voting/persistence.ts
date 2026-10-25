@@ -1,4 +1,6 @@
+// oxlint-disable import/max-dependencies -- Voting lifecycle composition coordinates snapshots, localized content, validation and completion in one transaction.
 // oxlint-disable no-await-in-loop -- Snapshot, option and scheduler writes are serialized on transaction connections.
+import { closeCompletedVoting } from './completion';
 import { validateSurvey } from './survey-domain';
 import { storeSurvey, readSurvey } from './survey-texts';
 import {
@@ -62,7 +64,7 @@ async function advance(
       .update(votings)
       .set({ status, snapshotAt: now })
       .where(eq(votings.id, record.id));
-    return { ...record, status, snapshotAt: now };
+    return await closeCompletedVoting(transaction, { ...record, status, snapshotAt: now });
   }
   if (
     record.status === 'OPEN' &&
@@ -72,7 +74,7 @@ async function advance(
     await transaction.update(votings).set({ status: 'CLOSED' }).where(eq(votings.id, record.id));
     return { ...record, status: 'CLOSED' };
   }
-  return record;
+  return await closeCompletedVoting(transaction, record);
 }
 async function hydrateInput(
   transaction: Transaction,
@@ -292,3 +294,5 @@ async function publishVoting(
   );
 }
 export { lockedVoting, advance, hydrateInput, persistVoting, publishVoting, replaceVotingInput };
+
+export { closeCompletedVoting } from './completion';

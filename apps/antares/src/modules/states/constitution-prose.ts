@@ -37,10 +37,18 @@ function votingProse(
   if (rules.thresholdKind === 'UNANIMOUS') {
     threshold = phrase(locale, 'одобрение всех избирателей', 'approval by every eligible voter');
   }
+  const early =
+    rules.closeWhenDecided === true
+      ? phrase(
+          locale,
+          ' При достигнутом кворуме голосование завершается досрочно, если оставшиеся голоса уже не могут изменить ни один результат.',
+          ' Once quorum is met, voting closes early when the remaining votes cannot change any outcome.',
+        )
+      : '';
   return phrase(
     locale,
-    `Голосование длится ${rules.durationHours} часов. Для кворума необходимо участие не менее ${rules.quorumPercent}% избирателей. Решение принимается, если получено ${threshold}. ${rules.allowAbstain ? 'Избиратель вправе воздержаться.' : 'Воздержание не предусмотрено.'}`,
-    `Voting lasts ${rules.durationHours} hours. A quorum requires at least ${rules.quorumPercent}% of eligible voters to participate. A decision requires ${threshold}. ${rules.allowAbstain ? 'Voters may abstain.' : 'Abstention is not available.'}`,
+    `Голосование длится не более ${rules.durationHours} часов. Для кворума необходимо участие не менее ${rules.quorumPercent}% избирателей. Решение принимается, если получено ${threshold}. ${rules.allowAbstain ? 'Избиратель вправе воздержаться.' : 'Воздержание не предусмотрено.'} Голосование автоматически завершается после участия всех избирателей.${early}`,
+    `Voting lasts at most ${rules.durationHours} hours. A quorum requires at least ${rules.quorumPercent}% of eligible voters to participate. A decision requires ${threshold}. ${rules.allowAbstain ? 'Voters may abstain.' : 'Abstention is not available.'} Voting automatically closes when every eligible voter has participated.${early}`,
   );
 }
 // oxlint-disable-next-line max-lines-per-function -- Each appointment, term, vacancy and inactivity setting contributes one document sentence.

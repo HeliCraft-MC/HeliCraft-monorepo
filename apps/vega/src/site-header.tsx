@@ -4,6 +4,7 @@ import { useTranslation } from './i18n';
 import { Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
+import { SiteNavigation } from './site-navigation';
 import { AccountLinks } from './account-links';
 import styles from './site.module.scss';
 
@@ -33,7 +34,7 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
   }, []);
   useEffect((): (() => void) => {
     function escape(event: KeyboardEvent): void {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && open) {
         setOpen(false);
         menuButton.current?.focus();
       }
@@ -42,7 +43,7 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
     return (): void => {
       globalThis.removeEventListener('keydown', escape);
     };
-  }, []);
+  }, [open]);
   return (
     <header
       className={[
@@ -57,27 +58,7 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
           <span>{branding.serverName}</span>
         </Link>
         <nav className={styles.navigation} aria-label={text('navigation.mainLabel')}>
-          <Link onClick={closeMenu} to="/world">
-            {text('navigation.world')}
-          </Link>
-          <a onClick={closeMenu} href="/states">
-            {text('navigation.states')}
-          </a>
-          <a onClick={closeMenu} href="/currencies">
-            {text('monetary.navigation')}
-          </a>
-          <a onClick={closeMenu} href="/exchange">
-            {text('fx.navigation')}
-          </a>
-          <a onClick={closeMenu} href="/companies">
-            {text('companies.navigation')}
-          </a>
-          <a onClick={closeMenu} href="/gallery">
-            {text('navigation.atlas')}
-          </a>
-          <Link onClick={closeMenu} to="/chronicle">
-            {text('navigation.chronicle')}
-          </Link>
+          <SiteNavigation onNavigate={closeMenu} />
         </nav>
         <div className={styles.accountLinks}>
           <AccountLinks registrationEnabled={false} />
@@ -103,27 +84,7 @@ function SiteHeader({ home }: Readonly<{ home: boolean }>): ReactElement {
           className={styles.mobileMenu}
           aria-label={text('navigation.mobileLabel')}
         >
-          <Link onClick={closeMenu} to="/world">
-            {text('navigation.world')}
-          </Link>
-          <a onClick={closeMenu} href="/states">
-            {text('navigation.states')}
-          </a>
-          <a onClick={closeMenu} href="/currencies">
-            {text('monetary.navigation')}
-          </a>
-          <a onClick={closeMenu} href="/exchange">
-            {text('fx.navigation')}
-          </a>
-          <a onClick={closeMenu} href="/companies">
-            {text('companies.navigation')}
-          </a>
-          <a onClick={closeMenu} href="/gallery">
-            {text('navigation.atlas')}
-          </a>
-          <Link onClick={closeMenu} to="/chronicle">
-            {text('navigation.chronicle')}
-          </Link>
+          <SiteNavigation onNavigate={closeMenu} />
           <Link onClick={closeMenu} to="/rules">
             {text('navigation.rules')}
           </Link>

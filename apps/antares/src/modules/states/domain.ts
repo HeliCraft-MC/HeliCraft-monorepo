@@ -24,6 +24,7 @@ function emptyConfiguration(): StateConfiguration {
         thresholdPercent: 66,
         thresholdKind: 'PERCENT',
         allowAbstain: true,
+        closeWhenDecided: true,
       },
       createdFromPreset: null,
     },

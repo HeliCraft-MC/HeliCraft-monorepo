@@ -22,6 +22,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     locale: await loadLocale({ data: new URLSearchParams(location.searchStr).get('lang') }),
   }),
   errorComponent: ErrorPage,
+  loaderDeps: ({ search }) => ({ lang: search.lang }),
+  staleTime: 30_000,
   loader: async () => await loadPublicNavigation(),
   head: ({ loaderData }) => ({
     meta: [

@@ -1,7 +1,7 @@
 import { institutionGroup } from '../states/policy-groups';
 import { InstitutionPolicyEditor } from '../states/institution-policy-editor';
 // oxlint-disable import/max-dependencies -- The form reuses shared localized input, confirmation and Governance submission.
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import type { ReactElement, SubmitEvent } from 'react';
 import type {
   GovernancePolicy,
@@ -10,7 +10,7 @@ import type {
   TaxLawRevision,
 } from '@helicraft/alhena';
 import { Alert, Button, Dialog, FormField, TextField } from '@helicraft/atria';
-import { LocalizedInputField } from '../localized-input';
+import { LocalizedForm } from '../localized-form';
 import { errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -42,6 +42,34 @@ function TaxEditor({
   const [description, setDescription] = useState<LocalizedInput>(revision?.description ?? {});
   const [document, setDocument] = useState<LocalizedInput>(revision?.document ?? {});
   const [initialPolicies, setInitialPolicies] = useState<GovernancePolicy[]>([]);
+  const localizedFields = useMemo(() => {
+    const fields = [
+      {
+        name: 'name',
+        label: uiText(locale, 'Название', 'Name'),
+        value: name,
+        onChange: setName,
+        multiline: false,
+      },
+      {
+        name: 'description',
+        label: uiText(locale, 'Описание', 'Description'),
+        value: description,
+        onChange: setDescription,
+        multiline: true,
+      },
+    ];
+    if (kind === 'ENACT_TAX_LAW' || kind === 'AMEND_TAX_LAW') {
+      fields.push({
+        name: 'document',
+        label: uiText(locale, 'Текст закона (Markdown)', 'Law document (Markdown)'),
+        value: document,
+        onChange: setDocument,
+        multiline: true,
+      });
+    }
+    return fields;
+  }, [locale, kind, name, description, document]);
   const [problem, setProblem] = useState('');
   const submission = useDirectiveSubmission(state.id, onSaved);
   const { setReview, confirm: handleConfirm, changeOpen: handleChangeOpen } = submission;
@@ -83,21 +111,7 @@ function TaxEditor({
     <section className={styles.card}>
       <h2>{uiText(locale, label?.[0] ?? kind, label?.[1] ?? kind)}</h2>
       <form className={styles.form} onSubmit={submit}>
-        {kind !== 'REPEAL_TAX_LAW' && (
-          <>
-            <LocalizedInputField
-              label={uiText(locale, 'Название', 'Name')}
-              value={name}
-              onChange={setName}
-            />
-            <LocalizedInputField
-              label={uiText(locale, 'Описание', 'Description')}
-              multiline
-              value={description}
-              onChange={setDescription}
-            />
-          </>
-        )}
+        {kind !== 'REPEAL_TAX_LAW' && <LocalizedForm fields={localizedFields} />}
         <InstitutionPolicyEditor
           state={state}
           group={institutionGroup(kind)}
@@ -107,12 +121,6 @@ function TaxEditor({
         {(kind === 'ENACT_TAX_LAW' || kind === 'AMEND_TAX_LAW') && (
           <>
             <TaxLawFields revision={revision} stateId={state.id} />
-            <LocalizedInputField
-              label={uiText(locale, 'Текст закона (Markdown)', 'Law document (Markdown)')}
-              multiline
-              value={document}
-              onChange={setDocument}
-            />
             <TaxExample />
           </>
         )}

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import type { StateDetail } from '@helicraft/alhena';
 import { listOfficeAssignments } from '@helicraft/alhena';
 import { useQuery } from '@tanstack/react-query';
-import { LoadingState, Alert, EmptyState } from '@helicraft/atria';
+import { LoadingState, Alert, EmptyState, ActionPanel } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from './text';
@@ -36,7 +36,15 @@ function OfficeAssignments({ state }: Readonly<{ state: StateDetail }>): ReactEl
         )}
       </p>
       {state.status === 'ACTIVE' && state.configuration.governance.offices.length > 0 && (
-        <OfficeAssignmentCreator key={state.governanceRevisionId} state={state} />
+        <ActionPanel
+          title={uiText(
+            locale,
+            'Предложить назначение или снятие',
+            'Propose appointment or removal',
+          )}
+        >
+          <OfficeAssignmentCreator key={state.governanceRevisionId} state={state} />
+        </ActionPanel>
       )}
       {query.data?.length === 0 && (
         <EmptyState

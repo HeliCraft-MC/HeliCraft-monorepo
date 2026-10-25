@@ -16,6 +16,7 @@ function ProfileGovernance({
     <section className={styles.card}>
       <h2>{uiText(locale, 'Управление и должности', 'Governance and offices')}</h2>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Корпоративные полномочия', 'Corporate authority')}
         content={uiText(
           locale,
@@ -51,31 +52,41 @@ function ProfileGovernance({
           <CompanyProcedureSummary procedure={office.removal} offices={profile.charter.offices} />
         </details>
       ))}
-      <h3>{uiText(locale, 'Правила решений', 'Decision policies')}</h3>
-      {profile.charter.policies.map((policy) => (
-        <details key={policy.action}>
-          <summary>{companyActionLabel(policy.action, locale)}</summary>
-          <CompanyProcedureSummary procedure={policy.procedure} offices={profile.charter.offices} />
-          {policy.financialBands.length > 0 && (
+      <details>
+        <summary>
+          {uiText(locale, 'Правила решений', 'Decision policies')} ·{' '}
+          {profile.charter.policies.length}
+        </summary>
+        <div className={styles.policyList}>
+          {profile.charter.policies.map((policy) => (
+            <details key={policy.action}>
+              <summary>{companyActionLabel(policy.action, locale)}</summary>
+              <CompanyProcedureSummary
+                procedure={policy.procedure}
+                offices={profile.charter.offices}
+              />
+              {policy.financialBands.length > 0 && (
+                <p>
+                  {uiText(
+                    locale,
+                    'Для отдельных сумм действуют дополнительные финансовые пороги. Точный применимый порядок проверяется при подготовке платежа.',
+                    'Amount-specific financial bands also apply. The exact applicable procedure is checked when preparing a payment.',
+                  )}
+                </p>
+              )}
+            </details>
+          ))}
+          {profile.charter.policies.length === 0 && (
             <p>
               {uiText(
                 locale,
-                'Для отдельных сумм действуют дополнительные финансовые пороги. Точный применимый порядок проверяется при подготовке платежа.',
-                'Amount-specific financial bands also apply. The exact applicable procedure is checked when preparing a payment.',
+                'Действия без настроенной политики недоступны.',
+                'Actions without a configured policy are unavailable.',
               )}
             </p>
           )}
-        </details>
-      ))}
-      {profile.charter.policies.length === 0 && (
-        <p>
-          {uiText(
-            locale,
-            'Действия без настроенной политики недоступны.',
-            'Actions without a configured policy are unavailable.',
-          )}
-        </p>
-      )}
+        </div>
+      </details>
     </section>
   );
 }

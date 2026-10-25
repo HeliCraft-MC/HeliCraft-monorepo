@@ -1,4 +1,5 @@
 const managementLabels = {
+  institutions: ['Институты', 'Institutions'],
   overview: ['Обзор', 'Overview'],
   identity: ['Государство', 'State identity'],
   citizens: ['Граждане', 'Citizens'],

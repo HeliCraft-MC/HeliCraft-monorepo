@@ -1,9 +1,11 @@
 // oxlint-disable no-magic-numbers -- Fixed public data, statuses and ports belong only to this isolated SSR/browser fixture.
 import { createApp } from '../../apps/antares/src/app';
 import { CompanyCatalogueQuerySchema } from '../../apps/antares/src/modules/companies/catalogue-contracts';
+import { emptyConfiguration } from '../../apps/antares/src/modules/states/domain';
 import { profileFixture, branchFixture } from './company-profile-public-fixture';
 import type {
   CompanyCatalogue,
+  StateDirectory,
   PublicSite,
   PublishedCompanyIdentity,
 } from '../../packages/alhena/src';
@@ -25,6 +27,37 @@ const identities: PublishedCompanyIdentity[] = Array.from({ length: 25 }, (_valu
   registrationStateName: jurisdiction.name,
   foundedAt: '2026-10-18T23:00:00.000Z',
 }));
+const stateConfiguration = emptyConfiguration();
+const stateDirectory: StateDirectory = {
+  items: [
+    {
+      id: STATE_ID,
+      slug: 'published-jurisdiction',
+      name: jurisdiction.name,
+      description: {},
+      color: '#338899',
+      horizontalFlag: stateConfiguration.horizontalFlag,
+      citizenship: stateConfiguration.citizenship,
+      citizens: 1,
+      officeCount: 1,
+      hasConstitution: false,
+      createdAt: '2026-10-18T23:00:00.000Z',
+    },
+  ],
+  total: 1,
+  page: 1,
+  pageSize: 20,
+};
+const BRAND_LOGO_ID = '11111111-1111-4111-8111-111111111111';
+const BRAND_COVER_ID = '22222222-2222-4222-8222-222222222222';
+const [brandedIdentity] = identities;
+if (brandedIdentity !== undefined) {
+  brandedIdentity.branding = {
+    color: '#338899',
+    logoMediaId: BRAND_LOGO_ID,
+    coverMediaId: BRAND_COVER_ID,
+  };
+}
 const site: PublicSite = {
   serverName: 'Catalogue Test Realm',
   githubUrl: 'https://example.test/source',
@@ -61,10 +94,14 @@ function companyResponse(url: URL): Response | null {
   const identity = identities.find(
     (company) =>
       url.pathname === `/api/v1/public/companies/${company.id}` ||
-      url.pathname === `/api/v1/public/companies/${company.id}/branches`,
+      url.pathname === `/api/v1/public/companies/${company.id}/branches` ||
+      url.pathname === `/api/v1/public/companies/${company.id}/identity`,
   );
   if (identity === undefined) {
     return null;
+  }
+  if (url.pathname.endsWith('/identity')) {
+    return Response.json(identity);
   }
   return mode === 'outage'
     ? Response.json({ message: 'Fixture outage' }, { status: 503 })
@@ -90,6 +127,18 @@ Bun.serve({
         path: url.pathname,
         cookie: request.headers.get('cookie'),
         query: Object.fromEntries(url.searchParams),
+      });
+    }
+    if (url.pathname === '/api/v1/public/states') {
+      return Response.json(stateDirectory);
+    }
+    if (
+      brandedIdentity !== undefined &&
+      (url.pathname === `/api/v1/public/companies/${brandedIdentity.id}/media/${BRAND_LOGO_ID}` ||
+        url.pathname === `/api/v1/public/companies/${brandedIdentity.id}/media/${BRAND_COVER_ID}`)
+    ) {
+      return new Response(Bun.file('apps/vega/public/world/town.webp'), {
+        headers: { 'Content-Type': 'image/webp' },
       });
     }
     if (url.pathname === '/api/v1/public/site') {

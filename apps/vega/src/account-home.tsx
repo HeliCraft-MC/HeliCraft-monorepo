@@ -1,6 +1,7 @@
+import { AccountTasks } from './account-tasks';
 import { AccountSkin } from './account-skin';
 import { PlayerNickname } from './player-nickname';
-import { Icon } from '@helicraft/atria';
+import { Icon, ActionPanel } from '@helicraft/atria';
 import { useTranslation } from './i18n';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import type { ReactElement } from 'react';
@@ -33,28 +34,31 @@ export function AccountHome(): ReactElement {
             </p>
           </div>
         </div>
-        <div className={styles.actionGrid}>
-          <Link className={styles.actionCard} to="/app/settings/profile">
-            <h2>{text('account.profile')}</h2>
-            <p>{text('account.profileHint')}</p>
-            <Icon name="arrowRight" />
-          </Link>
-          <Link className={styles.actionCard} to="/app/settings/skin">
-            <h2>{text('account.skin')}</h2>
-            <p>{text('account.skinHint')}</p>
-            <Icon name="arrowRight" />
-          </Link>
-          <Link className={styles.actionCard} to="/app/gallery/new">
-            <h2>{text('gallery.upload.title')}</h2>
-            <p>{text('account.galleryHint')}</p>
-            <Icon name="arrowRight" />
-          </Link>
-          <Link className={styles.actionCard} to="/app/settings/security">
-            <h2>{text('account.security')}</h2>
-            <p>{text('account.securityHint')}</p>
-            <Icon name="arrowRight" />
-          </Link>
-        </div>
+        <AccountTasks />
+        <ActionPanel title={locale === 'ru' ? 'Профиль и настройки' : 'Profile and settings'}>
+          <div className={styles.actionGrid}>
+            <Link className={styles.actionCard} to="/app/settings/profile">
+              <h2>{text('account.profile')}</h2>
+              <p>{text('account.profileHint')}</p>
+              <Icon name="arrowRight" />
+            </Link>
+            <Link className={styles.actionCard} to="/app/settings/skin">
+              <h2>{text('account.skin')}</h2>
+              <p>{text('account.skinHint')}</p>
+              <Icon name="arrowRight" />
+            </Link>
+            <Link className={styles.actionCard} to="/app/gallery/new">
+              <h2>{text('gallery.upload.title')}</h2>
+              <p>{text('account.galleryHint')}</p>
+              <Icon name="arrowRight" />
+            </Link>
+            <Link className={styles.actionCard} to="/app/settings/security">
+              <h2>{text('account.security')}</h2>
+              <p>{text('account.securityHint')}</p>
+              <Icon name="arrowRight" />
+            </Link>
+          </div>
+        </ActionPanel>
         {principal.permissions.includes('content.read') ||
         principal.permissions.includes('users.read') ? (
           <Link to="/admin">

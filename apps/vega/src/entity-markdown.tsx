@@ -3,6 +3,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { parseFragment } from 'parse5';
 import type { DefaultTreeAdapterMap } from 'parse5';
 import { PlayerNickname } from './player-nickname';
+import { CompanyName } from './company-name';
 import { StateName } from './state-name';
 import styles from './entity-markdown.module.scss';
 
@@ -21,6 +22,29 @@ const reactAttributes: Readonly<Record<string, string>> = {
   tabindex: 'tabIndex',
 };
 const booleanAttributes = new Set(['checked', 'disabled', 'multiple', 'selected']);
+function renderEntityLink(href: string, name: string, key: string): ReactNode {
+  const player = /^\/players\/(?<id>[0-9a-f-]{36})$/u.exec(href);
+  if (player?.groups?.id !== undefined && name !== '') {
+    return <PlayerNickname key={key} id={player.groups.id} name={name} />;
+  }
+  const state = /^\/states\/(?<slug>[a-z0-9-]+)$/u.exec(href);
+  if (state?.groups?.slug !== undefined && name !== '') {
+    return (
+      <StateName
+        key={key}
+        href={href}
+        slug={state.groups.slug}
+        color="var(--primary)"
+        name={name}
+      />
+    );
+  }
+  const company = /^\/companies\/(?<id>[0-9a-f-]{36})$/u.exec(href);
+  if (company?.groups?.id !== undefined && name !== '') {
+    return <CompanyName key={key} id={company.groups.id} name={name} />;
+  }
+  return null;
+}
 function renderNode(node: HtmlNode, key: string): ReactNode {
   if ('value' in node) {
     return node.value;
@@ -36,28 +60,11 @@ function renderNode(node: HtmlNode, key: string): ReactNode {
   );
   const { href: rawHref } = attributes;
   const href = typeof rawHref === 'string' ? rawHref : undefined;
-  const player =
-    node.tagName === 'a' && href !== undefined
-      ? /^\/players\/(?<id>[0-9a-f-]{36})$/u.exec(href)
-      : null;
-  const name = textContent(node).trim();
-  if (player?.groups?.id !== undefined && name !== '') {
-    return <PlayerNickname key={key} id={player.groups.id} name={name} />;
-  }
-  const state =
-    node.tagName === 'a' && href !== undefined
-      ? /^\/states\/(?<slug>[a-z0-9-]+)$/u.exec(href)
-      : null;
-  if (state?.groups?.slug !== undefined && name !== '') {
-    return (
-      <StateName
-        key={key}
-        href={href ?? ''}
-        slug={state.groups.slug}
-        color="var(--primary)"
-        name={name}
-      />
-    );
+  if (node.tagName === 'a' && href !== undefined) {
+    const entity = renderEntityLink(href, textContent(node).trim(), key);
+    if (entity !== null) {
+      return entity;
+    }
   }
   const children = node.childNodes.map((child, position): ReactNode =>
     renderNode(child, `${key}.${position}`),

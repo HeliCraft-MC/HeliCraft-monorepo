@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PlayerNickname } from './player-nickname';
 
 const meta = {
-  title: 'Atria/PlayerNickname',
+  title: 'Identity/PlayerNickname',
   component: PlayerNickname,
   tags: ['autodocs'],
   args: { name: 'Builder' },

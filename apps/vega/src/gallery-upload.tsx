@@ -7,7 +7,7 @@ import { TranslationFields, OriginalLanguage } from './translation-fields';
 import { galleryTranslations } from './gallery-translations';
 import { Icon, Alert, Button, FileDropzone, FormField, TextField } from '@helicraft/atria';
 import { useTranslation } from './i18n';
-import { getRouteApi } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
 import type { ChangeEvent, SubmitEvent, ReactElement } from 'react';
 import { uploadGalleryImage } from '@helicraft/alhena';
@@ -23,6 +23,7 @@ const MAX_BYTES = 10_485_760;
 // oxlint-disable-next-line max-lines-per-function -- One upload form keeps labels and validation adjacent; coordinates are optional metadata.
 function GalleryUpload(): ReactElement {
   const { text, locale } = useTranslation();
+  const navigate = useNavigate();
 
   const { principal } = route.useRouteContext();
   const [originalLanguage, setOriginalLanguage] = useState<string>(locale);
@@ -99,13 +100,13 @@ function GalleryUpload(): ReactElement {
           body: { file, metadata: JSON.stringify(metadata) },
           throwOnError: true,
         });
-        globalThis.location.assign(`/gallery/${data.id}`);
+        await navigate({ to: '/gallery/$id', params: { id: data.id } });
       } catch (error) {
         setMessage(errorMessage(error));
         setBusy(false);
       }
     },
-    [file, busy, players, states],
+    [file, busy, players, states, navigate],
   );
   const addSelf = useCallback((): void => {
     setPlayers((current) =>

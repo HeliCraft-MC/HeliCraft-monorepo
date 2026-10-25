@@ -27,6 +27,7 @@ function ProfileOwnership({
       <section className={styles.card}>
         <h2>{uiText(locale, 'Акционеры', 'Shareholders')}</h2>
         <FieldHelp
+          showLabel
           label={uiText(locale, 'Акции и доли', 'Shares and ownership')}
           content={uiText(
             locale,
@@ -55,6 +56,7 @@ function ProfileOwnership({
       <section className={styles.card}>
         <h2>{uiText(locale, 'Корпоративное владение', 'Corporate holdings')}</h2>
         <FieldHelp
+          showLabel
           label={uiText(locale, 'Дочерняя компания', 'Subsidiary')}
           content={uiText(
             locale,

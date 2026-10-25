@@ -1,10 +1,10 @@
 // oxlint-disable import/max-dependencies -- The state shell composes typed API data, navigation and the selected workspace.
 import { useCallback, useMemo } from 'react';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { createStateReformDraft, getOwnedState } from '@helicraft/alhena';
-import { Alert, LoadingState } from '@helicraft/atria';
+import { Alert, LoadingState, WorkspaceContent, WorkspaceLayout } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText, label, uiText } from './text';
@@ -62,10 +62,6 @@ function StateManagementPanel({
     mutate();
   }, [mutate]);
   const color = state.data?.configuration.color ?? '#859b76';
-  const theme = useMemo<CSSProperties & { '--state-accent': string }>(
-    () => ({ '--state-accent': color }),
-    [color],
-  );
   const publicParams = useMemo(() => ({ slug: state.data?.slug ?? '' }), [state.data?.slug]);
   if (!state.data) {
     return (
@@ -86,7 +82,7 @@ function StateManagementPanel({
   const accessible = sections.includes(selected);
   const name = displayText(state.data.configuration.name, locale);
   return (
-    <main id="main-content" className={styles.panel} style={theme}>
+    <WorkspaceLayout className={styles.panel} accent={color}>
       <ManagementNavigation
         stateId={stateId}
         stateName={name}
@@ -104,12 +100,12 @@ function StateManagementPanel({
             <span className={styles.status}>{label(state.data.status, locale)}</span>
             {state.data.status === 'ACTIVE' && (
               <Link to="/states/$slug" params={publicParams}>
-                {uiText(locale, 'Публичная страница ↗', 'Public page ↗')}
+                {uiText(locale, 'Публичная страница', 'Public page')}
               </Link>
             )}
           </div>
         </header>
-        <div className={styles.content}>
+        <WorkspaceContent className={styles.content}>
           {state.data.status !== 'ACTIVE' && state.data.statusReason !== null && (
             <Alert>{state.data.statusReason}</Alert>
           )}
@@ -136,9 +132,9 @@ function StateManagementPanel({
           )}
           {state.error !== null && <Alert tone="danger">{errorMessage(state.error)}</Alert>}
           {reform.error !== null && <Alert tone="danger">{errorMessage(reform.error)}</Alert>}
-        </div>
+        </WorkspaceContent>
       </div>
-    </main>
+    </WorkspaceLayout>
   );
 }
 export { StateManagementPanel };

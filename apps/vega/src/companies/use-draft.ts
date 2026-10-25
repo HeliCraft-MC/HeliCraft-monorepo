@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useBlocker } from '@tanstack/react-router';
 import { saveCompanyDraft } from '@helicraft/alhena';
 import type { CompanyDraft, CompanyConfiguration } from '@helicraft/alhena';
 import { browserClient, errorMessage } from '../account-api';
@@ -70,6 +71,15 @@ function useCompanyDraft(initial: CompanyDraft): {
     operation.current = null;
     return result;
   }, [initial.id]);
+  const shouldBlockNavigation = useCallback(async (): Promise<boolean> => {
+    try {
+      await flush();
+      return false;
+    } catch {
+      return true;
+    }
+  }, [flush]);
+  useBlocker({ shouldBlockFn: shouldBlockNavigation, enableBeforeUnload: false });
   useEffect(() => {
     if (JSON.stringify(fields) === fingerprint.current) {
       return (): void => {

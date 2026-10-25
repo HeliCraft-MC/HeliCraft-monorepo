@@ -10,7 +10,7 @@ const photo = {
   href: '#detail',
 };
 const meta = {
-  title: 'Atria/PhotoCarousel',
+  title: 'Media/PhotoCarousel',
   component: PhotoCarousel,
   tags: ['autodocs'],
   args: {

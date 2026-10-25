@@ -1,0 +1,18 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction/Contributing" />
+
+# Maintaining Storybook
+
+The normative agent checklist is `packages/atria/AGENTS.md`. Follow it whenever a component, public prop or interaction changes.
+
+1. Keep the story beside its component. Use the established category and exported component name; do not add a new top-level bucket for a feature.
+2. Document purpose, when to use it, required host data, accessibility, responsive behavior and important constraints.
+3. Provide a useful default plus meaningful variants: long text, narrow viewport, disabled, validation, loading, empty or failed states where applicable.
+4. Keep examples deterministic and local. Never call production services or require an account.
+5. Prefer component stories; composed galleries belong under Patterns. Reuse shared controls instead of rebuilding them in stories.
+6. Run typecheck, strict lint, format checks and build:storybook. Open representative desktop/mobile examples and test keyboard interaction. Record actual evidence without converting old checks into new claims.
+
+## Definition of done
+
+The component export, source behavior, examples and package documentation agree. A new agent can understand the intended use without reading the product application. Broken examples and placeholder documentation are unfinished work.

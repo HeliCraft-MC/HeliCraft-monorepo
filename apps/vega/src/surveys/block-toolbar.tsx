@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import type { ComponentProps, DragEvent, ReactElement } from 'react';
 import type { SurveyBlock, VotingInput } from '@helicraft/alhena';
-import { Button } from '@helicraft/atria';
+import { Button, Icon } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { usePropCache } from '../states/use-prop-cache';
@@ -42,7 +42,7 @@ function BlockToolbar({
           'Drag block; move up and down buttons are also available',
         )}
       >
-        ⠿ {index + 1}
+        <Icon name="drag" /> {index + 1}
       </button>
       <Button
         tone="quiet"
@@ -51,6 +51,7 @@ function BlockToolbar({
           onChange(moveBlock(input, block.id, index - 1));
         })}
       >
+        <Icon name="arrowUp" />
         {uiText(locale, 'Выше', 'Move up')}
       </Button>
       <Button
@@ -60,43 +61,51 @@ function BlockToolbar({
           onChange(moveBlock(input, block.id, index + 1));
         })}
       >
+        <Icon name="arrowDown" />
         {uiText(locale, 'Ниже', 'Move down')}
       </Button>
-      <Button
-        tone="quiet"
-        disabled={full || input.options.length + block.optionIds.length > MAX_OPTIONS}
-        onClick={click('copy', () => {
-          onChange(insertBlock(input, index + 1, block));
-        })}
-      >
-        {uiText(locale, 'Копировать', 'Duplicate')}
-      </Button>
-      <Button
-        tone="quiet"
-        disabled={full}
-        onClick={click('before', () => {
-          onChange(insertBlock(input, index));
-        })}
-      >
-        {uiText(locale, 'Вставить перед', 'Insert before')}
-      </Button>
-      <Button
-        tone="quiet"
-        disabled={full}
-        onClick={click('after', () => {
-          onChange(insertBlock(input, index + 1));
-        })}
-      >
-        {uiText(locale, 'Вставить после', 'Insert after')}
-      </Button>
-      <Button
-        tone="quiet"
-        onClick={click('remove', () => {
-          onChange(removeBlock(input, block));
-        })}
-      >
-        {uiText(locale, 'Удалить блок', 'Remove block')}
-      </Button>
+      <details className={styles.blockMenu}>
+        <summary>{uiText(locale, 'Действия с блоком', 'Block actions')}</summary>
+        <div className={styles.editor}>
+          <Button
+            tone="quiet"
+            disabled={full || input.options.length + block.optionIds.length > MAX_OPTIONS}
+            onClick={click('copy', () => {
+              onChange(insertBlock(input, index + 1, block));
+            })}
+          >
+            <Icon name="copy" />
+            {uiText(locale, 'Копировать', 'Duplicate')}
+          </Button>
+          <Button
+            tone="quiet"
+            disabled={full}
+            onClick={click('before', () => {
+              onChange(insertBlock(input, index));
+            })}
+          >
+            {uiText(locale, 'Вставить перед', 'Insert before')}
+          </Button>
+          <Button
+            tone="quiet"
+            disabled={full}
+            onClick={click('after', () => {
+              onChange(insertBlock(input, index + 1));
+            })}
+          >
+            {uiText(locale, 'Вставить после', 'Insert after')}
+          </Button>
+          <Button
+            tone="quiet"
+            onClick={click('remove', () => {
+              onChange(removeBlock(input, block));
+            })}
+          >
+            <Icon name="delete" />
+            {uiText(locale, 'Удалить блок', 'Remove block')}
+          </Button>
+        </div>
+      </details>
     </div>
   );
 }

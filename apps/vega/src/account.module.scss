@@ -1,11 +1,11 @@
 .page {
   min-height: 65vh;
-  padding-block: 4rem 6rem;
+  padding-block: 1.5rem 3rem;
   h1 {
     font-size: clamp(2rem, 4vw, 3rem);
     letter-spacing: -0.04em;
     line-height: 1.2;
-    margin-block: var(--space-4) var(--space-8);
+    margin-block: 0 var(--space-6);
   }
 }
 .eyebrow {
@@ -60,10 +60,9 @@
   }
 }
 .accountLayout {
-  min-height: 35rem;
   display: grid;
   grid-template-columns: 210px minmax(0, 1fr);
-  gap: clamp(24px, 3vw, 48px);
+  gap: clamp(1.25rem, 2vw, 2rem);
   align-items: start;
 }
 .workspaceContainer {
@@ -71,41 +70,29 @@
   padding-inline: clamp(1rem, 2vw, 2rem);
 }
 .sidebar {
-  display: grid;
-  gap: var(--space-2);
   position: sticky;
-  top: 110px;
-  a {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-medium);
-    text-decoration: none;
-    color: var(--text-secondary);
-    &[aria-current='page'] {
-      color: var(--text-primary);
-      background: var(--bg-panel);
-      font-weight: 650;
-      &::after {
-        content: '';
-        width: 0.4rem;
-        height: 0.4rem;
-        border-radius: 50%;
-        background: currentColor;
-        flex: none;
-        margin-inline-start: auto;
-      }
-    }
-    &:hover {
-      color: var(--text-primary);
-      background: var(--bg-elevated);
-    }
+  top: 6.5rem;
+  max-height: calc(100dvh - 7.5rem);
+  overflow-y: auto;
+  .eyebrow {
+    padding: 0.5rem 0.8rem;
+    margin: 0;
   }
 }
 .accountContent {
   min-width: 0;
   width: 100%;
+  line-height: 1.6;
+  :where(section, article, form, fieldset) {
+    min-width: 0;
+  }
+  :where(h1, h2, h3) {
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+  :where(button, a) {
+    touch-action: manipulation;
+  }
   .form {
     max-width: 680px;
     > button {
@@ -151,19 +138,19 @@
     border-color: var(--primary);
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 60rem) {
   .page {
-    padding-block: 2rem 4rem;
+    padding-block: 1rem 2rem;
   }
   .accountLayout {
     grid-template-columns: 1fr;
   }
   .sidebar {
     position: static;
-    display: flex;
-    flex-wrap: wrap;
+    max-height: none;
+    overflow: visible;
     .eyebrow {
-      width: 100%;
+      display: none;
     }
   }
   .actionGrid {
@@ -240,22 +227,6 @@
   }
 }
 
-@media (max-width: 760px) {
-  .sidebar {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 0.4rem;
-    .eyebrow {
-      display: none;
-    }
-    a {
-      flex: none;
-      white-space: nowrap;
-      padding: 0.75rem;
-    }
-  }
-}
-
 .filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
@@ -309,23 +280,25 @@
   }
   .sidebar {
     top: 5.5rem;
-    height: calc(100dvh - 5.5rem);
+    max-height: calc(100dvh - 5.5rem);
     padding: 1.5rem 1rem;
     overflow-y: auto;
     background: var(--bg-panel);
     border-right: 1px solid var(--border-subtle);
   }
   .accountContent {
-    padding: clamp(1rem, 3vw, 3rem);
+    padding: clamp(1rem, 2vw, 2rem);
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 60rem) {
   .adminPage {
     .accountLayout {
       grid-template-columns: minmax(0, 1fr);
     }
     .sidebar {
-      height: auto;
+      max-height: none;
+      overflow: visible;
+      padding: 0.75rem 1rem;
       border-right: 0;
       border-bottom: 1px solid var(--border-subtle);
     }
@@ -348,4 +321,11 @@
   display: block;
   max-width: 100%;
   height: auto;
+}
+.sidebarGroup {
+  padding: 1rem 1rem 0.25rem;
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }

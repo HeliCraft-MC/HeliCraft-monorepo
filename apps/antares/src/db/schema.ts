@@ -139,3 +139,4 @@ export {
   companyBranchApplications,
   companyBranchEvents,
 } from './company-branch-schema';
+export { companyMedia } from './company-media-schema';

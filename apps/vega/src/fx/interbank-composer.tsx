@@ -8,7 +8,7 @@ import type {
   StateDetail,
   StateMonetary,
 } from '@helicraft/alhena';
-import { Alert, Button, Dialog } from '@helicraft/atria';
+import { ActionPanel, Alert, Button, Dialog } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { errorMessage } from '../account-api';
@@ -84,8 +84,7 @@ function InterbankComposer({
     [state, monetary, bank, currency, setReview, locale],
   );
   return (
-    <section className={styles.card}>
-      <h2>{uiText(locale, 'Новая межбанковская сделка', 'New interbank trade')}</h2>
+    <ActionPanel title={uiText(locale, 'Новая межбанковская сделка', 'New interbank trade')}>
       <form onSubmit={submit} className={styles.form}>
         <InterbankFields
           stateId={state.id}
@@ -130,7 +129,7 @@ function InterbankComposer({
           )}
         </Alert>
       )}
-    </section>
+    </ActionPanel>
   );
 }
 export { InterbankComposer };

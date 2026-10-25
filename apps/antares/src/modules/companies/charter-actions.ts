@@ -26,6 +26,7 @@ function changedCharter(
       name: payload.name,
       description: payload.description,
       categories: payload.categories,
+      ...(payload.branding === undefined ? {} : { branding: payload.branding }),
     };
   }
   const exists = content.charter.offices.some((office) => office.id === payload.office.id);

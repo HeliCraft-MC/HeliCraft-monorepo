@@ -16,9 +16,9 @@ bun run storybook
 bun run build:storybook
 ```
 
-Storybook at localhost:6006 has primary, quiet and disabled stories, docs and accessibility checks. Vitest/Testing Library verifies keyboard and disabled behavior. Import components from `@helicraft/atria` and styles from `@helicraft/atria/styles.scss`. `dist/` contains ESM and declarations; workspace consumers intentionally resolve source for Vite HMR. Atria has no production service or Compose: it is part of each consumer bundle. Future primitives: forms, dialogs, tables, status feedback and animation rules.
+Storybook at localhost:6006 has primary, quiet and disabled stories, docs and accessibility checks. Vitest/Testing Library verifies keyboard and disabled behavior. Import components from `@helicraft/atria` and styles from `@helicraft/atria/styles.scss`. `dist/` contains ESM and declarations; workspace consumers intentionally resolve source for Vite HMR. Atria has no production service or Compose: it is part of each consumer bundle. The maintained catalogue covers forms, dialogs, tables, identity, feedback and workspace patterns.
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
+From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 
 ## Name
 
@@ -52,6 +52,30 @@ Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing s
 
 ## Monetary system V1
 
-[Domain model, Governance, exact accounting, API, screens and verification](../../docs/architecture/monetary.md).
+[Domain model, Governance, exact accounting, API, screens and verification](../../docs/economy/monetary.md).
 
-`MarkdownEditor.preview` and `previewLabel` add an exclusive third view using host-supplied sanitized content. Switching does not reset Markdown. Buttons and ActionLink share `--radius-medium`. Linked PlayerNickname and StateName enable hover/focus previews by default. FieldHelp opens on hover; click pins until another click, outside press or Escape.
+`MarkdownEditor.preview` and `previewLabel` add an exclusive third view using host-supplied sanitized content. Switching does not reset Markdown. Buttons and primary ActionLink share `--radius-medium`; quiet underlined ActionLink uses square corners. Linked PlayerNickname and StateName enable hover/focus previews by default. FieldHelp opens on hover; click pins until another click, outside press or Escape. Use `showLabel` for standalone section explanations so the subject stays visible beside the icon.
+
+## Forms and company identity
+
+`Form` creates a TanStack Form instance from a typed `FormModel` (including subclasses), default values, a Standard Schema validator such as Zod and field descriptors. Pass `onSubmit`, the language catalog and localized labels; `submitLabel` adds the managed submit action. `className` controls the form layout. `FormSection` groups related fields. For dynamic arrays, conditional controls, uploads or autosave, `useFormModel` exposes the typed library instance, which can also be passed to `Form`. Validation checks original form values; schema output transformations are not applied.
+
+A single form-level content-language control governs generated localized inputs and nested `LocalizableTextInput` fields. Missing translations stay empty and explicit translations survive switching. Standalone localized inputs keep the primary language visible and reveal translations together. Schema errors are associated with fields and summarized; failed submissions retain values. Storybook includes a model subclass, validation and narrow-layout examples.
+
+`CompanyName` shares the direct-link and keyboard/hover preview behavior of `PlayerNickname` and `StateName`. Supply published names, a square logo URL or decorative color and public facts. Use `linked={false}` inside existing buttons/card links. Domain fetching remains in Vega.
+
+## Workspace composition
+
+`WorkspaceNavigation` takes translated `label`/`currentLabel` and ordinary link children. It displays persistent desktop links and a disclosure below 60rem. Pass only authorized links and mark the selected one with `aria-current="page"`. `WorkspaceContent` supplies the protected-screen spacing and overflow baseline; `PageHeader` aligns a title, description and actions. `ActionPanel` keeps form state mounted behind a labelled disclosure, and `StepNavigation` revisits controlled editor stages without submitting. Storybook includes long labels, mobile navigation, editor stages and action forms.
+
+Use `Form autoFields={false}` with `FormFields` to place generated fields within a custom workflow. `languageSelectorVisible={false}` hides the selector without resetting the shared translation context. `Tabs.label` names a tab group; arrow keys move focus and Enter/Space select. Dialogs keep their labelled Lucide close button in the header while content scrolls.
+
+`WorkspaceLayout accent` owns entity surface, border and readable action/focus colors. Put the sidebar and body inside it; `Dialog` inherits the theme through its portal. `WorkflowLayout` accepts controlled stage IDs, labels and optional groups, keeps natural content height, and collapses its stage navigation on small screens. The host owns draft persistence and validation.
+
+Use `Form embedded` for generated fields inside an existing native form; it adds no nested form. `FormLanguageScope` shares one language switch across arbitrary nested localized editors without adding a form. Supply translated labels, hints and the platform language catalog.
+
+## Storybook reference
+
+The sidebar is organized into Introduction, Foundations, Actions, Forms, Navigation, Identity, Data display, Feedback, Overlays, Media and Patterns. Start with Welcome, Design principles and Contributing; Foundations documents semantic tokens. Focused component examples live beside source, while composed workspaces and workflows live in Patterns.
+
+Follow the mandatory [maintenance guide](AGENTS.md) for every component or public API change. Keep examples local and deterministic, describe host responsibilities and keyboard/responsive behavior, add meaningful states, and inspect representative desktop/mobile examples after a successful build. Do not recreate miscellaneous component dumps.

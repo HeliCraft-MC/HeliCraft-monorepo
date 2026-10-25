@@ -9,7 +9,7 @@ import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { economicAuthority } from '../taxation/model';
-import { DirectiveCard } from '../monetary/directive-card';
+import { DirectiveList } from '../monetary/directive-list';
 import { MonetaryOverview } from '../monetary/overview';
 import { MonetaryPagination } from '../monetary/pagination';
 import { OfferComposer } from './offer-composer';
@@ -94,20 +94,7 @@ function StateFxWorkspace({
           onSaved={refresh}
         />
       ))}
-      <h2>{uiText(locale, 'Решения и одобрения', 'Decisions and approvals')}</h2>
-      {fx.decisions.length === 0 && (
-        <p>{uiText(locale, 'Валютных решений пока нет.', 'No currency exchange decisions yet.')}</p>
-      )}
-      {fx.decisions.map((decision) => (
-        <DirectiveCard
-          key={decision.id}
-          directive={decision}
-          state={state}
-          actorId={actorId}
-          code=""
-          onSaved={refresh}
-        />
-      ))}
+      <DirectiveList items={fx.decisions} state={state} actorId={actorId} onSaved={refresh} />
       <MonetaryPagination page={fx.page} hasMore={fx.hasMore} onPage={setPage} />
     </section>
   );

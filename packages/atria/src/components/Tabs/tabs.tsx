@@ -11,10 +11,11 @@ interface TabItem {
 function Tabs({
   items,
   defaultValue,
-}: Readonly<{ items: readonly TabItem[]; defaultValue?: string }>): ReactElement {
+  label,
+}: Readonly<{ items: readonly TabItem[]; defaultValue?: string; label?: string }>): ReactElement {
   return (
-    <Primitive.Root defaultValue={defaultValue ?? items[0]?.id}>
-      <Primitive.List className={styles.tabList}>
+    <Primitive.Root className={styles.tabsRoot} defaultValue={defaultValue ?? items[0]?.id}>
+      <Primitive.List className={styles.tabList} aria-label={label}>
         {items.map((item) => (
           <Primitive.Tab
             key={item.id}

@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { FxBrowserFixtureSchema } from '../../apps/antares/tests/fx-browser-contracts';
@@ -25,9 +26,7 @@ async function workspace(page: Page, stateId: string): Promise<void> {
   await expect(
     page.getByRole('heading', { name: 'Central bank currency exchange', exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'New interbank trade', exact: true }),
-  ).toBeVisible();
+  await expect(page.locator('summary').filter({ hasText: 'New interbank trade' })).toBeVisible();
 }
 async function stateFx(
   page: Page,
@@ -69,6 +68,7 @@ async function playerAmounts(page: Page): Promise<ReturnType<typeof WalletSchema
   return WalletSchema.parse(await response.json());
 }
 async function proposeTrade(page: Page, data: FxBrowserFixture): Promise<void> {
+  await openWorkspaceAction(page, 'New interbank trade');
   await page.getByLabel('Bank jurisdiction', { exact: true }).selectOption(data.secondStateId);
   await page.getByRole('button', { name: 'Use this bank', exact: true }).click();
   await page.getByLabel('Our bank provides', { exact: true }).selectOption(data.firstCurrency);
@@ -92,6 +92,7 @@ async function proposeTrade(page: Page, data: FxBrowserFixture): Promise<void> {
     .toBe(1);
 }
 async function publishOffer(page: Page, data: FxBrowserFixture): Promise<string> {
+  await openWorkspaceAction(page, 'New reserved offer');
   await page.getByLabel('Bank receives', { exact: true }).selectOption(data.firstCurrency);
   await page
     .getByLabel('Bank provides from its holdings', { exact: true })

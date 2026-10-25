@@ -6,6 +6,7 @@ import { Alert, Button, FormField, Select, TextField } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { CompanyStateIdentity } from './state-identity';
+import styles from './companies.module.scss';
 
 const PAGE_SIZE = 20;
 function CompanyJurisdictionPicker({
@@ -87,15 +88,17 @@ function CompanyJurisdictionPicker({
           {uiText(locale, 'Не удалось загрузить государства.', 'Could not load jurisdictions.')}
         </Alert>
       )}
-      <Button onClick={previous} disabled={page === 1}>
-        {uiText(locale, 'Назад', 'Previous')}
-      </Button>
-      <Button
-        onClick={next}
-        disabled={query.data === undefined || page * PAGE_SIZE >= query.data.total}
-      >
-        {uiText(locale, 'Далее', 'Next')}
-      </Button>
+      <div className={styles.actions}>
+        <Button onClick={previous} disabled={page === 1}>
+          {uiText(locale, 'Назад', 'Previous')}
+        </Button>
+        <Button
+          onClick={next}
+          disabled={query.data === undefined || page * PAGE_SIZE >= query.data.total}
+        >
+          {uiText(locale, 'Далее', 'Next')}
+        </Button>
+      </div>
     </section>
   );
 }

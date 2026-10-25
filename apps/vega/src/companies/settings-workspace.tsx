@@ -1,12 +1,22 @@
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useId, useMemo } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
-import type { CompanyWorkspace } from '@helicraft/alhena';
-import { Button, FormField, TextField } from '@helicraft/atria';
-import { LocalizedInputField } from '../localized-input';
+import type { CompanyBranding, CompanyWorkspace } from '@helicraft/alhena';
+import {
+  Alert,
+  Button,
+  Form,
+  FormField,
+  TextField,
+  useFormModel,
+  useFormStore,
+} from '@helicraft/atria';
 import { useTranslation } from '../i18n';
+import { formLanguages } from '../form-languages';
 import { uiText } from '../states/text';
 import { CompanyDecisionReview } from './decision-review';
 import { useCompanyDecisionSubmission } from './use-decision-submission';
+import { companyProfileForm } from './profile-form-model';
+import { CompanyBrandingEditor } from './branding-editor';
 
 function CompanySettingsWorkspace({
   workspace,
@@ -14,60 +24,82 @@ function CompanySettingsWorkspace({
 }: Readonly<{ workspace: CompanyWorkspace; onSaved: () => void }>): ReactElement {
   const { locale } = useTranslation();
   const id = useId();
-  const [name, setName] = useState(workspace.content.name);
-  const [description, setDescription] = useState(workspace.content.description);
-  const [categories, setCategories] = useState(workspace.content.categories.join(', '));
   const submission = useCompanyDecisionSubmission(workspace, onSaved);
-  const { propose } = submission;
-  const changeCategories = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
-    setCategories(event.currentTarget.value);
-  }, []);
-  const review = useCallback((): void => {
-    propose({
-      kind: 'UPDATE_PROFILE',
-      name,
-      description,
-      categories: categories
-        .split(',')
-        .map((item) => item.trim())
-        .filter((item) => item !== ''),
-    });
-  }, [name, description, categories, propose]);
-  return (
-    <section>
-      <h2>{uiText(locale, 'Официальные сведения', 'Official company details')}</h2>
-      {workspace.availableActions.includes('UPDATE_PROFILE') && (
-        <>
-          <LocalizedInputField
-            label={uiText(locale, 'Название компании', 'Company name')}
-            value={name}
-            onChange={setName}
-          />
-          <LocalizedInputField
-            label={uiText(locale, 'Описание компании', 'Company description')}
-            value={description}
-            onChange={setDescription}
-            multiline
-          />
-          <FormField
-            label={uiText(locale, 'Описательные категории', 'Descriptive categories')}
-            htmlFor={`${id}-categories`}
-          >
-            <TextField id={`${id}-categories`} value={categories} onChange={changeCategories} />
-          </FormField>
-          <Button onClick={review}>
-            {uiText(locale, 'Проверить изменение сведений', 'Review profile update')}
-          </Button>
-        </>
-      )}
-      <p>
+  const model = useMemo(
+    () =>
+      companyProfileForm(
+        {
+          kind: 'UPDATE_PROFILE',
+          name: workspace.content.name,
+          description: workspace.content.description,
+          categories: workspace.content.categories,
+          branding: workspace.content.branding,
+        },
+        locale,
+      ),
+    [workspace.content, locale],
+  );
+  const form = useFormModel({ model, onSubmit: submission.propose });
+  const values = useFormStore(form.store, (state) => state.values);
+  const categories = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      form.setFieldValue(
+        'categories',
+        event.currentTarget.value
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
+      );
+    },
+    [form],
+  );
+  const branding = useCallback(
+    (next: CompanyBranding): void => {
+      form.setFieldValue('branding', next);
+    },
+    [form],
+  );
+  if (!workspace.availableActions.includes('UPDATE_PROFILE')) {
+    return (
+      <Alert>
         {uiText(
           locale,
-          'Закрытие учреждённой компании в V1 недоступно: сначала необходимы будущие процедуры погашения капитала и ликвидации. Неподанные проекты можно отозвать без удаления истории.',
-          'Registered companies cannot close in V1: capital retirement and liquidation require future procedures. Unsubmitted drafts can be withdrawn without deleting history.',
+          'Изменение сведений требует полномочия по уставу компании.',
+          'Updating the profile requires authority under the company charter.',
         )}
-      </p>
-
+      </Alert>
+    );
+  }
+  return (
+    <section>
+      <h2>{uiText(locale, 'Сведения и оформление', 'Profile and appearance')}</h2>
+      <Form
+        form={form}
+        model={model}
+        languages={formLanguages}
+        defaultLanguage={locale}
+        languageLabel={uiText(locale, 'Язык содержимого', 'Content language')}
+        translationHint={uiText(
+          locale,
+          'Название и описание переключаются вместе. Изменения проходят процедуру одобрения по уставу.',
+          'Name and description switch together. Changes follow the charter approval procedure.',
+        )}
+      >
+        <FormField
+          label={uiText(locale, 'Категории через запятую', 'Categories, separated by commas')}
+          htmlFor={id}
+        >
+          <TextField id={id} defaultValue={values.categories.join(', ')} onBlur={categories} />
+        </FormField>
+        <CompanyBrandingEditor
+          companyId={workspace.id}
+          value={values.branding}
+          onChange={branding}
+        />
+        <Button type="submit">
+          {uiText(locale, 'Проверить изменение сведений', 'Review profile update')}
+        </Button>
+      </Form>
       <CompanyDecisionReview workspace={workspace} submission={submission} />
     </section>
   );

@@ -31,6 +31,7 @@ import { Route as AdminTaxOfficesRouteImport } from './routes/admin.tax-offices'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppSharesRouteImport } from './routes/app.shares'
 import { Route as AppVotingsRouteImport } from './routes/app.votings'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
@@ -63,7 +64,6 @@ import { Route as AdminStatesStateIdRouteImport } from './routes/admin.states.$s
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
 import { Route as AppCompaniesIndexRouteImport } from './routes/app.companies.index'
-import { Route as AppCompaniesIdRouteImport } from './routes/app.companies.$id'
 import { Route as AppCompanyDecisionsIdRouteImport } from './routes/app.company-decisions.$id'
 import { Route as AppExchangeIndexRouteImport } from './routes/app.exchange.index'
 import { Route as AppExchangeIdRouteImport } from './routes/app.exchange.$id'
@@ -73,9 +73,12 @@ import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.pr
 import { Route as AppSettingsSecurityRouteImport } from './routes/app.settings.security'
 import { Route as AppSettingsSkinRouteImport } from './routes/app.settings.skin'
 import { Route as AppShareOperationsIdRouteImport } from './routes/app.share-operations.$id'
+import { Route as AppStateCompanyApplicationsIdRouteImport } from './routes/app.state-company-applications.$id'
+import { Route as AppStateDecisionsIdRouteImport } from './routes/app.state-decisions.$id'
 import { Route as AppStatesStateIdRouteImport } from './routes/app.states.$stateId'
 import { Route as AppStatesNewRouteImport } from './routes/app.states.new'
 import { Route as AppVotingsVotingIdRouteImport } from './routes/app.votings_.$votingId'
+import { Route as AppCompaniesIdRouteImport } from './routes/app_.companies.$id'
 import { Route as StatesSlugConstitutionRouteImport } from './routes/states.$slug_.constitution'
 import { Route as StatesSlugTaxationRouteImport } from './routes/states.$slug_.taxation'
 import { Route as AppCompaniesApplicationsIdRouteImport } from './routes/app.companies.applications.$id'
@@ -192,6 +195,11 @@ const AdminVotingsRoute = AdminVotingsRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSharesRoute = AppSharesRouteImport.update({
@@ -354,11 +362,6 @@ const AppCompaniesIndexRoute = AppCompaniesIndexRouteImport.update({
   path: '/companies/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCompaniesIdRoute = AppCompaniesIdRouteImport.update({
-  id: '/companies/$id',
-  path: '/companies/$id',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppCompanyDecisionsIdRoute = AppCompanyDecisionsIdRouteImport.update({
   id: '/company-decisions/$id',
   path: '/company-decisions/$id',
@@ -404,6 +407,17 @@ const AppShareOperationsIdRoute = AppShareOperationsIdRouteImport.update({
   path: '/share-operations/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStateCompanyApplicationsIdRoute =
+  AppStateCompanyApplicationsIdRouteImport.update({
+    id: '/state-company-applications/$id',
+    path: '/state-company-applications/$id',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppStateDecisionsIdRoute = AppStateDecisionsIdRouteImport.update({
+  id: '/state-decisions/$id',
+  path: '/state-decisions/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppStatesStateIdRoute = AppStatesStateIdRouteImport.update({
   id: '/states/$stateId',
   path: '/states/$stateId',
@@ -418,6 +432,11 @@ const AppVotingsVotingIdRoute = AppVotingsVotingIdRouteImport.update({
   id: '/votings_/$votingId',
   path: '/votings/$votingId',
   getParentRoute: () => AppRoute,
+} as any)
+const AppCompaniesIdRoute = AppCompaniesIdRouteImport.update({
+  id: '/app_/companies/$id',
+  path: '/app/companies/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const StatesSlugConstitutionRoute = StatesSlugConstitutionRouteImport.update({
   id: '/states/$slug_/constitution',
@@ -479,6 +498,7 @@ export interface FileRoutesByFullPath {
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
   '/app/wallet': typeof AppWalletRoute
@@ -508,7 +528,6 @@ export interface FileRoutesByFullPath {
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
-  '/app/companies/$id': typeof AppCompaniesIdRoute
   '/app/company-decisions/$id': typeof AppCompanyDecisionsIdRoute
   '/app/exchange/$id': typeof AppExchangeIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
@@ -516,9 +535,12 @@ export interface FileRoutesByFullPath {
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
   '/app/share-operations/$id': typeof AppShareOperationsIdRoute
+  '/app/state-company-applications/$id': typeof AppStateCompanyApplicationsIdRoute
+  '/app/state-decisions/$id': typeof AppStateDecisionsIdRoute
   '/app/states/$stateId': typeof AppStatesStateIdRoute
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings/$votingId': typeof AppVotingsVotingIdRoute
+  '/app/companies/$id': typeof AppCompaniesIdRoute
   '/states/$slug/constitution': typeof StatesSlugConstitutionRoute
   '/states/$slug/taxation': typeof StatesSlugTaxationRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
@@ -549,6 +571,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
   '/app/wallet': typeof AppWalletRoute
@@ -578,7 +601,6 @@ export interface FileRoutesByTo {
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
-  '/app/companies/$id': typeof AppCompaniesIdRoute
   '/app/company-decisions/$id': typeof AppCompanyDecisionsIdRoute
   '/app/exchange/$id': typeof AppExchangeIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
@@ -586,9 +608,12 @@ export interface FileRoutesByTo {
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
   '/app/share-operations/$id': typeof AppShareOperationsIdRoute
+  '/app/state-company-applications/$id': typeof AppStateCompanyApplicationsIdRoute
+  '/app/state-decisions/$id': typeof AppStateDecisionsIdRoute
   '/app/states/$stateId': typeof AppStatesStateIdRoute
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings/$votingId': typeof AppVotingsVotingIdRoute
+  '/app/companies/$id': typeof AppCompaniesIdRoute
   '/states/$slug/constitution': typeof StatesSlugConstitutionRoute
   '/states/$slug/taxation': typeof StatesSlugTaxationRoute
   '/admin/chronicle': typeof AdminChronicleIndexRoute
@@ -626,6 +651,7 @@ export interface FileRoutesById {
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/shares': typeof AppSharesRoute
   '/app/votings': typeof AppVotingsRoute
   '/app/wallet': typeof AppWalletRoute
@@ -655,7 +681,6 @@ export interface FileRoutesById {
   '/admin/pages/new': typeof AdminPagesNewRoute
   '/admin/states/$stateId': typeof AdminStatesStateIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
-  '/app/companies/$id': typeof AppCompaniesIdRoute
   '/app/company-decisions/$id': typeof AppCompanyDecisionsIdRoute
   '/app/exchange/$id': typeof AppExchangeIdRoute
   '/app/gallery/new': typeof AppGalleryNewRoute
@@ -663,9 +688,12 @@ export interface FileRoutesById {
   '/app/settings/security': typeof AppSettingsSecurityRoute
   '/app/settings/skin': typeof AppSettingsSkinRoute
   '/app/share-operations/$id': typeof AppShareOperationsIdRoute
+  '/app/state-company-applications/$id': typeof AppStateCompanyApplicationsIdRoute
+  '/app/state-decisions/$id': typeof AppStateDecisionsIdRoute
   '/app/states/$stateId': typeof AppStatesStateIdRoute
   '/app/states/new': typeof AppStatesNewRoute
   '/app/votings_/$votingId': typeof AppVotingsVotingIdRoute
+  '/app_/companies/$id': typeof AppCompaniesIdRoute
   '/states/$slug_/constitution': typeof StatesSlugConstitutionRoute
   '/states/$slug_/taxation': typeof StatesSlugTaxationRoute
   '/admin/chronicle/': typeof AdminChronicleIndexRoute
@@ -704,6 +732,7 @@ export interface FileRouteTypes {
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
+    | '/app/notifications'
     | '/app/shares'
     | '/app/votings'
     | '/app/wallet'
@@ -733,7 +762,6 @@ export interface FileRouteTypes {
     | '/admin/pages/new'
     | '/admin/states/$stateId'
     | '/admin/users/$userId'
-    | '/app/companies/$id'
     | '/app/company-decisions/$id'
     | '/app/exchange/$id'
     | '/app/gallery/new'
@@ -741,9 +769,12 @@ export interface FileRouteTypes {
     | '/app/settings/security'
     | '/app/settings/skin'
     | '/app/share-operations/$id'
+    | '/app/state-company-applications/$id'
+    | '/app/state-decisions/$id'
     | '/app/states/$stateId'
     | '/app/states/new'
     | '/app/votings/$votingId'
+    | '/app/companies/$id'
     | '/states/$slug/constitution'
     | '/states/$slug/taxation'
     | '/admin/chronicle/'
@@ -774,6 +805,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/tax-offices'
     | '/admin/votings'
+    | '/app/notifications'
     | '/app/shares'
     | '/app/votings'
     | '/app/wallet'
@@ -803,7 +835,6 @@ export interface FileRouteTypes {
     | '/admin/pages/new'
     | '/admin/states/$stateId'
     | '/admin/users/$userId'
-    | '/app/companies/$id'
     | '/app/company-decisions/$id'
     | '/app/exchange/$id'
     | '/app/gallery/new'
@@ -811,9 +842,12 @@ export interface FileRouteTypes {
     | '/app/settings/security'
     | '/app/settings/skin'
     | '/app/share-operations/$id'
+    | '/app/state-company-applications/$id'
+    | '/app/state-decisions/$id'
     | '/app/states/$stateId'
     | '/app/states/new'
     | '/app/votings/$votingId'
+    | '/app/companies/$id'
     | '/states/$slug/constitution'
     | '/states/$slug/taxation'
     | '/admin/chronicle'
@@ -850,6 +884,7 @@ export interface FileRouteTypes {
     | '/admin/tax-offices'
     | '/admin/users'
     | '/admin/votings'
+    | '/app/notifications'
     | '/app/shares'
     | '/app/votings'
     | '/app/wallet'
@@ -879,7 +914,6 @@ export interface FileRouteTypes {
     | '/admin/pages/new'
     | '/admin/states/$stateId'
     | '/admin/users/$userId'
-    | '/app/companies/$id'
     | '/app/company-decisions/$id'
     | '/app/exchange/$id'
     | '/app/gallery/new'
@@ -887,9 +921,12 @@ export interface FileRouteTypes {
     | '/app/settings/security'
     | '/app/settings/skin'
     | '/app/share-operations/$id'
+    | '/app/state-company-applications/$id'
+    | '/app/state-decisions/$id'
     | '/app/states/$stateId'
     | '/app/states/new'
     | '/app/votings_/$votingId'
+    | '/app_/companies/$id'
     | '/states/$slug_/constitution'
     | '/states/$slug_/taxation'
     | '/admin/chronicle/'
@@ -932,6 +969,7 @@ export interface RootRouteChildren {
   GalleryIndexRoute: typeof GalleryIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
   TreatiesIndexRoute: typeof TreatiesIndexRoute
+  AppCompaniesIdRoute: typeof AppCompaniesIdRoute
   StatesSlugConstitutionRoute: typeof StatesSlugConstitutionRoute
   StatesSlugTaxationRoute: typeof StatesSlugTaxationRoute
   AppStatesStateIdManageRoute: typeof AppStatesStateIdManageRoute
@@ -1091,6 +1129,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/shares': {
@@ -1317,13 +1362,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCompaniesIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/companies/$id': {
-      id: '/app/companies/$id'
-      path: '/companies/$id'
-      fullPath: '/app/companies/$id'
-      preLoaderRoute: typeof AppCompaniesIdRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/company-decisions/$id': {
       id: '/app/company-decisions/$id'
       path: '/company-decisions/$id'
@@ -1387,6 +1425,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppShareOperationsIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/state-company-applications/$id': {
+      id: '/app/state-company-applications/$id'
+      path: '/state-company-applications/$id'
+      fullPath: '/app/state-company-applications/$id'
+      preLoaderRoute: typeof AppStateCompanyApplicationsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/state-decisions/$id': {
+      id: '/app/state-decisions/$id'
+      path: '/state-decisions/$id'
+      fullPath: '/app/state-decisions/$id'
+      preLoaderRoute: typeof AppStateDecisionsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/states/$stateId': {
       id: '/app/states/$stateId'
       path: '/states/$stateId'
@@ -1407,6 +1459,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/votings/$votingId'
       preLoaderRoute: typeof AppVotingsVotingIdRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app_/companies/$id': {
+      id: '/app_/companies/$id'
+      path: '/app/companies/$id'
+      fullPath: '/app/companies/$id'
+      preLoaderRoute: typeof AppCompaniesIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/states/$slug_/constitution': {
       id: '/states/$slug_/constitution'
@@ -1543,11 +1602,11 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppSharesRoute: typeof AppSharesRoute
   AppVotingsRoute: typeof AppVotingsRoute
   AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
-  AppCompaniesIdRoute: typeof AppCompaniesIdRoute
   AppCompanyDecisionsIdRoute: typeof AppCompanyDecisionsIdRoute
   AppExchangeIdRoute: typeof AppExchangeIdRoute
   AppGalleryNewRoute: typeof AppGalleryNewRoute
@@ -1555,6 +1614,8 @@ interface AppRouteChildren {
   AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
   AppSettingsSkinRoute: typeof AppSettingsSkinRoute
   AppShareOperationsIdRoute: typeof AppShareOperationsIdRoute
+  AppStateCompanyApplicationsIdRoute: typeof AppStateCompanyApplicationsIdRoute
+  AppStateDecisionsIdRoute: typeof AppStateDecisionsIdRoute
   AppStatesStateIdRoute: typeof AppStatesStateIdRoute
   AppStatesNewRoute: typeof AppStatesNewRoute
   AppVotingsVotingIdRoute: typeof AppVotingsVotingIdRoute
@@ -1568,11 +1629,11 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppNotificationsRoute: AppNotificationsRoute,
   AppSharesRoute: AppSharesRoute,
   AppVotingsRoute: AppVotingsRoute,
   AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,
-  AppCompaniesIdRoute: AppCompaniesIdRoute,
   AppCompanyDecisionsIdRoute: AppCompanyDecisionsIdRoute,
   AppExchangeIdRoute: AppExchangeIdRoute,
   AppGalleryNewRoute: AppGalleryNewRoute,
@@ -1580,6 +1641,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsSecurityRoute: AppSettingsSecurityRoute,
   AppSettingsSkinRoute: AppSettingsSkinRoute,
   AppShareOperationsIdRoute: AppShareOperationsIdRoute,
+  AppStateCompanyApplicationsIdRoute: AppStateCompanyApplicationsIdRoute,
+  AppStateDecisionsIdRoute: AppStateDecisionsIdRoute,
   AppStatesStateIdRoute: AppStatesStateIdRoute,
   AppStatesNewRoute: AppStatesNewRoute,
   AppVotingsVotingIdRoute: AppVotingsVotingIdRoute,
@@ -1634,6 +1697,7 @@ const rootRouteChildren: RootRouteChildren = {
   GalleryIndexRoute: GalleryIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
   TreatiesIndexRoute: TreatiesIndexRoute,
+  AppCompaniesIdRoute: AppCompaniesIdRoute,
   StatesSlugConstitutionRoute: StatesSlugConstitutionRoute,
   StatesSlugTaxationRoute: StatesSlugTaxationRoute,
   AppStatesStateIdManageRoute: AppStatesStateIdManageRoute,

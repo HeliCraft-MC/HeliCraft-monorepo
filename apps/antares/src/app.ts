@@ -20,6 +20,8 @@ import { votingRoutes } from './modules/voting/routes';
 import { stateRoutes } from './modules/states/routes';
 import { taxationRoutes } from './modules/taxation/routes';
 import { monetaryRoutes } from './modules/monetary/routes';
+import { companyMediaRoutes } from './modules/companies/media-routes';
+import { companyInboxRoutes } from './modules/companies/inbox-routes';
 import { companyRoutes } from './modules/companies/routes';
 import { companyApplicationRoutes } from './modules/companies/application-routes';
 import { companyDecisionRoutes } from './modules/companies/decision-routes';
@@ -161,6 +163,16 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
   app.route('/api/v1', monetaryRoutes(dependencies.db, secureCookies));
   app.route('/api/v1', publicFxRoutes(dependencies.db));
   app.route('/api/v1', fxRoutes(dependencies.db, secureCookies));
+  app.route(
+    '/api/v1',
+    companyMediaRoutes({
+      db: dependencies.db,
+      storage: dependencies.storage,
+      bucket: dependencies.bucket,
+      secureCookies,
+    }),
+  );
+  app.route('/api/v1', companyInboxRoutes(dependencies.db, secureCookies));
   app.route('/api/v1', companyRoutes(dependencies.db, secureCookies));
   app.route('/api/v1', companyApplicationRoutes(dependencies.db, secureCookies));
   app.route('/api/v1', companyDecisionRoutes(dependencies.db, secureCookies));

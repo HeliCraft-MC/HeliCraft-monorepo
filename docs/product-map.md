@@ -2,7 +2,7 @@
 
 # HeliCraft product map
 
-This is the target product model. The implemented web foundation includes SSR pages, identity, server sessions, account/skin settings, CMS, RBAC and UI kit. The game systems described below remain future work.
+This is the target product model. The web implementation already includes public SSR, accounts and sessions, account/skin settings, CMS, RBAC, gallery, states and Governance, voting, companies, money, taxation, tax treaties and currency exchange. Connecting these systems to Minecraft, territories, goods markets, World Engine and custom Rigel game authentication remain future work. See the [administration overview (Russian)](overview/administration_RU.md) and [documentation index](README.md).
 
 ## Vega
 

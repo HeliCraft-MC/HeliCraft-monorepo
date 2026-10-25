@@ -26,7 +26,11 @@ function CompanyApplicationSummary({ id }: Readonly<{ id: string }>): ReactEleme
         <p>{uiText(locale, 'Загрузка условий заявки…', 'Loading application terms…')}</p>
       )}
       {query.data !== undefined && (
-        <CompanyFormationSummary configuration={query.data.configuration} />
+        <CompanyFormationSummary
+          configuration={query.data.configuration}
+          companyId={query.data.companyId}
+          applicationId={query.data.id}
+        />
       )}
       {query.error !== null && <Alert tone="danger">{errorMessage(query.error)}</Alert>}
     </section>

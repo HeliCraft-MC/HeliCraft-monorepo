@@ -1,6 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { LocalizedInputSchema } from '../localized-content/contracts';
-import { CompanyStatusSchema } from './contracts';
+import { CompanyStatusSchema, CompanyBrandingSchema } from './contracts';
 
 const PublishedCompanyIdentitySchema = z
   .object({
@@ -8,6 +8,9 @@ const PublishedCompanyIdentitySchema = z
     registrationStateId: z.uuid(),
     registrationStateName: LocalizedInputSchema,
     status: CompanyStatusSchema,
+    branding: CompanyBrandingSchema.optional(),
+    registrationStateSlug: z.string().optional(),
+    registrationStateColor: z.string().optional(),
     name: LocalizedInputSchema,
     description: LocalizedInputSchema,
     foundedAt: z.iso.datetime(),

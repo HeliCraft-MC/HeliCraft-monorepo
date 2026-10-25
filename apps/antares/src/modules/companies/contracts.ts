@@ -104,9 +104,18 @@ const CompanyCharterSchema = z
   })
   .strict()
   .openapi('CompanyCharter');
+const CompanyBrandingSchema = z
+  .object({
+    color: z.string().regex(/^#[\da-f]{6}$/iu),
+    logoMediaId: z.uuid().nullable(),
+    coverMediaId: z.uuid().nullable(),
+  })
+  .strict()
+  .openapi('CompanyBranding');
 const CompanyConfigurationSchema = z
   .object({
     registrationStateId: z.uuid().nullable(),
+    branding: CompanyBrandingSchema.optional(),
     name: LocalizedInputSchema,
     description: LocalizedInputSchema,
     categories: z.array(z.string().trim().min(1).max(80)).max(20),
@@ -121,6 +130,7 @@ const CompanyConfigurationSchema = z
   .openapi('CompanyConfiguration');
 const CompanyRevisionContentSchema = CompanyConfigurationSchema.pick({
   name: true,
+  branding: true,
   description: true,
   categories: true,
   charter: true,
@@ -152,6 +162,7 @@ type CompanyRegistrationPolicy = z.infer<typeof CompanyRegistrationPolicySchema>
 type CompanyRevisionContent = z.infer<typeof CompanyRevisionContentSchema>;
 type CompanyStatus = z.infer<typeof CompanyStatusSchema>;
 export {
+  CompanyBrandingSchema,
   ShareQuantitySchema,
   PositiveSharesSchema,
   LegalOwnerSchema,

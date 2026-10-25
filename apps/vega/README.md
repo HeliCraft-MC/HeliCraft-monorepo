@@ -17,7 +17,7 @@ bun run test:e2e
 
 For API data, start Antares separately or use `bun run dev`. `bun run dev:vega` prepares and watches Atria/Alhena and starts Storybook. Production: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` from the root (starts Antares and persistence too). Routes and generated `routeTree.gen.ts` are in `src/`; add routes there. The planned features include the world map, state management, laws, votes, markets, history, notifications; account security is implemented.
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
+From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 
 ## Name
 
@@ -39,6 +39,6 @@ Interface translations live in `src/locales/ru.ts` and `src/locales/en.ts`, usin
 
 ## Monetary system V1
 
-[Domain model, Governance, exact accounting, API, screens and verification](../../docs/architecture/monetary.md).
+[Domain model, Governance, exact accounting, API, screens and verification](../../docs/economy/monetary.md).
 
-Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/architecture/taxation.md) and [Diplomacy](../../docs/architecture/diplomacy.md).
+Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/economy/taxation.md) and [Diplomacy](../../docs/states/diplomacy.md).

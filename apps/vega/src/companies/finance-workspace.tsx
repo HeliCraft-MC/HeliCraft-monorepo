@@ -37,6 +37,7 @@ function CompanyFinanceWorkspace({
     <section>
       <h2>{uiText(locale, 'Финансы компании', 'Company finances')}</h2>
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Финансовые полномочия', 'Financial authority')}
         content={uiText(
           locale,

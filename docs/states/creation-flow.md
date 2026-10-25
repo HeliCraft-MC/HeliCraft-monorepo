@@ -4,11 +4,11 @@
 
 `/states/new` leads to the protected `/app/states/new` draft list. Drafts are private to their owner, have independent titles and versions, and can be resumed, renamed or soft-deleted. They are not states and never enter public SSR, sitemaps or service-worker data caches.
 
-The wizard steps are basic information, flags, founders, citizenship basics, presets/advanced mode, offices, appointment/term/vacancy rules, citizenship authority, state decisions, voting defaults, optional constitution and review. Steps can be revisited without resetting fields.
+The wizard steps are basic information, flags, founders, citizenship basics, presets/advanced mode, offices, appointment/term/vacancy rules, citizenship authority, state decisions, voting defaults, optional constitution and review. Steps are grouped in a responsive WorkflowLayout and can be revisited without resetting fields. Review issues link to the relevant stage. Identity fields share a content-language selector; nested office/policy editors share a language scope.
 
 The primary founder is the authenticated creator. The shared player picker provides cofounders, excludes duplicate identities and uses the same debounced search as the gallery. All founders become full citizens on initial submission.
 
-Autosave uses a 700 ms debounce, serializes writes and sends the expected server version. The UI reports Saving, Saved or Save failed. A conflict requires reloading the latest version instead of overwriting silently. Incomplete drafts can be saved; numeric policy errors are checked again on submission. Navigation away from unsaved content triggers the browser's standard warning.
+Autosave uses a 700 ms debounce, serializes writes and sends the expected server version. The UI reports Saving, Saved or Save failed. A conflict requires reloading the latest version instead of overwriting silently. Incomplete drafts can be saved; numeric policy errors are checked again on submission. Client navigation flushes pending changes and is blocked on save failure; unfinished work is not silently discarded.
 
 The backend revalidates names, slug uniqueness, founder identities, office/policy/generated-block references, voting rules, flags and media ownership. Review distinguishes warnings from blocking errors. Submission materializes the state in a single PostgreSQL transaction, sets CREATED and retains the converted draft.
 

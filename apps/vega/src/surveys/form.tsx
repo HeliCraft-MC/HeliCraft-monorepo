@@ -49,8 +49,8 @@ function SurveyForm({
     },
     [input, answers, onSubmit, preview, pending],
   );
-  return (
-    <form onSubmit={submit} className={styles.editor}>
+  const content = (
+    <>
       <p>
         {uiText(
           locale,
@@ -86,6 +86,13 @@ function SurveyForm({
           {uiText(locale, 'Отправить ответы', 'Submit responses')}
         </Button>
       )}
+    </>
+  );
+  return preview ? (
+    <div className={styles.editor}>{content}</div>
+  ) : (
+    <form onSubmit={submit} className={styles.editor}>
+      {content}
     </form>
   );
 }

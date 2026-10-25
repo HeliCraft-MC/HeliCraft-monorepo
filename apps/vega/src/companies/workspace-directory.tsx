@@ -1,3 +1,4 @@
+// oxlint-disable import/max-dependencies -- The directory composes shared company and state identities with protected pagination.
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -7,6 +8,8 @@ import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { MonetaryPagination } from '../monetary/pagination';
+import { CompanyName } from '../company-name';
+import { RegistrationStateName } from './registration-state-name';
 import { companyStatusLabel } from './labels';
 
 function CompanyWorkspaceDirectory({ actorId }: Readonly<{ actorId: string }>): ReactElement {
@@ -40,9 +43,14 @@ function CompanyWorkspaceDirectory({ actorId }: Readonly<{ actorId: string }>): 
       <ul>
         {query.data?.items.map((company) => (
           <li key={company.id}>
-            <a href={`/app/companies/${company.id}`}>{displayText(company.name, locale)}</a> ·{' '}
-            {companyStatusLabel(company.status, locale)} ·{' '}
-            {displayText(company.registrationStateName, locale)}
+            <CompanyName
+              id={company.id}
+              href={`/app/companies/${company.id}`}
+              name={displayText(company.name, locale)}
+              branding={company.branding}
+            />{' '}
+            · {companyStatusLabel(company.status, locale)} ·{' '}
+            <RegistrationStateName company={company} />
           </li>
         ))}
       </ul>

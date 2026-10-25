@@ -1,0 +1,97 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Tokens" />
+
+# Foundations
+
+Import `@helicraft/atria/styles.scss` once in the host. Components inherit semantic CSS variables; use these tokens instead of introducing a separate palette for a product page. The host supplies local Onest and IBM Plex Mono fonts.
+
+## Color roles
+
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit,minmax(10rem,1fr))',
+    gap: '1rem',
+  }}
+>
+  {['bg-base', 'bg-panel', 'bg-hover', 'primary', 'success', 'warning', 'danger', 'info'].map(
+    (token) => (
+      <div
+        key={token}
+        style={{
+          padding: '1rem',
+          border: '1px solid var(--border-strong)',
+          borderRadius: 'var(--radius-medium)',
+        }}
+      >
+        <div
+          style={{
+            height: '3rem',
+            background: `var(--${token})`,
+            borderRadius: 'var(--radius-small)',
+            marginBottom: '.5rem',
+          }}
+        />
+        {token}
+      </div>
+    ),
+  )}
+</div>
+
+Keep text on `--text-primary`, secondary explanations on `--text-secondary`, and hints on `--text-muted`. Feedback combines color with readable text; color alone never states success or failure.
+
+## Rhythm and shape
+
+<table>
+  <thead>
+    <tr>
+      <th>Role</th>
+      <th>Tokens</th>
+      <th>Guidance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tight groups</td>
+      <td>
+        <code>--space-1</code>, <code>--space-2</code>, <code>--space-3</code>
+      </td>
+      <td>Labels, icons and related controls</td>
+    </tr>
+    <tr>
+      <td>Content groups</td>
+      <td>
+        <code>--space-4</code>, <code>--space-6</code>, <code>--space-8</code>
+      </td>
+      <td>Fields, cards and section separation</td>
+    </tr>
+    <tr>
+      <td>Page separation</td>
+      <td>
+        <code>--space-12</code>, <code>--space-16</code>
+      </td>
+      <td>Use only when content calls for it</td>
+    </tr>
+    <tr>
+      <td>Shape</td>
+      <td>
+        <code>--radius-small</code>, <code>--radius-medium</code>, <code>--radius-large</code>
+      </td>
+      <td>Match the enclosing component</td>
+    </tr>
+    <tr>
+      <td>Motion</td>
+      <td>
+        <code>--motion-duration</code>, <code>--motion-easing</code>
+      </td>
+      <td>Respect reduced motion</td>
+    </tr>
+  </tbody>
+</table>
+
+Do not use fixed heights to fill empty space. Allow long translations to wrap and contain wide tables locally. Interactive controls need a visible focus ring and comfortable touch targets.
+
+## Entity colors
+
+`WorkspaceLayout accent` supplies `--workspace-accent`, `--workspace-surface` and `--workspace-border`, with readable primary and focus colors. Its context also reaches `Dialog` portals. Vega supplies the actual state or company color from Antares; Atria owns its presentation. Keep neutral surfaces as fallbacks outside a workspace.

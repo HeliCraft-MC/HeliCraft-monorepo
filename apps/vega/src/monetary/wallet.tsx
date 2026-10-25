@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getWallet } from '@helicraft/alhena';
-import { Alert, MoneyAmount } from '@helicraft/atria';
+import { PageHeader, Alert, MoneyAmount } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText } from '../states/text';
@@ -35,7 +35,7 @@ function WalletPage(): ReactElement {
   }, [refetch]);
   return (
     <section className={styles.panel}>
-      <h1>{text('monetary.wallet')}</h1>
+      <PageHeader title={text('monetary.wallet')} />
       <p>{text('monetary.privateHint')}</p>
       {query.isPending && <output>{text('monetary.loading')}</output>}
       {query.error !== null && <Alert tone="danger">{errorMessage(query.error)}</Alert>}

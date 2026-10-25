@@ -51,7 +51,10 @@ function StateCompanyFoundingDecision({
       <h2>{uiText(locale, 'Согласие государства на учреждение', 'State formation consent')}</h2>
       {project.data !== undefined && (
         <>
-          <CompanyFormationSummary configuration={project.data.draft.configuration} />
+          <CompanyFormationSummary
+            configuration={project.data.draft.configuration}
+            companyId={project.data.draft.companyId}
+          />
           <a href={`/app/companies/drafts/${project.data.draft.id}`}>
             {uiText(locale, 'Вернуться к проекту', 'Return to formation draft')}
           </a>

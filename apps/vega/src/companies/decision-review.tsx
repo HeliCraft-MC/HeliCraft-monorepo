@@ -39,6 +39,7 @@ function CompanyDecisionReview({
             <CompanyDecisionPayloadSummary
               payload={review.payload}
               charter={workspace.content.charter}
+              companyId={workspace.id}
             />
             {review.expiresAt !== undefined && (
               <p>

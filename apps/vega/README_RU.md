@@ -17,7 +17,7 @@ bun run test:e2e
 
 Для данных API запустите Antares отдельно либо используйте `bun run dev`. `dev:vega` готовит пакеты Atria/Alhena, запускает watch и Storybook. Продакшен из корня: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` (с API и хранилищами). Маршруты и генерируемый `routeTree.gen.ts` находятся в `src/`. Будущие функции: карта мира, управление государством, законы, голосования, рынки, история, уведомления ; безопасность аккаунта реализована.
 
-Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/setup-research_RU.md).
+Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/development/setup-research_RU.md).
 
 ## Название
 
@@ -39,6 +39,6 @@ bun run test:e2e
 
 ## Monetary system V1
 
-[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/architecture/monetary_RU.md).
+[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/economy/monetary_RU.md).
 
-Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/architecture/taxation_RU.md), [Diplomacy](../../docs/architecture/diplomacy_RU.md).
+Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/economy/taxation_RU.md), [Diplomacy](../../docs/states/diplomacy_RU.md).

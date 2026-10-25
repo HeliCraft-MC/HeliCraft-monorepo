@@ -163,7 +163,7 @@ async function createApplication(
     hash: command.formationHash,
     configuration: draft.configuration,
   });
-  const { name, description, categories, charter, document } = draft.configuration;
+  const { name, description, categories, charter, document, branding } = draft.configuration;
   const revisionId = await publishCompanyRevision(transaction, {
     companyId: company.id,
     actorId,
@@ -173,6 +173,7 @@ async function createApplication(
       categories,
       charter,
       document,
+      ...(branding === undefined ? {} : { branding }),
     }),
   });
   const id = crypto.randomUUID();

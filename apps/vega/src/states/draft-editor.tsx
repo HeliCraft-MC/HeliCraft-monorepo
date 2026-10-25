@@ -20,10 +20,11 @@ import type {
   StateDetail,
   ValidateStateDraftResponse,
 } from '@helicraft/alhena';
-import { Alert, Button, FormField, TextField } from '@helicraft/atria';
+import { Alert, Button, FormField, TextField, WorkflowLayout, ActionPanel } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import type { SelectedPlayer } from '../player-picker';
 import { useTranslation } from '../i18n';
+import { DraftIssues } from './draft-issues';
 import { StateWizardStep } from './wizard-step';
 import { useDraft } from './use-draft';
 import styles from './states.module.scss';
@@ -51,6 +52,21 @@ const stepNames = [
   ['Конституция', 'Constitution'],
   ['Проверка', 'Review'],
 ] as const;
+const PEOPLE_START = 2;
+const GOVERNMENT_START = 4;
+const RULES_START = 9;
+function stepGroup(index: number, locale: 'ru' | 'en'): string {
+  if (index < PEOPLE_START) {
+    return uiText(locale, 'Облик', 'Identity');
+  }
+  if (index < GOVERNMENT_START) {
+    return uiText(locale, 'Участники', 'People');
+  }
+  if (index < RULES_START) {
+    return uiText(locale, 'Устройство и полномочия', 'Government and authority');
+  }
+  return uiText(locale, 'Правила и публикация', 'Rules and publication');
+}
 // oxlint-disable-next-line max-lines-per-function, max-statements -- This composition keeps one atomic workflow or bounded declarative editor together.
 function DraftEditor({
   initial,
@@ -108,6 +124,22 @@ function DraftEditor({
     ['CITIZEN_VOTE', 'COUNCIL_VOTE', 'COMBINED'].includes(amendment.mechanism);
   const { setStep: handleStepChange } = draft;
   const step = Math.max(1, draft.step);
+  const workflowSteps = useMemo(
+    () =>
+      stepNames.map((names, index) => ({
+        id: String(index + 1),
+        label: `${index + 1}. ${names[locale === 'ru' ? 0 : 1]}`,
+        group: stepGroup(index, locale),
+      })),
+    [locale],
+  );
+  const selectStep = useCallback(
+    (value: string): void => {
+      handleStepChange(Number(value));
+    },
+    [handleStepChange],
+  );
+
   const submit = useMutation({
     mutationFn: async () => {
       const version = await draft.flush();
@@ -272,18 +304,22 @@ function DraftEditor({
         </h1>
         <output aria-live="polite">{saveStatusText(draft.status, locale)}</output>
       </div>
-      <FormField
-        htmlFor="state-draft-title"
-        label={uiText(locale, 'Название черновика', 'Draft title')}
+      <ActionPanel
+        title={uiText(locale, 'Название и параметры черновика', 'Draft name and settings')}
       >
-        <TextField
-          id="state-draft-title"
-          value={draft.title}
-          onChange={cacheTextFieldOnChange('5002', (event) => {
-            draft.setTitle(event.currentTarget.value);
-          })}
-        />
-      </FormField>
+        <FormField
+          htmlFor="state-draft-title"
+          label={uiText(locale, 'Название черновика', 'Draft title')}
+        >
+          <TextField
+            id="state-draft-title"
+            value={draft.title}
+            onChange={cacheTextFieldOnChange('5002', (event) => {
+              draft.setTitle(event.currentTarget.value);
+            })}
+          />
+        </FormField>
+      </ActionPanel>
       {draft.error !== null && (
         <Alert tone="danger">
           {draft.error}{' '}
@@ -297,135 +333,120 @@ function DraftEditor({
           </Button>
         </Alert>
       )}
-      <nav className={styles.steps} aria-label={uiText(locale, 'Шаги создания', 'Creation steps')}>
-        {stepNames.map((names, index) => (
-          <Button
-            key={names[1]}
-            tone="quiet"
-            aria-current={step === index + 1 ? 'step' : undefined}
-            onClick={cacheButtonOnClick(rowKey('5809', names, index), () => {
-              draft.setStep(index + 1);
-            })}
-          >
-            {index + 1}. {names[locale === 'ru' ? 0 : 1]}
-          </Button>
-        ))}
-      </nav>
-      <h2>{stepNames[step - 1]?.[locale === 'ru' ? 0 : 1]}</h2>
-      <fieldset disabled={submit.isPending} className={styles.localized}>
-        <StateWizardStep
-          step={step}
-          configuration={draft.configuration}
-          existingOfficeIds={existingOfficeIds}
-          holderCandidates={currentState?.citizens}
-          stableSlug={initial.stateId !== null}
-          onStepChange={handleStepChange}
-          onChange={handleConfiguration}
-          principal={creator}
-          cofounders={cofounders}
-          setCofounders={setCofounders}
-        />
-      </fieldset>
-      {step === stepNames.length && (
-        <>
-          <Button
-            tone="quiet"
-            disabled={validate.isPending}
-            onClick={cacheButtonOnClick('6552', () => {
-              validate.mutate();
-            })}
-          >
-            {uiText(locale, 'Проверить конфигурацию', 'Validate configuration')}
-          </Button>
-          <ul aria-live="polite">
-            {issues.map((issue) => (
-              <li key={`${issue.path}-${issue.message}`}>
-                <strong>
-                  {issue.severity === 'ERROR'
-                    ? uiText(locale, 'Ошибка', 'Error')
-                    : uiText(locale, 'Предупреждение', 'Warning')}
-                  :
-                </strong>{' '}
-                {issue.message}
-              </li>
-            ))}
-          </ul>
-          {initial.stateId !== null && (
-            <div className={styles.actions}>
-              <Button
-                onClick={cacheButtonOnClick('propose', () => {
-                  proposal.mutate();
-                })}
-                disabled={proposal.isPending}
-              >
-                {uiText(locale, 'Отправить на рассмотрение', 'Submit for review')}
-              </Button>
-              {requiresVote && (
+      <WorkflowLayout
+        label={uiText(
+          locale,
+          initial.stateId === null ? 'Учреждение государства' : 'Подготовка реформы',
+          initial.stateId === null ? 'State formation' : 'Prepare reform',
+        )}
+        steps={workflowSteps}
+        value={String(step)}
+        onChange={selectStep}
+      >
+        <h2>{stepNames[step - 1]?.[locale === 'ru' ? 0 : 1]}</h2>
+        <fieldset disabled={submit.isPending} className={styles.localized}>
+          <StateWizardStep
+            step={step}
+            configuration={draft.configuration}
+            existingOfficeIds={existingOfficeIds}
+            holderCandidates={currentState?.citizens}
+            stableSlug={initial.stateId !== null}
+            onStepChange={handleStepChange}
+            onChange={handleConfiguration}
+            principal={creator}
+            cofounders={cofounders}
+            setCofounders={setCofounders}
+          />
+        </fieldset>
+        {step === stepNames.length && (
+          <>
+            <Button
+              tone="quiet"
+              disabled={validate.isPending}
+              onClick={cacheButtonOnClick('6552', () => {
+                validate.mutate();
+              })}
+            >
+              {uiText(locale, 'Проверить конфигурацию', 'Validate configuration')}
+            </Button>
+            <DraftIssues issues={issues} onStepChange={handleStepChange} />
+            {initial.stateId !== null && (
+              <div className={styles.actions}>
                 <Button
-                  onClick={cacheButtonOnClick('7413', () => {
-                    vote.mutate();
+                  onClick={cacheButtonOnClick('propose', () => {
+                    proposal.mutate();
                   })}
+                  disabled={proposal.isPending}
                 >
-                  {uiText(
-                    locale,
-                    'Начать голосование по действующей процедуре',
-                    'Start voting under current governance',
-                  )}
+                  {uiText(locale, 'Отправить на рассмотрение', 'Submit for review')}
                 </Button>
-              )}
-              {approvalOffices.map((office) => (
-                <Button
-                  key={office.id}
-                  tone="quiet"
-                  onClick={cacheButtonOnClick(rowKey('7861', office), () => {
-                    approve.mutate(office.id);
-                  })}
-                >
-                  {uiText(locale, 'Одобрить от должности', 'Approve as office')}:{' '}
-                  {office.name[locale] ?? office.name.en ?? office.name.ru ?? ''}
-                </Button>
-              ))}
-            </div>
-          )}
+                {requiresVote && (
+                  <Button
+                    onClick={cacheButtonOnClick('7413', () => {
+                      vote.mutate();
+                    })}
+                  >
+                    {uiText(
+                      locale,
+                      'Начать голосование по действующей процедуре',
+                      'Start voting under current governance',
+                    )}
+                  </Button>
+                )}
+                {approvalOffices.map((office) => (
+                  <Button
+                    key={office.id}
+                    tone="quiet"
+                    onClick={cacheButtonOnClick(rowKey('7861', office), () => {
+                      approve.mutate(office.id);
+                    })}
+                  >
+                    {uiText(locale, 'Одобрить от должности', 'Approve as office')}:{' '}
+                    {office.name[locale] ?? office.name.en ?? office.name.ru ?? ''}
+                  </Button>
+                ))}
+              </div>
+            )}
+            <Button
+              disabled={submit.isPending || issues.some((issue) => issue.severity === 'ERROR')}
+              onClick={cacheButtonOnClick('8336', () => {
+                submit.mutate();
+              })}
+            >
+              {initial.stateId === null
+                ? uiText(locale, 'Создать государство', 'Create state')
+                : uiText(locale, 'Опубликовать одобренную реформу', 'Publish approved reform')}
+            </Button>
+          </>
+        )}
+        {[submit.error, validate.error, vote.error, approve.error, proposal.error]
+          .filter((error) => error !== null)
+          .map((error) => (
+            <Alert key={errorMessage(error)} tone="danger">
+              {errorMessage(error)}
+            </Alert>
+          ))}
+        {notice !== null && <Alert>{notice}</Alert>}
+        <div className={styles.actions}>
           <Button
-            disabled={submit.isPending || issues.some((issue) => issue.severity === 'ERROR')}
-            onClick={cacheButtonOnClick('8336', () => {
-              submit.mutate();
+            tone="quiet"
+            disabled={step === 1}
+            onClick={cacheButtonOnClick('9156', () => {
+              draft.setStep(step - 1);
             })}
           >
-            {initial.stateId === null
-              ? uiText(locale, 'Создать государство', 'Create state')
-              : uiText(locale, 'Опубликовать одобренную реформу', 'Publish approved reform')}
+            {uiText(locale, 'Назад', 'Back')}
           </Button>
-        </>
-      )}
-      {[submit.error, validate.error, vote.error, approve.error, proposal.error]
-        .filter((error) => error !== null)
-        .map((error) => (
-          <Alert key={errorMessage(error)} tone="danger">
-            {errorMessage(error)}
-          </Alert>
-        ))}
-      {notice !== null && <Alert>{notice}</Alert>}
-      <div className={styles.actions}>
-        <Button
-          tone="quiet"
-          disabled={step === 1}
-          onClick={cacheButtonOnClick('9156', () => {
-            draft.setStep(step - 1);
-          })}
-        >
-          {uiText(locale, 'Назад', 'Back')}
-        </Button>
-        <Button
-          disabled={step === stepNames.length}
-          onClick={cacheButtonOnClick('9371', () => {
-            draft.setStep(step + 1);
-          })}
-        >
-          {uiText(locale, 'Далее', 'Next')}
-        </Button>
-      </div>
+          <Button
+            disabled={step === stepNames.length}
+            onClick={cacheButtonOnClick('9371', () => {
+              draft.setStep(step + 1);
+            })}
+          >
+            {uiText(locale, 'Далее', 'Next')}
+          </Button>
+        </div>
+      </WorkflowLayout>
     </section>
   );
 }

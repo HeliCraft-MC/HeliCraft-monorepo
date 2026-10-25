@@ -25,6 +25,7 @@ const CompanyDecisionPayloadSchema = z
     z
       .object({
         kind: z.literal('UPDATE_PROFILE'),
+        branding: CompanyRevisionContentSchema.shape.branding,
         name: LocalizedInputSchema,
         description: LocalizedInputSchema,
         categories: CompanyRevisionContentSchema.shape.categories,

@@ -9,7 +9,7 @@ import type {
   StateDetail,
   StateMonetary,
 } from '@helicraft/alhena';
-import { Button, Select, FormField, FieldHelp, Alert } from '@helicraft/atria';
+import { ActionPanel, Button, Select, FormField, Alert } from '@helicraft/atria';
 import { DirectiveIdentity } from './directive-identity';
 import type { SelectedPlayer } from '../player-picker';
 import { useTranslation } from '../i18n';
@@ -120,11 +120,7 @@ function DirectiveComposer({
   }
 
   return (
-    <section className={styles.card}>
-      <h2>
-        {text('monetary.newDirective')}{' '}
-        <FieldHelp label={text('monetary.directives')} content={text('monetary.directiveHelp')} />
-      </h2>
+    <ActionPanel title={text('monetary.newDirective')} description={text('monetary.directiveHelp')}>
       <DirectiveResult id={savedId} monetary={monetary} />
       <form className={styles.form} onSubmit={submit}>
         <FormField
@@ -173,7 +169,7 @@ function DirectiveComposer({
         monetary={monetary}
         company={company}
       />
-    </section>
+    </ActionPanel>
   );
 }
 export { DirectiveComposer };

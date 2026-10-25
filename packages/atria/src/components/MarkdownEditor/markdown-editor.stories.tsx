@@ -44,7 +44,7 @@ function Example(): ReactElement {
     </>
   );
 }
-const meta = { title: 'Atria/MarkdownEditor', component: Example } satisfies Meta<typeof Example>;
+const meta = { title: 'Forms/MarkdownEditor', component: Example } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const VisualAndSource: Story = {};

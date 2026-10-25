@@ -82,6 +82,7 @@ function CompanyPolicyFields({
         </FormField>
       ))}
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Последствия политики', 'Policy effect')}
         content={uiText(
           locale,

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createClient, getFxBank, listStates } from '@helicraft/alhena';
 import type { FxOffer } from '@helicraft/alhena';
 import { Alert, Button, FormField, Select, TextField } from '@helicraft/atria';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 
@@ -98,7 +99,8 @@ function FxBankPicker({
       {bank.data !== undefined && (
         <>
           <p>
-            {displayText(bank.data.name, locale)} · {displayText(bank.data.stateName, locale)}
+            {displayText(bank.data.name, locale)} ·{' '}
+            <StateName id={bank.data.stateId} name={displayText(bank.data.stateName, locale)} />
           </p>
           <Button onClick={choose} disabled={!bank.data.available || value?.id === bank.data.id}>
             {uiText(locale, 'Выбрать этот банк', 'Use this bank')}
@@ -108,7 +110,7 @@ function FxBankPicker({
       {value !== null && (
         <p>
           {uiText(locale, 'Выбран', 'Selected')}: {displayText(value.name, locale)} ·{' '}
-          {displayText(value.stateName, locale)}
+          <StateName id={value.stateId} name={displayText(value.stateName, locale)} />
         </p>
       )}
     </fieldset>

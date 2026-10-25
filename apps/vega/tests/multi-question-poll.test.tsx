@@ -44,11 +44,11 @@ describe('multi-question ballot', () => {
         <Ballot />
       </LocaleProvider>,
     );
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Yes' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'North' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: /^No$/u }));
-    expect(screen.getByRole('checkbox', { name: 'Yes' })).not.toBeChecked();
-    expect(screen.getByRole('checkbox', { name: /^No$/u })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'North' })).toBeChecked();
+    fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'North' }));
+    fireEvent.click(screen.getByRole('radio', { name: /^No$/u }));
+    expect(screen.getByRole('radio', { name: 'Yes' })).not.toBeChecked();
+    expect(screen.getByRole('radio', { name: /^No$/u })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'North' })).toBeChecked();
   });
 });

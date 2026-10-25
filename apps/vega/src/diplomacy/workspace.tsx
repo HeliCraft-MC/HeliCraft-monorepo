@@ -10,7 +10,7 @@ import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { economicAuthority } from '../taxation/model';
 import { MonetaryPagination } from '../monetary/pagination';
-import { DirectiveCard } from '../monetary/directive-card';
+import { DirectiveList } from '../monetary/directive-list';
 import { TreatyWizard } from './wizard';
 import { TreatyCard } from './card';
 import styles from '../monetary/monetary.module.scss';
@@ -94,17 +94,12 @@ function DiplomacyWorkspace({
           onSaved={refresh}
         />
       ))}
-      <h3>{uiText(locale, 'Решения нашей стороны', 'Our state decisions')}</h3>
-      {query.data.directives.map((directive) => (
-        <DirectiveCard
-          key={directive.id}
-          directive={directive}
-          state={state}
-          actorId={actorId}
-          code=""
-          onSaved={refresh}
-        />
-      ))}
+      <DirectiveList
+        items={query.data.directives}
+        state={state}
+        actorId={actorId}
+        onSaved={refresh}
+      />
       <MonetaryPagination page={query.data.page} hasMore={query.data.hasMore} onPage={setPage} />
       <a href="/treaties">
         {uiText(locale, 'Публичные международные договоры', 'Public international treaties')}

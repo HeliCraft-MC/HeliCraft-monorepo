@@ -84,7 +84,7 @@ function ManagementIdentity({
       </dl>
       {state.status === 'ACTIVE' && (
         <Link to="/states/$slug/constitution" params={publicParams}>
-          {uiText(locale, 'Открыть конституцию ↗', 'Read constitution ↗')}
+          {uiText(locale, 'Открыть конституцию', 'Read constitution')}
         </Link>
       )}
     </section>

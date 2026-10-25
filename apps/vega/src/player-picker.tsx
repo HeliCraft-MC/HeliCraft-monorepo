@@ -3,7 +3,7 @@ import { useCallback, useEffect, useId, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { searchPlayers } from '@helicraft/alhena';
-import { Alert, Button, FormField, TextField } from '@helicraft/atria';
+import { Icon, Alert, Button, FormField, TextField } from '@helicraft/atria';
 import { browserClient } from './account-api';
 import { useTranslation } from './i18n';
 import styles from './gallery.module.scss';
@@ -114,7 +114,7 @@ function PlayerPicker({
               value={player.id}
               onClick={remove}
             >
-              ×
+              <Icon name="close" />
             </Button>
           </li>
         ))}

@@ -26,7 +26,7 @@ console.log(data.message);
 
 Транспорт использует Fetch, поддерживает отмену и выбрасывает ошибки при `throwOnError`. Типы не проверяют удалённый ответ в runtime; Vega проверяет приветствие Zod. В будущем внутренний SDK сможет обслуживать публичные интеграции, ботов, аналитику и автоматизацию.
 
-Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/setup-research_RU.md).
+Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/development/setup-research_RU.md).
 
 ## Название
 
@@ -42,6 +42,6 @@ Generated-клиент включает `/api/v1`: identity, account, sessions, 
 
 ## Monetary system V1
 
-[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/architecture/monetary_RU.md).
+[Доменная модель, Governance, точный учёт, API, интерфейс и проверки](../../docs/economy/monetary_RU.md).
 
-Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/architecture/taxation_RU.md), [Diplomacy](../../docs/architecture/diplomacy_RU.md).
+Налоги и дипломатия используют существующие Governance/Voting и точный ledger. Подробности: [Taxation](../../docs/economy/taxation_RU.md), [Diplomacy](../../docs/states/diplomacy_RU.md).

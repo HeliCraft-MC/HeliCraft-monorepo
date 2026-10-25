@@ -10,6 +10,7 @@ import { uiText } from '../states/text';
 import { lookupCorporatePlayers } from './player-directory';
 import { CompanyWizard } from './wizard';
 import { CompanyFormationSummary } from './formation-summary';
+import styles from './companies.module.scss';
 import { CompanyFormationConsents } from './formation-consents';
 
 function CompanyDraftPage({
@@ -18,6 +19,9 @@ function CompanyDraftPage({
 }: Readonly<{ id: string; principal: Principal }>): ReactElement {
   const { locale } = useTranslation();
   const query = useQuery({
+    // An editor must initialize from a fresh version after returning from approvals or another draft.
+    staleTime: 0,
+    gcTime: 0,
     queryKey: ['company-draft', id, principal.id],
     queryFn: async () => {
       const result = await getCompanyDraft({
@@ -52,10 +56,10 @@ function CompanyDraftPage({
   return draft.ownerId === principal.id ? (
     <CompanyWizard key={draft.id} initial={draft} principal={principal} players={players} />
   ) : (
-    <>
-      <CompanyFormationSummary configuration={draft.configuration} />
+    <section className={styles.page}>
+      <CompanyFormationSummary configuration={draft.configuration} companyId={draft.companyId} />
       <CompanyFormationConsents draft={draft} actorId={principal.id} />
-    </>
+    </section>
   );
 }
 export { CompanyDraftPage };

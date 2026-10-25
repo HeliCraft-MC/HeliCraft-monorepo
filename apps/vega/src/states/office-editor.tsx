@@ -8,7 +8,7 @@ import { useMemo, useId } from 'react';
 import type { ComponentProps, ReactElement } from 'react';
 import { usePropCache, rowKey } from './use-prop-cache';
 import type { StateOffice } from '@helicraft/alhena';
-import { Button, Checkbox, FormField, Select, TextField } from '@helicraft/atria';
+import { Icon, Button, Checkbox, FormField, Select, TextField } from '@helicraft/atria';
 import { LocalizedInputField } from './localized-input';
 import { useTranslation } from '../i18n';
 import type { SelectedPlayer } from '../player-picker';
@@ -127,21 +127,23 @@ function OfficeEditor({
         <div className={styles.actions}>
           <Button
             tone="quiet"
+            aria-label={uiText(locale, 'Переместить должность выше', 'Move office up')}
             disabled={position === 0}
             onClick={cacheButtonOnClick('2832', () => {
               onMove(MOVE_UP);
             })}
           >
-            ↑
+            <Icon name="arrowUp" />
           </Button>
           <Button
             tone="quiet"
+            aria-label={uiText(locale, 'Переместить должность ниже', 'Move office down')}
             disabled={position === offices.length - 1}
             onClick={cacheButtonOnClick('3046', () => {
               onMove(1);
             })}
           >
-            ↓
+            <Icon name="arrowDown" />
           </Button>
           <Button tone="quiet" onClick={onRemove}>
             {uiText(locale, 'Удалить должность', 'Remove office')}

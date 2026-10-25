@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { FxExchangeReceipt } from '@helicraft/alhena';
-import { MoneyAmount } from '@helicraft/atria';
+import { Icon, MoneyAmount } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import styles from '../monetary/monetary.module.scss';
@@ -15,7 +15,8 @@ function FxReceipt({ receipt }: Readonly<{ receipt: FxExchangeReceipt }>): React
     <article className={styles.card}>
       <h2>{uiText(locale, 'Обмен выполнен', 'Exchange completed')}</h2>
       <p>
-        <MoneyAmount minor={receipt.receiveMinor} code={receiveCode} locale={locale} /> →{' '}
+        <MoneyAmount minor={receipt.receiveMinor} code={receiveCode} locale={locale} />{' '}
+        <Icon name="arrowRight" />{' '}
         <MoneyAmount minor={receipt.provideMinor} code={provideCode} locale={locale} />
       </p>
       <p>

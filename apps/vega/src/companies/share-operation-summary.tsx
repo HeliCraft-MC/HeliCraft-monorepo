@@ -1,3 +1,4 @@
+import { Icon } from '@helicraft/atria';
 import type { ReactElement } from 'react';
 import type { CompanyShareOperation } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
@@ -19,7 +20,7 @@ function ShareOperationSummary({
       </p>
       {operation.kind === 'TRANSFER' ? (
         <p>
-          <CompanyOwnerIdentity owner={operation.owner} /> →{' '}
+          <CompanyOwnerIdentity owner={operation.owner} /> <Icon name="arrowRight" />{' '}
           <CompanyOwnerIdentity owner={operation.recipient} />
         </p>
       ) : (

@@ -19,6 +19,7 @@
   }
 }
 .quiet {
+  border-radius: 0;
   border-bottom: 1px solid var(--text-muted);
   padding-inline: 0;
   &:hover {

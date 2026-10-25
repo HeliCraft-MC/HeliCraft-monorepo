@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { StateDetailSchema } from '../../apps/antares/src/modules/states/contracts';
@@ -37,6 +38,7 @@ async function assertOfficeAssignmentPages(
   await expect(
     page.getByRole('heading', { name: 'Назначения и снятия с должностей', exact: true }),
   ).toBeVisible();
+  await openWorkspaceAction(page, 'Предложить назначение или снятие');
   await page
     .getByLabel('Игрок для решения', { exact: true })
     .selectOption({ label: input.successorName });

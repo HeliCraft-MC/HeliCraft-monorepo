@@ -1,3 +1,4 @@
+import { useSpaNavigation } from './use-spa-navigation';
 import { useSiteBranding } from './site-branding';
 import { useTranslation } from './i18n';
 import { Link, Outlet, getRouteApi, useRouterState } from '@tanstack/react-router';
@@ -11,6 +12,7 @@ const rootRoute = getRouteApi('__root__');
 
 function SiteLayoutContent(): ReactElement {
   const { text } = useTranslation();
+  useSpaNavigation();
 
   const navigation = rootRoute.useLoaderData();
   const branding = useSiteBranding();

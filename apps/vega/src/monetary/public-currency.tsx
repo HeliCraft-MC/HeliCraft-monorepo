@@ -2,6 +2,7 @@ import { monetaryLabel } from './labels';
 import type { ReactElement } from 'react';
 import type { PublicCurrency } from '@helicraft/alhena';
 import { FieldHelp, MoneyAmount } from '@helicraft/atria';
+import { StateName } from '../state-name';
 import { useTranslation } from '../i18n';
 import { displayText } from '../states/text';
 import { PolicySummary } from './policy-summary';
@@ -17,7 +18,12 @@ function PublicCurrencyPage({ item }: Readonly<{ item: PublicCurrency }>): React
       </h1>
       <p>{displayText(currency.description, locale)}</p>
       {state.active && state.slug !== null ? (
-        <a href={`/states/${state.slug}`}>{displayText(state.name ?? {}, locale)}</a>
+        <StateName
+          href={`/states/${state.slug}`}
+          slug={state.slug}
+          name={displayText(state.name ?? {}, locale)}
+          color="var(--primary)"
+        />
       ) : (
         <p>{text('monetary.stateInactive')}</p>
       )}

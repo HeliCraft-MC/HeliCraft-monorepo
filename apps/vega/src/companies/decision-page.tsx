@@ -52,6 +52,8 @@ function CompanyDecisionPage({
           <CompanyDecisionPayloadSummary
             payload={query.data.payload}
             charter={query.data.charter}
+            companyId={query.data.companyId}
+            decisionId={query.data.id}
           />
           {query.data.calculation !== undefined && (
             <TaxBreakdown calculation={query.data.calculation} code="" />

@@ -4,7 +4,7 @@ import { StateCard } from './state-card';
 const flag =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="90" height="60"%3E%3Cpath fill="%23585e48" d="M0 0h90v60H0z"/%3E%3Cpath fill="%23e1a15a" d="M0 25h90v10H0z"/%3E%3C/svg%3E';
 const meta = {
-  title: 'Atria/state-card',
+  title: 'Data display/StateCard',
   component: StateCard,
   parameters: {
     docs: {

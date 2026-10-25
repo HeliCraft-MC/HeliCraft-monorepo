@@ -1,18 +1,23 @@
 import { uiText } from './text';
 import { VotingCard } from './voting-card';
 import { PollCreateDialog } from './poll-create-dialog';
+import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listVotings, listAdminVotings } from '@helicraft/alhena';
-import { Alert, EmptyState } from '@helicraft/atria';
+import { Alert, EmptyState, PageHeader, ActionLink } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import styles from './states.module.scss';
 
-function VotingsPage({ admin = false }: Readonly<{ admin?: boolean }>): ReactElement {
+function VotingsPage({
+  admin = false,
+  votingId,
+}: Readonly<{ admin?: boolean; votingId?: string }>): ReactElement {
   const { locale } = useTranslation();
   const query = useQuery({
     queryKey: ['votings', admin],
+    enabled: votingId === undefined,
     queryFn: async () => {
       const result = await (admin ? listAdminVotings : listVotings)({
         client: browserClient(),
@@ -21,27 +26,38 @@ function VotingsPage({ admin = false }: Readonly<{ admin?: boolean }>): ReactEle
       return result.data.ids;
     },
   });
+  const actions = useMemo(() => {
+    if (votingId !== undefined) {
+      return (
+        <ActionLink href={admin ? '/admin/votings' : '/app/votings'}>
+          {uiText(locale, 'Все голосования', 'All votes')}
+        </ActionLink>
+      );
+    }
+    return admin ? <PollCreateDialog /> : undefined;
+  }, [admin, votingId, locale]);
+  const ids = votingId === undefined ? (query.data ?? []) : [votingId];
   return (
     <section className={styles.page}>
-      <h1>{uiText(locale, 'Голосования', 'Voting')}</h1>
-      <p className={styles.hint}>
-        {uiText(
+      <PageHeader
+        title={uiText(locale, 'Голосования', 'Voting')}
+        description={uiText(
           locale,
-          'Анкеты сообщества и голосования по решениям. Для каждого показаны сроки; состав участников фиксируется при открытии.',
-          'Community surveys and decision votes. Each shows its schedule; eligibility is frozen at opening.',
+          'Опросы и решения сообщества. Откройте голосование, чтобы ответить или посмотреть результаты.',
+          'Community polls and decisions. Open a vote to respond or review results.',
         )}
-      </p>
-      {admin && <PollCreateDialog />}
-      {query.isPending && (
+        actions={actions}
+      />
+      {votingId === undefined && query.isPending && (
         <output>{uiText(locale, 'Загрузка голосований…', 'Loading votes…')}</output>
       )}
-      {query.data?.length === 0 && (
+      {votingId === undefined && query.data?.length === 0 && (
         <EmptyState title={uiText(locale, 'Пока нет голосований', 'No votes yet')}>
           {uiText(locale, 'Доступные опросы появятся здесь.', 'Available polls will appear here.')}
         </EmptyState>
       )}
-      {(query.data ?? []).map((id) => (
-        <VotingCard key={id} id={id} admin={admin} />
+      {ids.map((id) => (
+        <VotingCard key={id} id={id} admin={admin} compact={votingId === undefined} />
       ))}
       {query.isError && <Alert tone="danger">{errorMessage(query.error)}</Alert>}
     </section>

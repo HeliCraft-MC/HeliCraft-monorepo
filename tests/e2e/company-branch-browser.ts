@@ -1,3 +1,4 @@
+import { openWorkspaceAction } from './workspace-browser-helpers';
 import { expect } from '@playwright/test';
 import type { Browser, Page } from '@playwright/test';
 import { BranchListSchema } from '../../apps/antares/src/modules/companies/branch-read-contracts';
@@ -29,6 +30,10 @@ async function verifyCompanyBranch(
     await expect(
       host.getByRole('heading', { name: 'Companies and registration', exact: true }),
     ).toBeVisible();
+    await host
+      .locator('summary')
+      .filter({ hasText: 'Registration rules and founder permissions' })
+      .click();
     await host.getByLabel('Branch registration', { exact: true }).selectOption('APPROVAL');
     await host.getByLabel('Foreign branches', { exact: true }).selectOption('ALLOW');
     await host.getByLabel('Corporate founders', { exact: true }).selectOption('ALLOW');
@@ -41,6 +46,7 @@ async function verifyCompanyBranch(
       host.getByRole('dialog', { name: 'Review state decision', exact: true }),
     ).not.toBeVisible();
     await page.goto(`/app/companies/${input.companyId}?section=branches&lang=en`);
+    await openWorkspaceAction(page, 'Open a branch');
     await page.getByLabel('Host jurisdiction', { exact: true }).selectOption(input.secondStateId);
     await page.getByLabel('Branch name · English', { exact: true }).fill('Browser foreign branch');
     await page

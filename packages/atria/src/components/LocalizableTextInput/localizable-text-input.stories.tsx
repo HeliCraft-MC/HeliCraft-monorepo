@@ -29,7 +29,7 @@ function Editor(): ReactElement {
   );
 }
 const meta = {
-  title: 'Components/LocalizableTextInput',
+  title: 'Forms/LocalizableTextInput',
   component: LocalizableTextInput,
   tags: ['autodocs'],
   args: {
@@ -47,7 +47,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Controlled multilingual text field with a native language picker that scales to many languages and works on mobile. Switching languages preserves all values; completion marks represent explicit translations only. Supply supported languages and localized interface labels. Fallback belongs to the platform resolver, never this editor.',
+          'Controlled multilingual text field with an always-visible primary language and a compact disclosure for translations. Expanded translations can be edited side by side; no fallback values are copied. Completion counts represent explicit translations only. Supply supported languages and localized interface labels. Fallback belongs to the platform resolver, never this editor.',
       },
     },
   },

@@ -1,12 +1,30 @@
+import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { test } from './fixtures';
 
 const PASSWORD = 'Browser test password 2026';
+
+async function openPoll(page: Page, title: string, admin: boolean): Promise<string> {
+  await page.goto(admin ? '/admin/votings' : '/app/votings');
+  const card = page
+    .getByRole('article')
+    .filter({ has: page.getByRole('heading', { name: title, exact: true }) });
+  const link = card.getByRole('link', {
+    name: admin ? 'Управлять опросом' : 'Открыть голосование',
+    exact: true,
+  });
+  const href = await link.getAttribute('href');
+  if (href === null) {
+    throw new Error('Missing voting link');
+  }
+  await link.click();
+  return href;
+}
+
 test('admin publishes a saved global poll, a user votes, and results remain reviewable', async ({
   page,
 }) => {
-  const suffix = crypto.randomUUID().replaceAll('-', '').slice(0, 9);
-  const title = `Общий опрос ${suffix}`;
+  const title = `Общий опрос ${crypto.randomUUID()}`;
   await page.goto('/login?returnTo=/admin/votings');
   await page.getByLabel('Ник', { exact: true }).fill('E2eOwner');
   await page.getByLabel('Пароль', { exact: true }).fill(PASSWORD);
@@ -19,23 +37,25 @@ test('admin publishes a saved global poll, a user votes, and results remain revi
     .fill('Поддерживаете предложение?');
   await page.getByLabel('Ответ 1 · Русский', { exact: true }).fill('За предложение');
   await page.getByLabel('Ответ 2 · Русский', { exact: true }).fill('Против предложения');
+  await page.getByRole('button', { name: 'Настройки', exact: true }).click();
   await page.getByLabel('Видимость результатов', { exact: true }).selectOption('PUBLIC');
   await page.getByRole('button', { name: 'Сохранить черновик опроса', exact: true }).click();
   const adminCard = page
     .getByRole('heading', { name: title, exact: true })
-    .locator('xpath=ancestor::section[1]');
+    .locator('xpath=ancestor::*[self::section or self::article][1]');
   await adminCard.getByRole('button', { name: 'Редактировать черновик', exact: true }).click();
   const editor = page.getByRole('dialog', { name: 'Черновик опроса', exact: true });
   await editor.getByLabel('Описание опроса · Русский', { exact: true }).fill('Изменённый черновик');
   await editor.getByRole('button', { name: 'Сохранить изменения', exact: true }).click();
   await expect(editor).toBeHidden();
   await expect(adminCard.getByText('Изменённый черновик', { exact: true })).toBeVisible();
+  await openPoll(page, title, true);
   await adminCard.getByRole('button', { name: 'Опубликовать голосование', exact: true }).click();
   await expect(adminCard.getByText('Идёт голосование', { exact: false })).toBeVisible();
-  await page.goto('/app/votings');
+  await openPoll(page, title, false);
   const userCard = page
     .getByRole('heading', { name: title, exact: true })
-    .locator('xpath=ancestor::section[1]');
+    .locator('xpath=ancestor::*[self::section or self::article][1]');
   const rules = userCard.locator('details').filter({ hasText: 'Правила голосования' });
   await rules.locator('summary').click();
   await rules.getByRole('button', { name: 'ⓘ Кворум', exact: true }).click();
@@ -45,7 +65,7 @@ test('admin publishes a saved global poll, a user votes, and results remain revi
   await userCard.getByRole('button', { name: 'Проголосовать', exact: true }).click();
   await expect(userCard.getByText('Ваш голос принят', { exact: true })).toBeVisible();
   await expect(userCard.getByText(/Участие: 1\//u)).toBeVisible();
-  await page.goto('/admin/votings');
+  await openPoll(page, title, true);
   await expect(adminCard.getByText(/Участие: 1\//u)).toBeVisible();
   await adminCard.getByRole('button', { name: 'Отменить голосование', exact: true }).click();
   await expect(adminCard.getByText('Отменено', { exact: false })).toBeVisible();
@@ -70,6 +90,7 @@ test('multi-question poll retains answers independently and requires a complete 
   await page.getByLabel('Текст вопроса · Русский', { exact: true }).nth(1).fill('Где строим?');
   await page.getByLabel('Ответ 1 · Русский', { exact: true }).nth(1).fill('На севере');
   await page.getByLabel('Ответ 2 · Русский', { exact: true }).nth(1).fill('На юге');
+  await page.getByRole('button', { name: 'Настройки', exact: true }).click();
   await page.getByRole('button', { name: 'ⓘ Кворум, %', exact: true }).click();
   await expect(page.getByText(/Минимальная доля избирателей/u)).toBeVisible();
   await page.keyboard.press('Escape');
@@ -82,12 +103,14 @@ test('multi-question poll retains answers independently and requires a complete 
     path: `/tmp/helicraft-poll-editor-${test.info().project.name}.png`,
     fullPage: true,
   });
+  await page.getByRole('button', { name: 'Проверка', exact: true }).click();
   await page.getByRole('button', { name: 'Опубликовать опрос', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Новый опрос', exact: true })).toBeHidden();
   await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-  await page.goto('/app/votings');
+  await openPoll(page, title, false);
   const ballot = page
     .getByRole('heading', { name: title, exact: true })
-    .locator('xpath=ancestor::section[1]');
+    .locator('xpath=ancestor::*[self::section or self::article][1]');
   await ballot.getByLabel('Строим', { exact: true }).check();
   await expect(ballot.getByRole('button', { name: 'Проголосовать', exact: true })).toBeDisabled();
   await ballot.getByLabel('На севере', { exact: true }).check();
@@ -115,6 +138,16 @@ test('survey constructor autosaves mixed blocks and administrators manage respon
   await editor
     .getByLabel('Заголовок блока · Русский', { exact: true })
     .fill('Какой проект предложите?');
+  await editor.getByRole('combobox', { name: 'Язык содержимого', exact: true }).selectOption('en');
+  await expect(editor.getByLabel('Название опроса · English', { exact: true })).toHaveValue('');
+  await editor.getByLabel('Название опроса · English', { exact: true }).fill('Community survey');
+  await editor
+    .getByLabel('Заголовок блока · English', { exact: true })
+    .fill('What would you build?');
+  await editor.getByRole('combobox', { name: 'Язык содержимого', exact: true }).selectOption('ru');
+  await expect(editor.getByLabel('Заголовок блока · Русский', { exact: true })).toHaveValue(
+    'Какой проект предложите?',
+  );
   await editor.getByLabel('Обязательный вопрос', { exact: true }).check();
   await editor.getByRole('button', { name: 'Добавить блок', exact: true }).click();
   const choice = editor.getByRole('region', { name: 'Блок 2', exact: true });
@@ -138,11 +171,12 @@ test('survey constructor autosaves mixed blocks and administrators manage respon
     .getByLabel('Загрузить изображение', { exact: true })
     .setInputFiles('apps/vega/public/world/town.webp');
   await expect(imageBlock.getByRole('img', { name: imageTitle, exact: true })).toBeVisible();
+  await editor.getByRole('button', { name: 'Настройки', exact: true }).click();
   await editor.getByLabel('Видимость результатов', { exact: true }).selectOption('PUBLIC');
   await expect(editor.getByText('Черновик сохранён', { exact: true })).toBeVisible();
-  await editor.getByRole('button', { name: 'Предпросмотр анкеты', exact: true }).click();
+  await editor.getByRole('button', { name: 'Проверка', exact: true }).click();
   await expect(editor.getByLabel('Какой проект предложите? *', { exact: true })).toBeVisible();
-  await editor.getByRole('button', { name: 'Вернуться к редактору', exact: true }).click();
+  await editor.getByRole('button', { name: 'Вопросы', exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= globalThis.innerWidth),
@@ -151,17 +185,18 @@ test('survey constructor autosaves mixed blocks and administrators manage respon
     path: `/tmp/helicraft-survey-editor-${test.info().project.name}.png`,
     fullPage: true,
   });
+  await editor.getByRole('button', { name: 'Проверка', exact: true }).click();
   await editor.getByRole('button', { name: 'Опубликовать опрос', exact: true }).click();
   await expect(editor).toBeHidden();
   const card = page
     .getByRole('heading', { name: title, exact: true })
-    .locator('xpath=ancestor::section[1]');
-  const href = await card
-    .getByRole('link', { name: 'Открыть по ссылке', exact: true })
-    .getAttribute('href');
-  if (href === null) {
-    throw new Error('Missing survey link');
+    .locator('xpath=ancestor::*[self::section or self::article][1]');
+  const managedHref = await openPoll(page, title, true);
+  const votingId = new URL(managedHref, page.url()).searchParams.get('votingId');
+  if (votingId === null) {
+    throw new Error('Missing voting identity');
   }
+  const href = `/app/votings/${votingId}`;
   await page.goto(href);
   await expect(page.getByText('Спасибо за предложения!', { exact: true })).toBeVisible();
   await expect(page.getByRole('img', { name: imageTitle, exact: true })).toBeVisible();
@@ -172,7 +207,7 @@ test('survey constructor autosaves mixed blocks and administrators manage respon
   await page.getByRole('button', { name: 'Отправить ответы', exact: true }).click();
   await expect(page.getByText('Ваш ответ принят', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Отправить ответы', exact: true })).toBeHidden();
-  await page.goto('/admin/votings');
+  await openPoll(page, title, true);
   await card.locator('summary').filter({ hasText: 'Просмотр ответов' }).click();
   await expect(card.getByRole('cell', { name: 'Построить порт', exact: true })).toBeVisible();
   await card.getByRole('button', { name: 'Закрыть анкету', exact: true }).click();

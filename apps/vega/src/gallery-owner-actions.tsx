@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import { Alert, Button } from '@helicraft/atria';
 import { deleteGalleryImage } from '@helicraft/alhena';
 import { browserClient, currentAccount, errorMessage } from './account-api';
+import { useNavigate } from '@tanstack/react-router';
 import { useHydrated } from './use-hydrated';
 
 function GalleryOwnerActions({
@@ -12,6 +13,7 @@ function GalleryOwnerActions({
   ownerId,
 }: Readonly<{ id: string; ownerId: string }>): ReactElement | null {
   const { text } = useTranslation();
+  const navigate = useNavigate();
 
   const hydrated = useHydrated();
   const account = useQuery({
@@ -27,12 +29,12 @@ function GalleryOwnerActions({
     setBusy(true);
     try {
       await deleteGalleryImage({ client: browserClient(), path: { id }, throwOnError: true });
-      globalThis.location.assign('/gallery');
+      await navigate({ to: '/gallery', search: { page: 1 } });
     } catch (error) {
       setMessage(errorMessage(error));
       setBusy(false);
     }
-  }, [id]);
+  }, [id, navigate]);
   const handleRemove = useCallback((): void => {
     void remove();
   }, [remove]);

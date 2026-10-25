@@ -30,19 +30,13 @@ describe('multilingual text editing', () => {
     fireEvent.change(screen.getByLabelText('Name · English'), {
       target: { value: 'Aurora Republic' },
     });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
-      target: { value: 'ru' },
-    });
+    fireEvent.click(screen.getByText('Language'));
     expect(screen.getByLabelText('Name · Русский')).toHaveValue('');
     fireEvent.change(screen.getByLabelText('Name · Русский'), { target: { value: 'Аврора' } });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
-      target: { value: 'en' },
-    });
+    fireEvent.click(screen.getByText('Language'));
     expect(screen.getByLabelText('Name · English')).toHaveValue('Aurora Republic');
     expect(screen.getByLabelText('Completed: 2/3')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
-      target: { value: 'de' },
-    });
+    fireEvent.click(screen.getByText('Language'));
     expect(screen.getByLabelText('Name · Deutsch')).toHaveValue('');
   });
 });

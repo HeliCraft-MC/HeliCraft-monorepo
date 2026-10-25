@@ -1,3 +1,5 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { CompanyCatalogue } from '@helicraft/alhena';
@@ -5,6 +7,10 @@ import { CompanyCataloguePage } from '../src/companies/catalogue';
 import { catalogueSearch, catalogueUrl } from '../src/companies/catalogue-search';
 import { LocaleProvider } from '../src/locale-provider';
 
+function renderPublic(content: ReactElement): string {
+  const client = new QueryClient();
+  return renderToStaticMarkup(<QueryClientProvider client={client}>{content}</QueryClientProvider>);
+}
 const COMPANY_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const STATE_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const catalogue: CompanyCatalogue = {
@@ -27,7 +33,7 @@ const catalogue: CompanyCatalogue = {
 const emptyCatalogue: CompanyCatalogue = { ...catalogue, items: [], total: 0, page: 1 };
 describe('published company catalogue', () => {
   it('renders localized public identity, real status, legal jurisdiction and UTC date without JavaScript', () => {
-    const html = renderToStaticMarkup(
+    const html = renderPublic(
       <LocaleProvider locale="ru">
         <CompanyCataloguePage
           catalogue={catalogue}
@@ -48,12 +54,12 @@ describe('published company catalogue', () => {
   });
   it('keeps outage and empty-result messages distinct', () => {
     const search = catalogueSearch.parse({});
-    const outage = renderToStaticMarkup(
+    const outage = renderPublic(
       <LocaleProvider locale="en">
         <CompanyCataloguePage catalogue={null} search={search} />
       </LocaleProvider>,
     );
-    const empty = renderToStaticMarkup(
+    const empty = renderPublic(
       <LocaleProvider locale="en">
         <CompanyCataloguePage catalogue={emptyCatalogue} search={search} />
       </LocaleProvider>,

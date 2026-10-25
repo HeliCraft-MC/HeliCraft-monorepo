@@ -27,6 +27,7 @@ function Page(): ReactElement {
 }
 const Route = createFileRoute('/app_/states/$stateId/manage')({
   ssr: false,
+  staleTime: 30_000,
   loader: async () => await loadPublicSite(),
   beforeLoad: async ({ location }) => {
     try {

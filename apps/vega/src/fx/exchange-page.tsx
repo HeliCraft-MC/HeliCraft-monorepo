@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createClient, getFxOffer } from '@helicraft/alhena';
-import { Alert, LoadingState } from '@helicraft/atria';
+import { PageHeader, Alert, LoadingState } from '@helicraft/atria';
 import { errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
@@ -29,7 +29,7 @@ function FxExchangePage({ id }: Readonly<{ id: string }>): ReactElement {
   }, [refetch]);
   return (
     <section className={styles.panel}>
-      <h1>{uiText(locale, 'Обмен валют', 'Currency exchange')}</h1>
+      <PageHeader title={uiText(locale, 'Обмен валют', 'Currency exchange')} />
       <a href="/exchange">{uiText(locale, 'Все предложения', 'All offers')}</a>
       {query.isPending && (
         <LoadingState label={uiText(locale, 'Загрузка предложения', 'Loading offer')} />

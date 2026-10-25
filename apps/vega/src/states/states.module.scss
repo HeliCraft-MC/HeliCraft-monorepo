@@ -7,7 +7,8 @@
 }
 .card,
 .localized {
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--workspace-border, var(--border-strong));
+  background: var(--workspace-surface, var(--bg-panel));
   border-radius: 1rem;
   padding: 1.25rem;
   display: grid;
@@ -135,4 +136,136 @@
   height: 2rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-small);
+}
+
+.pollEditor {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+  h2,
+  h3,
+  p {
+    margin-block: 0;
+  }
+  .card {
+    padding: clamp(0.75rem, 2vw, 1.25rem);
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding-block: 0.75rem;
+  }
+}
+
+.pollStep:not([hidden]) {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+.pollStep[hidden] {
+  display: none;
+}
+.editorFooter {
+  position: sticky;
+  bottom: -1.5rem;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-panel);
+}
+.optionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: end;
+  min-width: 0;
+  > button {
+    margin-bottom: 0.1rem;
+  }
+}
+.ballotChoice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  cursor: pointer;
+}
+.ballotChoice:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--bg-elevated);
+}
+.ballotChoice input {
+  accent-color: var(--primary);
+  flex: none;
+}
+@media (max-width: 40rem) {
+  .editorFooter {
+    bottom: -1rem;
+    > button {
+      flex: 1 1 100%;
+    }
+    > div {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}
+
+.institutionGrid,
+.institutionNavigation {
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--workspace-border, var(--border-subtle));
+    border-radius: var(--radius-medium);
+    background: var(--workspace-surface, var(--bg-panel));
+    color: var(--text-secondary);
+    text-decoration: none;
+    &[aria-current='page'] {
+      color: var(--text-primary);
+      font-weight: 650;
+      border-color: var(--primary);
+    }
+  }
+}
+.institutionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.75rem;
+  a {
+    min-height: 5rem;
+    align-items: start;
+    > svg {
+      margin-top: 0.2rem;
+    }
+    span {
+      display: grid;
+      gap: 0.35rem;
+    }
+    small {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.8rem;
+    }
+  }
+}
+.institutionNavigation strong {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+@media (min-width: 60.001rem) {
+  .institutionNavigation :global(nav) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
 }

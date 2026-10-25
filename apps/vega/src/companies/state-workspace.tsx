@@ -16,6 +16,7 @@ import { StateCompanyDecisions } from './state-decisions';
 import { StateCompanyShareAction } from './state-share-action';
 import { StateCompanyPortfolio } from './state-portfolio';
 import { StateCompanyFoundingDecision } from './state-founding-decision';
+import styles from './companies.module.scss';
 import { StateEntityVoting } from './state-entity-voting';
 
 function StateCompanyWorkspace({
@@ -49,7 +50,7 @@ function StateCompanyWorkspace({
     void queries.invalidateQueries({ queryKey: ['company-registration-policy', state.id] });
   }, [queries, state.id]);
   return (
-    <section>
+    <section className={styles.stateWorkspace}>
       <StateEntityVoting state={state} actorId={actorId} votingId={votingId} onSaved={refresh} />
       <StateCompanyFoundingDecision
         state={state}
@@ -64,43 +65,57 @@ function StateCompanyWorkspace({
         onSaved={refresh}
       />
       <h1>{uiText(locale, 'Компании и регистрация', 'Companies and registration')}</h1>
-      {policy.isPending && (
-        <p>{uiText(locale, 'Загрузка правил…', 'Loading registration policy…')}</p>
-      )}
-      {policy.data === null && (
-        <Alert>
-          {uiText(
-            locale,
-            'Правила ещё не утверждены. Регистрация компаний и филиалов недоступна до действительного решения Governance. Недостающее полномочие можно настроить через реформу государственного управления.',
-            'No registration policy has been adopted. Company and branch registration remain unavailable until a valid Governance decision. Missing authority can be configured through a Governance reform.',
-          )}
-        </Alert>
-      )}
-      {policy.data !== null && policy.data !== undefined && (
-        <PolicyTerms policy={policy.data.policy} />
-      )}
-      {policy.data !== undefined &&
-        economicAuthority(state, actorId, 'SET_COMPANY_REGISTRATION_POLICY') && (
-          <CompanyPolicyComposer
-            key={policy.data?.id ?? 'initial-policy'}
-            state={state}
-            current={policy.data}
-            onSaved={refresh}
-          />
-        )}
-      {policy.error !== null && (
-        <Alert tone="danger">
-          {uiText(
-            locale,
-            'Не удалось загрузить правила регистрации.',
-            'Could not load registration policy.',
-          )}
-        </Alert>
-      )}
+      <a href="/app/notifications">
+        {uiText(locale, 'Все входящие согласования', 'All approval requests')}
+      </a>
       <StateCompanyApplications state={state} actorId={actorId} onSaved={refresh} />
+      <StateCompanyDecisions state={state} actorId={actorId} onSaved={refresh} />
+      <details>
+        <summary>
+          {uiText(
+            locale,
+            'Правила регистрации и права учредителей',
+            'Registration rules and founder permissions',
+          )}
+        </summary>
+        <div className={styles.stateWorkspace}>
+          {policy.isPending && (
+            <p>{uiText(locale, 'Загрузка правил…', 'Loading registration policy…')}</p>
+          )}
+          {policy.data === null && (
+            <Alert>
+              {uiText(
+                locale,
+                'Правила ещё не утверждены. Регистрация компаний и филиалов недоступна до действительного решения Governance. Недостающее полномочие можно настроить через реформу государственного управления.',
+                'No registration policy has been adopted. Company and branch registration remain unavailable until a valid Governance decision. Missing authority can be configured through a Governance reform.',
+              )}
+            </Alert>
+          )}
+          {policy.data !== null && policy.data !== undefined && (
+            <PolicyTerms policy={policy.data.policy} />
+          )}
+          {policy.data !== undefined &&
+            economicAuthority(state, actorId, 'SET_COMPANY_REGISTRATION_POLICY') && (
+              <CompanyPolicyComposer
+                key={policy.data?.id ?? 'initial-policy'}
+                state={state}
+                current={policy.data}
+                onSaved={refresh}
+              />
+            )}
+          {policy.error !== null && (
+            <Alert tone="danger">
+              {uiText(
+                locale,
+                'Не удалось загрузить правила регистрации.',
+                'Could not load registration policy.',
+              )}
+            </Alert>
+          )}
+        </div>
+      </details>
       <StateCompanyPortfolio state={state} actorId={actorId} />
       <StateCompanyBranches state={state} actorId={actorId} onSaved={refresh} />
-      <StateCompanyDecisions state={state} actorId={actorId} onSaved={refresh} />
     </section>
   );
 }

@@ -1,64 +1,51 @@
-import { useState, useCallback } from 'react';
 import type { ReactElement } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { createClient, getPublicState } from '@helicraft/alhena';
 import { StateName as Name } from '@helicraft/atria';
-import { useTranslation } from './i18n';
-import { displayText, uiText } from './states/text';
+import { StatePreviewName } from './state-preview-name';
+import { StateNameById } from './state-name-by-id';
 
-const PREVIEW_STALE_MS = 60_000;
+interface StateNameProps {
+  readonly id?: string;
+  readonly name?: string;
+  readonly href?: string;
+  readonly color?: string;
+  readonly slug?: string;
+  readonly facts?: string;
+  readonly linked?: boolean;
+}
 function StateName({
+  id,
   name,
   href,
-  color,
+  color = 'var(--primary)',
   slug,
   facts,
-}: Readonly<{
-  name: string;
-  href: string;
-  color: string;
-  slug: string;
-  facts?: string;
-}>): ReactElement {
-  const { locale } = useTranslation();
-  const [requested, setRequested] = useState(false);
-  const requestPreview = useCallback((): void => {
-    setRequested(true);
-  }, []);
-  const state = useQuery({
-    queryKey: ['public-state-preview', slug, locale],
-    enabled: requested,
-    staleTime: PREVIEW_STALE_MS,
-    retry: false,
-    queryFn: async () => {
-      const result = await getPublicState({
-        client: createClient({ credentials: 'omit' }),
-        path: { slug },
-        query: { locale },
-        throwOnError: true,
-      });
-      return result.data;
-    },
-  });
-  const publicFacts =
-    state.data === undefined
-      ? undefined
-      : `${uiText(locale, 'Граждане', 'Citizens')}: ${state.data.citizens.length} · ${uiText(locale, 'Должности', 'Offices')}: ${state.data.configuration.governance.offices.length}`;
-  return (
-    <Name
-      name={name}
-      href={href}
-      color={color}
-      onPreview={requestPreview}
-      description={
-        state.data === undefined
-          ? undefined
-          : displayText(state.data.configuration.description, locale)
-      }
-      facts={[publicFacts, facts]
-        .filter((value) => value !== undefined && value !== '')
-        .join(' · ')}
-    />
-  );
+  linked = true,
+}: StateNameProps): ReactElement {
+  if (!linked) {
+    return (
+      <Name
+        name={name ?? slug ?? ''}
+        href={href ?? ''}
+        color={color}
+        facts={facts}
+        linked={false}
+      />
+    );
+  }
+  if (slug !== undefined) {
+    return (
+      <StatePreviewName
+        name={name ?? slug}
+        href={href ?? `/states/${slug}`}
+        color={color}
+        slug={slug}
+        facts={facts}
+      />
+    );
+  }
+  if (id !== undefined) {
+    return <StateNameById id={id} name={name} color={color} facts={facts} />;
+  }
+  return <Name name={name ?? ''} href={href ?? ''} color={color} facts={facts} linked={false} />;
 }
 export { StateName };

@@ -26,7 +26,7 @@ console.log(data.message);
 
 The transport uses Fetch, supports cancellation and throws when `throwOnError` is requested. Types do not validate remote payloads at runtime; Vega validates its greeting with Zod. Eventually this internal SDK can support public integrations, bots, analytics and automation.
 
-From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/setup-research.md).
+From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 
 ## Name
 
@@ -42,6 +42,6 @@ Public `/gallery` and `/gallery/:id` use SSR; `/app/gallery/new` uses existing s
 
 ## Monetary system V1
 
-[Domain model, Governance, exact accounting, API, screens and verification](../../docs/architecture/monetary.md).
+[Domain model, Governance, exact accounting, API, screens and verification](../../docs/economy/monetary.md).
 
-Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/architecture/taxation.md) and [Diplomacy](../../docs/architecture/diplomacy.md).
+Taxation and diplomacy reuse existing Governance/Voting and exact ledger accounting. See [Taxation](../../docs/economy/taxation.md) and [Diplomacy](../../docs/states/diplomacy.md).

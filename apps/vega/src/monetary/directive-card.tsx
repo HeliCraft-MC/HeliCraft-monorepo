@@ -10,7 +10,7 @@ import {
   cancelMonetaryDirective,
 } from '@helicraft/alhena';
 import type { MonetaryDirective, StateDetail } from '@helicraft/alhena';
-import { Alert, Button, FormField, TextField } from '@helicraft/atria';
+import { Icon, Alert, Button, FormField, TextField } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { displayText } from '../states/text';
@@ -95,7 +95,7 @@ function DirectiveCard({
       {directive.votes.map((vote) => (
         <a key={vote.id} href={`/app/votings/${vote.id}`}>
           {text('monetary.vote')}
-          {vote.approved ? ' ✓' : ''}
+          {vote.approved && <Icon name="check" />}
         </a>
       ))}
       {directive.manualRequired && (

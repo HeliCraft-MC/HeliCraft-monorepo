@@ -1,7 +1,7 @@
 import { useCallback, useId, useMemo, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 import type { CompanyWorkspace, CompanyOffice } from '@helicraft/alhena';
-import { Button, FieldHelp, FormField, Select } from '@helicraft/atria';
+import { ActionPanel, Button, FieldHelp, FormField, Select } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
 import { OfficeIdentityFields } from './office-identity-fields';
@@ -46,8 +46,9 @@ function CompanyOfficeDefinition({
     propose({ kind: existing ? 'UPDATE_OFFICE' : 'CREATE_OFFICE', office });
   }, [existing, office, propose]);
   return (
-    <section>
-      <h3>{uiText(locale, 'Создать или изменить должность', 'Create or update an office')}</h3>
+    <ActionPanel
+      title={uiText(locale, 'Создать или изменить должность', 'Create or update an office')}
+    >
       <FormField label={uiText(locale, 'Редактируемая должность', 'Office to edit')} htmlFor={id}>
         <Select id={id} value={existing ? office.id : ''} onChange={select}>
           <option value="">{uiText(locale, 'Новая должность', 'New office')}</option>
@@ -74,6 +75,7 @@ function CompanyOfficeDefinition({
         onChange={removal}
       />
       <FieldHelp
+        showLabel
         label={uiText(locale, 'Обязательные должности', 'Required offices')}
         content={uiText(
           locale,
@@ -90,7 +92,7 @@ function CompanyOfficeDefinition({
         {uiText(locale, 'Проверить определение должности', 'Review office definition')}
       </Button>
       <CompanyDecisionReview workspace={workspace} submission={submission} />
-    </section>
+    </ActionPanel>
   );
 }
 export { CompanyOfficeDefinition };

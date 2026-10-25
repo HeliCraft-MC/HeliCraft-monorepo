@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ComponentProps, ReactElement } from 'react';
 import type { MinecraftBanner } from '@helicraft/alhena';
-import { Button } from '@helicraft/atria';
+import { Icon, Button } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { bannerLabel } from './banner-labels';
 import { dyes, isDye } from './banner-model';
@@ -40,7 +40,7 @@ function BannerPalette({
               }
             })}
           >
-            <span aria-hidden="true">{value === color ? '✓' : ''}</span>
+            <span aria-hidden="true">{value === color && <Icon name="check" />}</span>
           </Button>
         ))}
       </div>

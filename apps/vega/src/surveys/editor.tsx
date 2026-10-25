@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { ComponentProps, DragEvent, ReactElement } from 'react';
 import type { VotingInput } from '@helicraft/alhena';
-import { Button, Checkbox } from '@helicraft/atria';
+import { Button, Checkbox, Icon } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { usePropCache } from '../states/use-prop-cache';
@@ -77,6 +77,7 @@ function SurveyEditor({
         disabled={(input.survey?.blocks.length ?? 0) >= MAX_BLOCKS}
         onClick={add}
       >
+        <Icon name="add" />
         {uiText(locale, 'Добавить блок', 'Add block')}
       </Button>
     </div>
