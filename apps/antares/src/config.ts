@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ServiceActorSchema } from './modules/minecraft/contracts';
+import { TileSourcesSchema } from './modules/spatial/tile-sources';
 
 const MAX_PORT = 65_535;
 const DEFAULT_PORT = 3000;
@@ -28,6 +29,19 @@ const CommunityLinks = z
 const EnvSchema = z
   .object({
     COMMUNITY_LINKS: CommunityLinks,
+    SQUAREMAP_TILE_SOURCES: z
+      .string()
+      .default('[]')
+      .transform((value, context): unknown => {
+        try {
+          const parsed: unknown = JSON.parse(value);
+          return parsed;
+        } catch {
+          context.addIssue({ code: 'custom', message: 'SQUAREMAP_TILE_SOURCES must be JSON' });
+          return z.NEVER;
+        }
+      })
+      .pipe(TileSourcesSchema),
     MINECRAFT_DISPOSABLE: z
       .enum(['true', 'false'])
       .default('false')

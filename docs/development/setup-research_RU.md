@@ -30,7 +30,7 @@ Compose использует `postgis/postgis:18-3.6`; том PostgreSQL 18 мо
 
 ## Java и Minecraft
 
-Java **25**, Gradle **9.1.0**, Kotlin DSL. Paper **26.2 build 129** и Velocity **4.2.0 build 30** выбраны из официальных stable-релизов; URL и SHA-256 закреплены в `server-lock.json`. Docker скачивает сервер и сверяет checksum. [Gradle 9.1](https://docs.gradle.org/9.1.0/release-notes.html), [Paper downloads](https://docs.papermc.io/misc/downloads-service/).
+Java **25**, Gradle **9.1.0**, Kotlin DSL. Paper **26.3 build 223** и Velocity **4.2.0 build 30** выбраны из официальных stable-релизов; URL и SHA-256 закреплены в `server-lock.json`. Docker скачивает сервер и сверяет checksum. [Gradle 9.1](https://docs.gradle.org/9.1.0/release-notes.html), [Paper downloads](https://docs.papermc.io/misc/downloads-service/).
 
 Deneb использует compile-only Paper/Adventure; JTS и Caffeine включены в jar через Shadow и relocated. Rigel использует compile-only Velocity API и annotation processor для дескриптора. Неблокирующий HTTP health-запрос показывает соединение с Antares, не реализуя World Engine или авторизацию. [Paper project setup](https://docs.papermc.io/paper/dev/project-setup/), [Velocity plugin](https://docs.papermc.io/velocity/dev/creating-your-first-plugin/).
 

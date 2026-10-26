@@ -65,17 +65,18 @@
     "minecraft:clean": "bun --no-env-file scripts/minecraft.ts clean",
     "minecraft:config": "bun --no-env-file scripts/minecraft.ts config",
     "test:minecraft": "bun --no-env-file scripts/minecraft.ts test",
+    "test:minecraft:territories": "bun --no-env-file scripts/minecraft.ts test",
     "test:minecraft:contracts": "bun run --cwd apps/antares test:integration tests/minecraft.integration.test.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "@types/bun": "1.4.2",
-    "minecraft-protocol": "1.68.0",
     "oxfmt": "0.71.0",
     "oxlint": "1.86.0",
     "oxlint-tsgolint": "7.0.2003",
     "typescript": "7.0.2",
-    "vitest": "5.0.3"
+    "vitest": "5.0.3",
+    "zod": "4.6.5"
   },
   "engines": {
     "bun": ">=1.4.2"

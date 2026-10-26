@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-const lock: unknown = await Bun.file('server-lock.json').json();
+const lock: unknown = await Bun.file(process.argv[2] ?? 'server-lock.json').json();
 if (
   typeof lock !== 'object' ||
   lock === null ||
@@ -21,4 +21,4 @@ const bytes = await response.arrayBuffer();
 if (createHash('sha256').update(new Uint8Array(bytes)).digest('hex') !== lock.sha256) {
   throw new Error('Server checksum mismatch');
 }
-await Bun.write('server.jar', bytes);
+await Bun.write(process.argv[3] ?? 'server.jar', bytes);

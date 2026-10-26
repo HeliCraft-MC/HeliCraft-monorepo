@@ -1,5 +1,7 @@
+// oxlint-disable import/max-dependencies -- Read-only state decision review composes existing domain displays and shared Voting eligibility.
 import { treatyRevision } from '../diplomacy/store';
 import { fxDecisionDisplay } from '../fx/decision-display';
+import { territorialDecisionDisplay } from '../spatial/decision-display';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Transaction } from '../permissions/transaction';
 import type { Database } from '../../db';
@@ -62,6 +64,7 @@ class MonetaryReviewService {
     code: string;
     treatyContent: DirectiveDetail['treatyContent'];
     fxDisplay: DirectiveDetail['fxDisplay'];
+    territorialDisplay: DirectiveDetail['territorialDisplay'];
   }> {
     return await this.db.transaction(async (transaction) => {
       await monetaryActor(transaction, actor);
@@ -97,6 +100,7 @@ class MonetaryReviewService {
         code,
         treatyContent: treaty?.content ?? null,
         fxDisplay: await fxDecisionDisplay(transaction, record.stateId, payload),
+        territorialDisplay: await territorialDecisionDisplay(transaction, payload),
       };
     });
   }

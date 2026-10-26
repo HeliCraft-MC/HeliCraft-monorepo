@@ -1,10 +1,14 @@
 name: Deneb
 version: 0.1.0
 main: io.helicraft.deneb.DenebPlugin
-api-version: '26.2'
+api-version: '26.3'
 authors: [HeliCraft]
-description: Antares identity and presence in Minecraft
+description: Antares identity, presence and verified territorial jurisdiction in Minecraft
 commands:
   heli:
     description: Server information and verified player profile
-    usage: /heli [status|profile]
+    usage: /heli [status|profile|whereami|borders]
+permissions:
+  helicraft.spatial.debug:
+    description: Inspect verified spatial snapshot versions
+    default: op

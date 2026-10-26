@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as ChronicleRouteImport } from './routes/chronicle'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as StartRouteImport } from './routes/start'
@@ -28,6 +29,7 @@ import { Route as AdminMonetaryDirectivesRouteImport } from './routes/admin.mone
 import { Route as AdminPagesRouteImport } from './routes/admin.pages'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminTaxOfficesRouteImport } from './routes/admin.tax-offices'
+import { Route as AdminTerritoriesRouteImport } from './routes/admin.territories'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVotingsRouteImport } from './routes/admin.votings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -113,6 +115,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -181,6 +188,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
 const AdminTaxOfficesRoute = AdminTaxOfficesRouteImport.update({
   id: '/tax-offices',
   path: '/tax-offices',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTerritoriesRoute = AdminTerritoriesRouteImport.update({
+  id: '/territories',
+  path: '/territories',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -489,6 +501,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/chronicle': typeof ChronicleRouteWithChildren
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/register': typeof RegisterRoute
   '/rules': typeof RulesRoute
   '/start': typeof StartRoute
@@ -502,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
+  '/admin/territories': typeof AdminTerritoriesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
   '/app/minecraft': typeof AppMinecraftRoute
@@ -566,6 +580,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/register': typeof RegisterRoute
   '/rules': typeof RulesRoute
   '/start': typeof StartRoute
@@ -577,6 +592,7 @@ export interface FileRoutesByTo {
   '/admin/monetary-directives': typeof AdminMonetaryDirectivesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
+  '/admin/territories': typeof AdminTerritoriesRoute
   '/admin/votings': typeof AdminVotingsRoute
   '/app/minecraft': typeof AppMinecraftRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -644,6 +660,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/chronicle': typeof ChronicleRouteWithChildren
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
   '/register': typeof RegisterRoute
   '/rules': typeof RulesRoute
   '/start': typeof StartRoute
@@ -657,6 +674,7 @@ export interface FileRoutesById {
   '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/tax-offices': typeof AdminTaxOfficesRoute
+  '/admin/territories': typeof AdminTerritoriesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/votings': typeof AdminVotingsRoute
   '/app/minecraft': typeof AppMinecraftRoute
@@ -726,6 +744,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/chronicle'
     | '/login'
+    | '/map'
     | '/register'
     | '/rules'
     | '/start'
@@ -739,6 +758,7 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/settings'
     | '/admin/tax-offices'
+    | '/admin/territories'
     | '/admin/users'
     | '/admin/votings'
     | '/app/minecraft'
@@ -803,6 +823,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/map'
     | '/register'
     | '/rules'
     | '/start'
@@ -814,6 +835,7 @@ export interface FileRouteTypes {
     | '/admin/monetary-directives'
     | '/admin/settings'
     | '/admin/tax-offices'
+    | '/admin/territories'
     | '/admin/votings'
     | '/app/minecraft'
     | '/app/notifications'
@@ -880,6 +902,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/chronicle'
     | '/login'
+    | '/map'
     | '/register'
     | '/rules'
     | '/start'
@@ -893,6 +916,7 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/settings'
     | '/admin/tax-offices'
+    | '/admin/territories'
     | '/admin/users'
     | '/admin/votings'
     | '/app/minecraft'
@@ -961,6 +985,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ChronicleRoute: typeof ChronicleRouteWithChildren
   LoginRoute: typeof LoginRoute
+  MapRoute: typeof MapRoute
   RegisterRoute: typeof RegisterRoute
   RulesRoute: typeof RulesRoute
   StartRoute: typeof StartRoute
@@ -1022,6 +1047,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -1120,6 +1152,13 @@ declare module '@tanstack/react-router' {
       path: '/tax-offices'
       fullPath: '/admin/tax-offices'
       preLoaderRoute: typeof AdminTaxOfficesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/territories': {
+      id: '/admin/territories'
+      path: '/territories'
+      fullPath: '/admin/territories'
+      preLoaderRoute: typeof AdminTerritoriesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/users': {
@@ -1594,6 +1633,7 @@ interface AdminRouteChildren {
   AdminPagesRoute: typeof AdminPagesRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTaxOfficesRoute: typeof AdminTaxOfficesRoute
+  AdminTerritoriesRoute: typeof AdminTerritoriesRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminVotingsRoute: typeof AdminVotingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -1611,6 +1651,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPagesRoute: AdminPagesRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTaxOfficesRoute: AdminTaxOfficesRoute,
+  AdminTerritoriesRoute: AdminTerritoriesRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminVotingsRoute: AdminVotingsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -1698,6 +1739,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ChronicleRoute: ChronicleRouteWithChildren,
   LoginRoute: LoginRoute,
+  MapRoute: MapRoute,
   RegisterRoute: RegisterRoute,
   RulesRoute: RulesRoute,
   StartRoute: StartRoute,

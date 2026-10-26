@@ -10,6 +10,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { authSessions, users } from './core-schema';
+import type { Locale } from '../modules/localized-content/contracts';
 
 const minecraftChallenges = pgTable(
   'minecraft_challenges',
@@ -30,6 +31,7 @@ const minecraftChallenges = pgTable(
       .default('WAITING_AUTH'),
     attempts: integer('attempts').notNull().default(0),
     approvedSessionId: uuid('approved_session_id').references(() => authSessions.id),
+    locale: text('locale').$type<Locale>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     polledAt: timestamp('polled_at', { withTimezone: true }).notNull().defaultNow(),
@@ -41,6 +43,7 @@ const minecraftChallenges = pgTable(
       sql`${table.status} in ('WAITING_AUTH','APPROVED','CONSUMED','REJECTED','EXPIRED','DISCONNECTED')`,
     ),
     check('minecraft_challenge_attempts', sql`${table.attempts} between 0 and 5`),
+    check('minecraft_challenge_locale', sql`${table.locale} in ('ru','en')`),
     check('minecraft_challenge_lifetime', sql`${table.expiresAt} > ${table.createdAt}`),
   ],
 );

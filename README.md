@@ -13,13 +13,15 @@ Public state pages present flags, founders, citizenship, current offices, decisi
 
 The [monetary system V1](docs/economy/monetary.md) adds Governance-controlled central banks, administrative ratification, national currencies, immutable monetary policies, a double-entry ledger, treasury spending and personal wallets. Operate it entirely through Vega without Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` and public SSR `/currencies`. Monetary authority must be explicitly configured through a reform.
 
+State territories now connect the [political map and editor](docs/states/territories.md), existing Governance and independent ratification to native Paper 26.3 gameplay. Actual squaremap tiles and Deneb JTS snapshots are covered by [dated verification](docs/verification/territories-2026-10-25.md); private claims and enforcement remain future work.
+
 ## Projects
 
 | Product                             | Directory         | Stack                                                                     |
 | ----------------------------------- | ----------------- | ------------------------------------------------------------------------- |
 | [Vega](apps/vega/README.md)         | `apps/vega`       | React 19 · TypeScript · Vite · TanStack Router/Query · Zod · Atria · PWA  |
 | [Antares](apps/antares/README.md)   | `apps/antares`    | TypeScript · Bun · Hono · Zod/OpenAPI · Drizzle · PostgreSQL/PostGIS · S3 |
-| [Deneb](apps/deneb/README.md)       | `apps/deneb`      | Java 25 · Paper 26.2 · Gradle Kotlin DSL · Adventure · JTS · Caffeine     |
+| [Deneb](apps/deneb/README.md)       | `apps/deneb`      | Java 25 · Paper 26.3 · Gradle Kotlin DSL · Adventure · JTS · Caffeine     |
 | [Rigel](apps/rigel/README.md)       | `apps/rigel`      | Java 25 · Velocity 4.2.0 · Gradle Kotlin DSL                              |
 | [Atria](packages/atria/README.md)   | `packages/atria`  | React · TypeScript · SCSS Modules · Base UI · Storybook                   |
 | [Alhena](packages/alhena/README.md) | `packages/alhena` | Generated TypeScript SDK · native Fetch · zero runtime dependencies       |

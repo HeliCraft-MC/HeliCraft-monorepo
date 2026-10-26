@@ -1,4 +1,5 @@
 import { publishInitialPolicies } from './institution-policies';
+import { executeTerritoryDirective } from '../spatial/directives';
 // oxlint-disable import/max-dependencies -- Approved economic directives dispatch to existing ledger or institution/law/treaty domain services.
 import { TaxDirectiveSchema } from '../taxation/contracts';
 import { TreatyDirectiveSchema } from '../diplomacy/contracts';
@@ -42,7 +43,9 @@ async function applyDirective(
   const treaty = TreatyDirectiveSchema.safeParse(payload);
   const company = CompanyStateDirectiveSchema.safeParse(payload);
   const fx = FxDirectiveSchema.safeParse(payload);
-  if (fx.success) {
+  if (payload.kind === 'CHANGE_TERRITORY') {
+    await executeTerritoryDirective(transaction, record, payload);
+  } else if (fx.success) {
     await executeFxDirective(transaction, { record, actorId: actor.id }, fx.data);
   } else if (company.success) {
     await executeCompanyStateDirective(transaction, { record, actorId: actor.id }, company.data);

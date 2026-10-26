@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { LocaleSchema } from '../localized-content/contracts';
 
 const MAX_SERVICE_TOKEN = 128;
 const CODE_LENGTH = 16;
@@ -38,6 +39,7 @@ const IssuedChallenge = ChallengeView.extend({
 }).openapi('MinecraftIssuedChallenge');
 const DecisionInput = z.strictObject({
   decision: z.enum(['APPROVE', 'REJECT']),
+  locale: LocaleSchema.optional(),
   code: z
     .string()
     .length(CODE_LENGTH)
@@ -66,6 +68,7 @@ const Profile = z
     username: MinecraftName,
     serverName: z.string(),
     states: z.array(z.string()),
+    locale: LocaleSchema,
   })
   .openapi('MinecraftProfile');
 const EventView = z.object({
@@ -96,6 +99,7 @@ const ServiceActorSchema = z.strictObject({
     .regex(/^[A-Za-z0-9_-]+$/u),
 });
 type ServiceActor = z.infer<typeof ServiceActorSchema>;
+type ChallengeDecision = z.infer<typeof DecisionInput>;
 type ChallengeRecord = z.infer<typeof ChallengeView>;
 type GameSession = z.infer<typeof SessionView>;
 export {
@@ -115,6 +119,7 @@ export {
   IdParams,
   ServiceActorSchema,
   type ServiceActor,
+  type ChallengeDecision,
   type ChallengeRecord,
   type GameSession,
 };

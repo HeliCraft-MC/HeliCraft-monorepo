@@ -65,6 +65,39 @@ final class AntaresClientTest {
   }
 
   @Test
+  void rejectsOversizedAuthenticationBodiesWhileAllowingBoundedSpatialPayloads()
+      throws java.io.IOException {
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    byte[] bytes =
+        ("{\"payload\":\"" + "x".repeat(70_000) + "\"}").getBytes(StandardCharsets.UTF_8);
+    for (String path :
+        java.util.List.of(
+            "/api/v1/internal/minecraft/large", "/api/v1/internal/minecraft/spatial/snapshot")) {
+      server.createContext(
+          path,
+          exchange -> {
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (var body = exchange.getResponseBody()) {
+              body.write(bytes);
+            } finally {
+              exchange.close();
+            }
+          });
+    }
+    server.start();
+    try (AntaresClient client =
+        new AntaresClient("http://127.0.0.1:" + server.getAddress().getPort(), "x".repeat(43))) {
+      assertThrows(
+          CompletionException.class,
+          () -> client.post("/api/v1/internal/minecraft/large", new Object(), Object.class).join());
+      var result = client.spatialSnapshot(new Object(), com.google.gson.JsonObject.class).join();
+      assertEquals(70_000, result.get("payload").getAsString().length());
+    } finally {
+      server.stop(0);
+    }
+  }
+
+  @Test
   void validatesRealHttpAuthenticationErrorsAndMalformedResponses() throws java.io.IOException {
     HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     server.createContext(

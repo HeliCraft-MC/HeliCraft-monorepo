@@ -1,0 +1,27 @@
+.frame {
+  position: relative;
+  min-width: 0;
+}
+.frame .map {
+  height: clamp(24rem, 65vh, 48rem);
+  width: 100%;
+  isolation: isolate;
+  background: #17202b;
+  border-radius: 0.75rem;
+  outline-offset: 3px;
+  :global(.leaflet-tile) {
+    image-rendering: pixelated;
+  }
+  :global(.leaflet-tooltip) {
+    white-space: normal;
+    width: max-content;
+    max-width: 14rem;
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 40rem) {
+  .map {
+    height: 60vh;
+    min-height: 22rem;
+  }
+}

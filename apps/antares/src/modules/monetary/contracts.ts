@@ -7,6 +7,7 @@ import { LocalizedInputSchema, resolveText } from '../localized-content/contract
 import { MinorSchema, CumulativeMinorSchema, PositiveMinorSchema } from './amount-contracts';
 import { CompanyStateDirectiveSchemas } from '../companies/registration-contracts';
 import { FxDecisionDisplaySchema, FxDirectiveSchemas } from '../fx/contracts';
+import { TerritoryDirectiveSchema, TerritoryDecisionDisplaySchema } from '../spatial/contracts';
 
 const NameSchema = LocalizedInputSchema.refine(
   (value) => resolveText(value, 'en').value.trim().length > 0,
@@ -35,6 +36,7 @@ const financial = {
 };
 const DirectivePayloadSchema = z
   .discriminatedUnion('kind', [
+    TerritoryDirectiveSchema,
     ...FxDirectiveSchemas,
     ...CompanyStateDirectiveSchemas,
     ...TaxDirectiveSchemas,
@@ -100,6 +102,7 @@ const DirectiveDetailSchema = z
     payloadHash: z.string(),
     treatyContent: TreatyContentSchema.nullable().openapi('OptionalDirectiveTreatyContent'),
     fxDisplay: FxDecisionDisplaySchema.optional(),
+    territorialDisplay: TerritoryDecisionDisplaySchema.optional(),
     status: z.enum(['PENDING', 'APPLIED', 'CANCELLED']),
     createdAt: z.iso.datetime(),
     appliedAt: z.iso.datetime().nullable(),

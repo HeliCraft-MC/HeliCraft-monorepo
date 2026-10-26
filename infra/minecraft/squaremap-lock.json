@@ -1,0 +1,9 @@
+{
+  "project": "squaremap-paper",
+  "version": "1.4.3",
+  "minecraft": "26.3",
+  "source": "https://api.modrinth.com/v2/version/6wmZVQBO",
+  "url": "https://cdn.modrinth.com/data/PFb7ZqK6/versions/6wmZVQBO/squaremap-paper-mc26.3-1.4.3.jar",
+  "sha256": "d13331799cd5ace6c02b7e625eda40f0fb69c4f89c3778324758bf6f25f49f08",
+  "sha512": "8e3fde14937a8ff7776a37f43385942ff76bab4d2a5f9e9d5290a22c5dc26b21fbde666439e48b0f128e09083ac06b96e56263e2ee740e8550bc5c61e408a4c1"
+}

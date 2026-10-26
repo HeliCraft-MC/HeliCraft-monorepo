@@ -1,0 +1,2 @@
+ALTER TABLE "minecraft_challenges" ADD COLUMN "locale" text;--> statement-breakpoint
+ALTER TABLE "minecraft_challenges" ADD CONSTRAINT "minecraft_challenge_locale" CHECK ("minecraft_challenges"."locale" in ('ru','en'));

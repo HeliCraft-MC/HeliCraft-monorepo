@@ -18,7 +18,7 @@ bun run test:integration
 bun run generate
 ```
 
-Copy root `.env.example` to `.env` first. Target database: `helicraft`, PostgreSQL 18/PostGIS 3.6. The initial migration enables PostGIS and creates `world_events` with an optional SRID 4326 point. This is a wiring example; Minecraft planar coordinates require a deliberate future coordinate model. Generate new migrations with `db:generate`, review them and apply with `db:migrate`; no destructive push command is configured.
+Copy root `.env.example` to `.env` first. Target database: `helicraft`, PostgreSQL 18/PostGIS 3.6. The initial migration enables PostGIS and creates `world_events` with an optional SRID 4326 point. This remains a separate event-wiring example. Current [state territories](../../docs/architecture/spatial.md) use local planar `[X,Z]`, SRID 0, in their own PostGIS geometry/revision tables; never interpret Minecraft blocks as SRID 4326. Generate new migrations with `db:generate`, review them and apply with `db:migrate`; no destructive push command is configured.
 
 S3 uses AWS SDK v3 with an endpoint and path-style addressing. Integration tests use Testcontainers for real PostGIS migrations/spatial persistence and S3 object round trips. Docker daemon is required. Unit tests inject readiness dependencies and do not need services.
 

@@ -6,7 +6,7 @@ Use this guide for the isolated Minecraft Integration V1 environment. It never a
 
 ## Prerequisites and pinned versions
 
-Bun 1.4.2+, Docker/Compose and Java 25 are required for native tests. The checked-in wrapper downloads Gradle 9.1.0. Rigel uses Velocity 4.2.0 build 30; Deneb uses Paper 26.2 build 129. Server locks contain download URL and SHA-256. LimboAPI `1.1.27-SNAPSHOT` is pinned to commit `bfef5799f21d73a80155035c3430f6654aa6b9f8` and checksum in `infra/minecraft/limboapi.properties`; mutable upstream replacement fails verification. Chromium is needed for browser acceptance: `bunx --bun playwright install chromium` (Linux may also need system libraries).
+Bun 1.4.2+, Docker/Compose and Java 25 are required for native tests. The checked-in wrapper downloads Gradle 9.1.0. Rigel uses Velocity 4.2.0 build 30; Deneb uses Paper 26.3 build 223. Server locks contain download URL and SHA-256. LimboAPI `1.1.27-SNAPSHOT` is pinned to commit `bfef5799f21d73a80155035c3430f6654aa6b9f8` and checksum in `infra/minecraft/limboapi.properties`; mutable upstream replacement fails verification. Chromium is needed for browser acceptance: `bunx --bun playwright install chromium` (Linux may also need system libraries).
 
 Install once at repository root with `bun install --frozen-lockfile`. Do not use npm for JavaScript scripts or downgrade TS7. Docker provides Java for the Compose runtime; local JDK is needed for explicit Gradle/native tests. No Minecraft client mod is required.
 
@@ -63,14 +63,14 @@ Artifacts: `apps/rigel/build/libs/rigel.jar`, `apps/deneb/build/libs/deneb.jar`;
 
 `test:minecraft:contracts` runs real Antares HTTP/security scenarios on disposable PostgreSQL through Testcontainers. `test:minecraft` builds current Java and TS sources, starts a fresh PostgreSQL, real local Velocity/Paper and production Vega, then drives browser confirmation and real Minecraft protocol traffic. It also kills/restarts the Java servers, waits for lease expiry, rejects wrong forwarding/stale service credentials/unavailable Paper/another forced-host backend, and verifies recovery with the same UUID. Native servers bind loopback only. It prints a unique `/tmp/helicraft-minecraft-v1-*` evidence directory containing logs, screenshots and successful `result.json`; processes and the container stop in `finally`. No user DB/world is touched. Preserve that directory for investigation; it may contain private local runtime configuration and should not be published wholesale.
 
-The available protocol library is `minecraft-protocol` 1.68.0 with Minecraft 26.1. The automated disposable Paper installs pinned ViaVersion/ViaBackwards 5.12.1 solely to translate this real protocol to Paper 26.2. Both JARs are checksum-verified in `infra/minecraft/test-adapters.json`. These are test adapters, not part of the ordinary Compose stack. Do not claim native 26.2 UI acceptance from that test.
+The harness uses the maintained MCProtocolLib **26.3 / protocol 777** as a test-only Java dependency. `:minecraft-client:nativeClientClasspath` prepares its classpath; the private IPC adapter handles standard teleport acknowledgements and client tick-end packets. Production plugins contain no protocol stack or translation plugin. No ViaVersion/ViaBackwards is installed. The old adapter lock is unused historical evidence. `test:minecraft:territories` invokes the same workspace and full native acceptance, including real squaremap, Vega and physical jurisdiction; it does not create another Compose stack. Human graphical 26.3 acceptance is a separate check.
 
 Run container-heavy integration suites before browser suites. On this host, changing Docker interfaces can make Chromium fail with `ERR_NETWORK_CHANGED`; rerun the browser suite after infrastructure settles and keep the initial failure attributable. Missing Docker, worker-process access, Chromium/system libraries, Java or network downloads are environment failures, distinct from code regressions. Never suppress application page errors to hide them.
 
 ## Native-client acceptance
 
 1. Start `minecraft:up`; open [Vega](http://localhost:8096), register a disposable account and keep its browser session.
-2. In an ordinary Minecraft **26.2** client, set its player name to that account username and connect to `localhost:25575`. An account name alone grants no ownership. Do not use a different person's name.
+2. In an ordinary Minecraft **26.3** client, set its player name to that account username and connect to `localhost:25575`. An account name alone grants no ownership. Do not use a different person's name.
 3. Confirm that the isolated waiting space shows configured branding, a code and `/app/minecraft`. No gameplay backend/playerdata should exist before approval.
 4. Open `/app/minecraft`, inspect name/time, enter the code from your own game and confirm. Check the Paper welcome, every actual citizenship or neutral status, `/heli`, `/heli status`, `/heli profile`, matching account UUID and online presence.
 5. Disconnect; check offline status and one end event. Reconnect requires a new code; rejection/expiry/wrong code/another browser account cannot admit the player.
@@ -91,4 +91,16 @@ Expected startup evidence: exact Velocity/Paper/Limbo versions, `Rigel ready:`, 
 
 For debugging use disposable logs and scoped DTO/state-machine tests first. Remote Java debugging may be enabled explicitly for a loopback-only local process; do not publish debug ports or secret-bearing HTTP traces. Never log password commands or full auth bodies.
 
-Plugin HTTP timeout: `MINECRAFT_HTTP_TIMEOUT_MS` defaults to 4000 and is restricted to 1000–10000 ms. Mutation retries are deliberately disabled; an ambiguous consumption is resolved by disconnect/expiry, never by another admission request. The protocol harness clears leftover known-packs/code-of-conduct listeners at normal configuration completion because the pinned client otherwise sends duplicate replies when leaving limbo. Native 26.2 clients need no such adapter.
+Plugin HTTP timeout: `MINECRAFT_HTTP_TIMEOUT_MS` defaults to 4000 and is restricted to 1000–10000 ms. Mutation retries are deliberately disabled; an ambiguous consumption is resolved by disconnect/expiry, never by another admission request. The native MCProtocolLib adapter uses the library's configuration lifecycle and acknowledges Paper 26.3 teleports with exact position/rotation plus client tick-end. Never treat a translated older client as native coverage.
+
+## squaremap and world migration
+
+Squaremap Paper 1.4.3 for mc26.3 is pinned by URL, SHA-256 and upstream SHA-512 in `infra/minecraft/squaremap-lock.json`. Its JAR is installed separately from Deneb. Internal HTTP listens on 8081; Antares reads only configured `SQUAREMAP_TILE_SOURCES` and exposes fixed registered-world PNG routes. Readiness checks `/tiles/settings.json` internally. Live-player tracking is disabled. Renderer files live under the dedicated Paper test volume.
+
+Use the administrative Territories and worlds page to register the actual backend, Paper UUID and dimension printed by Deneb. Recreated worlds require a new identity and do not inherit old geometry. The public map remains empty until registration. In V1, register/edit territories only for Overworld. Normal Paper port privacy and modern forwarding remain mandatory.
+
+For bounded initial rendering, use the trusted server console: `squaremap radiusrender minecraft:overworld 64 0 0`. The console also supports `squaremap fullrender minecraft:overworld`, cancellation and renderer status. Full/radius rendering uses one worker with bounded chunk requests/cache; background updates process at most 16 chunks every ten seconds. Do not schedule infinite fullrender at startup or claim a fixed TPS guarantee without measurement. Large renders require an operator-chosen area/time and monitoring.
+
+Paper 26.3 can upgrade world formats. This task's harness always creates a fresh disposable world; it never opens a user world or connects to database `helicraft`. Before an operator migrates a persistent world, stop writes, back up the complete world/plugin data and database, verify restores, test a copy with the exact locked runtime, and retain a rollback environment. Copying only the region files is insufficient.
+
+See [territorial workflow](../states/territories.md), [coordinates and snapshot/cache contract](../architecture/spatial.md) and [current verification](../verification/territories-2026-10-25.md).

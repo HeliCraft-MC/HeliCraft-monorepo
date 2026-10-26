@@ -4,6 +4,7 @@ import { uiText } from '../states/text';
 import type { StateDetail, MonetaryDirectivePayload, GovernancePolicy } from '@helicraft/alhena';
 
 const economicActions = {
+  CHANGE_TERRITORY: 'CHANGE_TERRITORY',
   SET_COMPANY_REGISTRATION_POLICY: 'SET_COMPANY_REGISTRATION_POLICY',
   REVIEW_COMPANY_REGISTRATION: 'REGISTER_COMPANY',
   REVIEW_COMPANY_BRANCH: 'REGISTER_COMPANY_BRANCH',
@@ -42,6 +43,7 @@ function economicAuthority(
   );
 }
 const economicLabels: Readonly<Record<string, readonly [string, string]>> = {
+  CHANGE_TERRITORY: ['Изменить государственную территорию', 'Change state territory'],
   SET_COMPANY_REGISTRATION_POLICY: ['Правила регистрации компаний', 'Company registration policy'],
   REVIEW_COMPANY_REGISTRATION: ['Рассмотрение регистрации компании', 'Company registration review'],
   REVIEW_COMPANY_BRANCH: ['Рассмотрение регистрации филиала', 'Branch registration review'],

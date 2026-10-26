@@ -4,6 +4,554 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type SpatialWorld = SpatialWorldInput & {
+    id: string;
+    status: 'ACTIVE' | 'RETIRED';
+    version: number;
+};
+
+export type LocalizedInput = {
+    ru?: string;
+    en?: string;
+};
+
+export type SpatialWorldInput = {
+    logicalKey: string;
+    backendId: string;
+    paperWorldId: string;
+    dimension: 'minecraft:overworld' | 'minecraft:the_nether' | 'minecraft:the_end';
+    name: LocalizedInput;
+    tileKey: string;
+    maxZoom?: number;
+    extraZoom?: number;
+};
+
+export type SpatialSnapshot = {
+    schemaVersion: 1;
+    worldId: string;
+    paperWorldId: string;
+    dimension: string;
+    version: number;
+    integrity: string;
+    generatedAt: string;
+    territories: Array<PublicTerritory>;
+};
+
+export type PublicTerritory = {
+    stateId: string;
+    slug: string;
+    name: LocalizedInput;
+    color: string;
+    revisionId: string;
+    number: number;
+    area: number;
+    geometry: TerritoryGeometry;
+};
+
+export type TerritoryGeometry = {
+    type: 'Polygon';
+    coordinates: Array<Array<[
+        number,
+        number
+    ]>>;
+} | {
+    type: 'MultiPolygon';
+    coordinates: Array<Array<Array<[
+        number,
+        number
+    ]>>>;
+};
+
+export type TerritoryDraft = TerritoryDraftInput & {
+    id: string;
+    stateId: string;
+    baseRevisionId: string | null;
+    version: number;
+    createdBy: string;
+    sealedAt: string | null;
+    hash: string | null;
+    directiveId: string | null;
+    application: OptionalTerritorialApplicationSummary;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type OptionalTerritoryGeometry = {
+    type: 'Polygon';
+    coordinates: Array<Array<[
+        number,
+        number
+    ]>>;
+} | {
+    type: 'MultiPolygon';
+    coordinates: Array<Array<Array<[
+        number,
+        number
+    ]>>>;
+} | null;
+
+export type OptionalTerritorialApplicationSummary = {
+    id: string;
+    status: 'REVIEW' | 'APPROVED' | 'REJECTED';
+    reason: string | null;
+    reviewedAt: string | null;
+    revisionId: string | null;
+} | null;
+
+export type TerritoryDraftInput = {
+    worldId: string;
+    geometry: OptionalTerritoryGeometry;
+    reason: LocalizedInput;
+    change: 'INITIAL' | 'EXPAND' | 'REDUCE' | 'RESHAPE';
+};
+
+export type SpatialAnalysis = {
+    valid: boolean;
+    problem: string | null;
+    area: number;
+    addedArea: number;
+    removedArea: number;
+    vertices: number;
+    warnings: Array<string>;
+    conflicts: Array<{
+        stateId: string;
+        area: number;
+    }>;
+};
+
+export type TerritorialApplication = {
+    id: string;
+    status: 'REVIEW' | 'APPROVED' | 'REJECTED';
+    draft: TerritoryDraft;
+    analysis: SpatialAnalysis;
+    decision: MonetaryDirective;
+    createdAt: string;
+    review: {
+        actorId: string;
+        decision: 'APPROVE' | 'REJECT';
+        reason: string;
+        createdAt: string;
+    } | null;
+};
+
+export type MonetaryDirective = {
+    id: string;
+    stateId: string;
+    governanceRevisionId: string;
+    createdBy: string;
+    payload: MonetaryDirectivePayload;
+    payloadHash: string;
+    treatyContent: OptionalDirectiveTreatyContent;
+    fxDisplay?: FxDecisionDisplay;
+    territorialDisplay?: TerritoryDecisionDisplay;
+    status: 'PENDING' | 'APPLIED' | 'CANCELLED';
+    createdAt: string;
+    appliedAt: string | null;
+    stale: boolean;
+    ready: boolean;
+    manualRequired: boolean;
+    manualProcedure: LocalizedInput;
+    canApply: boolean;
+    executionProblem: string | null;
+    approvableOfficeIds: Array<string>;
+    approvalGroups: Array<{
+        mode: 'ANY' | 'ALL';
+        officeIds: Array<string>;
+    }>;
+    approvals: Array<{
+        officeId: string;
+        actorId: string;
+        current: boolean;
+    }>;
+    votes: Array<{
+        id: string;
+        approved: boolean;
+    }>;
+};
+
+export type MonetaryDirectivePayload = TerritoryDirectivePayload | {
+    kind: 'PUBLISH_FX_OFFER';
+    offerId: string;
+    terms: FxOfferTerms;
+} | {
+    kind: 'CANCEL_FX_OFFER';
+    offerId: string;
+    termsHash: string;
+} | {
+    kind: 'APPROVE_INTERBANK_EXCHANGE';
+    tradeId: string;
+    terms: InterbankExchangeTerms;
+} | {
+    kind: 'REVIEW_COMPANY_BRANCH';
+    applicationId: string;
+    branchId: string;
+    decision: 'APPROVE' | 'REJECT';
+    reason: string;
+} | {
+    kind: 'ACCEPT_SHARE_ACQUISITION';
+    operation: CompanyShareOperation;
+} | {
+    kind: 'REVOKE_SHARE_ACQUISITION';
+    consentId: string;
+} | {
+    kind: 'TRANSFER_COMPANY_SHARES';
+    operation: CompanyShareTransfer;
+    authorizationDecisionId: string | null;
+} | {
+    kind: 'VOTE_AS_SHAREHOLDER';
+    votingId: string;
+    choices: Array<string>;
+    abstain: boolean;
+} | {
+    kind: 'SET_COMPANY_REGISTRATION_POLICY';
+    baseRevisionId: string | null;
+    policy: CompanyRegistrationPolicy;
+} | {
+    kind: 'REVIEW_COMPANY_REGISTRATION';
+    applicationId: string;
+    formationHash: string;
+    decision: 'APPROVE' | 'REJECT';
+    reason: string;
+} | {
+    kind: 'CONSENT_COMPANY_FORMATION';
+    companyId: string;
+    formationHash: string;
+} | {
+    kind: 'ESTABLISH_TAX_OFFICE';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    initialPolicies?: Array<GovernancePolicy>;
+} | {
+    kind: 'CHANGE_TAX_CHARTER';
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'ENACT_TAX_LAW';
+    lawId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    effectiveAt: string;
+    rule: TaxRule;
+} | {
+    kind: 'AMEND_TAX_LAW';
+    lawId: string;
+    baseRevisionId: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    effectiveAt: string;
+    rule: TaxRule;
+} | {
+    kind: 'REPEAL_TAX_LAW';
+    lawId: string;
+    baseRevisionId: string;
+    effectiveAt: string;
+} | {
+    kind: 'AMEND_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'RATIFY_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'DENOUNCE_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'REJECT_TREATY';
+    treatyId: string;
+    revisionId: string;
+    contentHash: string;
+} | {
+    kind: 'ESTABLISH_BANK';
+    name: LocalizedInput;
+    description: LocalizedInput;
+    initialPolicies?: Array<GovernancePolicy>;
+} | {
+    kind: 'CHANGE_CHARTER';
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CREATE_CURRENCY';
+    code: string;
+    name: LocalizedInput;
+    description: LocalizedInput;
+} | {
+    kind: 'CHANGE_POLICY';
+    currencyId: string;
+    policy: MonetaryPolicy;
+} | {
+    kind: 'ISSUE';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+} | {
+    kind: 'BURN';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+} | {
+    kind: 'BANK_TRANSFER';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+    recipient: {
+        type: 'PLAYER';
+        userId: string;
+    } | {
+        type: 'COMPANY';
+        companyId: string;
+    } | {
+        type: 'TREASURY';
+    } | {
+        type: 'CENTRAL_BANK';
+    };
+} | {
+    kind: 'TREASURY_TRANSFER';
+    currencyId: string;
+    amountMinor: MoneyMinor;
+    purpose: string;
+    recipient: {
+        type: 'PLAYER';
+        userId: string;
+    } | {
+        type: 'COMPANY';
+        companyId: string;
+    } | {
+        type: 'TREASURY';
+    } | {
+        type: 'CENTRAL_BANK';
+    };
+};
+
+export type TerritoryDirectivePayload = {
+    kind: 'CHANGE_TERRITORY';
+    draftId: string;
+    draftHash: string;
+};
+
+export type FxOfferTerms = {
+    receiveCurrencyId: string;
+    provideCurrencyId: string;
+    receivePerLotMinor: MoneyMinor;
+    providePerLotMinor: MoneyMinor;
+    totalLots: MoneyMinor;
+    minimumLots: MoneyMinor;
+    expiresAt: string;
+};
+
+export type MoneyMinor = string;
+
+export type InterbankExchangeTerms = {
+    first: {
+        stateId: string;
+        bankId: string;
+        currencyId: string;
+        amountMinor: MoneyMinor;
+    };
+    second: {
+        stateId: string;
+        bankId: string;
+        currencyId: string;
+        amountMinor: MoneyMinor;
+    };
+    expiresAt: string;
+};
+
+export type CompanyShareOperation = ({
+    kind: 'ISSUE';
+} & CompanyShareIssue) | ({
+    kind: 'TRANSFER';
+} & CompanyShareTransfer);
+
+export type CompanyShareIssue = {
+    kind: 'ISSUE';
+    operationId: string;
+    issuerId: string;
+    issuerRevisionId: string;
+    shares: CompanyShareQuantity;
+    allocations: Array<{
+        owner: LegalOwner;
+        shares: CompanyShareQuantity;
+    }>;
+};
+
+export type CompanyShareQuantity = string;
+
+export type LegalOwner = {
+    type: 'PLAYER';
+    id: string;
+} | {
+    type: 'COMPANY';
+    id: string;
+} | {
+    type: 'STATE';
+    id: string;
+};
+
+export type CompanyShareTransfer = {
+    kind: 'TRANSFER';
+    operationId: string;
+    issuerId: string;
+    issuerRevisionId: string;
+    owner: LegalOwner;
+    recipient: LegalOwner;
+    shares: CompanyShareQuantity;
+};
+
+export type CompanyRegistrationPolicy = {
+    companyMode: 'FREE' | 'APPROVAL';
+    foreignPlayerFounders: 'ALLOW' | 'DENY';
+    corporateFounders: 'ALLOW' | 'DOMESTIC_ONLY' | 'DENY';
+    stateFounders: 'ALLOW' | 'DOMESTIC_ONLY' | 'DENY';
+    branchMode: 'FREE' | 'APPROVAL' | 'DENY';
+    foreignBranches: 'ALLOW' | 'DENY';
+    registrationFee: {
+        currencyId: string;
+        amountMinor: MoneyMinor;
+    } | null;
+};
+
+export type GovernancePolicy = {
+    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'SET_COMPANY_REGISTRATION_POLICY' | 'REGISTER_COMPANY' | 'REGISTER_COMPANY_BRANCH' | 'PARTICIPATE_IN_COMPANY' | 'ACQUIRE_COMPANY_SHARES' | 'TRANSFER_COMPANY_SHARES' | 'MANAGE_FX_OFFERS' | 'CANCEL_FX_OFFERS' | 'APPROVE_INTERBANK_EXCHANGE' | 'DECLARE_WAR';
+    mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
+    officeIds: Array<string>;
+    vote: OptionalVotingRules;
+    manualProcedure: LocalizedInput;
+};
+
+export type OptionalVotingRules = {
+    durationHours: number;
+    quorumPercent: number;
+    thresholdPercent: number;
+    thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
+    allowAbstain: boolean;
+    closeWhenDecided?: boolean;
+} | null;
+
+export type TaxRule = {
+    event: TaxableEventType;
+    events?: Array<TaxableEventType>;
+    regime?: CompanyTaxRegime;
+    category: string;
+    taxpayer: 'SENDER' | 'RECIPIENT';
+    base?: {
+        kind: 'FULL_AMOUNT';
+    } | {
+        kind: 'EXCESS';
+        thresholdMinor: MoneyMinor;
+    };
+    jurisdictions: Array<'CITIZENSHIP' | 'TERRITORIAL' | 'COMPANY_REGISTRATION' | 'BRANCH_REGISTRATION'>;
+    rateBps: number;
+    recipient: 'STATE_TREASURY' | 'CENTRAL_BANK';
+    currencyIds: Array<string>;
+};
+
+export type TaxableEventType = 'PLAYER_TRANSFER' | 'PLAYER_COMPANY_TRANSFER' | 'COMPANY_PLAYER_TRANSFER' | 'COMPANY_TRANSFER';
+
+export type CompanyTaxRegime = {
+    companyId: string;
+    branchId: string | null;
+    mode: 'EXEMPT' | 'REPLACE' | 'ADDITIONAL';
+    targetLawId: string | null;
+};
+
+export type MonetaryPolicy = {
+    maxSupplyMinor: OptionalMoneyLimit;
+    maxGrossIssuance30dMinor: OptionalMoneyLimit;
+    maxIssuancePerOperationMinor: OptionalMoneyLimit;
+};
+
+export type OptionalMoneyLimit = string | null;
+
+export type OptionalDirectiveTreatyContent = {
+    name: LocalizedInput;
+    description: LocalizedInput;
+    document: LocalizedInput;
+    type: 'TAX_TREATY';
+    event: TaxableEventType;
+    category: string;
+    categoryMapping?: {
+        firstCategory: string;
+        secondCategory: string;
+    };
+    taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
+    terms: TreatyTaxTerms;
+    effectiveAt: string;
+    expiresAt: string | null;
+    termination: 'BILATERAL';
+} | null;
+
+export type TreatyTaxTerms = {
+    mode: 'EXCLUSIVE';
+    taxingStateId: string;
+} | {
+    mode: 'SHARED';
+    rateBps: number;
+    firstShareBps: number;
+};
+
+export type FxDecisionDisplay = {
+    currencies: Array<{
+        id: string;
+        code: string;
+        name: LocalizedInput;
+    }>;
+    banks: Array<{
+        id: string;
+        stateId: string;
+        name: LocalizedInput;
+        stateName: LocalizedInput;
+    }>;
+};
+
+export type TerritoryDecisionDisplay = {
+    draft: TerritoryDraft;
+    analysis: SpatialAnalysis;
+};
+
+export type TerritoryHistory = {
+    items: Array<PublishedTerritoryRevision>;
+    page: number;
+    hasMore: boolean;
+};
+
+export type PublishedTerritoryRevision = TerritoryRevision & {
+    worldVersion: number;
+    reason: LocalizedInput;
+    ratificationReason: string;
+};
+
+export type TerritoryRevision = {
+    id: string;
+    stateId: string;
+    worldId: string;
+    previousRevisionId: string | null;
+    number: number;
+    applicationId: string;
+    directiveId: string;
+    geometry: TerritoryGeometry;
+    area: number;
+    createdBy: string;
+    ratifiedBy: string;
+    effectiveAt: string;
+};
+
+export type PublicTerritorySummary = {
+    stateId: string;
+    slug: string;
+    name: LocalizedInput;
+    color: string;
+    revisionId: string;
+    number: number;
+    area: number;
+};
+
 export type MinecraftIssuedChallenge = MinecraftChallenge & {
     accountId: string;
     verifier: string;
@@ -61,6 +609,7 @@ export type MinecraftProfile = {
     username: string;
     serverName: string;
     states: Array<string>;
+    locale: 'ru' | 'en';
 };
 
 export type Principal = {
@@ -128,11 +677,6 @@ export type GalleryItem = {
     createdAt: string;
     imageUrl: string;
     thumbnailUrl: string;
-};
-
-export type LocalizedInput = {
-    ru?: string;
-    en?: string;
 };
 
 export type PublicContent = {
@@ -255,23 +799,6 @@ export type StateOffice = {
     vacancy: 'APPOINTMENT' | 'ELECTION' | 'COUNCIL' | 'MANUAL';
     inactivityDays: number | null;
 };
-
-export type GovernancePolicy = {
-    action: 'ENACT_LAW' | 'REPEAL_LAW' | 'AMEND_GOVERNANCE' | 'ACCEPT_CITIZEN' | 'REMOVE_CITIZEN' | 'APPOINT_OFFICE_HOLDER' | 'REMOVE_OFFICE_HOLDER' | 'CREATE_INSTITUTION' | 'CHANGE_TERRITORY' | 'SIGN_TREATY' | 'ISSUE_CURRENCY' | 'ESTABLISH_CENTRAL_BANK' | 'CHANGE_BANK_CHARTER' | 'CREATE_CURRENCY' | 'CHANGE_MONETARY_POLICY' | 'BURN_CURRENCY' | 'TRANSFER_CENTRAL_BANK' | 'SPEND_TREASURY' | 'ESTABLISH_TAX_OFFICE' | 'CHANGE_TAX_OFFICE_CHARTER' | 'AMEND_TAX_LAW' | 'AMEND_TREATY' | 'DENOUNCE_TREATY' | 'SET_COMPANY_REGISTRATION_POLICY' | 'REGISTER_COMPANY' | 'REGISTER_COMPANY_BRANCH' | 'PARTICIPATE_IN_COMPANY' | 'ACQUIRE_COMPANY_SHARES' | 'TRANSFER_COMPANY_SHARES' | 'MANAGE_FX_OFFERS' | 'CANCEL_FX_OFFERS' | 'APPROVE_INTERBANK_EXCHANGE' | 'DECLARE_WAR';
-    mechanism: 'SINGLE_OFFICE' | 'ANY_OF_OFFICES' | 'MULTIPLE_OFFICES' | 'CITIZEN_VOTE' | 'COUNCIL_VOTE' | 'COMBINED' | 'MANUAL';
-    officeIds: Array<string>;
-    vote: OptionalVotingRules;
-    manualProcedure: LocalizedInput;
-};
-
-export type OptionalVotingRules = {
-    durationHours: number;
-    quorumPercent: number;
-    thresholdPercent: number;
-    thresholdKind: 'PERCENT' | 'SIMPLE_MAJORITY' | 'ABSOLUTE_MAJORITY' | 'UNANIMOUS';
-    allowAbstain: boolean;
-    closeWhenDecided?: boolean;
-} | null;
 
 export type GovernanceVotingRules = {
     durationHours: number;
@@ -509,8 +1036,6 @@ export type TaxCalculation = {
     charges: Array<TaxCharge>;
 };
 
-export type TaxableEventType = 'PLAYER_TRANSFER' | 'PLAYER_COMPANY_TRANSFER' | 'COMPANY_PLAYER_TRANSFER' | 'COMPANY_TRANSFER';
-
 export type TaxCharge = {
     key: string;
     taxpayer?: 'SENDER' | 'RECIPIENT';
@@ -585,8 +1110,6 @@ export type TaxJurisdictionEvidence = {
     branchId: string;
     applicationId: string;
 };
-
-export type MoneyMinor = string;
 
 export type EconomicOperation = {
     id: string;
@@ -670,354 +1193,6 @@ export type TaxLawRevision = {
     document: LocalizedInput;
     effectiveAt: string;
     createdAt: string;
-};
-
-export type TaxRule = {
-    event: TaxableEventType;
-    events?: Array<TaxableEventType>;
-    regime?: CompanyTaxRegime;
-    category: string;
-    taxpayer: 'SENDER' | 'RECIPIENT';
-    base?: {
-        kind: 'FULL_AMOUNT';
-    } | {
-        kind: 'EXCESS';
-        thresholdMinor: MoneyMinor;
-    };
-    jurisdictions: Array<'CITIZENSHIP' | 'TERRITORIAL' | 'COMPANY_REGISTRATION' | 'BRANCH_REGISTRATION'>;
-    rateBps: number;
-    recipient: 'STATE_TREASURY' | 'CENTRAL_BANK';
-    currencyIds: Array<string>;
-};
-
-export type CompanyTaxRegime = {
-    companyId: string;
-    branchId: string | null;
-    mode: 'EXEMPT' | 'REPLACE' | 'ADDITIONAL';
-    targetLawId: string | null;
-};
-
-export type MonetaryDirective = {
-    id: string;
-    stateId: string;
-    governanceRevisionId: string;
-    createdBy: string;
-    payload: MonetaryDirectivePayload;
-    payloadHash: string;
-    treatyContent: OptionalDirectiveTreatyContent;
-    fxDisplay?: FxDecisionDisplay;
-    status: 'PENDING' | 'APPLIED' | 'CANCELLED';
-    createdAt: string;
-    appliedAt: string | null;
-    stale: boolean;
-    ready: boolean;
-    manualRequired: boolean;
-    manualProcedure: LocalizedInput;
-    canApply: boolean;
-    executionProblem: string | null;
-    approvableOfficeIds: Array<string>;
-    approvalGroups: Array<{
-        mode: 'ANY' | 'ALL';
-        officeIds: Array<string>;
-    }>;
-    approvals: Array<{
-        officeId: string;
-        actorId: string;
-        current: boolean;
-    }>;
-    votes: Array<{
-        id: string;
-        approved: boolean;
-    }>;
-};
-
-export type MonetaryDirectivePayload = {
-    kind: 'PUBLISH_FX_OFFER';
-    offerId: string;
-    terms: FxOfferTerms;
-} | {
-    kind: 'CANCEL_FX_OFFER';
-    offerId: string;
-    termsHash: string;
-} | {
-    kind: 'APPROVE_INTERBANK_EXCHANGE';
-    tradeId: string;
-    terms: InterbankExchangeTerms;
-} | {
-    kind: 'REVIEW_COMPANY_BRANCH';
-    applicationId: string;
-    branchId: string;
-    decision: 'APPROVE' | 'REJECT';
-    reason: string;
-} | {
-    kind: 'ACCEPT_SHARE_ACQUISITION';
-    operation: CompanyShareOperation;
-} | {
-    kind: 'REVOKE_SHARE_ACQUISITION';
-    consentId: string;
-} | {
-    kind: 'TRANSFER_COMPANY_SHARES';
-    operation: CompanyShareTransfer;
-    authorizationDecisionId: string | null;
-} | {
-    kind: 'VOTE_AS_SHAREHOLDER';
-    votingId: string;
-    choices: Array<string>;
-    abstain: boolean;
-} | {
-    kind: 'SET_COMPANY_REGISTRATION_POLICY';
-    baseRevisionId: string | null;
-    policy: CompanyRegistrationPolicy;
-} | {
-    kind: 'REVIEW_COMPANY_REGISTRATION';
-    applicationId: string;
-    formationHash: string;
-    decision: 'APPROVE' | 'REJECT';
-    reason: string;
-} | {
-    kind: 'CONSENT_COMPANY_FORMATION';
-    companyId: string;
-    formationHash: string;
-} | {
-    kind: 'ESTABLISH_TAX_OFFICE';
-    name: LocalizedInput;
-    description: LocalizedInput;
-    initialPolicies?: Array<GovernancePolicy>;
-} | {
-    kind: 'CHANGE_TAX_CHARTER';
-    name: LocalizedInput;
-    description: LocalizedInput;
-} | {
-    kind: 'ENACT_TAX_LAW';
-    lawId: string;
-    name: LocalizedInput;
-    description: LocalizedInput;
-    document: LocalizedInput;
-    effectiveAt: string;
-    rule: TaxRule;
-} | {
-    kind: 'AMEND_TAX_LAW';
-    lawId: string;
-    baseRevisionId: string;
-    name: LocalizedInput;
-    description: LocalizedInput;
-    document: LocalizedInput;
-    effectiveAt: string;
-    rule: TaxRule;
-} | {
-    kind: 'REPEAL_TAX_LAW';
-    lawId: string;
-    baseRevisionId: string;
-    effectiveAt: string;
-} | {
-    kind: 'AMEND_TREATY';
-    treatyId: string;
-    revisionId: string;
-    contentHash: string;
-} | {
-    kind: 'RATIFY_TREATY';
-    treatyId: string;
-    revisionId: string;
-    contentHash: string;
-} | {
-    kind: 'DENOUNCE_TREATY';
-    treatyId: string;
-    revisionId: string;
-    contentHash: string;
-} | {
-    kind: 'REJECT_TREATY';
-    treatyId: string;
-    revisionId: string;
-    contentHash: string;
-} | {
-    kind: 'ESTABLISH_BANK';
-    name: LocalizedInput;
-    description: LocalizedInput;
-    initialPolicies?: Array<GovernancePolicy>;
-} | {
-    kind: 'CHANGE_CHARTER';
-    name: LocalizedInput;
-    description: LocalizedInput;
-} | {
-    kind: 'CREATE_CURRENCY';
-    code: string;
-    name: LocalizedInput;
-    description: LocalizedInput;
-} | {
-    kind: 'CHANGE_POLICY';
-    currencyId: string;
-    policy: MonetaryPolicy;
-} | {
-    kind: 'ISSUE';
-    currencyId: string;
-    amountMinor: MoneyMinor;
-    purpose: string;
-} | {
-    kind: 'BURN';
-    currencyId: string;
-    amountMinor: MoneyMinor;
-    purpose: string;
-} | {
-    kind: 'BANK_TRANSFER';
-    currencyId: string;
-    amountMinor: MoneyMinor;
-    purpose: string;
-    recipient: {
-        type: 'PLAYER';
-        userId: string;
-    } | {
-        type: 'COMPANY';
-        companyId: string;
-    } | {
-        type: 'TREASURY';
-    } | {
-        type: 'CENTRAL_BANK';
-    };
-} | {
-    kind: 'TREASURY_TRANSFER';
-    currencyId: string;
-    amountMinor: MoneyMinor;
-    purpose: string;
-    recipient: {
-        type: 'PLAYER';
-        userId: string;
-    } | {
-        type: 'COMPANY';
-        companyId: string;
-    } | {
-        type: 'TREASURY';
-    } | {
-        type: 'CENTRAL_BANK';
-    };
-};
-
-export type FxOfferTerms = {
-    receiveCurrencyId: string;
-    provideCurrencyId: string;
-    receivePerLotMinor: MoneyMinor;
-    providePerLotMinor: MoneyMinor;
-    totalLots: MoneyMinor;
-    minimumLots: MoneyMinor;
-    expiresAt: string;
-};
-
-export type InterbankExchangeTerms = {
-    first: {
-        stateId: string;
-        bankId: string;
-        currencyId: string;
-        amountMinor: MoneyMinor;
-    };
-    second: {
-        stateId: string;
-        bankId: string;
-        currencyId: string;
-        amountMinor: MoneyMinor;
-    };
-    expiresAt: string;
-};
-
-export type CompanyShareOperation = ({
-    kind: 'ISSUE';
-} & CompanyShareIssue) | ({
-    kind: 'TRANSFER';
-} & CompanyShareTransfer);
-
-export type CompanyShareIssue = {
-    kind: 'ISSUE';
-    operationId: string;
-    issuerId: string;
-    issuerRevisionId: string;
-    shares: CompanyShareQuantity;
-    allocations: Array<{
-        owner: LegalOwner;
-        shares: CompanyShareQuantity;
-    }>;
-};
-
-export type CompanyShareQuantity = string;
-
-export type LegalOwner = {
-    type: 'PLAYER';
-    id: string;
-} | {
-    type: 'COMPANY';
-    id: string;
-} | {
-    type: 'STATE';
-    id: string;
-};
-
-export type CompanyShareTransfer = {
-    kind: 'TRANSFER';
-    operationId: string;
-    issuerId: string;
-    issuerRevisionId: string;
-    owner: LegalOwner;
-    recipient: LegalOwner;
-    shares: CompanyShareQuantity;
-};
-
-export type CompanyRegistrationPolicy = {
-    companyMode: 'FREE' | 'APPROVAL';
-    foreignPlayerFounders: 'ALLOW' | 'DENY';
-    corporateFounders: 'ALLOW' | 'DOMESTIC_ONLY' | 'DENY';
-    stateFounders: 'ALLOW' | 'DOMESTIC_ONLY' | 'DENY';
-    branchMode: 'FREE' | 'APPROVAL' | 'DENY';
-    foreignBranches: 'ALLOW' | 'DENY';
-    registrationFee: {
-        currencyId: string;
-        amountMinor: MoneyMinor;
-    } | null;
-};
-
-export type MonetaryPolicy = {
-    maxSupplyMinor: OptionalMoneyLimit;
-    maxGrossIssuance30dMinor: OptionalMoneyLimit;
-    maxIssuancePerOperationMinor: OptionalMoneyLimit;
-};
-
-export type OptionalMoneyLimit = string | null;
-
-export type OptionalDirectiveTreatyContent = {
-    name: LocalizedInput;
-    description: LocalizedInput;
-    document: LocalizedInput;
-    type: 'TAX_TREATY';
-    event: TaxableEventType;
-    category: string;
-    categoryMapping?: {
-        firstCategory: string;
-        secondCategory: string;
-    };
-    taxpayerScope: 'OVERLAPPING_NATIONAL_CLAIMS';
-    terms: TreatyTaxTerms;
-    effectiveAt: string;
-    expiresAt: string | null;
-    termination: 'BILATERAL';
-} | null;
-
-export type TreatyTaxTerms = {
-    mode: 'EXCLUSIVE';
-    taxingStateId: string;
-} | {
-    mode: 'SHARED';
-    rateBps: number;
-    firstShareBps: number;
-};
-
-export type FxDecisionDisplay = {
-    currencies: Array<{
-        id: string;
-        code: string;
-        name: LocalizedInput;
-    }>;
-    banks: Array<{
-        id: string;
-        stateId: string;
-        name: LocalizedInput;
-        stateName: LocalizedInput;
-    }>;
 };
 
 export type FinancialAccount = {
@@ -2328,6 +2503,1236 @@ export type Readiness = {
     status: 'ready';
 };
 
+export type ListSpatialWorldsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/spatial/worlds';
+};
+
+export type ListSpatialWorldsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListSpatialWorldsError = ListSpatialWorldsErrors[keyof ListSpatialWorldsErrors];
+
+export type ListSpatialWorldsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<SpatialWorld>;
+    };
+};
+
+export type ListSpatialWorldsResponse = ListSpatialWorldsResponses[keyof ListSpatialWorldsResponses];
+
+export type GetPoliticalMapData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        minX?: number | null;
+        minZ?: number | null;
+        maxX?: number | null;
+        maxZ?: number | null;
+    };
+    url: '/api/v1/public/spatial/worlds/{id}/territories';
+};
+
+export type GetPoliticalMapErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetPoliticalMapError = GetPoliticalMapErrors[keyof GetPoliticalMapErrors];
+
+export type GetPoliticalMapResponses = {
+    /**
+     * Result
+     */
+    200: SpatialSnapshot;
+};
+
+export type GetPoliticalMapResponse = GetPoliticalMapResponses[keyof GetPoliticalMapResponses];
+
+export type RegisterSpatialWorldData = {
+    body: SpatialWorldInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/spatial/worlds';
+};
+
+export type RegisterSpatialWorldErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type RegisterSpatialWorldError = RegisterSpatialWorldErrors[keyof RegisterSpatialWorldErrors];
+
+export type RegisterSpatialWorldResponses = {
+    /**
+     * Result
+     */
+    200: SpatialWorld;
+};
+
+export type RegisterSpatialWorldResponse = RegisterSpatialWorldResponses[keyof RegisterSpatialWorldResponses];
+
+export type RetireSpatialWorldData = {
+    body: {
+        reason: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/spatial/worlds/{id}/retire';
+};
+
+export type RetireSpatialWorldErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type RetireSpatialWorldError = RetireSpatialWorldErrors[keyof RetireSpatialWorldErrors];
+
+export type RetireSpatialWorldResponses = {
+    /**
+     * Result
+     */
+    200: {
+        success: true;
+    };
+};
+
+export type RetireSpatialWorldResponse = RetireSpatialWorldResponses[keyof RetireSpatialWorldResponses];
+
+export type ListTerritoryDraftsData = {
+    body?: never;
+    path: {
+        stateId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/territory/drafts';
+};
+
+export type ListTerritoryDraftsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListTerritoryDraftsError = ListTerritoryDraftsErrors[keyof ListTerritoryDraftsErrors];
+
+export type ListTerritoryDraftsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<TerritoryDraft>;
+    };
+};
+
+export type ListTerritoryDraftsResponse = ListTerritoryDraftsResponses[keyof ListTerritoryDraftsResponses];
+
+export type CreateTerritoryDraftData = {
+    body: TerritoryDraftInput;
+    path: {
+        stateId: string;
+    };
+    query?: never;
+    url: '/api/v1/account/states/{stateId}/territory/drafts';
+};
+
+export type CreateTerritoryDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type CreateTerritoryDraftError = CreateTerritoryDraftErrors[keyof CreateTerritoryDraftErrors];
+
+export type CreateTerritoryDraftResponses = {
+    /**
+     * Result
+     */
+    200: TerritoryDraft;
+};
+
+export type CreateTerritoryDraftResponse = CreateTerritoryDraftResponses[keyof CreateTerritoryDraftResponses];
+
+export type GetTerritoryDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/territory/drafts/{id}';
+};
+
+export type GetTerritoryDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetTerritoryDraftError = GetTerritoryDraftErrors[keyof GetTerritoryDraftErrors];
+
+export type GetTerritoryDraftResponses = {
+    /**
+     * Result
+     */
+    200: TerritoryDraft;
+};
+
+export type GetTerritoryDraftResponse = GetTerritoryDraftResponses[keyof GetTerritoryDraftResponses];
+
+export type SaveTerritoryDraftData = {
+    body: TerritoryDraftInput & {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/territory/drafts/{id}';
+};
+
+export type SaveTerritoryDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type SaveTerritoryDraftError = SaveTerritoryDraftErrors[keyof SaveTerritoryDraftErrors];
+
+export type SaveTerritoryDraftResponses = {
+    /**
+     * Result
+     */
+    200: TerritoryDraft;
+};
+
+export type SaveTerritoryDraftResponse = SaveTerritoryDraftResponses[keyof SaveTerritoryDraftResponses];
+
+export type PreviewTerritoryDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/territory/drafts/{id}/preview';
+};
+
+export type PreviewTerritoryDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type PreviewTerritoryDraftError = PreviewTerritoryDraftErrors[keyof PreviewTerritoryDraftErrors];
+
+export type PreviewTerritoryDraftResponses = {
+    /**
+     * Result
+     */
+    200: SpatialAnalysis;
+};
+
+export type PreviewTerritoryDraftResponse = PreviewTerritoryDraftResponses[keyof PreviewTerritoryDraftResponses];
+
+export type SubmitTerritoryDraftData = {
+    body: {
+        version: number;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/account/territory/drafts/{id}/submit';
+};
+
+export type SubmitTerritoryDraftErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type SubmitTerritoryDraftError = SubmitTerritoryDraftErrors[keyof SubmitTerritoryDraftErrors];
+
+export type SubmitTerritoryDraftResponses = {
+    /**
+     * Result
+     */
+    200: {
+        id: string;
+    };
+};
+
+export type SubmitTerritoryDraftResponse = SubmitTerritoryDraftResponses[keyof SubmitTerritoryDraftResponses];
+
+export type ListTerritorialApplicationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/spatial/applications';
+};
+
+export type ListTerritorialApplicationsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ListTerritorialApplicationsError = ListTerritorialApplicationsErrors[keyof ListTerritorialApplicationsErrors];
+
+export type ListTerritorialApplicationsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<TerritorialApplication>;
+    };
+};
+
+export type ListTerritorialApplicationsResponse = ListTerritorialApplicationsResponses[keyof ListTerritorialApplicationsResponses];
+
+export type GetTerritorialApplicationData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/spatial/applications/{id}';
+};
+
+export type GetTerritorialApplicationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetTerritorialApplicationError = GetTerritorialApplicationErrors[keyof GetTerritorialApplicationErrors];
+
+export type GetTerritorialApplicationResponses = {
+    /**
+     * Result
+     */
+    200: TerritorialApplication;
+};
+
+export type GetTerritorialApplicationResponse = GetTerritorialApplicationResponses[keyof GetTerritorialApplicationResponses];
+
+export type ReviewTerritorialApplicationData = {
+    body: {
+        decision: 'APPROVE' | 'REJECT';
+        reason: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/spatial/applications/{id}/review';
+};
+
+export type ReviewTerritorialApplicationErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    429: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type ReviewTerritorialApplicationError = ReviewTerritorialApplicationErrors[keyof ReviewTerritorialApplicationErrors];
+
+export type ReviewTerritorialApplicationResponses = {
+    /**
+     * Result
+     */
+    200: {
+        revisionId: string | null;
+    };
+};
+
+export type ReviewTerritorialApplicationResponse = ReviewTerritorialApplicationResponses[keyof ReviewTerritorialApplicationResponses];
+
+export type GetTerritoryHistoryData = {
+    body?: never;
+    path: {
+        worldId: string;
+        stateId: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/api/v1/public/spatial/worlds/{worldId}/states/{stateId}/history';
+};
+
+export type GetTerritoryHistoryResponses = {
+    /**
+     * Result
+     */
+    200: TerritoryHistory;
+};
+
+export type GetTerritoryHistoryResponse = GetTerritoryHistoryResponses[keyof GetTerritoryHistoryResponses];
+
+export type GetPoliticalMapCatalogData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/public/spatial/worlds/{id}/states';
+};
+
+export type GetPoliticalMapCatalogResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<PublicTerritorySummary>;
+    };
+};
+
+export type GetPoliticalMapCatalogResponse = GetPoliticalMapCatalogResponses[keyof GetPoliticalMapCatalogResponses];
+
+export type GetSquaremapTileData = {
+    body?: never;
+    path: {
+        id: string;
+        zoom?: number | null;
+        x?: number | null;
+        z?: number | null;
+    };
+    query?: never;
+    url: '/api/v1/public/spatial/worlds/{id}/tiles/{zoom}/{x}/{z}';
+};
+
+export type GetSquaremapTileErrors = {
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+    };
+};
+
+export type GetSquaremapTileError = GetSquaremapTileErrors[keyof GetSquaremapTileErrors];
+
+export type GetSquaremapTileResponses = {
+    /**
+     * A real squaremap surface tile
+     */
+    200: Blob | File;
+};
+
+export type GetSquaremapTileResponse = GetSquaremapTileResponses[keyof GetSquaremapTileResponses];
+
+export type GetMinecraftSpatialWorldsData = {
+    body: {
+        worlds: Array<{
+            paperWorldId: string;
+            dimension: string;
+        }>;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/spatial/worlds';
+};
+
+export type GetMinecraftSpatialWorldsErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetMinecraftSpatialWorldsError = GetMinecraftSpatialWorldsErrors[keyof GetMinecraftSpatialWorldsErrors];
+
+export type GetMinecraftSpatialWorldsResponses = {
+    /**
+     * Result
+     */
+    200: {
+        items: Array<{
+            id: string;
+            paperWorldId: string;
+            dimension: string;
+            version: number;
+        }>;
+    };
+};
+
+export type GetMinecraftSpatialWorldsResponse = GetMinecraftSpatialWorldsResponses[keyof GetMinecraftSpatialWorldsResponses];
+
+export type GetMinecraftSpatialVersionData = {
+    body: {
+        worldId: string;
+        paperWorldId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/spatial/version';
+};
+
+export type GetMinecraftSpatialVersionErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetMinecraftSpatialVersionError = GetMinecraftSpatialVersionErrors[keyof GetMinecraftSpatialVersionErrors];
+
+export type GetMinecraftSpatialVersionResponses = {
+    /**
+     * Result
+     */
+    200: {
+        worldId: string;
+        paperWorldId: string;
+        version: number;
+        integrity: string;
+    };
+};
+
+export type GetMinecraftSpatialVersionResponse = GetMinecraftSpatialVersionResponses[keyof GetMinecraftSpatialVersionResponses];
+
+export type GetMinecraftSpatialSnapshotData = {
+    body: {
+        worldId: string;
+        paperWorldId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/internal/minecraft/spatial/snapshot';
+};
+
+export type GetMinecraftSpatialSnapshotErrors = {
+    /**
+     * Result
+     */
+    400: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    401: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    403: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    503: {
+        message: string;
+        code?: string;
+    };
+};
+
+export type GetMinecraftSpatialSnapshotError = GetMinecraftSpatialSnapshotErrors[keyof GetMinecraftSpatialSnapshotErrors];
+
+export type GetMinecraftSpatialSnapshotResponses = {
+    /**
+     * Result
+     */
+    200: {
+        integrity: string;
+        payload: string;
+        generatedAt: string;
+    };
+};
+
+export type GetMinecraftSpatialSnapshotResponse = GetMinecraftSpatialSnapshotResponses[keyof GetMinecraftSpatialSnapshotResponses];
+
 export type CreateMinecraftChallengeData = {
     body: {
         username: string;
@@ -2597,6 +4002,7 @@ export type GetAccountMinecraftResponse = GetAccountMinecraftResponses[keyof Get
 export type DecideMinecraftChallengeData = {
     body: {
         decision: 'APPROVE' | 'REJECT';
+        locale?: 'ru' | 'en';
         code?: string;
     };
     path: {
@@ -9111,6 +10517,7 @@ export type GetMonetaryVotingPayloadResponses = {
         code: string;
         treatyContent: OptionalTreatyContent;
         fxDisplay?: FxDecisionDisplay;
+        territorialDisplay?: TerritoryDecisionDisplay;
     };
 };
 

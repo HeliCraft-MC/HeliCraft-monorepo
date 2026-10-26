@@ -3,6 +3,7 @@
 // oxlint-disable max-lines-per-function, max-statements -- Typed OpenAPI declarations delegate all lifecycle, accounting and authorization to services.
 import { TreatyContentSchema } from '../diplomacy/contracts';
 import { FxDecisionDisplaySchema } from '../fx/contracts';
+import { TerritoryDecisionDisplaySchema } from '../spatial/contracts';
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 import type { Database } from '../../db';
@@ -105,6 +106,7 @@ function monetaryRoutes(db: Database['db'] | undefined, secureCookies: boolean):
             code: z.string(),
             treatyContent: TreatyContentSchema.nullable().openapi('OptionalTreatyContent'),
             fxDisplay: FxDecisionDisplaySchema.optional(),
+            territorialDisplay: TerritoryDecisionDisplaySchema.optional(),
           }),
         ),
         ...Errors,

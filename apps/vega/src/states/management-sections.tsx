@@ -14,6 +14,10 @@ import { PublicGovernment } from './public-government';
 import { uiText } from './text';
 import styles from './states.module.scss';
 
+const StateTerritoryWorkspace = lazy(async () => {
+  const module = await import('../spatial/state-workspace');
+  return { default: module.StateTerritoryWorkspace };
+});
 const DiplomacyWorkspace = lazy(async () => {
   const module = await import('../diplomacy/workspace');
   return { default: module.DiplomacyWorkspace };
@@ -29,6 +33,7 @@ const StateProposalsPage = lazy(async () => {
 
 const MANAGEMENT_SECTIONS = [
   'overview',
+  'territory',
   'identity',
   'citizens',
   'government',
@@ -86,6 +91,15 @@ function ManagementSections({
         votingId={votingId}
         formationDraftId={formationDraftId}
         shareOperationId={shareOperationId}
+      />
+    );
+  } else if (section === 'territory') {
+    content = (
+      <StateTerritoryWorkspace
+        state={state}
+        actorId={actorId}
+        onReform={onReform}
+        pending={pending}
       />
     );
   } else if (section === 'diplomacy') {

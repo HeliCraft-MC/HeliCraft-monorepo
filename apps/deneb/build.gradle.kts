@@ -11,14 +11,18 @@ repositories {
 java { toolchain.languageVersion.set(JavaLanguageVersion.of(25)) }
 dependencies {
     implementation(project(":minecraft-client"))
-    compileOnly("io.papermc.paper:paper-api:26.2.build.129-stable")
-    compileOnly("net.kyori:adventure-api:4.25.0")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.223-stable")
     implementation("org.locationtech.jts:jts-core:1.20.0")
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
 }
-tasks.test { useJUnitPlatform() }
+tasks.test {
+    useJUnitPlatform()
+    val spatialFixtures = rootProject.file("tests/fixtures/spatial.json")
+    inputs.file(spatialFixtures)
+    systemProperty("helicraft.spatial.fixtures", spatialFixtures.absolutePath)
+}
 tasks.shadowJar {
     relocate("com.google.gson", "io.helicraft.deneb.libs.gson")
     archiveFileName.set("deneb.jar")

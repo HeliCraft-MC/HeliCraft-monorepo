@@ -31,6 +31,7 @@ services:
       COMMUNITY_LINKS: '${COMMUNITY_LINKS:-[]}'
       SITE_PHASE: ${SITE_PHASE:-PRELAUNCH}
       MINECRAFT_SERVICE_ACTORS: '${MINECRAFT_SERVICE_ACTORS:-[]}'
+      SQUAREMAP_TILE_SOURCES: '${SQUAREMAP_TILE_SOURCES:-[]}'
       MINECRAFT_ADDRESS: ${MINECRAFT_ADDRESS:-}
     depends_on:
       migrate: { condition: service_completed_successfully }

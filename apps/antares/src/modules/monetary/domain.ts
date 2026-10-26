@@ -17,6 +17,7 @@ const ACTIONS = {
   TREASURY_TRANSFER: 'SPEND_TREASURY',
 } satisfies Partial<Record<DirectivePayload['kind'], Policy['action']>>;
 const DECISION_ACTIONS = {
+  CHANGE_TERRITORY: 'CHANGE_TERRITORY',
   ...ACTIONS,
   PUBLISH_FX_OFFER: 'MANAGE_FX_OFFERS',
   CANCEL_FX_OFFER: 'CANCEL_FX_OFFERS',

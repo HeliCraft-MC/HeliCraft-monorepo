@@ -43,6 +43,9 @@ function SiteNavigation({ onNavigate }: Readonly<{ onNavigate: () => void }>): R
           <Link onKeyDown={escape} onClick={close} to="/world">
             {uiText(locale, 'Обзор мира', 'World overview')}
           </Link>
+          <Link onKeyDown={escape} onClick={close} to="/map">
+            {uiText(locale, 'Политическая карта', 'Political map')}
+          </Link>
           <Link onKeyDown={escape} onClick={close} to="/states" search={stateSearch}>
             {text('navigation.states')}
           </Link>

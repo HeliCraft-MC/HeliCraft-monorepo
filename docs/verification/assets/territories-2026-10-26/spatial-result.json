@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "nativeProtocol": 777,
+  "paper": "26.3-223",
+  "worldId": "a4f00c8f-bc17-4ddf-9ada-d8ac265cac41",
+  "paperWorldId": "93ae009d-4b0d-43e7-9a17-661e5d1f8124",
+  "r1": 3,
+  "r2": 4,
+  "recovered": 5,
+  "tiles": {
+    "before": "40b49735ebac0e9fb565d82078d6026b608715e98724ca0236b28786d3800083",
+    "after": "2c6cc6ad5c1cb356bee7f57dfc8bc4298c5f1e3bac1c190e23b5e67397372ecd",
+    "background": "ab7a8ebda4d048724bb146a5b692d9035805d08acfed5c79176737ce398e25bc"
+  },
+  "scenarios": [
+    "Wilderness → Aurora → hole → Aurora",
+    "ordinary movement and shared edge",
+    "vanilla powered-minecart movement across state borders",
+    "Nether/End commons and Overworld return",
+    "automatic squaremap background update",
+    "Loria and Wilderness",
+    "no debug leak to ordinary player",
+    "browser-drawn territory recognized by Paper",
+    "R2 through Vega without restart and stationary reclassification",
+    "spatial API outage retains verified snapshot with stale label",
+    "reconciliation installs missed revision",
+    "official localized name refresh by integrity without geometry rewrite"
+  ]
+}

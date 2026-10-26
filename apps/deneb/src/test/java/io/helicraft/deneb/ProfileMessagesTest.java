@@ -12,7 +12,7 @@ final class ProfileMessagesTest {
   void showsAllCitizenshipsWithoutInventingLocationOrHardcodingServerIdentity() {
     var profile =
         new ApiModels.Profile(
-            UUID.randomUUID(), "Player", "Configured name", List.of("First", "Second"));
+            UUID.randomUUID(), "Player", "Configured name", List.of("First", "Second"), null);
     assertEquals("Citizenships: First, Second", ProfileMessages.citizenship(profile, false));
     assertEquals("Гражданство: First, Second", ProfileMessages.citizenship(profile, true));
     assertEquals("Welcome to Configured name, Player!", ProfileMessages.welcome(profile, false));
@@ -20,7 +20,19 @@ final class ProfileMessagesTest {
 
   @Test
   void usesNeutralStateForNoCitizenship() {
-    var profile = new ApiModels.Profile(UUID.randomUUID(), "Player", "Configured name", List.of());
+    var profile =
+        new ApiModels.Profile(UUID.randomUUID(), "Player", "Configured name", List.of(), null);
     assertEquals("No active citizenship.", ProfileMessages.citizenship(profile, false));
+  }
+
+  @Test
+  void prefersTheApprovedWebsiteLanguageAndFallsBackToTheClientThenEnglish() {
+    var preferred =
+        new ApiModels.Profile(UUID.randomUUID(), "Player", "Configured name", List.of(), "ru");
+    var unset =
+        new ApiModels.Profile(UUID.randomUUID(), "Player", "Configured name", List.of(), null);
+    assertEquals("ru", ProfileMessages.locale(preferred, "en"));
+    assertEquals("ru", ProfileMessages.locale(unset, "ru"));
+    assertEquals("en", ProfileMessages.locale(unset, "de"));
   }
 }

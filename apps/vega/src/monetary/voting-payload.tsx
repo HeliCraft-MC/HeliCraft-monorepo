@@ -5,6 +5,7 @@ import { Alert } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { TreatyDecisionContent } from '../diplomacy/decision-content';
+import { TerritoryDecisionContent } from '../spatial/decision-content';
 import { PayloadSummary } from './payload-summary';
 
 function MonetaryVotingPayload({ id }: Readonly<{ id: string }>): ReactElement {
@@ -31,6 +32,9 @@ function MonetaryVotingPayload({ id }: Readonly<{ id: string }>): ReactElement {
             code={query.data.code}
             fxDisplay={query.data.fxDisplay}
           />
+          {query.data.territorialDisplay && (
+            <TerritoryDecisionContent display={query.data.territorialDisplay} />
+          )}
           {query.data.treatyContent !== null && (
             <TreatyDecisionContent content={query.data.treatyContent} />
           )}

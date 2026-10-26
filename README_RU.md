@@ -13,13 +13,15 @@ HeliCraft — постоянный социальный, политически�
 
 [Денежная система V1](docs/economy/monetary_RU.md): Центральные банки через Governance и административное одобрение, национальные валюты, неизменяемые политики, двойная запись, казна и личные кошельки. Весь сценарий доступен в Веге без Minecraft: `/app/states/:id/manage`, `/app/wallet`, `/admin/central-banks` и публичные SSR-страницы `/currencies`. Финансовые полномочия настраиваются явно через реформу.
 
+Государственные территории связывают [политическую карту и редактор](docs/states/territories_RU.md), существующий Governance и отдельную ратификацию с native Paper 26.3. Настоящие тайлы squaremap и JTS snapshots Денеба подтверждены [датированными проверками](docs/verification/territories-2026-10-25_RU.md); private claims и enforcement остаются будущей работой.
+
 ## Проекты
 
 | Продукт                                | Каталог           | Стек                                                                      |
 | -------------------------------------- | ----------------- | ------------------------------------------------------------------------- |
 | [Vega](apps/vega/README_RU.md)         | `apps/vega`       | React 19 · TypeScript · Vite · TanStack Router/Query · Zod · Atria · PWA  |
 | [Antares](apps/antares/README_RU.md)   | `apps/antares`    | TypeScript · Bun · Hono · Zod/OpenAPI · Drizzle · PostgreSQL/PostGIS · S3 |
-| [Deneb](apps/deneb/README_RU.md)       | `apps/deneb`      | Java 25 · Paper 26.2 · Gradle Kotlin DSL · Adventure · JTS · Caffeine     |
+| [Deneb](apps/deneb/README_RU.md)       | `apps/deneb`      | Java 25 · Paper 26.3 · Gradle Kotlin DSL · Adventure · JTS · Caffeine     |
 | [Rigel](apps/rigel/README_RU.md)       | `apps/rigel`      | Java 25 · Velocity 4.2.0 · Gradle Kotlin DSL                              |
 | [Atria](packages/atria/README_RU.md)   | `packages/atria`  | React · TypeScript · SCSS Modules · Base UI · Storybook                   |
 | [Alhena](packages/alhena/README_RU.md) | `packages/alhena` | Generated TypeScript SDK · native Fetch · zero runtime dependencies       |

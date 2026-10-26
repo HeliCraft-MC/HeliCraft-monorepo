@@ -14,3 +14,4 @@
 | Качество           | [Требования и адресные исключения](../development/quality.md)                                                                                                               |
 
 - [Minecraft Integration V1](minecraft-integration_RU.md) — единая identity, авторизация, forwarding, сессии и события.
+- [Spatial architecture](spatial_RU.md) — PostGIS authority, юридическая публикация, координаты карты и атомарные JTS snapshots Денеба.

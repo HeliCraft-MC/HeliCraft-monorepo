@@ -38,7 +38,7 @@ function managementSections(state: StateDetail, actorId: string): ManagementSect
     ) {
       sections.push('appointments');
     }
-    sections.push('proposals');
+    sections.push('proposals', 'territory');
     const kinds = availableKinds(state, actorId);
     sections.push(
       ...monetarySections

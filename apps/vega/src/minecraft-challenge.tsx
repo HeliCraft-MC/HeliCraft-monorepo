@@ -52,7 +52,7 @@ function MinecraftChallengeForm({ challenge, onDecided }: Props): ReactElement {
         await decideMinecraftChallenge({
           client: browserClient(),
           path: { id: challenge.id },
-          body: decision === 'APPROVE' ? { code, decision } : { decision },
+          body: decision === 'APPROVE' ? { code, decision, locale } : { decision },
           throwOnError: true,
         });
         form.reset();
@@ -62,7 +62,7 @@ function MinecraftChallengeForm({ challenge, onDecided }: Props): ReactElement {
       }
       setBusy(false);
     },
-    [challenge.id, onDecided],
+    [challenge.id, locale, onDecided],
   );
   const handleSubmit = useCallback(
     (event: SubmitEvent<HTMLFormElement>): void => {

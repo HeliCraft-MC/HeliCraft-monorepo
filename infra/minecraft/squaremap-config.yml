@@ -1,0 +1,41 @@
+config-version: 3
+settings:
+  update-checker: false
+  web-directory:
+    path: web
+    auto-update: true
+  internal-webserver:
+    enabled: true
+    bind: 0.0.0.0
+    port: 8081
+    flush-json-immediately: true
+world-settings:
+  default:
+    map:
+      enabled: false
+      zoom:
+        maximum: 3
+        default: 3
+        extra: 2
+      render:
+        full:
+          workers: 1
+          max-chunk-requests: 16
+          max-active-chunks: 16
+          max-active-regions: 1
+        radius:
+          workers: 1
+          max-chunk-requests: 16
+          max-active-chunks: 16
+          max-active-regions: 1
+        background:
+          enabled: true
+          workers: 1
+          interval-seconds: 10
+          max-chunks-per-interval: 16
+    player-tracker:
+      enabled: false
+      show-controls: false
+  minecraft:overworld:
+    map:
+      enabled: true

@@ -78,12 +78,16 @@ public final class ApiModels {
 
   public record SessionResult(Admission admission) {}
 
-  public record Profile(UUID accountId, String username, String serverName, List<String> states) {
+  public record Profile(
+      UUID accountId, String username, String serverName, List<String> states, String locale) {
     public Profile {
       Objects.requireNonNull(accountId);
       requireName(username);
       Objects.requireNonNull(serverName);
       states = List.copyOf(states);
+      if (locale != null && !locale.equals("ru") && !locale.equals("en")) {
+        throw new IllegalArgumentException("Unsupported profile locale");
+      }
     }
   }
 

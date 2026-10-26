@@ -1,4 +1,5 @@
 import { institutionConfiguration } from './institution-policies';
+import { assertTerritoryDirective } from '../spatial/directives';
 // oxlint-disable import/max-dependencies -- Execution availability composes bank, taxation and treaty domain checks under the existing directive boundary.
 import { TaxDirectiveSchema } from '../taxation/contracts';
 import { TreatyDirectiveSchema } from '../diplomacy/contracts';
@@ -85,6 +86,10 @@ async function assertDomainDirective(
   stateId: string,
   payload: DirectivePayload,
 ): Promise<boolean> {
+  if (payload.kind === 'CHANGE_TERRITORY') {
+    await assertTerritoryDirective(transaction, stateId, payload);
+    return true;
+  }
   const fx = FxDirectiveSchema.safeParse(payload);
   if (fx.success) {
     await assertFxDirective(transaction, stateId, fx.data);

@@ -1,6 +1,7 @@
 // oxlint-disable import/max-dependencies -- Decision orchestration composes the existing Governance authority and generic voting services.
 import { and, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../db';
+import type { Transaction } from '../permissions/transaction';
 import { monetaryDirectives, monetaryApprovals, monetaryVotes, votings } from '../../db/schema';
 import { assignmentState } from '../states/office-assignment-context';
 import { DomainError, HTTP } from '../errors';
@@ -27,79 +28,83 @@ class MonetaryDirectiveService {
   public constructor(db: Database['db']) {
     this.db = db;
   }
-  // oxlint-disable-next-line max-lines-per-function -- Proposal creation serializes the immutable payload, current authority and generic votes.
   public async create(stateId: string, actor: MonetaryActor, raw: DirectiveInput): Promise<string> {
+    return await this.db.transaction(
+      async (transaction) =>
+        await MonetaryDirectiveService.createInTransaction(transaction, { stateId, actor, raw }),
+    );
+  }
+  // oxlint-disable-next-line max-lines-per-function, max-statements -- Shared decision creation can join its domain's draft submission transaction.
+  public static async createInTransaction(
+    transaction: Transaction,
+    command: Readonly<{ stateId: string; actor: MonetaryActor; raw: DirectiveInput }>,
+  ): Promise<string> {
+    const { stateId, actor, raw } = command;
     const input = DirectiveInputSchema.parse(raw);
-    // oxlint-disable-next-line max-lines-per-function, max-statements -- The submitted proposal and immediate single-office execution share the same transaction.
-    return await this.db.transaction(async (transaction) => {
-      await monetaryActor(transaction, actor);
-      const state = await assignmentState(transaction, stateId, actor);
-      const prior = await previousDirective(transaction, actor.id, input.idempotencyKey);
-      const hash = monetaryHash(input.payload);
-      if (prior) {
-        if (prior.stateId !== stateId || prior.payloadHash !== hash) {
-          monetaryError(
-            'IDEMPOTENCY_CONFLICT',
-            'Этот ключ уже использован для другого распоряжения',
-          );
-        }
-        return prior.id;
+    await monetaryActor(transaction, actor);
+    const state = await assignmentState(transaction, stateId, actor);
+    const prior = await previousDirective(transaction, actor.id, input.idempotencyKey);
+    const hash = monetaryHash(input.payload);
+    if (prior) {
+      if (prior.stateId !== stateId || prior.payloadHash !== hash) {
+        monetaryError('IDEMPOTENCY_CONFLICT', 'Этот ключ уже использован для другого распоряжения');
       }
-      const policy = decisionPolicy(state.configuration.governance.policies, input.payload.kind);
-      if (state.status !== 'ACTIVE' || !policy || !policyActor(state, policy, actor.id)) {
-        throw new DomainError(
-          HTTP.forbidden,
-          'MONETARY_AUTHORITY_REQUIRED',
-          'Требуется активное государство и действующее финансовое полномочие Governance',
+      return prior.id;
+    }
+    const policy = decisionPolicy(state.configuration.governance.policies, input.payload.kind);
+    if (state.status !== 'ACTIVE' || !policy || !policyActor(state, policy, actor.id)) {
+      throw new DomainError(
+        HTTP.forbidden,
+        'MONETARY_AUTHORITY_REQUIRED',
+        'Требуется активное государство и действующее финансовое полномочие Governance',
+      );
+    }
+    await assertExecutable(transaction, stateId, input.payload);
+    const current =
+      'currencyId' in input.payload
+        ? await currentPolicy(transaction, input.payload.currencyId)
+        : null;
+    const policyRevisionId = current?.id ?? null;
+    const id = crypto.randomUUID();
+    const stored = await storePayload(transaction, input.payload);
+    await transaction.insert(monetaryDirectives).values({
+      id,
+      stateId,
+      governanceRevisionId: state.governanceRevisionId,
+      policyRevisionId,
+      ...stored,
+      payloadHash: hash,
+      createdBy: actor.id,
+      idempotencyKey: input.idempotencyKey,
+      createdAt: sql`clock_timestamp()`,
+    });
+    await storeDirectiveDocument(transaction, id, input.payload);
+    const record = await directiveRecord(transaction, id);
+    await createDirectiveVote(transaction, { record, state, policy });
+    const context = await directiveContext(transaction, id, actor);
+    if (context.detail.votes.length === 0 && !context.detail.manualRequired) {
+      const offices = context.detail.approvableOfficeIds;
+      if (offices.length > 0) {
+        await transaction.insert(monetaryApprovals).values(
+          offices.map((officeId) => ({
+            directiveId: id,
+            officeId,
+            actorId: actor.id,
+            approvedAt: sql`clock_timestamp()`,
+          })),
         );
       }
-      await assertExecutable(transaction, stateId, input.payload);
-      const current =
-        'currencyId' in input.payload
-          ? await currentPolicy(transaction, input.payload.currencyId)
-          : null;
-      const policyRevisionId = current?.id ?? null;
-      const id = crypto.randomUUID();
-      const stored = await storePayload(transaction, input.payload);
-      await transaction.insert(monetaryDirectives).values({
-        id,
-        stateId,
-        governanceRevisionId: state.governanceRevisionId,
-        policyRevisionId,
-        ...stored,
-        payloadHash: hash,
-        createdBy: actor.id,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: sql`clock_timestamp()`,
-      });
-      await storeDirectiveDocument(transaction, id, input.payload);
-      const record = await directiveRecord(transaction, id);
-      await createDirectiveVote(transaction, { record, state, policy });
-      const context = await directiveContext(transaction, id, actor);
-      if (context.detail.votes.length === 0 && !context.detail.manualRequired) {
-        const offices = context.detail.approvableOfficeIds;
-        if (offices.length > 0) {
-          await transaction.insert(monetaryApprovals).values(
-            offices.map((officeId) => ({
-              directiveId: id,
-              officeId,
-              actorId: actor.id,
-              approvedAt: sql`clock_timestamp()`,
-            })),
-          );
-        }
-        const approved = await directiveContext(transaction, id, actor);
-        if (approved.detail.canApply) {
-          await applyDirective(transaction, { id, actor });
-        }
+      const approved = await directiveContext(transaction, id, actor);
+      if (approved.detail.canApply) {
+        await applyDirective(transaction, { id, actor });
       }
-      await monetaryAudit(transaction, {
-        actorId: actor.id,
-        id,
-        action: 'monetary.directive.created',
-      });
-      return id;
+    }
+    await monetaryAudit(transaction, {
+      actorId: actor.id,
+      id,
+      action: 'monetary.directive.created',
     });
+    return id;
   }
   public async detail(id: string, actor: MonetaryActor): Promise<DirectiveDetail> {
     return await this.db.transaction(async (transaction) => {

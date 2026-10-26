@@ -142,3 +142,12 @@ export {
 export { companyMedia } from './company-media-schema';
 
 export { minecraftChallenges, minecraftSessions, minecraftEvents } from './minecraft-schema';
+export {
+  spatialWorlds,
+  territoryDrafts,
+  territoryApplications,
+  territoryReviews,
+  territoryRevisions,
+  activeTerritories,
+  territorialEvents,
+} from './spatial-schema';

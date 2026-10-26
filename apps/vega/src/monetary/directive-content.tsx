@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { MonetaryDirective, StateDetail } from '@helicraft/alhena';
 import { TreatyDecisionContent } from '../diplomacy/decision-content';
+import { TerritoryDecisionContent } from '../spatial/decision-content';
 import { PayloadSummary } from './payload-summary';
 
 function DirectiveContent({
@@ -16,6 +17,9 @@ function DirectiveContent({
         code={code}
         fxDisplay={directive.fxDisplay}
       />
+      {directive.territorialDisplay && (
+        <TerritoryDecisionContent display={directive.territorialDisplay} />
+      )}
       {directive.treatyContent !== null && (
         <TreatyDecisionContent content={directive.treatyContent} />
       )}

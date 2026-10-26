@@ -12,18 +12,23 @@ import { createDatabase } from '../src/db';
 import { AccountMinecraft } from '../src/modules/minecraft/contracts';
 import { connectMinecraft } from '../../../tests/minecraft/client';
 import type { ProtocolConnection } from '../../../tests/minecraft/client';
+import { verifyTerritoryRuntime } from '../../../tests/minecraft/territories';
 import type { Subprocess } from 'bun';
 
 const root = path.resolve(import.meta.dir, '../../..');
 const run = await mkdtemp('/tmp/helicraft-minecraft-v1-');
 const origin = 'http://localhost:8096';
-const locks = z.array(z.object({ url: z.url(), sha256: z.string(), file: z.string() }));
 const serverLock = z.object({ url: z.url(), sha256: z.string() });
 const rigelToken = randomBytes(32).toString('hex');
 const denebToken = randomBytes(32).toString('hex');
 const forwarding = randomBytes(32).toString('hex');
 const clients: ProtocolConnection[] = [];
-const children: { readonly process: Subprocess; readonly service: string }[] = [];
+const children: {
+  readonly process: Subprocess;
+  readonly service: string;
+  readonly write: (command: string) => Promise<void>;
+}[] = [];
+let spatialUnavailable = false;
 async function artifact(url: string, sha256: string, filename: string): Promise<string> {
   const target = path.join(root, 'build/minecraft', filename);
   await mkdir(path.dirname(target), { recursive: true });
@@ -70,7 +75,24 @@ async function start(
     stderr: descriptor.fd,
   });
   await descriptor.close();
-  children.push({ process: child, service });
+  children.push({
+    process: child,
+    service,
+    write: async (command): Promise<void> => {
+      if (command.includes('\n')) {
+        throw new Error('One disposable server console command required');
+      }
+      void child.stdin.write(`${command}\n`);
+      await child.stdin.flush();
+    },
+  });
+}
+async function paperConsole(command: string): Promise<void> {
+  const paper = children.find((child) => child.service === 'paper');
+  if (!paper || paper.process.exitCode !== null) {
+    throw new Error('Disposable Paper is not running');
+  }
+  await paper.write(command);
 }
 async function stopService(prefix: string, signal: 'SIGTERM' | 'SIGKILL'): Promise<void> {
   const index = children.findIndex((child) => child.service.startsWith(prefix));
@@ -100,6 +122,7 @@ try {
   const app = createApp({
     db: database.db,
     siteOrigin: origin,
+    squaremapTileSources: [{ backendId: 'deneb', origin: 'http://127.0.0.1:8081' }],
     minecraftActors: [
       { id: 'rigel-test', role: 'RIGEL', backendId: 'deneb', token: rigelToken },
       { id: 'deneb-test', role: 'DENEB', backendId: 'deneb', token: denebToken },
@@ -108,7 +131,19 @@ try {
       await Promise.resolve();
     },
   });
-  server = Bun.serve({ port: 3106, hostname: '127.0.0.1', fetch: app.fetch });
+  server = Bun.serve({
+    port: 3106,
+    hostname: '127.0.0.1',
+    fetch: async (request) => {
+      if (
+        spatialUnavailable &&
+        new URL(request.url).pathname.startsWith('/api/v1/internal/minecraft/spatial/')
+      ) {
+        return new Response('Spatial service test outage', { status: 503 });
+      }
+      return await app.fetch(request);
+    },
+  });
   await start('vega', ['bun', '--no-env-file', 'infra/serve-vega.ts'], {
     cwd: root,
     env: {
@@ -152,12 +187,21 @@ try {
       path.join(paperDir, 'plugins/deneb.jar'),
     ),
   ]);
-  for (const adapter of locks.parse(
-    await Bun.file(path.join(root, 'infra/minecraft/test-adapters.json')).json(),
-  )) {
-    const jar = await artifact(adapter.url, adapter.sha256, adapter.file);
-    await copyFile(jar, path.join(paperDir, 'plugins', adapter.file));
-  }
+  const squaremap = serverLock.parse(
+    await Bun.file(path.join(root, 'infra/minecraft/squaremap-lock.json')).json(),
+  );
+  await copyFile(
+    await artifact(squaremap.url, squaremap.sha256, 'squaremap.jar'),
+    path.join(paperDir, 'plugins/squaremap.jar'),
+  );
+  await mkdir(path.join(paperDir, 'plugins/squaremap'), { recursive: true });
+  await Bun.write(
+    path.join(paperDir, 'plugins/squaremap/config.yml'),
+    (await Bun.file(path.join(root, 'infra/minecraft/squaremap-config.yml')).text()).replace(
+      'bind: 0.0.0.0',
+      'bind: 127.0.0.1',
+    ),
+  );
   const proxyConfig = (await readFile(path.join(root, 'apps/rigel/docker/velocity.toml'), 'utf8'))
     .replace('0.0.0.0:25565', '127.0.0.1:25575')
     .replace('deneb:25566', '127.0.0.1:25576')
@@ -171,7 +215,7 @@ try {
   ).replace('25566', '25576');
   await Bun.write(
     path.join(paperDir, 'server.properties'),
-    `${properties}\nserver-ip=127.0.0.1\nlevel-name=disposable-world\nview-distance=2\nsimulation-distance=2\n`,
+    `${properties}\nserver-ip=127.0.0.1\nlevel-name=disposable-world\nview-distance=2\nsimulation-distance=2\ndifficulty=peaceful\n`,
   );
   const paperConfig = (
     await readFile(path.join(root, 'apps/deneb/docker/paper-global.yml'), 'utf8')
@@ -308,6 +352,20 @@ try {
     globalThis.scrollTo(0, 0);
   });
   await page.screenshot({ path: path.join(run, 'minecraft-online.png'), fullPage: true });
+  const spatialEvidence = await verifyTerritoryRuntime({
+    browser,
+    db: database.db,
+    run,
+    origin,
+    username: name,
+    player,
+    paperPid: () => children.find((child) => child.service === 'paper')?.process.pid,
+    console: paperConsole,
+    waitUntil,
+    spatialUnavailable: (unavailable) => {
+      spatialUnavailable = unavailable;
+    },
+  });
   player.client.end();
   await waitUntil(
     async () => (await gameAccount(cookie)).session === null,
@@ -349,7 +407,7 @@ try {
   expect(pageErrors).toStrictEqual([]);
   const finalPaperLog = await Bun.file(path.join(run, 'paper.log')).text();
   const finalProxyLog = await Bun.file(path.join(run, 'velocity.log')).text();
-  expect(finalPaperLog).toContain('Paper version 26.2-129');
+  expect(finalPaperLog).toContain('Paper version 26.3-223');
   expect(finalProxyLog).toContain('limboapi 1.1.27-SNAPSHOT (git-bfef579)');
   expect(finalPaperLog).not.toMatch(/\bERROR\b|Exception/u);
   expect(finalProxyLog).not.toMatch(/\bERROR\b|Exception/u);
@@ -468,6 +526,35 @@ try {
       );
     },
   });
+  await page.goto(`${origin}/app/minecraft?lang=ru`);
+  const russianPlayer = await pendingPlayer();
+  const russianCode = /Code \/ Код: (?<code>[\dA-F]{16})/u.exec(russianPlayer.messages.join(' '))
+    ?.groups?.code;
+  if (russianCode === undefined) {
+    throw new Error('No native locale acceptance proof');
+  }
+  await page.getByLabel('Код из Minecraft', { exact: true }).fill(russianCode);
+  await page.getByRole('button', { name: 'Подтвердить вход в Minecraft', exact: true }).click();
+  await russianPlayer.waitFor(
+    () => russianPlayer.messages.join(' ').includes('Добро пожаловать'),
+    'website-selected Russian welcome',
+  );
+  expect(russianPlayer.loginIds).toContain(registered.id);
+  await russianPlayer.waitFor(
+    () => russianPlayer.titles.join(' ').includes('Аврора'),
+    'localized jurisdiction at persisted login position',
+  );
+  russianPlayer.client.chat('/heli whereami');
+  await russianPlayer.waitFor(
+    () => russianPlayer.messages.join(' ').includes('Аврора'),
+    'localized physical jurisdiction',
+  );
+  russianPlayer.client.end();
+  await noSession();
+  expect(pageErrors).toStrictEqual([]);
+  console.info(
+    'Website-selected Russian locale overrides the game default; persisted-location login jurisdiction passed.',
+  );
   expect(
     (await readdir(path.join(paperDir, 'disposable-world/players/data'))).filter((file) =>
       file.endsWith('.dat'),
@@ -484,11 +571,13 @@ try {
     JSON.stringify(
       {
         status: 'passed',
-        protocolClient: 'minecraft-protocol 1.68.0 / Minecraft 26.1',
-        paper: '26.2-129',
+        protocolClient: 'MCProtocolLib 26.3 / Minecraft 26.3 / protocol 777',
+        paper: '26.3-223',
         velocity: '4.2.0-30',
         limbo: '1.1.27-SNAPSHOT bfef579',
-        adapter: 'ViaVersion/ViaBackwards 5.12.1 (test only)',
+        adapter: null,
+        spatial: spatialEvidence,
+        localeAcceptance: 'Vega ru → native welcome/title/whereami; persisted-location login',
         accountId: registered.id,
         pageErrors,
         faultScenarios: [

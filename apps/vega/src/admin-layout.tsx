@@ -22,6 +22,7 @@ function adminSectionLabel(
     ['/admin/users', text('admin.users')],
     ['/admin/audit', text('admin.audit')],
     ['/admin/states', text('states.title')],
+    ['/admin/territories', uiText(locale, 'Территории и миры', 'Territories and worlds')],
     ['/admin/votings', text('votings.title')],
     ['/admin/companies', uiText(locale, 'Компании', 'Companies')],
     ['/admin/institutions', uiText(locale, 'Институты', 'Institutions')],
@@ -82,6 +83,10 @@ function AdminLayout(): ReactElement {
                 <Link to="/admin/companies">
                   <Icon name="company" />
                   {uiText(locale, 'Компании', 'Companies')}
+                </Link>
+                <Link to="/admin/territories">
+                  <Icon name="state" />
+                  {uiText(locale, 'Территории и миры', 'Territories and worlds')}
                 </Link>
                 <Link to="/admin/states">
                   <Icon name="state" />

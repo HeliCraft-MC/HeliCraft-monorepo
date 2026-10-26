@@ -13,6 +13,7 @@ const storage = createStorage(config);
 const app = createApp({
   db,
   minecraftActors: config.MINECRAFT_SERVICE_ACTORS,
+  squaremapTileSources: config.SQUAREMAP_TILE_SOURCES,
   sitePhase: config.SITE_PHASE,
   communityLinks: config.COMMUNITY_LINKS,
   minecraftAddress: config.MINECRAFT_ADDRESS,

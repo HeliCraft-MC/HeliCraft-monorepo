@@ -14,3 +14,4 @@ Current cross-cutting contracts and application boundaries belong here. Domain r
 | Quality              | [Requirements and narrowly scoped exceptions](../development/quality.md)                                                                                                                        |
 
 - [Minecraft Integration V1](minecraft-integration.md) — single identity, authentication, forwarding, sessions and events.
+- [Spatial architecture](spatial.md) — PostGIS authority, legal publication, map coordinates and atomic Deneb JTS snapshots.

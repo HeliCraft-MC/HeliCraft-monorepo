@@ -6,7 +6,7 @@
 
 ## Требования и версии
 
-Для native-тестов нужны Bun 1.4.2+, Docker/Compose и Java 25. Wrapper скачивает Gradle 9.1.0. Ригель использует Velocity 4.2.0 build 30, Денеб — Paper 26.2 build 129. Server locks содержат URL и SHA-256. LimboAPI `1.1.27-SNAPSHOT` зафиксирован на commit `bfef5799f21d73a80155035c3430f6654aa6b9f8` и checksum в `infra/minecraft/limboapi.properties`; замена upstream-артефакта отклоняется. Для браузера нужен Chromium: `bunx --bun playwright install chromium` (Linux также может требовать системные библиотеки).
+Для native-тестов нужны Bun 1.4.2+, Docker/Compose и Java 25. Wrapper скачивает Gradle 9.1.0. Ригель использует Velocity 4.2.0 build 30, Денеб — Paper 26.3 build 223. Server locks содержат URL и SHA-256. LimboAPI `1.1.27-SNAPSHOT` зафиксирован на commit `bfef5799f21d73a80155035c3430f6654aa6b9f8` и checksum в `infra/minecraft/limboapi.properties`; замена upstream-артефакта отклоняется. Для браузера нужен Chromium: `bunx --bun playwright install chromium` (Linux также может требовать системные библиотеки).
 
 Одна установка из корня: `bun install --frozen-lockfile`. JS-команды выполняются Bun; TS7 не понижается. Compose предоставляет Java внутри образов; локальный JDK нужен для явных Gradle/native-тестов. Клиентский мод Minecraft не требуется.
 
@@ -63,14 +63,14 @@ JAR: `apps/rigel/build/libs/rigel.jar`, `apps/deneb/build/libs/deneb.jar`. Об�
 
 `test:minecraft:contracts` проверяет настоящий HTTP/security Антареса на временном PostgreSQL через Testcontainers. `test:minecraft` собирает текущие Java/TS, запускает свежие PostgreSQL, Velocity/Paper и production Вегу, затем проходит браузерное подтверждение и настоящий Minecraft-протокол. Он также аварийно завершает и перезапускает Java-серверы, ждёт истечения lease, проверяет отказ для неверного forwarding secret, старого сервисного токена, недоступного Paper и другого backend через forced host, затем восстановление с прежним UUID. Native-серверы слушают только loopback. Команда выводит уникальную папку `/tmp/helicraft-minecraft-v1-*` с логами, скриншотами и успешным `result.json`; процессы и контейнер завершаются в `finally`. Пользовательские БД/миры не затрагиваются. Папка может содержать приватную локальную конфигурацию, не публикуйте её целиком.
 
-Доступная библиотека `minecraft-protocol` 1.68.0 поддерживает Minecraft 26.1. Только автоматический disposable Paper устанавливает зафиксированные ViaVersion/ViaBackwards 5.12.1 для перевода настоящего протокола в Paper 26.2. Контрольные суммы находятся в `infra/minecraft/test-adapters.json`. В обычный Compose адаптеры не входят. Такой тест не заменяет приёмку UI обычным клиентом 26.2.
+Harness использует поддерживаемый MCProtocolLib **26.3 / protocol 777** как test-only Java dependency. `:minecraft-client:nativeClientClasspath` готовит classpath; private IPC adapter обрабатывает стандартные teleport acknowledgements и client tick-end. В production-плагинах нет protocol stack и переводящих плагинов. ViaVersion/ViaBackwards не устанавливаются, прежний adapter lock — неиспользуемое историческое доказательство. `test:minecraft:territories` запускает тот же workspace и полную native-приёмку с настоящими squaremap, Вегой и физической юрисдикцией, без второго Compose-стенда. Приёмка человеком в графическом клиенте 26.3 остаётся отдельной проверкой.
 
 Сначала завершайте контейнерные integration suites, затем браузерные. Изменение Docker-интерфейсов на этом хосте может вызвать `ERR_NETWORK_CHANGED` в Chromium; повторяйте браузер после стабилизации инфраструктуры, сохраняя исходную ошибку в отчёте. Отсутствие Docker, доступа к worker-процессам, Chromium/библиотек, Java или сети отличается от регрессии кода. Нельзя скрывать ошибки страницы.
 
 ## Приёмка обычным клиентом
 
 1. Запустите `minecraft:up`, откройте [Вегу](http://localhost:8096), создайте тестовый аккаунт и сохраните сессию браузера.
-2. В обычном клиенте Minecraft **26.2** задайте имя этого аккаунта и подключитесь к `localhost:25575`. Имя само по себе не подтверждает владение; не используйте чужой ник.
+2. В обычном клиенте Minecraft **26.3** задайте имя этого аккаунта и подключитесь к `localhost:25575`. Имя само по себе не подтверждает владение; не используйте чужой ник.
 3. Убедитесь, что отдельное виртуальное ожидание показывает название из настроек, код и `/app/minecraft`. До подтверждения доступа к игровому backend/playerdata быть не должно.
 4. В `/app/minecraft` проверьте имя/время, введите свой игровой код и подтвердите. Проверьте приветствие Paper, все действительные гражданства или нейтральный ответ, `/heli`, `/heli status`, `/heli profile`, UUID аккаунта и online в Веге.
 5. Выйдите: появятся offline и одно событие завершения. Новый вход требует новый код. Отказ, expiry, неверный код и чужая браузерная сессия не должны пропускать игрока.
@@ -91,4 +91,16 @@ JAR: `apps/rigel/build/libs/rigel.jar`, `apps/deneb/build/libs/deneb.jar`. Об�
 
 Для debugging сначала используйте disposable логи, DTO/state-machine tests. Remote Java debugging допускается только явно для локального loopback-процесса; не публикуйте debug ports и HTTP traces с секретами. Парольные команды и полные auth bodies не логируются.
 
-HTTP timeout плагинов задаётся `MINECRAFT_HTTP_TIMEOUT_MS`: по умолчанию 4000, допустимо 1000–10000 мс. Mutation retries намеренно отключены: неоднозначный consumption завершается disconnect/TTL, а не повторным допуском. Протокольный harness очищает оставшиеся known-packs/code-of-conduct listeners при штатном завершении configuration, иначе зафиксированный клиент отвечает дважды после limbo. Обычному клиенту 26.2 такая адаптация не нужна.
+HTTP timeout плагинов задаётся `MINECRAFT_HTTP_TIMEOUT_MS`: по умолчанию 4000, допустимо 1000–10000 мс. Mutation retries намеренно отключены: неоднозначный consumption завершается disconnect/TTL, а не повторным допуском. Native adapter MCProtocolLib использует библиотечный configuration lifecycle и подтверждает телепортации Paper 26.3 точными position/rotation и client tick-end. Переведённый старый клиент не считается native coverage.
+
+## squaremap and world migration
+
+Squaremap Paper 1.4.3 для mc26.3 закреплён URL, SHA-256 и upstream SHA-512 в `infra/minecraft/squaremap-lock.json`. JAR установлен отдельно от Денеба. Внутренний HTTP слушает 8081; Антарес читает только настроенные `SQUAREMAP_TILE_SOURCES` и отдаёт фиксированные PNG-маршруты зарегистрированного мира. Readiness проверяет `/tiles/settings.json` внутри инфраструктуры. Live player tracking выключен. Renderer хранит данные в отдельном тестовом Paper volume.
+
+На административной странице территорий и миров зарегистрируйте настоящий backend, Paper UUID и dimension из журнала Денеба. Пересозданный мир получает новую identity и не наследует старую геометрию. До регистрации публичная карта пуста. В V1 регистрируйте и редактируйте государственные территории только в Overworld. Приватность Paper port и modern forwarding обязательны.
+
+Для ограниченного начального рендера используйте доверенную консоль: `squaremap radiusrender minecraft:overworld 64 0 0`. Она также поддерживает `squaremap fullrender minecraft:overworld`, отмену и статус renderer. Full/radius используют один worker и ограниченные chunk requests/cache; background обрабатывает до 16 чанков каждые десять секунд. Не запускайте бесконечный fullrender при старте и не обещайте фиксированный TPS без измерений. Большой рендер требует выбранной оператором области/времени и мониторинга.
+
+Paper 26.3 может обновить формат мира. Harness этой задачи всегда создаёт новый disposable world, не открывает пользовательский мир и не подключается к БД `helicraft`. Перед переносом постоянного мира оператор останавливает запись, сохраняет полные world/plugin data и БД, проверяет восстановление, тестирует копию на точном locked runtime и сохраняет rollback environment. Одних region files недостаточно.
+
+См. [территориальный workflow](../states/territories_RU.md), [координаты и snapshot/cache contract](../architecture/spatial_RU.md), [актуальные проверки](../verification/territories-2026-10-25_RU.md).

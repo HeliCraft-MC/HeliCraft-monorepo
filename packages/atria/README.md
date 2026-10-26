@@ -79,3 +79,9 @@ Use `Form embedded` for generated fields inside an existing native form; it adds
 The sidebar is organized into Introduction, Foundations, Actions, Forms, Navigation, Identity, Data display, Feedback, Overlays, Media and Patterns. Start with Welcome, Design principles and Contributing; Foundations documents semantic tokens. Focused component examples live beside source, while composed workspaces and workflows live in Patterns.
 
 Follow the mandatory [maintenance guide](AGENTS.md) for every component or public API change. Keep examples local and deterministic, describe host responsibilities and keyboard/responsive behavior, add meaningful states, and inspect representative desktop/mobile examples after a successful build. Do not recreate miscellaneous component dumps.
+
+## Planar maps
+
+`FlatMap` lazily loads Leaflet 1.9.4 and Geoman Free 2.20.4 in the browser. The host supplies safe raster URLs, world identity, localized labels, published shapes and a controlled Polygon/MultiPolygon draft with holes. Squaremap uses 512px tiles and `CRS.Simple`; `flatToMap`/`mapToFlat` preserve `[X,Z]` and northward negative Z. Published shapes cannot be edited or cut. Arrow keys and +/− navigate; Escape cancels drawing. The host provides keyboard coordinate editing, validation, history, persistence and authority. Storybook covers read-only/editable/empty/long-label/narrow/unavailable-tile states using a neutral local component fixture, never invented Minecraft terrain.
+
+`onBounds` reports the visible planar window after pan/zoom/resize; the host bounds, debounces and cancels network requests. `onModeChange` synchronizes completion and Escape with host controls.

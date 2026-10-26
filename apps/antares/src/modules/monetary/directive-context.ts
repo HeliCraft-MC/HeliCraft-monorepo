@@ -1,3 +1,4 @@
+// oxlint-disable import/max-dependencies -- State decision display composes domain-specific treaty, FX and territorial proofs without new authority.
 import type { TreatyContent } from '../diplomacy/contracts';
 import { treatyRevision } from '../diplomacy/store';
 import type { Transaction } from '../permissions/transaction';
@@ -8,6 +9,7 @@ import { monetaryError } from './domain';
 import { policyActor } from './evidence';
 import { directiveProofs } from './directive-proofs';
 import { fxDecisionDisplay } from '../fx/decision-display';
+import { territorialDecisionDisplay } from '../spatial/decision-display';
 
 async function directiveTreatyContent(
   transaction: Transaction,
@@ -41,6 +43,7 @@ async function directiveContext(
       payloadHash: record.payloadHash,
       treatyContent: await directiveTreatyContent(transaction, payload),
       fxDisplay: await fxDecisionDisplay(transaction, record.stateId, payload),
+      territorialDisplay: await territorialDecisionDisplay(transaction, payload),
       status: record.status,
       createdAt: record.createdAt.toISOString(),
       appliedAt: record.appliedAt?.toISOString() ?? null,

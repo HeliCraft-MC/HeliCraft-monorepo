@@ -2,6 +2,13 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
+  spatialWorlds,
+  territoryDrafts,
+  territoryApplications,
+  territoryReviews,
+  territoryRevisions,
+  activeTerritories,
+  territorialEvents,
   minecraftChallenges,
   minecraftSessions,
   minecraftEvents,
@@ -112,6 +119,13 @@ import {
 } from './schema';
 
 const schema = {
+  spatialWorlds,
+  territoryDrafts,
+  territoryApplications,
+  territoryReviews,
+  territoryRevisions,
+  activeTerritories,
+  territorialEvents,
   minecraftChallenges,
   minecraftSessions,
   minecraftEvents,

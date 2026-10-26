@@ -15,7 +15,7 @@ bun run test:vega
 bun run test:e2e
 ```
 
-Для данных API запустите Antares отдельно либо используйте `bun run dev`. `dev:vega` готовит пакеты Atria/Alhena, запускает watch и Storybook. Продакшен из корня: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` (с API и хранилищами). Маршруты и генерируемый `routeTree.gen.ts` находятся в `src/`. Будущие функции: карта мира, управление государством, законы, голосования, рынки, история, уведомления ; безопасность аккаунта реализована.
+Для данных API запустите Antares отдельно либо используйте `bun run dev`. `dev:vega` готовит пакеты Atria/Alhena, запускает watch и Storybook. Продакшен из корня: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` (с API и хранилищами). Маршруты и генерируемый `routeTree.gen.ts` находятся в `src/`. Действующие [политическая карта и редактор государственных территорий](../../docs/states/territories_RU.md) используют настоящие тайлы squaremap, существующий Governance и отдельную административную ратификацию. Безопасность аккаунта, управление государством, Voting и веб-экономика описаны в [доменных справочниках](../../docs/README_RU.md); рынки товаров и другие будущие игровые системы остаются продуктовым замыслом.
 
 Из корня: `bun run lint` и `bun run format:check`. Правила и исключения: [настройка проверок](../../docs/development/setup-research_RU.md).
 

@@ -5,6 +5,12 @@ import io.helicraft.minecraft.ApiModels.Profile;
 final class ProfileMessages {
   private ProfileMessages() {}
 
+  static String locale(Profile profile, String clientLanguage) {
+    return profile.locale() == null
+        ? (clientLanguage.equals("ru") ? "ru" : "en")
+        : profile.locale();
+  }
+
   static String welcome(Profile profile, boolean russian) {
     return (russian ? "Добро пожаловать на " : "Welcome to ")
         + profile.serverName()

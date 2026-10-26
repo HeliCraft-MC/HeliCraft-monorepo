@@ -19,7 +19,13 @@ async function confirmDecision(page: Page): Promise<void> {
 async function effectiveNow(page: Page): Promise<void> {
   const value = await page.evaluate(() => {
     const now = new Date();
-    return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, -1);
+    const field = document.createElement('input');
+    field.type = 'datetime-local';
+    // Match the browser's canonical precision, including trailing fractional zeros.
+    field.value = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
+      .toISOString()
+      .slice(0, -1);
+    return field.value;
   });
   await page.getByLabel('Дата вступления в силу', { exact: true }).fill(value);
 }

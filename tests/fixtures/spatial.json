@@ -1,0 +1,149 @@
+[
+  {
+    "name": "polygon with an independent enclave",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [0, 0],
+          [64, 0],
+          [64, 64],
+          [0, 64],
+          [0, 0]
+        ],
+        [
+          [16, 16],
+          [16, 32],
+          [32, 32],
+          [32, 16],
+          [16, 16]
+        ]
+      ]
+    },
+    "points": [
+      { "x": 8, "z": 8, "inside": true },
+      { "x": 20, "z": 20, "inside": false },
+      { "x": 16, "z": 20, "inside": false },
+      { "x": 16, "z": 16, "inside": false },
+      { "x": 64, "z": 32, "inside": false },
+      { "x": 0, "z": 0, "inside": false },
+      { "x": 40, "z": 40, "inside": true }
+    ]
+  },
+  {
+    "name": "disconnected components across negative coordinates",
+    "geometry": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [-64, -64],
+            [-32, -64],
+            [-32, -32],
+            [-64, -32],
+            [-64, -64]
+          ]
+        ],
+        [
+          [
+            [32, 32],
+            [64, 32],
+            [64, 64],
+            [32, 64],
+            [32, 32]
+          ]
+        ]
+      ]
+    },
+    "points": [
+      { "x": -48, "z": -48, "inside": true },
+      { "x": 48, "z": 48, "inside": true },
+      { "x": 0, "z": 0, "inside": false },
+      { "x": -32, "z": -48, "inside": false },
+      { "x": 32, "z": 32, "inside": false }
+    ]
+  },
+  {
+    "name": "west side of a legal shared edge",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [-64, -32],
+          [0, -32],
+          [0, 32],
+          [-64, 32],
+          [-64, -32]
+        ]
+      ]
+    },
+    "points": [
+      { "x": -0.5, "z": 0, "inside": true },
+      { "x": 0, "z": 0, "inside": false },
+      { "x": 0, "z": 32, "inside": false },
+      { "x": 0.5, "z": 0, "inside": false }
+    ]
+  },
+  {
+    "name": "east side of a legal shared edge",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [0, -32],
+          [64, -32],
+          [64, 32],
+          [0, 32],
+          [0, -32]
+        ]
+      ]
+    },
+    "points": [
+      { "x": -0.5, "z": 0, "inside": false },
+      { "x": 0, "z": 0, "inside": false },
+      { "x": 0, "z": 32, "inside": false },
+      { "x": 0.5, "z": 0, "inside": true }
+    ]
+  },
+  {
+    "name": "narrow valid component",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [0, 0],
+          [0.125, 0],
+          [0.125, 64],
+          [0, 64],
+          [0, 0]
+        ]
+      ]
+    },
+    "points": [
+      { "x": 0.0625, "z": 32, "inside": true },
+      { "x": 0.125, "z": 32, "inside": false },
+      { "x": 0, "z": 32, "inside": false },
+      { "x": 0.126, "z": 32, "inside": false }
+    ]
+  },
+  {
+    "name": "positive Minecraft coordinate limit",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [29999980, 29999980],
+          [29999984, 29999980],
+          [29999984, 29999984],
+          [29999980, 29999984],
+          [29999980, 29999980]
+        ]
+      ]
+    },
+    "points": [
+      { "x": 29999982, "z": 29999982, "inside": true },
+      { "x": 29999984, "z": 29999982, "inside": false },
+      { "x": 29999980, "z": 29999980, "inside": false }
+    ]
+  }
+]

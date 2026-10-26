@@ -8,6 +8,9 @@ if [ "$HELI_SERVICE" = deneb ]; then
   if [ "${EULA:-false}" != true ]; then echo 'Accept the Minecraft EULA by setting EULA=true' >&2; exit 1; fi
   printf 'eula=true\n' > eula.txt
   cp bootstrap/server.properties server.properties
+  cp /opt/squaremap.jar plugins/squaremap.jar
+  mkdir -p plugins/squaremap
+  cp /opt/squaremap-config.yml plugins/squaremap/config.yml
   mkdir -p config
   sed "s/__FORWARDING_SECRET__/$FORWARDING_SECRET/g" bootstrap/paper-global.yml > config/paper-global.yml
 else

@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 /** Asynchronous, bounded HTTP; error objects never contain credentials or response bodies. */
 public final class AntaresClient implements AutoCloseable {
   private static final int MAX_RESPONSE = 65536;
+  private static final int MAX_SPATIAL_RESPONSE = 16_777_216;
   private final HttpClient http;
   private final Gson gson = new Gson();
   private final URI base;
@@ -64,6 +65,14 @@ public final class AntaresClient implements AutoCloseable {
   }
 
   public <T> CompletableFuture<T> post(String path, Object input, Class<T> type) {
+    return send(path, input, type, MAX_RESPONSE);
+  }
+
+  public <T> CompletableFuture<T> spatialSnapshot(Object input, Class<T> type) {
+    return send("/api/v1/internal/minecraft/spatial/snapshot", input, type, MAX_SPATIAL_RESPONSE);
+  }
+
+  private <T> CompletableFuture<T> send(String path, Object input, Class<T> type, int limit) {
     if (!path.matches("/api/v1/internal/minecraft/[A-Za-z0-9/-]+")) {
       throw new IllegalArgumentException("Internal Minecraft path required");
     }
@@ -74,13 +83,16 @@ public final class AntaresClient implements AutoCloseable {
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(input)))
             .build();
-    return http.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+    return http.sendAsync(
+            request,
+            HttpResponse.BodyHandlers.limiting(
+                HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8), limit))
         .thenApply(
             response -> {
               if (response.statusCode() != 200) {
                 throw new ApiException(response.statusCode());
               }
-              if (response.body().length() > MAX_RESPONSE) {
+              if (response.body().length() > limit) {
                 throw new ApiException(502);
               }
               try {

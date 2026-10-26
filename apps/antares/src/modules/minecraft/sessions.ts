@@ -96,15 +96,28 @@ class MinecraftSessions {
     accountId: string,
     username: string,
     actor: ServiceActor,
-    locale: Locale,
-  ): Promise<{ accountId: string; username: string; serverName: string; states: string[] }> {
-    await this.admission(accountId, username, actor);
+    clientLocale: Locale,
+  ): Promise<{
+    accountId: string;
+    username: string;
+    serverName: string;
+    states: string[];
+    locale: Locale;
+  }> {
+    const admission = await this.admission(accountId, username, actor);
+    const [approval] = await this.db
+      .select({ locale: minecraftChallenges.locale })
+      .from(minecraftSessions)
+      .innerJoin(minecraftChallenges, eq(minecraftChallenges.id, minecraftSessions.challengeId))
+      .where(eq(minecraftSessions.id, admission.session.id));
+    const locale = approval?.locale ?? clientLocale;
     const profile = await publicPlayerProfile(this.db, accountId);
     const site = await readSiteSettings(this.db, {});
     return {
       accountId,
       username: profile.name,
       serverName: site.serverName,
+      locale,
       // Public affiliation also includes historical founders; gameplay reports current citizenship only.
       states: profile.states
         .filter((state) => state.citizenSince !== null)

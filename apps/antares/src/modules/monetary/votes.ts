@@ -24,14 +24,19 @@ async function createDirectiveVote(
     return;
   }
   const yes = crypto.randomUUID();
+  const territorial = record.payload.kind === 'CHANGE_TERRITORY';
   const id = await persistVoting(transaction, record.createdBy, {
     title: {
-      ru: `Денежное решение: ${actionName(DECISION_ACTIONS[record.payload.kind], 'ru')}`,
-      en: `Monetary decision: ${actionName(DECISION_ACTIONS[record.payload.kind], 'en')}`,
+      ru: `${territorial ? 'Территориальное' : 'Денежное'} решение: ${actionName(DECISION_ACTIONS[record.payload.kind], 'ru')}`,
+      en: `${territorial ? 'Territorial' : 'Monetary'} decision: ${actionName(DECISION_ACTIONS[record.payload.kind], 'en')}`,
     },
     description: {
-      ru: `Неизменяемое распоряжение ${record.id}. Проверьте сумму, получателя и ограничения в полном тексте решения.`,
-      en: `Immutable directive ${record.id}. Review the amount, recipient and limits in the complete decision.`,
+      ru: territorial
+        ? `Неизменяемая территориальная заявка ${record.id}. Проверьте геометрию и обоснование. После государственного решения требуется административная ратификация.`
+        : `Неизменяемое распоряжение ${record.id}. Проверьте сумму, получателя и ограничения в полном тексте решения.`,
+      en: territorial
+        ? `Immutable territorial proposal ${record.id}. Review its geometry and justification. Administrative ratification follows the state decision.`
+        : `Immutable directive ${record.id}. Review the amount, recipient and limits in the complete decision.`,
     },
     options: [
       { id: yes, label: { ru: 'Одобрить', en: 'Approve' } },

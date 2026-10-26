@@ -7,7 +7,7 @@ import { minecraftChallenges, minecraftSessions } from '../../db/minecraft-schem
 import { DomainError, HTTP } from '../errors';
 import { tokenHash } from '../sessions/service';
 import type { Authenticated } from '../sessions/service';
-import type { ServiceActor } from './contracts';
+import type { ServiceActor, ChallengeDecision } from './contracts';
 import { CHALLENGE_MS, MAX_ATTEMPTS, expireMinecraft } from './lifecycle';
 import {
   activeAccount,
@@ -203,7 +203,7 @@ class MinecraftChallenges {
   }
   public async decide(
     id: string,
-    input: { readonly code?: string; readonly decision: 'APPROVE' | 'REJECT' },
+    input: Readonly<ChallengeDecision>,
     current: Authenticated,
   ): Promise<ReturnType<typeof challengeView>> {
     const result = await this.db.transaction(async (transaction) => {
@@ -239,7 +239,11 @@ class MinecraftChallenges {
         input.decision === 'APPROVE' ? 'APPROVED' : 'REJECTED';
       await transaction
         .update(minecraftChallenges)
-        .set({ status, approvedSessionId: current.sessionId })
+        .set({
+          status,
+          approvedSessionId: current.sessionId,
+          locale: input.decision === 'APPROVE' ? (input.locale ?? null) : null,
+        })
         .where(eq(minecraftChallenges.id, id));
       await audit(transaction, row.userId, id, `challenge.${status.toLowerCase()}`, 'vega');
       return { ...challengeView(row, now), status };

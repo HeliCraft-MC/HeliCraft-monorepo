@@ -106,3 +106,13 @@ export {
 
 export { FormLanguageScope } from './components/Form/form-language-scope';
 export { WorkflowLayout, type WorkflowStep } from './components/Workspace/workflow-layout';
+export { FlatMap } from './components/FlatMap/flat-map';
+export { flatToMap, mapToFlat } from './components/FlatMap/model';
+export type {
+  FlatMapProps,
+  FlatGeometry,
+  FlatPoint,
+  FlatMapShape,
+  FlatMapMode,
+  FlatMapBounds,
+} from './components/FlatMap/flat-map';

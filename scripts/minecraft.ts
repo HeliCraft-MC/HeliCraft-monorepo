@@ -60,7 +60,13 @@ if (action === 'prepare') {
 } else if (action === 'config') {
   await compose(['config', '--quiet']);
 } else if (action === 'test') {
-  await command(['./gradlew', ':minecraft-client:build', ':rigel:build', ':deneb:build']);
+  await command([
+    './gradlew',
+    ':minecraft-client:build',
+    ':minecraft-client:nativeClientClasspath',
+    ':rigel:build',
+    ':deneb:build',
+  ]);
   await command(['bun', 'run', 'build:ts']);
   await command(['bun', '--no-env-file', 'apps/antares/tests/minecraft-runtime.ts']);
 } else {

@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${MC_TEST_DATABASE_PASSWORD:?Run bun run minecraft:prepare}
     volumes: [minecraft-postgres:/var/lib/postgresql]
     healthcheck:
-      test: [CMD-SHELL, pg_isready -U minecraft_test -d helicraft_minecraft_test]
+      test: [CMD-SHELL, pg_isready -h 127.0.0.1 -U minecraft_test -d helicraft_minecraft_test]
       interval: 3s
       timeout: 3s
       retries: 30
@@ -38,6 +38,7 @@ services:
       PORT: '3000'
       DATABASE_URL: postgresql://minecraft_test:${MC_TEST_DATABASE_PASSWORD}@postgres:5432/helicraft_minecraft_test
       MINECRAFT_DISPOSABLE: 'true'
+      SQUAREMAP_TILE_SOURCES: '[{"backendId":"deneb","origin":"http://deneb:8081"}]'
       MINECRAFT_SERVICE_ACTORS: '[{"id":"rigel-test","role":"RIGEL","backendId":"deneb","token":"${MC_TEST_RIGEL_TOKEN}"},{"id":"deneb-test","role":"DENEB","backendId":"deneb","token":"${MC_TEST_DENEB_TOKEN}"}]'
       S3_ENDPOINT: http://storage:8333
       S3_ACCESS_KEY: minecraft_test
@@ -97,7 +98,10 @@ services:
       antares: { condition: service_healthy }
     healthcheck:
       test:
-        [CMD-SHELL, 'grep -q "Done (" logs/latest.log && grep -q "Deneb ready:" logs/latest.log']
+        [
+          CMD-SHELL,
+          'grep -q "Done (" logs/latest.log && grep -q "Deneb ready:" logs/latest.log && curl --fail --silent --max-time 2 http://127.0.0.1:8081/tiles/settings.json > /dev/null',
+        ]
       interval: 5s
       timeout: 3s
       retries: 60

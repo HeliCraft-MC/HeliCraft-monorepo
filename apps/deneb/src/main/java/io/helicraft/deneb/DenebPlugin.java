@@ -22,6 +22,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
   private final Map<UUID, Connection> connections = new ConcurrentHashMap<>();
   private AntaresClient api;
   private BukkitTask heartbeat;
+  private TerritorialRuntime territories;
 
   @Override
   public void onEnable() {
@@ -36,6 +37,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
             System.getenv().getOrDefault("ANTARES_URL", "http://localhost:3000"),
             token,
             AntaresClient.configuredTimeout());
+    territories = new TerritorialRuntime(this, api, this::verifiedLocale);
     var command = getCommand("heli");
     if (command == null) {
       throw new IllegalStateException("Missing /heli command");
@@ -54,8 +56,12 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
                 Component.text("Profile temporarily unavailable / Профиль временно недоступен"));
             return true;
           }
-          boolean russian = player.locale().getLanguage().equals("ru");
-          if (args.length > 0 && "status".equalsIgnoreCase(args[0])) {
+          boolean russian = "ru".equals(verifiedLocale(player));
+          if (args.length > 0 && "whereami".equalsIgnoreCase(args[0])) {
+            territories.whereami(player);
+          } else if (args.length > 0 && "borders".equalsIgnoreCase(args[0])) {
+            territories.borders(player);
+          } else if (args.length > 0 && "status".equalsIgnoreCase(args[0])) {
             player.sendMessage(
                 Component.text(
                     russian ? "Антарес: соединение подтверждено" : "Antares: connection verified"));
@@ -64,7 +70,8 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
           } else {
             player.sendMessage(
                 Component.text(
-                    connection.profile.serverName() + " · /heli status · /heli profile"));
+                    connection.profile.serverName()
+                        + " · /heli status · /heli profile · /heli whereami · /heli borders"));
           }
           return true;
         });
@@ -74,7 +81,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
 
   private void sendProfile(Player player, Connection connection) {
     UUID accountId = player.getUniqueId();
-    boolean russian = player.locale().getLanguage().equals("ru");
+    boolean russian = "ru".equals(verifiedLocale(player));
     api.post(
             "/api/v1/internal/minecraft/paper/profile",
             new ApiModels.ProfileInput(
@@ -100,8 +107,19 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
                       connection.profile = profile;
                       player.sendMessage(Component.text(profile.username() + " · " + accountId));
                       player.sendMessage(
-                          Component.text(ProfileMessages.citizenship(profile, russian)));
+                          Component.text(
+                              ProfileMessages.citizenship(
+                                  profile,
+                                  ProfileMessages.locale(profile, player.locale().getLanguage())
+                                      .equals("ru"))));
                     }));
+  }
+
+  private String verifiedLocale(Player player) {
+    Connection connection = connections.get(player.getUniqueId());
+    return connection == null || connection.profile == null
+        ? null
+        : ProfileMessages.locale(connection.profile, player.locale().getLanguage());
   }
 
   @EventHandler
@@ -185,11 +203,10 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
                         return;
                       }
                       connection.profile = profile;
+                      boolean russian = ProfileMessages.locale(profile, locale).equals("ru");
+                      player.sendMessage(Component.text(ProfileMessages.welcome(profile, russian)));
                       player.sendMessage(
-                          Component.text(ProfileMessages.welcome(profile, locale.equals("ru"))));
-                      player.sendMessage(
-                          Component.text(
-                              ProfileMessages.citizenship(profile, locale.equals("ru"))));
+                          Component.text(ProfileMessages.citizenship(profile, russian)));
                       getLogger().info("Deneb joined account " + player.getUniqueId());
                     }));
   }
@@ -259,6 +276,9 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
 
   @Override
   public void onDisable() {
+    if (territories != null) {
+      territories.close();
+    }
     if (heartbeat != null) {
       heartbeat.cancel();
     }

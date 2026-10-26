@@ -53,4 +53,8 @@
 - Governance authority derives from offices, appointment rules, decision policies and voting. Presets only initialize configuration; never derive capabilities from `government_type` or preset metadata.
 - Machine-readable Governance is authoritative. Custom constitution Markdown does not change capabilities. Published governance and constitution revisions are immutable; generated blocks render the governance revision pinned by their constitution revision.
 - Use the generic Voting service for applicable new voting use cases; do not create feature-specific ballot tables.
+- Spatial territory is authoritative in Antares/PostGIS. GeoJSON is local planar `[X,Z]`, SRID 0; exact polygon/hole edges are Wilderness. Register backend + immutable Paper world UUID + dimension; never inherit geometry by world display name. Only Overworld is territorial in V1.
+- Territorial changes require current `CHANGE_TERRITORY` Governance and separate reasoned administrative ratification. Draft seals, decisions, revisions and publication events are immutable; serialize publication by world and recheck active geometry/base revisions.
+- Minecraft targets native Paper/protocol 26.3. Pin Paper/squaremap artifacts and checksums. Deneb uses bounded verified JTS snapshots and atomic replacement, with no HTTP in movement hot paths. New game-event mechanics require real Paper/native-client acceptance including missed-revision recovery.
+- Political maps use actual squaremap tiles and explicit flat X/Z conversion. Published geometry and private drafts must remain separate; public SSR never loads draft data or forwards cookies.
 - `archive/*` is read-only reference for this architecture. Never introduce legacy runtime dependencies.

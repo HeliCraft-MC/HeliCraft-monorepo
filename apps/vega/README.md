@@ -15,7 +15,7 @@ bun run test:vega
 bun run test:e2e
 ```
 
-For API data, start Antares separately or use `bun run dev`. `bun run dev:vega` prepares and watches Atria/Alhena and starts Storybook. Production: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` from the root (starts Antares and persistence too). Routes and generated `routeTree.gen.ts` are in `src/`; add routes there. The planned features include the world map, state management, laws, votes, markets, history, notifications; account security is implemented.
+For API data, start Antares separately or use `bun run dev`. `bun run dev:vega` prepares and watches Atria/Alhena and starts Storybook. Production: `docker compose --env-file .env -f apps/vega/compose.yml up -d --build` from the root (starts Antares and persistence too). Routes and generated `routeTree.gen.ts` are in `src/`; add routes there. The current [political map and state territory editor](../../docs/states/territories.md) use actual squaremap tiles, existing Governance and separate administrative ratification. Account security, state management, voting and the web economy remain documented in the [domain references](../../docs/README.md); goods markets and other future game systems are product intent.
 
 From the root: `bun run lint` and `bun run format:check`. Rules and exceptions: [quality setup](../../docs/development/setup-research.md).
 

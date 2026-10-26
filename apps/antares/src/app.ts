@@ -5,6 +5,11 @@ import { bodyLimit } from 'hono/body-limit';
 import { except } from 'hono/combine';
 import type { Database } from './db';
 import { minecraftRoutes } from './modules/minecraft/routes';
+import { spatialRoutes } from './modules/spatial/routes';
+import { spatialHistoryRoutes } from './modules/spatial/history-routes';
+import { spatialMinecraftRoutes } from './modules/spatial/minecraft-routes';
+import { tileRoutes } from './modules/spatial/tiles';
+import type { TileSource } from './modules/spatial/tile-sources';
 import type { ServiceActor } from './modules/minecraft/contracts';
 import { identityRoutes } from './modules/identity/routes';
 import { validateBrowserMutation } from './modules/sessions/security';
@@ -39,6 +44,7 @@ import { publicFxRoutes } from './modules/fx/public-routes';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 interface Dependencies {
+  readonly squaremapTileSources?: readonly TileSource[];
   readonly minecraftActors?: readonly ServiceActor[];
   readonly checkReady: () => Promise<void>;
   readonly db?: Database['db'];
@@ -114,6 +120,10 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
     // oxlint-disable-next-line node/callback-return -- Hono next is Promise<void>; awaiting it preserves response headers and error propagation.
     await next();
   });
+  app.route('/api/v1', spatialRoutes(dependencies.db, secureCookies));
+  app.route('/api/v1', spatialHistoryRoutes(dependencies.db));
+  app.route('/api/v1', tileRoutes(dependencies.db, dependencies.squaremapTileSources ?? []));
+  app.route('/api/v1', spatialMinecraftRoutes(dependencies.db, dependencies.minecraftActors ?? []));
   app.route(
     '/api/v1',
     minecraftRoutes({

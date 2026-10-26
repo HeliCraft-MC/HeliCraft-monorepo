@@ -30,7 +30,7 @@ Drizzle uses `pg`, targeting the **helicraft** PostgreSQL database. The first mi
 
 ## Java
 
-Java **25** uses Gradle **9.1.0** and Kotlin DSL. Stable Paper **26.2 build 129** and Velocity **4.2.0 build 30** URLs and SHA-256 are pinned in server lockfiles and checked during container builds. [Gradle 9.1](https://docs.gradle.org/9.1.0/release-notes.html), [Paper downloads](https://docs.papermc.io/misc/downloads-service/).
+Java **25** uses Gradle **9.1.0** and Kotlin DSL. Stable Paper **26.3 build 223** and Velocity **4.2.0 build 30** URLs and SHA-256 are pinned in server lockfiles and checked during container builds. [Gradle 9.1](https://docs.gradle.org/9.1.0/release-notes.html), [Paper downloads](https://docs.papermc.io/misc/downloads-service/).
 
 Deneb compiles against Paper/Adventure and shades/relocates JTS and Caffeine. Rigel uses Velocity's annotation processor for its plugin descriptor. Both issue nonblocking Antares health requests. [Paper setup](https://docs.papermc.io/paper/dev/project-setup/), [Velocity plugins](https://docs.papermc.io/velocity/dev/creating-your-first-plugin/).
 

@@ -16,6 +16,7 @@ import styles from './management.module.scss';
 const SECTION_ICONS: Readonly<Record<ManagementSection, IconProps['name']>> = {
   institutions: 'state',
   overview: 'overview',
+  territory: 'state',
   identity: 'state',
   citizens: 'users',
   government: 'governance',

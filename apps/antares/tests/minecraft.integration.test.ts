@@ -467,6 +467,61 @@ describe('Minecraft Paper presence and private immutable events', () => {
     expect((await request('en')).states).toStrictEqual([]);
   });
 
+  it('binds the approved website language to the exact game session without changing identity checks', async () => {
+    const current = await fixture();
+    const pending = await challenge(current);
+    const route = `/api/v1/account/minecraft/challenges/${pending.issued.id}/decision`;
+    expect(
+      (
+        await current.app.request(
+          route,
+          post(
+            { decision: 'APPROVE', code: pending.issued.code, locale: 'xx' },
+            undefined,
+            current.cookie,
+          ),
+        )
+      ).status,
+    ).toBe(400);
+    const wrongCode = `${pending.issued.code.startsWith('0') ? '1' : '0'}${pending.issued.code.slice(1)}`;
+    expect(
+      (
+        await current.app.request(
+          route,
+          post({ decision: 'APPROVE', code: wrongCode, locale: 'ru' }, undefined, current.cookie),
+        )
+      ).status,
+    ).toBe(403);
+    const [unapproved] = await persistence()
+      .db.select({ locale: minecraftChallenges.locale })
+      .from(minecraftChallenges)
+      .where(eq(minecraftChallenges.id, pending.issued.id));
+    expect(unapproved?.locale).toBeNull();
+    expect(
+      (
+        await current.app.request(
+          route,
+          post(
+            { decision: 'APPROVE', code: pending.issued.code, locale: 'ru' },
+            undefined,
+            current.cookie,
+          ),
+        )
+      ).status,
+    ).toBe(200);
+    expect((await consume(current, pending)).status).toBe(200);
+    const response = await current.app.request(
+      '/api/v1/internal/minecraft/paper/profile',
+      post({ accountId: current.id, username: current.name, locale: 'en' }, DENEB.token),
+    );
+    expect(response.status).toBe(200);
+    expect(Profile.parse(await response.json())).toMatchObject({
+      accountId: current.id,
+      username: current.name,
+      locale: 'ru',
+    });
+  });
+
   it('requires actual Paper join, matches UUID/name, closes idempotently and never exposes secrets', async () => {
     const current = await fixture();
     const admission = await admitted(current);

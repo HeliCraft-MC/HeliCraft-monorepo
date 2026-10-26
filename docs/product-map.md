@@ -2,7 +2,7 @@
 
 # HeliCraft product map
 
-This is the target product model. The web implementation already includes public SSR, accounts and sessions, account/skin settings, CMS, RBAC, gallery, states and Governance, voting, companies, money, taxation, tax treaties and currency exchange. [Minecraft Integration V1](architecture/minecraft-integration.md) connects the existing account to browser-confirmed game entry, stable UUID and private presence. Territories, goods markets and World Engine remain future work. See the [administration overview (Russian)](overview/administration_RU.md) and [documentation index](README.md).
+This is the target product model. The web implementation already includes public SSR, accounts and sessions, account/skin settings, CMS, RBAC, gallery, states and Governance, voting, companies, money, taxation, tax treaties and currency exchange. [Minecraft Integration V1](architecture/minecraft-integration.md) connects the existing account to browser-confirmed game entry, stable UUID and private presence. [Territories V1](states/territories.md) connects the real squaremap surface, Governance and administrative ratification to Deneb jurisdiction on native Paper 26.3. Private claims, goods markets and World Engine remain future work. See the [administration overview (Russian)](overview/administration_RU.md) and [documentation index](README.md).
 
 ## Vega
 
