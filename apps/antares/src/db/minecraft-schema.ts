@@ -3,6 +3,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -11,6 +12,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { authSessions, users } from './core-schema';
 import type { Locale } from '../modules/localized-content/contracts';
+import type { z } from 'zod';
+import type { ConnectionDetails } from '../modules/minecraft/connection';
 
 const minecraftChallenges = pgTable(
   'minecraft_challenges',
@@ -32,6 +35,7 @@ const minecraftChallenges = pgTable(
     attempts: integer('attempts').notNull().default(0),
     approvedSessionId: uuid('approved_session_id').references(() => authSessions.id),
     locale: text('locale').$type<Locale>(),
+    connection: jsonb('connection').$type<z.infer<typeof ConnectionDetails>>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     polledAt: timestamp('polled_at', { withTimezone: true }).notNull().defaultNow(),

@@ -17,6 +17,7 @@ import { displayText, uiText } from '../states/text';
 import { economicAuthority } from '../taxation/model';
 import { DirectiveCard } from '../monetary/directive-card';
 import { DraftMap } from './draft-map';
+import { TerritoryAccessHelp } from './territory-access-help';
 import styles from './spatial.module.scss';
 
 // oxlint-disable-next-line max-lines-per-function -- State workspace composes draft selection, explicit creation and existing Governance decisions.
@@ -95,21 +96,7 @@ function StateTerritoryWorkspace({
     setSelected(event.currentTarget.value);
   }, []);
   if (!authorized) {
-    return (
-      <section className={styles.panel}>
-        <p>
-          {uiText(
-            locale,
-            'Редактор доступен при действующем полномочии CHANGE_TERRITORY. Если процедуры нет в устройстве государства, сначала предложите реформу; администрация не назначает её автоматически.',
-            'Editing requires current CHANGE_TERRITORY authority. If the state has no such procedure, propose a governance reform first; administrators do not assign it automatically.',
-          )}
-        </p>
-        <Button onClick={onReform} disabled={pending}>
-          {uiText(locale, 'Предложить реформу устройства', 'Propose governance reform')}
-        </Button>
-        <a href="/map">{uiText(locale, 'Открыть публичную карту', 'Open public map')}</a>
-      </section>
-    );
+    return <TerritoryAccessHelp state={state} onReform={onReform} pending={pending} />;
   }
   if (!query.data) {
     return query.isPending ? (
@@ -152,8 +139,8 @@ function StateTerritoryWorkspace({
         <Alert>
           {uiText(
             locale,
-            'Администрация ещё не зарегистрировала игровой мир.',
-            'Administrators have not registered a game world yet.',
+            'Игровой мир ещё не подключён. Он появится автоматически после запуска Minecraft-сервера.',
+            'The game world is not connected yet. It will appear automatically when Minecraft starts.',
           )}
         </Alert>
       )}

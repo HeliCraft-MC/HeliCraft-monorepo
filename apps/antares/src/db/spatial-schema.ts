@@ -57,6 +57,22 @@ const spatialWorlds = pgTable(
     ),
   ],
 );
+const spatialWorldEvents = pgTable(
+  'spatial_world_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    worldId: uuid('world_id')
+      .notNull()
+      .references(() => spatialWorlds.id),
+    serviceId: text('service_id').notNull(),
+    action: text('action').$type<'REGISTERED' | 'RETIRED'>().notNull(),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('spatial_world_event_once').on(table.worldId, table.action),
+    check('spatial_world_event_action', sql`${table.action} in ('REGISTERED','RETIRED')`),
+  ],
+);
 const territoryDrafts = pgTable(
   'territory_drafts',
   {
@@ -213,6 +229,7 @@ const territorialEvents = pgTable(
 );
 export {
   spatialWorlds,
+  spatialWorldEvents,
   territoryDrafts,
   territoryApplications,
   territoryReviews,

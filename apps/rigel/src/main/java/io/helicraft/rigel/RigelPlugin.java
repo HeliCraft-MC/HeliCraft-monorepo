@@ -111,7 +111,16 @@ public final class RigelPlugin {
     return EventTask.resumeWhenComplete(
         api.post(
                 "/api/v1/internal/minecraft/challenges",
-                new ApiModels.Connect(event.getUsername(), connectionId),
+                new ApiModels.Connect(
+                    event.getUsername(),
+                    connectionId,
+                    new ApiModels.ClientConnection(
+                        event.getConnection().getRemoteAddress().getAddress().getHostAddress(),
+                        event.getConnection().getRemoteAddress().getPort(),
+                        event.getConnection().getProtocolVersion().getProtocol(),
+                        String.join(
+                            " / ",
+                            event.getConnection().getProtocolVersion().getVersionsSupportedBy()))),
                 ApiModels.Challenge.class)
             .handle(
                 (challenge, error) -> {
@@ -399,13 +408,13 @@ public final class RigelPlugin {
               Component.text(challenge.serverName()),
               Component.text("Confirm sign-in / Подтвердите вход")));
       client.sendMessage(
-          Component.text(challenge.confirmationUrl())
+          Component.text("Confirm sign-in on the website / Подтвердить вход на сайте")
               .clickEvent(ClickEvent.openUrl(challenge.confirmationUrl())));
       client.sendMessage(
           Component.text("Code / Код: " + challenge.code() + " · 120 seconds / секунд"));
       client.sendMessage(
           Component.text(
-              "Enter this code in your signed-in website account. Never approve someone else's code. / Введите этот код в своём кабинете. Не подтверждайте чужой вход."));
+              "Open the link and confirm your own sign-in. You can also enter the code on the website. / Откройте ссылку и подтвердите свой вход. Можно также ввести код в кабинете."));
       client.sendActionBar(
           Component.text("Waiting for browser confirmation / Ожидание подтверждения в браузере"));
       logger.info("Rigel auth lobby entered account {}", challenge.accountId());

@@ -13,7 +13,11 @@ export const Route = createFileRoute('/app')({
     try {
       return { principal: await currentAccount() };
     } catch {
-      throw redirect({ to: '/login', search: { returnTo: location.href } });
+      throw redirect({
+        to: '/login',
+        search: { returnTo: location.href.split('#')[0] },
+        hash: location.hash,
+      });
     }
   },
   head: ({ match, loaderData }) => ({

@@ -11,7 +11,7 @@ import { label, uiText } from './text';
 import { useTranslation } from '../i18n';
 
 import { PolicyEditor } from './policy-editor';
-import { actions, newPolicy, replacePolicy } from './policy-model';
+import { actions, optionalActions, newPolicy, replacePolicy } from './policy-model';
 
 import styles from './states.module.scss';
 import type { StateWizardStepProps } from './wizard-types';
@@ -72,33 +72,7 @@ function PoliciesStep(props: StateWizardStepProps): ReactElement {
         )
         .map((action) => {
           const existing = configuration.governance.policies.find((item) => item.action === action);
-          if (
-            existing === undefined &&
-            [
-              'CREATE_INSTITUTION',
-              'CHANGE_BANK_CHARTER',
-              'CREATE_CURRENCY',
-              'CHANGE_MONETARY_POLICY',
-              'ISSUE_CURRENCY',
-              'BURN_CURRENCY',
-              'TRANSFER_CENTRAL_BANK',
-              'SPEND_TREASURY',
-              'CHANGE_TAX_OFFICE_CHARTER',
-              'AMEND_TAX_LAW',
-              'SIGN_TREATY',
-              'AMEND_TREATY',
-              'DENOUNCE_TREATY',
-              'SET_COMPANY_REGISTRATION_POLICY',
-              'REGISTER_COMPANY',
-              'REGISTER_COMPANY_BRANCH',
-              'PARTICIPATE_IN_COMPANY',
-              'ACQUIRE_COMPANY_SHARES',
-              'TRANSFER_COMPANY_SHARES',
-              'MANAGE_FX_OFFERS',
-              'CANCEL_FX_OFFERS',
-              'APPROVE_INTERBANK_EXCHANGE',
-            ].includes(action)
-          ) {
+          if (existing === undefined && optionalActions.some((optional) => optional === action)) {
             return (
               <section className={styles.card} key={action}>
                 <h3>{label(action, locale)}</h3>

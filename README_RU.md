@@ -111,7 +111,7 @@ Deneb включает и изолирует JTS и Caffeine, Adventure пред
 
 ## Minecraft development
 
-`bun run minecraft:up` собирает отдельный disposable стек (Вега `http://localhost:8096`, Minecraft `localhost:25575`); `minecraft:logs`, `minecraft:down`, `minecraft:clean` управляют только тестовым проектом. `bun run test:minecraft` собирает свежие плагины/веб и проверяет настоящий браузерный/протокольный сценарий. [Разработка, версии, безопасность и приёмка обычным клиентом](docs/development/minecraft-plugins_RU.md).
+`bun run minecraft:up` собирает отдельный disposable стек (Вега `http://localhost:8096`, Minecraft `127.0.0.1:25575`); `minecraft:logs`, `minecraft:down`, `minecraft:clean` управляют только тестовым проектом. Денеб автоматически регистрирует основной Overworld; он появляется в `/admin/territories` без ввода UUID. В чате Minecraft выдаётся одноразовая ссылка подтверждения; ручной ввод кода также доступен. `bun run test:minecraft` собирает свежие плагины/веб и проверяет настоящий браузерный/протокольный сценарий. [Разработка, версии, безопасность и приёмка обычным клиентом](docs/development/minecraft-plugins_RU.md).
 
 ## Документация
 

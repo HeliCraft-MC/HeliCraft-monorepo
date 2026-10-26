@@ -12,6 +12,14 @@ Geometry is planar Polygon/MultiPolygon with holes, in Minecraft blocks, seriali
 
 Each registered world has an immutable logical ID, backend instance, Paper world UUID, dimension and lifecycle status. The Paper UUID must match before geometry applies; a recreated world with the same name is a different world. V1 permits territorial editing only for explicitly registered active Overworlds. Nether and End remain commons. Public map configuration explicitly identifies the squaremap world key and coordinate/zoom conventions after inspection of the pinned renderer.
 
+## Automatic primary world registration
+
+Deneb sends `registerOverworld: true` with its bounded loaded-world report to `POST /api/v1/internal/minecraft/spatial/worlds` during the existing asynchronous five-second reconciliation. The default for older/read-only callers is false. Only a scoped DENEB actor can request registration; Antares derives the backend ID from that actor, never the request body. At most one exact `minecraft:overworld` is accepted; duplicate UUIDs and multiple primary Overworlds are rejected before mutation. Nether/End/custom keys are not auto-registered.
+
+Antares serializes discovery per backend. A matching Paper UUID/dimension reuses its immutable registration and map settings. An unseen UUID gets a separate logical key and localized name, squaremap key `minecraft_overworld`, native zoom 3 and extra zoom 2. An existing active binding to the same backend/tile key is retired atomically before the new registration. Its geometry, drafts and published history are retained and never copied. Retired UUIDs are never resurrected: obsolete backend reports cannot reclaim the current binding. Discovery manages this physical lifecycle and cannot publish territory or grant Governance authority.
+
+Migration `0049_spatial_world_discovery.sql` adds append-only `spatial_world_events` for service-identified registration/retirement without inventing an administrator/player account. Existing territorial revisions and user world files are unchanged. Startup/API outages retry in ordinary reconciliation, with no HTTP in movement paths. The admin UI lists connected worlds and keeps an explained advanced manual form. [Operator instructions](../states/territories.md#world-connection).
+
 ## Legal changes and concurrency
 
 Existing active states may have no territory; no founding date, historical decision or default polygon is rewritten. A versioned draft pins its state, world and base active territorial revision. Saving uses optimistic concurrency. Submission freezes geometry, reason and hash into an immutable proposal.

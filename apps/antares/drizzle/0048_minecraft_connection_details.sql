@@ -1,0 +1,1 @@
+ALTER TABLE "minecraft_challenges" ADD COLUMN "connection" jsonb;

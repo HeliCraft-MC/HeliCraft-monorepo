@@ -11,12 +11,30 @@ const en = {
     'Your website session expired. Sign in again before confirming Minecraft.',
 
   'minecraft.title': 'Minecraft',
+  'minecraft.confirmTitle': 'Are you trying to sign into Minecraft?',
+  'minecraft.linkReady':
+    'Your in-game link is ready. Review the details and confirm your own sign-in — no need to retype the code.',
+  'minecraft.linkUnavailable':
+    'This link is invalid, used, expired or belongs to another account. Sign in with your game account and reconnect if needed.',
+  'minecraft.decisionSaved':
+    'Your decision was saved. If you approved, return to Minecraft and wait for the connection.',
+  'minecraft.ipAddress': 'Connection IP',
+  'minecraft.clientPort': 'Client port',
+  'minecraft.clientVersion': 'Minecraft version',
+  'minecraft.protocol': 'protocol',
+  'minecraft.location': 'Approximate location',
+  'minecraft.localAddress': 'Local network or proxy address; location unavailable',
+  'minecraft.locationUnknown': 'Unavailable — no GeoIP database or no match for this address',
+  'minecraft.timeZone': 'GeoIP time zone',
+  'minecraft.connectionUnknown': 'Client details are unavailable for this connection.',
+  'minecraft.connectionHint':
+    'The IP is observed by Rigel and may belong to a VPN, proxy or Docker gateway. Location is approximate; the version comes from the client protocol. These details do not prove identity.',
   'minecraft.intro':
-    'Connect using your account username. Confirm each game connection here using the code displayed in your Minecraft client. Your account UUID stays the same after a rename.',
+    'Connect using your account username. Open the link in Minecraft chat and confirm with a button. If the link is unavailable, enter the code manually here. Your account UUID stays the same after a rename.',
   'minecraft.requested': 'Requested:',
   'minecraft.expires': 'Expires:',
   'minecraft.warning':
-    'Approve only a connection you started yourself. Enter the code you see in your own Minecraft client. A link or username alone does not prove ownership.',
+    'Approve only a sign-in you started yourself. Never open links or enter codes sent by other people: this could let them into your account. Opening this page does not approve anything.',
   'minecraft.code': 'Code from Minecraft',
   'minecraft.codeHint':
     'Enter all 16 characters from your game client. Do not enter your account password.',

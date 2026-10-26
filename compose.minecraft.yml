@@ -47,7 +47,9 @@ services:
       SITE_ORIGIN: http://localhost:8096
       SECURE_COOKIES: 'false'
       SITE_PHASE: OPEN
-      MINECRAFT_ADDRESS: localhost:25575
+      MINECRAFT_ADDRESS: 127.0.0.1:25575
+      GEOIP_DATABASE_PATH: ${GEOIP_DATABASE_PATH:-}
+    volumes: ['./infra/geoip:/geoip:ro']
     depends_on:
       migrate: { condition: service_completed_successfully }
       storage: { condition: service_healthy }

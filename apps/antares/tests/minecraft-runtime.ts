@@ -327,8 +327,28 @@ try {
     }),
   ).toBeVisible();
   expect((await gameAccount(cookie)).session).toBeNull();
-  await page.getByLabel('Code from Minecraft', { exact: true }).fill(code);
+  const confirmationUrl = player.links.find((link) => link.startsWith(`${origin}/app/minecraft#`));
+  if (confirmationUrl === undefined) {
+    throw new Error('No clickable confirmation link from the native Minecraft client');
+  }
+  await context.clearCookies({ name: 'helicraft_session' });
+  await page.goto(confirmationUrl);
+  await expect(page).toHaveURL(/\/login\?/u);
+  expect(new URL(page.url()).search).not.toContain(code);
+  expect(new URL(page.url()).hash).toContain(code);
+  await page.getByLabel('Username', { exact: true }).fill(name);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Are you trying to sign into Minecraft?', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Code from Minecraft', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('127.0.0.1', { exact: true })).toBeVisible();
+  await expect(page.getByText(/26\.3.*777/u)).toBeVisible();
+  expect((await gameAccount(cookie)).session).toBeNull();
+  await page.screenshot({ path: path.join(run, 'minecraft-confirmation.png'), fullPage: true });
   await page.getByRole('button', { name: 'Confirm Minecraft sign-in', exact: true }).click();
+  await expect(page).toHaveURL(`${origin}/app/minecraft`);
   await player.waitFor(
     () => player.messages.join(' ').includes('Welcome to'),
     'Paper welcome after browser approval',

@@ -19,3 +19,5 @@ Some reports reference local `run/` logs and screenshots. Those are run artifact
 
 - [Minecraft Integration V1 — 2026-10-25](minecraft-integration-2026-10-25.md) — security contracts, real Compose, Java, browser and Minecraft protocol.
 - [Territories & Political Map V1 — 2026-10-25](territories-2026-10-25.md) — completed automated acceptance, follow-up 2026-10-26; native 26.3, real tiles, legal workflow and hot geometry updates.
+
+- [Minecraft confirmation links — 2026-10-26](minecraft-sign-in-2026-10-26.md) — actual native link → website login → explicit approval, private connection details and optional local GeoIP.

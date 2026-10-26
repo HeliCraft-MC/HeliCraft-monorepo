@@ -26,7 +26,7 @@ public final class SpatialModels {
     }
   }
 
-  public record WorldRequest(List<WorldIdentity> worlds) {
+  public record WorldRequest(List<WorldIdentity> worlds, boolean registerOverworld) {
     public WorldRequest {
       worlds = List.copyOf(worlds);
     }

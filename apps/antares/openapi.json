@@ -2936,6 +2936,87 @@
           }
         ]
       },
+      "MinecraftConnectionDetails": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "ip"
+              },
+              {
+                "type": "string",
+                "format": "ip"
+              }
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "protocol": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[\\w .+/-]+$/u"
+          },
+          "addressKind": {
+            "type": "string",
+            "enum": [
+              "LOCAL",
+              "PUBLIC"
+            ]
+          },
+          "location": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "countryCode": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[A-Z]{2}$/u"
+              },
+              "city": {
+                "$ref": "#/components/schemas/LocalizedInput"
+              },
+              "timeZone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "countryCode",
+              "city",
+              "timeZone"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "port",
+          "protocol",
+          "version",
+          "addressKind",
+          "location"
+        ],
+        "additionalProperties": false
+      },
       "MinecraftChallenge": {
         "type": "object",
         "properties": {
@@ -2965,6 +3046,9 @@
               "EXPIRED",
               "DISCONNECTED"
             ]
+          },
+          "connection": {
+            "$ref": "#/components/schemas/MinecraftConnectionDetails"
           }
         },
         "required": [
@@ -2972,7 +3056,8 @@
           "username",
           "createdAt",
           "expiresAt",
-          "status"
+          "status",
+          "connection"
         ]
       },
       "PlatformError": {
@@ -15247,6 +15332,10 @@
                       "additionalProperties": false
                     },
                     "maxItems": 64
+                  },
+                  "registerOverworld": {
+                    "type": "boolean",
+                    "default": false
                   }
                 },
                 "required": [
@@ -15366,6 +15455,27 @@
             }
           },
           "404": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Result",
             "content": {
               "application/json": {
@@ -15555,6 +15665,27 @@
               }
             }
           },
+          "409": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
           "503": {
             "description": "Result",
             "content": {
@@ -15719,6 +15850,27 @@
               }
             }
           },
+          "409": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
           "503": {
             "description": "Result",
             "content": {
@@ -15760,6 +15912,46 @@
                   "connectionId": {
                     "type": "string",
                     "format": "uuid"
+                  },
+                  "client": {
+                    "type": "object",
+                    "properties": {
+                      "address": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "ip"
+                          },
+                          {
+                            "type": "string",
+                            "format": "ip"
+                          }
+                        ]
+                      },
+                      "port": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 65535
+                      },
+                      "protocol": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2147483647
+                      },
+                      "version": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[\\w .+/-]+$/u"
+                      }
+                    },
+                    "required": [
+                      "address",
+                      "port",
+                      "protocol",
+                      "version"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "required": [

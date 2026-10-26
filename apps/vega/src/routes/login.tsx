@@ -4,11 +4,11 @@ import { translate } from '../locales';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
 import { AuthPage } from '../auth-page';
-import { currentAccount } from '../account-api';
+import { currentAccount, safeReturn } from '../account-api';
 
 export const Route = createFileRoute('/login')({
   validateSearch: z.object({ returnTo: z.string().optional() }),
-  beforeLoad: async () => {
+  beforeLoad: async ({ search, location }) => {
     if (typeof document === 'undefined') {
       return;
     }
@@ -20,7 +20,9 @@ export const Route = createFileRoute('/login')({
       authenticated = false;
     }
     if (authenticated) {
-      throw redirect({ to: '/app' });
+      throw redirect({
+        href: `${safeReturn(search.returnTo)}${location.hash ? `#${location.hash}` : ''}`,
+      });
     }
   },
   loader: async () => await loadPublicSite(),

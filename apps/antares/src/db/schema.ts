@@ -144,6 +144,7 @@ export { companyMedia } from './company-media-schema';
 export { minecraftChallenges, minecraftSessions, minecraftEvents } from './minecraft-schema';
 export {
   spatialWorlds,
+  spatialWorldEvents,
   territoryDrafts,
   territoryApplications,
   territoryReviews,

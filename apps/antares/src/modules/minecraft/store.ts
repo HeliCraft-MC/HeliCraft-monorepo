@@ -60,6 +60,7 @@ function challengeView(row: typeof minecraftChallenges.$inferSelect, now: Date):
       (row.expiresAt <= now || row.polledAt.getTime() + POLL_STALE_MS <= now.getTime())
         ? 'EXPIRED'
         : row.status,
+    connection: row.connection,
   };
 }
 function sessionView(row: SessionRow, now: Date): GameSession {

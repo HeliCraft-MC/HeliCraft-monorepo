@@ -45,7 +45,9 @@ export function AuthPage({
         const action = registration ? register : login;
         await action({ client: browserClient(), body: { username, password }, throwOnError: true });
         const params = new URLSearchParams(globalThis.location.search);
-        globalThis.location.assign(safeReturn(params.get('returnTo')));
+        globalThis.location.assign(
+          `${safeReturn(params.get('returnTo'))}${globalThis.location.hash}`,
+        );
       } catch (error) {
         setMessage(errorMessage(error));
         setBusy(false);

@@ -9,15 +9,9 @@ const mechanisms = [
   'COMBINED',
   'MANUAL',
 ] as const;
-const actions = [
-  'AMEND_GOVERNANCE',
-  'ENACT_LAW',
-  'REPEAL_LAW',
-  'ACCEPT_CITIZEN',
-  'REMOVE_CITIZEN',
-  'APPOINT_OFFICE_HOLDER',
-  'REMOVE_OFFICE_HOLDER',
+const optionalActions = [
   'CREATE_INSTITUTION',
+  'CHANGE_TERRITORY',
   'CHANGE_BANK_CHARTER',
   'CREATE_CURRENCY',
   'CHANGE_MONETARY_POLICY',
@@ -39,6 +33,16 @@ const actions = [
   'MANAGE_FX_OFFERS',
   'CANCEL_FX_OFFERS',
   'APPROVE_INTERBANK_EXCHANGE',
+] as const;
+const actions = [
+  'AMEND_GOVERNANCE',
+  'ENACT_LAW',
+  'REPEAL_LAW',
+  'ACCEPT_CITIZEN',
+  'REMOVE_CITIZEN',
+  'APPOINT_OFFICE_HOLDER',
+  'REMOVE_OFFICE_HOLDER',
+  ...optionalActions,
 ] as const;
 function newPolicy(action: GovernancePolicy['action']): GovernancePolicy {
   return { action, mechanism: 'CITIZEN_VOTE', officeIds: [], vote: null, manualProcedure: {} };
@@ -68,4 +72,4 @@ function replacePolicy(
     policy,
   ];
 }
-export { mechanisms, actions, newPolicy, selectedOffices, replacePolicy };
+export { mechanisms, actions, optionalActions, newPolicy, selectedOffices, replacePolicy };

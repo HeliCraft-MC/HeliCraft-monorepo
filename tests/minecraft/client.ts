@@ -12,6 +12,7 @@ interface ProtocolConnection {
     readonly end: () => void;
   };
   readonly messages: string[];
+  readonly links: string[];
   readonly titles: string[];
   readonly positions: string[];
   readonly loginIds: string[];
@@ -39,6 +40,8 @@ function event(connection: ProtocolConnection, line: string): void {
       connection.disconnected = true;
       connection.client.end();
     }
+  } else if (value.type === 'link') {
+    connection.links.push(value.value);
   } else if (value.type === 'title' || value.type === 'subtitle') {
     connection.titles.push(value.value);
   } else if (value.type === 'position') {
@@ -148,6 +151,7 @@ function connectMinecraft(
       },
     },
     messages: [],
+    links: [],
     titles: [],
     positions: [],
     loginIds: [],

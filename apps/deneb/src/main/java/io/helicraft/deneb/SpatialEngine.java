@@ -59,7 +59,7 @@ final class SpatialEngine implements AutoCloseable {
     List<SpatialModels.WorldIdentity> loaded = List.copyOf(identities);
     api.post(
             "/api/v1/internal/minecraft/spatial/worlds",
-            new SpatialModels.WorldRequest(loaded),
+            new SpatialModels.WorldRequest(loaded, true),
             SpatialModels.WorldResponse.class)
         .thenCompose(worlds -> reconcile(loaded, worlds))
         .whenComplete(

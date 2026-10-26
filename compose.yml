@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: apps/antares/Dockerfile
     restart: unless-stopped
-    volumes: ['./ops.json:/workspace/ops.json:ro']
+    volumes: ['./ops.json:/workspace/ops.json:ro', './infra/geoip:/geoip:ro']
     environment:
       PORT: '3000'
       DATABASE_URL: postgresql://helicraft:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/helicraft
@@ -33,6 +33,7 @@ services:
       MINECRAFT_SERVICE_ACTORS: '${MINECRAFT_SERVICE_ACTORS:-[]}'
       SQUAREMAP_TILE_SOURCES: '${SQUAREMAP_TILE_SOURCES:-[]}'
       MINECRAFT_ADDRESS: ${MINECRAFT_ADDRESS:-}
+      GEOIP_DATABASE_PATH: ${GEOIP_DATABASE_PATH:-}
     depends_on:
       migrate: { condition: service_completed_successfully }
       storage: { condition: service_healthy }

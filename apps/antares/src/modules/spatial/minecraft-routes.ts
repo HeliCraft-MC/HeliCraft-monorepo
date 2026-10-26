@@ -7,6 +7,7 @@ import type { ServiceActor } from '../minecraft/contracts';
 import { canonicalJson } from '../states/configuration-hash';
 import { SpatialWorldService } from './worlds';
 import { SpatialSnapshotService } from './snapshots';
+import { discoverOverworld } from './world-discovery';
 
 const Identity = z.object({ worldId: z.uuid(), paperWorldId: z.uuid() }).strict();
 const ErrorSchema = z.object({ message: z.string(), code: z.string().optional() });
@@ -15,12 +16,29 @@ const Errors = {
   401: json(ErrorSchema),
   403: json(ErrorSchema),
   404: json(ErrorSchema),
+  409: json(ErrorSchema),
   503: json(ErrorSchema),
 };
 const MAX_WORLD_KEY_LENGTH = 96;
 const MAX_LOADED_WORLDS = 64;
 const WorldIdentity = z
   .object({ paperWorldId: z.uuid(), dimension: z.string().max(MAX_WORLD_KEY_LENGTH) })
+  .strict();
+const WorldRequest = z
+  .object({
+    worlds: z
+      .array(WorldIdentity)
+      .max(MAX_LOADED_WORLDS)
+      .refine(
+        (worlds) => new Set(worlds.map((world) => world.paperWorldId)).size === worlds.length,
+        'Loaded world UUIDs must be unique',
+      )
+      .refine(
+        (worlds) => worlds.filter((world) => world.dimension === 'minecraft:overworld').length <= 1,
+        'Only one primary Overworld may be reported',
+      ),
+    registerOverworld: z.boolean().default(false),
+  })
   .strict();
 const RegisteredWorld = z.object({
   id: z.uuid(),
@@ -54,7 +72,7 @@ function spatialMinecraftRoutes(
           required: true,
           content: {
             'application/json': {
-              schema: z.object({ worlds: z.array(WorldIdentity).max(MAX_LOADED_WORLDS) }).strict(),
+              schema: WorldRequest,
             },
           },
         },
@@ -63,7 +81,12 @@ function spatialMinecraftRoutes(
     }),
     async (context) => {
       const actor = serviceActor(context, actors, 'DENEB');
-      const requested = context.req.valid('json').worlds;
+      const input = context.req.valid('json');
+      const requested = input.worlds;
+      const overworld = requested.find((world) => world.dimension === 'minecraft:overworld');
+      if (input.registerOverworld && overworld !== undefined) {
+        await discoverOverworld(persistence(), actor, overworld.paperWorldId);
+      }
       const registered = await new SpatialWorldService(persistence()).list();
       const items = registered.filter(
         (world) =>

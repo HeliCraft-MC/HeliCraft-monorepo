@@ -23,6 +23,7 @@ import {
 } from './contracts';
 import type { ServiceActor } from './contracts';
 import { mountServiceSessions } from './session-routes';
+import type { GeoLookup } from './connection';
 
 const CREATION_LIMIT = 10;
 const SERVICE_LIMIT = 2400;
@@ -31,12 +32,15 @@ interface MinecraftDependencies {
   readonly actors: readonly ServiceActor[];
   readonly siteOrigin: string;
   readonly secureCookies: boolean;
+  readonly geoLookup?: GeoLookup;
 }
 // oxlint-disable-next-line max-lines-per-function -- Typed route declarations compose one bounded authentication workflow.
 function minecraftRoutes(deps: MinecraftDependencies): OpenAPIHono {
   const app = new OpenAPIHono();
   const limiter = new RateLimiter();
-  const challenges = deps.db ? new MinecraftChallenges(deps.db, deps.siteOrigin) : null;
+  const challenges = deps.db
+    ? new MinecraftChallenges(deps.db, deps.siteOrigin, deps.geoLookup)
+    : null;
   const sessions = deps.db ? new MinecraftSessions(deps.db) : null;
   const web = deps.db ? new SessionService(deps.db) : null;
   const cookieName = deps.secureCookies ? '__Host-helicraft' : 'helicraft_session';

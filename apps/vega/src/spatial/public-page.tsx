@@ -53,8 +53,8 @@ function PublicPoliticalMap({
             <p>
               {uiText(
                 locale,
-                'Выбранный мир недоступен. Карта появится после регистрации мира администрацией.',
-                'This world is unavailable. The map appears after administrators register a world.',
+                'Выбранный мир недоступен. Обычный мир подключается автоматически после запуска Minecraft-сервера.',
+                'This world is unavailable. The primary Overworld connects automatically when Minecraft starts.',
               )}
             </p>
           )}

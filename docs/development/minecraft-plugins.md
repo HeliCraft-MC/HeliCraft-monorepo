@@ -38,6 +38,18 @@ bun run minecraft:clean
 
 `minecraft:down` preserves its test volumes. Cleanup never runs destructive SQL or deletes an external world. Removing/rotating the ignored credential file requires cleaning/recreating its disposable database volume to avoid a PostgreSQL password mismatch. Preserve any evidence you need before cleanup.
 
+## Optional local GeoIP
+
+The confirmation page shows the connection IP/port and Minecraft protocol version supplied by Rigel. It labels local/private addresses, including Docker gateways. Without a database, public addresses have no location. These details do not prove account ownership.
+
+For country/city/time-zone lookup, obtain a compatible GeoLite2-City or GeoIP2-City MMDB under the provider's terms and place it at `infra/geoip/GeoLite2-City.mmdb`. Both root and Minecraft Compose mount this directory read-only at `/geoip`; `.mmdb` files are ignored by Git. Start the test stack with:
+
+```sh
+GEOIP_DATABASE_PATH=/geoip/GeoLite2-City.mmdb bun run minecraft:up
+```
+
+For local `bun run dev`, set `GEOIP_DATABASE_PATH` in `.env` to an absolute host path. Restart Antares after replacing the database. Compose uses the path inside the container. No player IP is sent to a third-party API, no provider key is required by the application, and missing or failed lookups do not invent a location. Setup does not download GeoLite or accept its terms for you. Reader API: [node-maxmind](https://github.com/runk/node-maxmind).
+
 ## Build, install and quality gates
 
 ```sh
@@ -70,9 +82,9 @@ Run container-heavy integration suites before browser suites. On this host, chan
 ## Native-client acceptance
 
 1. Start `minecraft:up`; open [Vega](http://localhost:8096), register a disposable account and keep its browser session.
-2. In an ordinary Minecraft **26.3** client, set its player name to that account username and connect to `localhost:25575`. An account name alone grants no ownership. Do not use a different person's name.
+2. In an ordinary Minecraft **26.3** client, set its player name to that account username and connect to `127.0.0.1:25575`. An account name alone grants no ownership. Do not use a different person's name.
 3. Confirm that the isolated waiting space shows configured branding, a code and `/app/minecraft`. No gameplay backend/playerdata should exist before approval.
-4. Open `/app/minecraft`, inspect name/time, enter the code from your own game and confirm. Check the Paper welcome, every actual citizenship or neutral status, `/heli`, `/heli status`, `/heli profile`, matching account UUID and online presence.
+4. Open `/app/minecraft`, inspect name/time, open the link from your own game, review the connection details and explicitly confirm. Check the link survives website login without automatic approval. Also test manual code entry. Check the Paper welcome, every actual citizenship or neutral status, `/heli`, `/heli status`, `/heli profile`, matching account UUID and online presence.
 5. Disconnect; check offline status and one end event. Reconnect requires a new code; rejection/expiry/wrong code/another browser account cannot admit the player.
 6. Check another unknown name, `/server`/forced-host/transfer attempts before auth, blocked account, revoked web session, API outage/slow response, stopped Paper, wrong forwarding secret, outdated service token and proxy/Paper restart. All must fail closed or close presence through TTL. Never test against production worlds.
 
@@ -97,7 +109,7 @@ Plugin HTTP timeout: `MINECRAFT_HTTP_TIMEOUT_MS` defaults to 4000 and is restric
 
 Squaremap Paper 1.4.3 for mc26.3 is pinned by URL, SHA-256 and upstream SHA-512 in `infra/minecraft/squaremap-lock.json`. Its JAR is installed separately from Deneb. Internal HTTP listens on 8081; Antares reads only configured `SQUAREMAP_TILE_SOURCES` and exposes fixed registered-world PNG routes. Readiness checks `/tiles/settings.json` internally. Live-player tracking is disabled. Renderer files live under the dedicated Paper test volume.
 
-Use the administrative Territories and worlds page to register the actual backend, Paper UUID and dimension printed by Deneb. Recreated worlds require a new identity and do not inherit old geometry. The public map remains empty until registration. In V1, register/edit territories only for Overworld. Normal Paper port privacy and modern forwarding remain mandatory.
+Deneb automatically registers the primary Overworld with Antares during startup/reconciliation; no UUID or dimension entry is required. The administrative Territories and worlds page shows connected worlds and map links. Normal restarts reuse the existing identity. A new Paper UUID creates a separate empty world; the previous primary tile binding is retired without moving its boundaries or history. Only Overworld is auto-registered. See the [step-by-step connection guide](../states/territories.md#world-connection). Paper port privacy and modern forwarding remain mandatory.
 
 For bounded initial rendering, use the trusted server console: `squaremap radiusrender minecraft:overworld 64 0 0`. The console also supports `squaremap fullrender minecraft:overworld`, cancellation and renderer status. Full/radius rendering uses one worker with bounded chunk requests/cache; background updates process at most 16 chunks every ten seconds. Do not schedule infinite fullrender at startup or claim a fixed TPS guarantee without measurement. Large renders require an operator-chosen area/time and monitoring.
 

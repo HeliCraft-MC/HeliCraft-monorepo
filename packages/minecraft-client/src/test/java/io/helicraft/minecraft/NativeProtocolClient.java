@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
@@ -45,6 +46,17 @@ public final class NativeProtocolClient {
 
   private static void message(String type, Component value) {
     emit(type, GsonComponentSerializer.gson().serialize(value));
+    links(value);
+  }
+
+  private static void links(Component value) {
+    var click = value.clickEvent();
+    if (click != null
+        && click.action() == ClickEvent.Action.OPEN_URL
+        && click.payload() instanceof ClickEvent.Payload.Text payload) {
+      emit("link", payload.value());
+    }
+    value.children().forEach(NativeProtocolClient::links);
   }
 
   public static void main(String[] args) throws Exception {

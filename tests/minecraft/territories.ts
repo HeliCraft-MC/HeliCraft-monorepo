@@ -314,22 +314,15 @@ async function verifyTerritoryRuntime(
     await paperLog(context),
   );
   const paperWorldId = z.uuid().parse(match?.groups?.id);
-  const world = await apiCall(
-    context,
-    'admin/spatial/worlds',
-    adminCookie,
-    {
-      logicalKey: 'native-territories',
-      backendId: 'deneb',
-      paperWorldId,
-      dimension: 'minecraft:overworld',
-      name: { en: 'Disposable native world', ru: 'Тестовый мир' },
-      tileKey: 'minecraft_overworld',
-      maxZoom: 3,
-      extraZoom: 2,
-    },
-    SpatialWorldSchema,
-  );
+  const registered = await fetch(`${context.origin}/api/v1/public/spatial/worlds`);
+  expect(registered.ok).toBe(true);
+  const worlds = z.object({ items: z.array(SpatialWorldSchema) }).parse(await registered.json());
+  expect(worlds.items).toHaveLength(1);
+  const world = SpatialWorldSchema.parse(worlds.items[0]);
+  expect(world.paperWorldId).toBe(paperWorldId);
+  expect(world.dimension).toBe('minecraft:overworld');
+  expect(world.backendId).toBe('deneb');
+  expect(world.name).toStrictEqual({ en: 'Overworld', ru: 'Обычный мир' });
   const base = { stateId: first.stateId, worldId: world.id, actorCookie, adminCookie };
   await publish(context, { ...base, geometry: auroraGeometry(16), change: 'INITIAL' });
   await publish(context, {

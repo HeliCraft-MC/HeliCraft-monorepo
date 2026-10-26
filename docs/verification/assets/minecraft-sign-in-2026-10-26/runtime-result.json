@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "protocolClient": "MCProtocolLib 26.3 / Minecraft 26.3 / protocol 777",
+  "paper": "26.3-223",
+  "velocity": "4.2.0-30",
+  "limbo": "1.1.27-SNAPSHOT bfef579",
+  "adapter": null,
+  "spatial": {
+    "status": "passed",
+    "nativeProtocol": 777,
+    "paper": "26.3-223",
+    "worldId": "cde6e45e-7075-44dc-be24-6af4037b82e0",
+    "paperWorldId": "d7f17355-a534-4cfd-b1a7-18fab31cf204",
+    "r1": 3,
+    "r2": 4,
+    "recovered": 5,
+    "tiles": {
+      "before": "bcd095abd736d6073b7dcacd793ea0683ea5004b42d6738d8674e6f709a4aca7",
+      "after": "bb88d44f1d35c3f0762f369f30f380d61bb3c16eed0708d10416f192ee9821ab",
+      "background": "b5e2a248a15ca15a88a3d8b0e305ff3ffd8a6ee16446a9b899618795dd960007"
+    },
+    "scenarios": [
+      "Wilderness → Aurora → hole → Aurora",
+      "ordinary movement and shared edge",
+      "vanilla powered-minecart movement across state borders",
+      "Nether/End commons and Overworld return",
+      "automatic squaremap background update",
+      "Loria and Wilderness",
+      "no debug leak to ordinary player",
+      "browser-drawn territory recognized by Paper",
+      "R2 through Vega without restart and stationary reclassification",
+      "spatial API outage retains verified snapshot with stale label",
+      "reconciliation installs missed revision",
+      "official localized name refresh by integrity without geometry rewrite"
+    ]
+  },
+  "localeAcceptance": "Vega ru → native welcome/title/whereami; persisted-location login",
+  "accountId": "9aa77c47-b92d-404f-81aa-e246af49afbf",
+  "pageErrors": [],
+  "faultScenarios": [
+    "crash lease expiry",
+    "Velocity/Paper restart",
+    "wrong forwarding secret",
+    "Paper unavailable",
+    "stale service token",
+    "forced-host/other backend",
+    "recovery"
+  ]
+}

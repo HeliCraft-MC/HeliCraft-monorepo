@@ -4,9 +4,26 @@
 
 Implemented in the repository. Antares owns state jurisdiction; squaremap supplies the actual Minecraft surface. Local verification and remaining manual acceptance are recorded in the [dated report](../verification/territories-2026-10-25.md). This is not evidence of production deployment.
 
+## World connection
+
+For the standard stack, you do not need to find or copy any UUIDs:
+
+1. Start Minecraft together with the site: `bun run minecraft:up`.
+2. Open `/admin/territories` on the website using an administrator account. Under **Connected worlds**, wait for **Overworld** to appear. The list refreshes automatically; Deneb checks world registration every five seconds while running.
+3. Click **Open map**. The world is available immediately after registration; surface tiles appear as squaremap renders chunks. Registration does not generate terrain or start an unlimited full render.
+4. Open the state's **Territory** section, select this world and use the normal Governance/ratification procedure to establish borders. Registration itself does not grant territory.
+
+A normal Minecraft restart preserves the Paper UUID, world record and published borders. Deleting/regenerating the Minecraft world creates a new UUID: Deneb registers a new empty Overworld and retires the previous primary tile binding. Old borders, drafts and published history remain attached to the old world. An old/retired UUID cannot be reactivated by another synchronization request. Keep appropriate world and database backups; automatic registration never restores or transfers them. If reusing an existing squaremap data directory for a regenerated world, regenerate its surface tiles separately; legal registration does not erase renderer caches.
+
+If no world appears, ensure both Deneb and Antares are running, then inspect `bun run minecraft:logs deneb`. The line `Spatial Paper world <UUID> dimension minecraft:overworld` identifies the physical Minecraft world; `Spatial snapshot installed world <UUID> revision 0` identifies its separate Antares registration. These are different identifiers. An API outage is retried during later reconciliation; you do not need to fill the manual form to compensate for it.
+
+**Manual registration (advanced)** remains for preconfigured/custom backend or map settings. Its fields are: a unique permanent logical key (for example `main-world`), the Deneb service account's backend ID (`deneb` in the standard stack), the Paper UUID from the first log line above, a localized display name, and the actual squaremap tile directory key (`minecraft_overworld` by default). This form already fixes the dimension to Overworld; there is no dimension field to fill. Player/account UUIDs and world folder names are not valid substitutes. Existing matching registrations and map configuration are preserved by automatic discovery.
+
 ## Legal workflow
 
-An existing ACTIVE state starts without territory and does not need to be founded again. An administrator first registers the actual Overworld identity. A representative opens the state's **Territory** section in Vega. The current machine-readable Governance must authorize `CHANGE_TERRITORY`; a missing policy is added through the ordinary Governance reform. Office titles, presets and constitution prose cannot grant access.
+An existing ACTIVE state starts without territory and does not need to be founded again. Deneb automatically registers the primary Overworld when Minecraft starts; see the connection steps above. A representative opens the state's **Territory** section in Vega. The current machine-readable Governance must authorize `CHANGE_TERRITORY`; a missing policy is added through the ordinary Governance reform. Office titles, presets and constitution prose cannot grant access.
+
+If the editor reports missing authority, open **Propose governance reform → 9. State decisions → General state decisions → Change territory → Configure procedure**. For a single monarch to decide, choose **Single office** and select the monarch's office. Submit the reform, obtain the approvals/votes required by current amendment rules, then press **Publish approved reform**. Saving a draft does not grant authority. If a procedure already exists, check citizenship and a current appointment to a selected office.
 
 Create a draft for the selected world. An initial proposal starts empty; a replacement starts with that state's published geometry. Draw a Polygon, add components to form a MultiPolygon, drag vertices, cut holes or remove components. Undo/redo works across geometry changes. Labelled coordinate navigation and the optional keyboard GeoJSON control complement pointer editing. The published neighboring geometry stays read-only.
 

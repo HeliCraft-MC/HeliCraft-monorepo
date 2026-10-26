@@ -19,3 +19,5 @@
 
 - [Minecraft Integration V1 — 2026-10-25](minecraft-integration-2026-10-25_RU.md) — контракты безопасности, настоящий Compose, Java, браузер и Minecraft protocol.
 - [Territories & Political Map V1 — 2026-10-25](territories-2026-10-25_RU.md) — завершённая автоматизированная приёмка с дополнением 26 октября; native 26.3, реальные тайлы, юридическая процедура и горячее обновление геометрии.
+
+- [Minecraft confirmation links — 2026-10-26](minecraft-sign-in-2026-10-26_RU.md) — настоящая native-ссылка → вход на сайт → явное подтверждение, приватные сведения о соединении и локальный GeoIP.

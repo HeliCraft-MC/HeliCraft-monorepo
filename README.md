@@ -111,7 +111,7 @@ Earlier verification used Docker, Testcontainers and Chromium on disposable infr
 
 ## Minecraft development
 
-`bun run minecraft:up` builds a disposable full stack (Vega `http://localhost:8096`, Minecraft `localhost:25575`); `minecraft:logs`, `minecraft:down` and `minecraft:clean` manage only that test project. `bun run test:minecraft` builds fresh plugins/web and verifies the real browser/protocol flow. [Development, version pins, security boundaries and native-client checklist](docs/development/minecraft-plugins.md).
+`bun run minecraft:up` builds a disposable full stack (Vega `http://localhost:8096`, Minecraft `127.0.0.1:25575`); `minecraft:logs`, `minecraft:down` and `minecraft:clean` manage only that test project. Deneb automatically registers the primary Overworld; it appears in `/admin/territories` without UUID entry. Minecraft chat provides a one-time confirmation link; manual code entry remains available. `bun run test:minecraft` builds fresh plugins/web and verifies the real browser/protocol flow. [Development, version pins, security boundaries and native-client checklist](docs/development/minecraft-plugins.md).
 
 ## Documentation
 

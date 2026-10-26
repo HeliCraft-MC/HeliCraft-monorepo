@@ -26,6 +26,7 @@ import {
 } from '../src/db/minecraft-schema';
 import { users, authSessions } from '../src/db/schema';
 import { expireMinecraft } from '../src/modules/minecraft/lifecycle';
+import type { GeoLookup } from '../src/modules/minecraft/connection';
 
 const ORIGIN = 'http://localhost:5173';
 const PASSWORD = 'Minecraft test account password';
@@ -49,9 +50,10 @@ function persistence(): Database {
   }
   return database;
 }
-function api(): ReturnType<typeof createApp> {
+function api(geoLookup?: GeoLookup): ReturnType<typeof createApp> {
   return createApp({
     db: persistence().db,
+    geoLookup,
     siteOrigin: ORIGIN,
     minecraftActors: [
       RIGEL,
@@ -230,6 +232,91 @@ describe('Minecraft service authentication and identity', () => {
       .where(eq(minecraftChallenges.id, issued.id));
     expect(row?.codeHash).not.toContain(issued.code);
     expect(row?.verifierHash).not.toContain(issued.verifier);
+  });
+});
+describe('Minecraft sign-in link and private metadata', () => {
+  it('issues a fragment-only link with private connection details and still requires explicit owner approval', async () => {
+    const original = await fixture();
+    const current = {
+      ...original,
+      app: api(() => ({
+        countryCode: 'US',
+        city: { en: 'Test city' },
+        timeZone: 'America/New_York',
+      })),
+    };
+    const other = await fixture();
+    const connectionId = crypto.randomUUID();
+    const client = { address: '8.8.8.8', port: 54_321, protocol: 777, version: '26.3' };
+    const issuedResponse = await current.app.request(
+      '/api/v1/internal/minecraft/challenges',
+      post({ username: current.name, connectionId, client }, RIGEL.token),
+    );
+    expect(issuedResponse.status).toBe(200);
+    const issued = IssuedChallenge.parse(await issuedResponse.json());
+    const link = new URL(issued.confirmationUrl);
+    expect(link.origin).toBe(ORIGIN);
+    expect(link.pathname).toBe('/app/minecraft');
+    expect(link.search).toBe('');
+    const fragment = new URLSearchParams(link.hash.slice(1));
+    expect(fragment.get('challenge')).toBe(issued.id);
+    expect(fragment.get('code')).toBe(issued.code);
+    const accountResponse = await current.app.request('/api/v1/account/minecraft', {
+      headers: { Cookie: current.cookie },
+    });
+    expect(accountResponse.headers.get('cache-control')).toBe('no-store');
+    const account = AccountMinecraft.parse(await accountResponse.json());
+    expect(account.challenges[0]?.connection).toMatchObject({
+      ...client,
+      addressKind: 'PUBLIC',
+      location: { countryCode: 'US', city: { en: 'Test city' } },
+    });
+    expect(JSON.stringify(account)).not.toContain(issued.code);
+    const foreign = await current.app.request('/api/v1/account/minecraft', {
+      headers: { Cookie: other.cookie },
+    });
+    expect(AccountMinecraft.parse(await foreign.json()).challenges).toStrictEqual([]);
+    const pending = { issued, proof: { connectionId, verifier: issued.verifier } };
+    expect((await consume(current, pending)).status).toBe(403);
+    expect((await decision({ ...current, cookie: other.cookie }, issued)).status).toBe(403);
+    expect(
+      (
+        await current.app.request(
+          `/api/v1/account/minecraft/challenges/${issued.id}/decision`,
+          post({ decision: 'APPROVE' }, undefined, current.cookie),
+        )
+      ).status,
+    ).toBe(403);
+    expect((await decision(current, issued, fragment.get('code') ?? '')).status).toBe(200);
+    expect((await consume(current, pending)).status).toBe(200);
+    expect((await decision(current, issued)).status).toBe(403);
+  });
+  it('validates proxy connection metadata and rejects client-supplied geolocation', async () => {
+    const current = await fixture();
+    const base = { username: current.name, connectionId: crypto.randomUUID() };
+    const clients = [
+      { address: 'not-an-ip', port: 1, protocol: 777, version: '26.3' },
+      { address: '127.0.0.1', port: 65_536, protocol: 777, version: '26.3' },
+      {
+        address: '127.0.0.1',
+        port: 1,
+        protocol: 777,
+        version: '26.3',
+        location: { countryCode: 'US' },
+      },
+    ];
+    await Promise.all(
+      clients.map(async (client) => {
+        expect(
+          (
+            await current.app.request(
+              '/api/v1/internal/minecraft/challenges',
+              post({ ...base, client }, RIGEL.token),
+            )
+          ).status,
+        ).toBe(400);
+      }),
+    );
   });
 });
 describe('Minecraft browser possession proof and single use', () => {

@@ -152,3 +152,27 @@ describe('state editor', () => {
     expect(slugify('Королевство Аврора')).toBe('korolevstvo-avrora');
   });
 });
+
+it('offers an explicit territory procedure and assigns it to an actual office', () => {
+  mount(<WizardHarness step={9} />);
+  const section = screen.getByRole('heading', { name: 'Change territory' }).closest('section');
+  if (section === null) {
+    throw new Error('Territory policy section missing');
+  }
+  expect(
+    within(section).getByText(
+      'No policy is configured. This action is denied until a reform is approved.',
+    ),
+  ).toBeVisible();
+  expect(within(section).queryByLabelText('Who makes this decision?')).not.toBeInTheDocument();
+  fireEvent.click(within(section).getByRole('button', { name: 'Configure procedure' }));
+  const editor = screen.getByRole('heading', { name: 'Change territory' }).closest('section');
+  if (editor === null) {
+    throw new Error('Territory policy editor missing');
+  }
+  fireEvent.change(within(editor).getByLabelText('Who makes this decision?'), {
+    target: { value: 'SINGLE_OFFICE' },
+  });
+  fireEvent.click(within(editor).getByLabelText('Leader'));
+  expect(within(editor).getByLabelText('Leader')).toBeChecked();
+});

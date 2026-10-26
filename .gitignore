@@ -10,6 +10,7 @@
 **/run/
 logs/
 *.log
+*.mmdb
 .DS_Store
 .fleet/
 .idea/

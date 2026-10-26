@@ -5,6 +5,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { except } from 'hono/combine';
 import type { Database } from './db';
 import { minecraftRoutes } from './modules/minecraft/routes';
+import type { GeoLookup } from './modules/minecraft/connection';
 import { spatialRoutes } from './modules/spatial/routes';
 import { spatialHistoryRoutes } from './modules/spatial/history-routes';
 import { spatialMinecraftRoutes } from './modules/spatial/minecraft-routes';
@@ -46,6 +47,7 @@ import type { S3Client } from '@aws-sdk/client-s3';
 interface Dependencies {
   readonly squaremapTileSources?: readonly TileSource[];
   readonly minecraftActors?: readonly ServiceActor[];
+  readonly geoLookup?: GeoLookup;
   readonly checkReady: () => Promise<void>;
   readonly db?: Database['db'];
   readonly siteOrigin?: string;
@@ -129,6 +131,7 @@ function createApp(dependencies: Dependencies): OpenAPIHono {
     minecraftRoutes({
       db: dependencies.db,
       actors: dependencies.minecraftActors ?? [],
+      geoLookup: dependencies.geoLookup,
       siteOrigin,
       secureCookies,
     }),

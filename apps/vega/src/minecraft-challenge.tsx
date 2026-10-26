@@ -7,6 +7,8 @@ import { browserClient } from './account-api';
 import { z } from 'zod';
 import { useTranslation } from './i18n';
 import { formatDateTime } from './date-format';
+import { MinecraftConnection } from './minecraft-connection';
+import { useExpired } from './use-expired';
 import styles from './account.module.scss';
 
 const DecisionError = z.object({ code: z.string().optional() });
@@ -31,19 +33,22 @@ function decisionError(error: unknown): string {
 interface Props {
   readonly challenge: MinecraftChallenge;
   readonly onDecided: () => Promise<unknown>;
+  readonly linkCode?: string;
 }
-function MinecraftChallengeForm({ challenge, onDecided }: Props): ReactElement {
+function MinecraftChallengeForm({ challenge, onDecided, linkCode }: Props): ReactElement {
   const { text, locale } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const expired = useExpired(challenge.expiresAt);
   const submit = useCallback(
     async (event: SubmitEvent<HTMLFormElement>): Promise<void> => {
       event.preventDefault();
       const form = event.currentTarget;
       const data = new FormData(form, event.nativeEvent.submitter);
-      const code = data.get('code');
+      const enteredCode = data.get('code');
+      const code = linkCode ?? (typeof enteredCode === 'string' ? enteredCode : '');
       const decision = data.get('decision');
-      if (typeof code !== 'string' || (decision !== 'APPROVE' && decision !== 'REJECT')) {
+      if (decision !== 'APPROVE' && decision !== 'REJECT') {
         return;
       }
       setBusy(true);
@@ -62,7 +67,7 @@ function MinecraftChallengeForm({ challenge, onDecided }: Props): ReactElement {
       }
       setBusy(false);
     },
-    [challenge.id, locale, onDecided],
+    [challenge.id, linkCode, locale, onDecided],
   );
   const handleSubmit = useCallback(
     (event: SubmitEvent<HTMLFormElement>): void => {
@@ -79,27 +84,34 @@ function MinecraftChallengeForm({ challenge, onDecided }: Props): ReactElement {
       <p>
         {text('minecraft.expires')} {formatDateTime(challenge.expiresAt, locale)}
       </p>
+      <MinecraftConnection connection={challenge.connection} />
       <Alert tone="info">{text('minecraft.warning')}</Alert>
+      <p>{text('minecraft.connectionHint')}</p>
       <form method="post" className={styles.form} onSubmit={handleSubmit}>
-        <FormField
-          label={text('minecraft.code')}
-          htmlFor={`minecraft-code-${challenge.id}`}
-          hint={text('minecraft.codeHint')}
-        >
-          <TextField
-            id={`minecraft-code-${challenge.id}`}
-            name="code"
-            required
-            minLength={16}
-            maxLength={16}
-            pattern="[0-9A-Fa-f]{16}"
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </FormField>
+        {linkCode === undefined ? (
+          <FormField
+            label={text('minecraft.code')}
+            htmlFor={`minecraft-code-${challenge.id}`}
+            hint={text('minecraft.codeHint')}
+          >
+            <TextField
+              id={`minecraft-code-${challenge.id}`}
+              name="code"
+              required
+              minLength={16}
+              maxLength={16}
+              pattern="[0-9A-Fa-f]{16}"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </FormField>
+        ) : (
+          <Alert tone="info">{text('minecraft.linkReady')}</Alert>
+        )}
+        {expired ? <Alert tone="danger">{text('minecraft.expired')}</Alert> : null}
         {message === null ? null : <Alert tone="danger">{text(message)}</Alert>}
         <div className={styles.navigation}>
-          <Button type="submit" name="decision" value="APPROVE" disabled={busy}>
+          <Button type="submit" name="decision" value="APPROVE" disabled={busy || expired}>
             {text('minecraft.approve')}
           </Button>
           <Button
@@ -108,7 +120,7 @@ function MinecraftChallengeForm({ challenge, onDecided }: Props): ReactElement {
             value="REJECT"
             formNoValidate
             tone="quiet"
-            disabled={busy}
+            disabled={busy || expired}
           >
             {text('minecraft.reject')}
           </Button>

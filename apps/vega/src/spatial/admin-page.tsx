@@ -11,11 +11,13 @@ import { WorldRegistration } from './world-registration';
 import styles from './spatial.module.scss';
 
 const SHORT_ID_LENGTH = 8;
+const REFRESH_MS = 5000;
 function SpatialAdministration(): ReactElement {
   const { locale } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ['territory-administration'],
+    refetchInterval: REFRESH_MS,
     queryFn: async () => {
       const client = browserClient();
       const [applications, worlds] = await Promise.all([
@@ -38,7 +40,7 @@ function SpatialAdministration(): ReactElement {
   return (
     <section className={styles.panel}>
       <h1>{uiText(locale, 'Территории и миры', 'Territories and worlds')}</h1>
-      <WorldRegistration onSaved={refresh} />
+      <WorldRegistration onSaved={refresh} worlds={query.data?.worlds} />
       <h2>{uiText(locale, 'Административная ратификация', 'Administrative ratification')}</h2>
       <p>
         {uiText(

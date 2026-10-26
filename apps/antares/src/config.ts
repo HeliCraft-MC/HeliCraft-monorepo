@@ -46,6 +46,11 @@ const EnvSchema = z
       .enum(['true', 'false'])
       .default('false')
       .transform((value) => value === 'true'),
+    GEOIP_DATABASE_PATH: z
+      .string()
+      .trim()
+      .optional()
+      .transform((value) => (value === '' ? undefined : value)),
     MINECRAFT_SERVICE_ACTORS: z
       .string()
       .default('[]')

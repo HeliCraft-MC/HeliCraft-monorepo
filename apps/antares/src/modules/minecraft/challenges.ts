@@ -1,4 +1,5 @@
 // oxlint-disable max-lines-per-function -- Account locking, possession proof and one-time transitions must remain in the same atomic transactions.
+// oxlint-disable import/max-dependencies -- Challenge creation composes private connection metadata alongside identity, persistence and possession proof.
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { and, eq, isNull, or } from 'drizzle-orm';
 import type { Database } from '../../db';
@@ -7,8 +8,15 @@ import { minecraftChallenges, minecraftSessions } from '../../db/minecraft-schem
 import { DomainError, HTTP } from '../errors';
 import { tokenHash } from '../sessions/service';
 import type { Authenticated } from '../sessions/service';
-import type { ServiceActor, ChallengeDecision } from './contracts';
+import type {
+  ServiceActor,
+  ChallengeDecision,
+  ConnectionRequest,
+  IssuedConnection,
+} from './contracts';
 import { CHALLENGE_MS, MAX_ATTEMPTS, expireMinecraft } from './lifecycle';
+import { connectionDetails, noLocation } from './connection';
+import type { GeoLookup } from './connection';
 import {
   activeAccount,
   activeWebSession,
@@ -28,25 +36,16 @@ interface ChallengeProof {
 class MinecraftChallenges {
   private readonly db: Database['db'];
   private readonly siteOrigin: string;
-  public constructor(db: Database['db'], siteOrigin: string) {
+  private readonly geoLookup: GeoLookup;
+  public constructor(db: Database['db'], siteOrigin: string, geoLookup: GeoLookup = noLocation) {
     this.db = db;
     this.siteOrigin = siteOrigin;
+    this.geoLookup = geoLookup;
   }
   public async create(
-    input: { readonly username: string; readonly connectionId: string },
+    input: Readonly<ConnectionRequest>,
     actor: ServiceActor,
-  ): Promise<{
-    id: string;
-    accountId: string;
-    username: string;
-    createdAt: string;
-    expiresAt: string;
-    status: 'WAITING_AUTH';
-    verifier: string;
-    code: string;
-    confirmationUrl: string;
-    serverName: string;
-  }> {
+  ): Promise<IssuedConnection> {
     await expireMinecraft(this.db);
     return await this.db.transaction(async (transaction) => {
       const [lookup] = await transaction
@@ -96,6 +95,7 @@ class MinecraftChallenges {
           connectionId: input.connectionId,
           verifierHash: tokenHash(verifier),
           codeHash: tokenHash(code),
+          connection: connectionDetails(input.client, this.geoLookup),
           createdAt: now,
           expiresAt: new Date(now.getTime() + CHALLENGE_MS),
         })
@@ -110,7 +110,7 @@ class MinecraftChallenges {
         accountId: user.id,
         verifier,
         code,
-        confirmationUrl: `${this.siteOrigin}/app/minecraft`,
+        confirmationUrl: `${this.siteOrigin}/app/minecraft#${new URLSearchParams({ challenge: row.id, code })}`,
         serverName: '',
       };
     });

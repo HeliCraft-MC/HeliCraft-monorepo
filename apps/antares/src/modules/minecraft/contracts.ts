@@ -1,11 +1,16 @@
 import { z } from '@hono/zod-openapi';
 import { LocaleSchema } from '../localized-content/contracts';
+import { ClientConnection, ConnectionDetails } from './connection';
 
 const MAX_SERVICE_TOKEN = 128;
 const CODE_LENGTH = 16;
 const SECRET_LENGTH = 43;
 const MinecraftName = z.string().regex(/^[A-Za-z0-9_]{3,16}$/u);
-const ConnectionInput = z.strictObject({ username: MinecraftName, connectionId: z.uuid() });
+const ConnectionInput = z.strictObject({
+  username: MinecraftName,
+  connectionId: z.uuid(),
+  client: ClientConnection.optional(),
+});
 const ProofInput = z.strictObject({
   connectionId: z.uuid(),
   verifier: z
@@ -28,6 +33,7 @@ const ChallengeView = z
     createdAt: z.iso.datetime(),
     expiresAt: z.iso.datetime(),
     status: ChallengeStatus,
+    connection: ConnectionDetails.nullable(),
   })
   .openapi('MinecraftChallenge');
 const IssuedChallenge = ChallengeView.extend({
@@ -102,6 +108,8 @@ type ServiceActor = z.infer<typeof ServiceActorSchema>;
 type ChallengeDecision = z.infer<typeof DecisionInput>;
 type ChallengeRecord = z.infer<typeof ChallengeView>;
 type GameSession = z.infer<typeof SessionView>;
+type ConnectionRequest = z.infer<typeof ConnectionInput>;
+type IssuedConnection = z.infer<typeof IssuedChallenge>;
 export {
   MinecraftName,
   ConnectionInput,
@@ -122,4 +130,6 @@ export {
   type ChallengeDecision,
   type ChallengeRecord,
   type GameSession,
+  type ConnectionRequest,
+  type IssuedConnection,
 };

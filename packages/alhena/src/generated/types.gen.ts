@@ -560,12 +560,26 @@ export type MinecraftIssuedChallenge = MinecraftChallenge & {
     serverName: string;
 };
 
+export type MinecraftConnectionDetails = {
+    address: string;
+    port: number;
+    protocol: number;
+    version: string;
+    addressKind: 'LOCAL' | 'PUBLIC';
+    location: {
+        countryCode: string | null;
+        city: LocalizedInput;
+        timeZone: string | null;
+    } | null;
+} | null;
+
 export type MinecraftChallenge = {
     id: string;
     username: string;
     createdAt: string;
     expiresAt: string;
     status: 'WAITING_AUTH' | 'APPROVED' | 'CONSUMED' | 'REJECTED' | 'EXPIRED' | 'DISCONNECTED';
+    connection: MinecraftConnectionDetails;
 };
 
 export type PlatformError = {
@@ -3544,6 +3558,7 @@ export type GetMinecraftSpatialWorldsData = {
             paperWorldId: string;
             dimension: string;
         }>;
+        registerOverworld?: boolean;
     };
     path?: never;
     query?: never;
@@ -3576,6 +3591,13 @@ export type GetMinecraftSpatialWorldsErrors = {
      * Result
      */
     404: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
+    409: {
         message: string;
         code?: string;
     };
@@ -3648,6 +3670,13 @@ export type GetMinecraftSpatialVersionErrors = {
     /**
      * Result
      */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
     503: {
         message: string;
         code?: string;
@@ -3712,6 +3741,13 @@ export type GetMinecraftSpatialSnapshotErrors = {
     /**
      * Result
      */
+    409: {
+        message: string;
+        code?: string;
+    };
+    /**
+     * Result
+     */
     503: {
         message: string;
         code?: string;
@@ -3737,6 +3773,12 @@ export type CreateMinecraftChallengeData = {
     body: {
         username: string;
         connectionId: string;
+        client?: {
+            address: string;
+            port: number;
+            protocol: number;
+            version: string;
+        };
     };
     path?: never;
     query?: never;

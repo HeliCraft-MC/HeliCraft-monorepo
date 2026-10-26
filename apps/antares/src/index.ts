@@ -4,6 +4,7 @@ import { createApp } from './app';
 import { readConfig } from './config';
 import { createDatabase } from './db';
 import { expireMinecraft } from './modules/minecraft/lifecycle';
+import { openGeoIP } from './modules/minecraft/connection';
 import { VotingService } from './modules/voting/service';
 import { createStorage } from './storage';
 
@@ -13,6 +14,7 @@ const storage = createStorage(config);
 const app = createApp({
   db,
   minecraftActors: config.MINECRAFT_SERVICE_ACTORS,
+  geoLookup: await openGeoIP(config.GEOIP_DATABASE_PATH),
   squaremapTileSources: config.SQUAREMAP_TILE_SOURCES,
   sitePhase: config.SITE_PHASE,
   communityLinks: config.COMMUNITY_LINKS,

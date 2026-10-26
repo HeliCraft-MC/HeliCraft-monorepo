@@ -91,7 +91,9 @@ public final class ApiModels {
     }
   }
 
-  public record Connect(String username, UUID connectionId) {}
+  public record ClientConnection(String address, int port, int protocol, String version) {}
+
+  public record Connect(String username, UUID connectionId, ClientConnection client) {}
 
   public record PaperIdentity(UUID accountId, String username) {}
 

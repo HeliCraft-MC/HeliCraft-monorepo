@@ -10,5 +10,6 @@ archive
 **/run
 **/.env
 .env
+**/*.mmdb
 **/test-results
 **/playwright-report

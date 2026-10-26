@@ -337,6 +337,20 @@
       "when": 1792958010620,
       "tag": "0047_minecraft_approval_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1793013711874,
+      "tag": "0048_minecraft_connection_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1793015520088,
+      "tag": "0049_spatial_world_discovery",
+      "breakpoints": true
     }
   ]
 }
