@@ -12,10 +12,12 @@ function DraftMap({
   draft,
   world,
   onSaved,
+  onEditingChange,
 }: Readonly<{
   draft: TerritoryDraft;
   world: SpatialWorld;
   onSaved: () => void;
+  onEditingChange: (busy: boolean) => void;
 }>): ReactElement {
   const { locale } = useTranslation();
   const query = useQuery({
@@ -45,6 +47,7 @@ function DraftMap({
       world={world}
       territories={query.data.territories}
       onSaved={onSaved}
+      onEditingChange={onEditingChange}
     />
   );
 }

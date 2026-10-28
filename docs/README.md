@@ -17,6 +17,8 @@ Start with the audience and the question. Current system contracts, product inte
 - **Minecraft confirmation links — 2026-10-26:** [native/browser checks and local GeoIP](verification/minecraft-sign-in-2026-10-26.md).
 - **Territories and political map:** [workflow](states/territories.md), [spatial architecture](architecture/spatial.md), [current verification](verification/territories-2026-10-25.md).
 
+- **Minecraft interfaces — 2026-10-28:** [public map, territory editing, sign-in and plugin UI](verification/minecraft-ui-2026-10-28.md).
+
 ## Reference map
 
 | Section                                | Contents and entry points                                                                                                                                                                                                        |

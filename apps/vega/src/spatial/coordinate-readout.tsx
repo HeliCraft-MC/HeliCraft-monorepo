@@ -5,6 +5,8 @@ import type { FlatPoint } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { COORDINATE_PRECISION } from './model';
+import { Copy } from 'lucide-react';
+import styles from './spatial.module.scss';
 
 function CoordinateReadout({ point }: Readonly<{ point: FlatPoint | null }>): ReactElement | null {
   const { locale } = useTranslation();
@@ -29,10 +31,14 @@ function CoordinateReadout({ point }: Readonly<{ point: FlatPoint | null }>): Re
     return null;
   }
   return (
-    <div>
-      <output>{value}</output>{' '}
-      <Button tone="quiet" onClick={handleCopy}>
-        {uiText(locale, 'Копировать координаты', 'Copy coordinates')}
+    <div className={styles.coordinateReadout}>
+      <output className={styles.coordinateValue}>{value}</output>
+      <Button
+        tone="quiet"
+        onClick={handleCopy}
+        aria-label={uiText(locale, 'Копировать координаты', 'Copy coordinates')}
+      >
+        <Copy size={15} aria-hidden="true" />
       </Button>
       <output aria-live="polite">
         {copied === value ? uiText(locale, 'Скопировано.', 'Copied.') : ''}

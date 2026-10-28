@@ -79,12 +79,20 @@ The harness uses the maintained MCProtocolLib **26.3 / protocol 777** as a test-
 
 Run container-heavy integration suites before browser suites. On this host, changing Docker interfaces can make Chromium fail with `ERR_NETWORK_CHANGED`; rerun the browser suite after infrastructure settles and keep the initial failure attributable. Missing Docker, worker-process access, Chromium/system libraries, Java or network downloads are environment failures, distinct from code regressions. Never suppress application page errors to hide them.
 
+## Player interface
+
+Rigel and Deneb share the website's amber accent, readable text and muted secondary labels. Messages use literal text components, so configured names cannot inject formatting or actions. The waiting space presents one website action, the account name and a copyable fallback code; its boss bar counts down the challenge's actual deadline and disappears on approval or disconnect. Expiry, website rejection and service failure have separate explanations with a reconnect action. Waiting messages follow the Minecraft client's language; Deneb uses the verified approval language as described in [architecture](../architecture/minecraft-integration.md#language-preference).
+
+`/heli` offers clickable commands with hover explanations and tab completion. Profile and status cards separate identity, citizenship and connection state. `/heli whereami` shows copyable coordinates and the physical jurisdiction, explicitly labels stale snapshots, and links to `/heli borders`. Boundary titles appear only after the existing stable dwell check; long names are shortened for the title while the command retains their full text.
+
+Set `SITE_ORIGIN` on Deneb to the public website origin to enable the clickable `/map` action in `/heli borders`. The disposable Compose stack supplies it. Without a valid HTTP(S) origin, the command explains where to find Map on the website instead of inventing a URL. This setting does not change admission, forwarding, published geometry or private draft access. Adventure remains a compile-only server API and is not bundled into either plugin.
+
 ## Native-client acceptance
 
 1. Start `minecraft:up`; open [Vega](http://localhost:8096), register a disposable account and keep its browser session.
 2. In an ordinary Minecraft **26.3** client, set its player name to that account username and connect to `127.0.0.1:25575`. An account name alone grants no ownership. Do not use a different person's name.
-3. Confirm that the isolated waiting space shows configured branding, a code and `/app/minecraft`. No gameplay backend/playerdata should exist before approval.
-4. Open `/app/minecraft`, inspect name/time, open the link from your own game, review the connection details and explicitly confirm. Check the link survives website login without automatic approval. Also test manual code entry. Check the Paper welcome, every actual citizenship or neutral status, `/heli`, `/heli status`, `/heli profile`, matching account UUID and online presence.
+3. Confirm that the isolated waiting space shows configured branding, a clickable website action, a copyable code and a live deadline. Check hover hints, the website link and the visible timer near expiry. No gameplay backend/playerdata should exist before approval.
+4. Open `/app/minecraft`, inspect name/time, open the link from your own game, review the connection details and explicitly confirm. Check the link survives website login without automatic approval. Also test manual code entry. Check that the waiting bar disappears, the Paper welcome, every actual citizenship or neutral status, clickable `/heli` actions, tab completion, `/heli status`, `/heli profile`, matching account UUID and online presence. Exercise coordinate/UUID copying and `/heli borders` with and without a configured site origin.
 5. Disconnect; check offline status and one end event. Reconnect requires a new code; rejection/expiry/wrong code/another browser account cannot admit the player.
 6. Check another unknown name, `/server`/forced-host/transfer attempts before auth, blocked account, revoked web session, API outage/slow response, stopped Paper, wrong forwarding secret, outdated service token and proxy/Paper restart. All must fail closed or close presence through TTL. Never test against production worlds.
 

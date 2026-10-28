@@ -1,14 +1,17 @@
 .frame {
   position: relative;
   min-width: 0;
+  isolation: isolate;
 }
 .frame .map {
-  height: clamp(24rem, 65vh, 48rem);
+  height: var(--flat-map-height, clamp(24rem, 65vh, 48rem));
+  min-height: 22rem;
   width: 100%;
   isolation: isolate;
-  background: #17202b;
-  border-radius: 0.75rem;
-  outline-offset: 3px;
+  background: #141a19;
+  border-radius: var(--radius-medium);
+  outline-offset: -3px;
+  font-family: var(--font-sans);
   :global(.leaflet-tile) {
     image-rendering: pixelated;
   }
@@ -17,11 +20,106 @@
     width: max-content;
     max-width: 14rem;
     overflow-wrap: anywhere;
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    box-shadow: 0 2px 12px rgb(0 0 0 / 25%);
+    border-radius: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.3rem 0.6rem;
+    &::before {
+      display: none;
+    }
+  }
+  :global(.leaflet-control-zoom) {
+    margin: 1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.6rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-panel);
+    a {
+      display: grid;
+      place-items: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+      border-color: var(--border-strong);
+      font-size: 1.35rem;
+      font-weight: 400;
+      &:hover {
+        background: var(--bg-hover);
+      }
+      &:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: -3px;
+      }
+    }
+    :global(.leaflet-disabled) {
+      color: var(--text-disabled);
+      cursor: default;
+    }
+  }
+  :global(.leaflet-control-attribution) {
+    background: var(--surface-overlay);
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    border-radius: 0.35rem 0 0;
+    a {
+      color: var(--text-secondary);
+    }
   }
 }
-@media (max-width: 40rem) {
-  .map {
-    height: 60vh;
-    min-height: 22rem;
+.compass {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  position: absolute;
+  z-index: 500;
+  top: 1rem;
+  right: 1rem;
+  color: var(--text-primary);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-strong);
+  border-radius: 2rem;
+  padding: 0.6rem 0.7rem;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  svg {
+    transform: rotate(-45deg);
   }
+  small {
+    color: var(--text-muted);
+    font-size: 0.55rem;
+  }
+}
+.overlay {
+  position: absolute;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-medium);
+  color: var(--text-muted);
+}
+.tileWarning {
+  position: absolute;
+  z-index: 500;
+  bottom: 2rem;
+  left: 1rem;
+  max-width: min(28rem, calc(100% - 2rem));
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  pointer-events: none;
 }

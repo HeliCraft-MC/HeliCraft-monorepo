@@ -1,0 +1,247 @@
+.workspace,
+.section {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+  min-width: 0;
+  :where(h2, h3, h4, p) {
+    margin: 0;
+  }
+  :where(h2, h3) {
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  h2 {
+    font-size: clamp(1.2rem, 2vw, 1.65rem);
+  }
+}
+.eyebrow {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.muted {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  max-width: 68ch;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+}
+.mapStage {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--bg-elevated);
+}
+.mapReadout {
+  display: flex;
+  align-items: center;
+  min-height: 3.5rem;
+  border-top: 1px solid var(--border-subtle);
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.tools {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.toolbar,
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+}
+.footer {
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.toolset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+  > button {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+.details {
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--bg-elevated);
+  padding: 1rem;
+  > summary {
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 550;
+  }
+  > summary ~ * {
+    margin-top: 1rem;
+  }
+}
+.coordinates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem;
+  > div {
+    flex: 1 1 7rem;
+    min-width: 0;
+  }
+}
+.code {
+  font-family: var(--font-mono);
+  min-height: 15rem;
+  width: 100%;
+  font-size: 0.8rem;
+}
+.card {
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--workspace-surface, var(--bg-panel));
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  div {
+    min-width: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+  dt {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+  }
+}
+.empty {
+  display: grid;
+  gap: 0.75rem;
+  place-items: start;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--bg-elevated);
+  > svg {
+    width: 2rem;
+    height: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+}
+.draftList {
+  > article {
+    flex: 1 1 16rem;
+  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  > button {
+    display: grid;
+    gap: 0.25rem;
+    text-align: start;
+    justify-items: start;
+    small {
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+  }
+}
+.publication {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  list-style-position: inside;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+@media (max-width: 35rem) {
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .footer > button,
+  .footer > div {
+    width: 100%;
+  }
+  .footer button {
+    flex: 1 1 auto;
+  }
+  .tools {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .toolset {
+    gap: 0.35rem;
+    > button {
+      width: 2.5rem;
+      min-height: 2.75rem;
+      padding: 0.5rem;
+    }
+    .toolLabel {
+      display: none;
+    }
+    svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+  }
+}

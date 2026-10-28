@@ -31,7 +31,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Flat planar raster map with host-owned published shapes and controlled Polygon/MultiPolygon drafts, including holes. Leaflet and Geoman load only in the browser. The host supplies world identity, a safe same-origin tile URL, localized labels, legal authorization, save/validation workflow and any keyboard coordinate editor. For squaremap, use 512px tiles, native zoom 3 and extra zoom 2; [X,Z] maps to [-Z/8,X/8] in CRS.Simple. Published shapes cannot be edited or cut. Tab reaches zoom controls and the map; arrows pan and +/− zoom. Geoman drawing/editing is pointer based; Escape cancels drawing. Supply host-owned coordinate controls for keyboard-only geometry editing. No networking occurs on the server. Width follows the container, narrow screens retain a usable 22rem minimum map height, and reduced motion disables zoom animation. Fixture tiles below are a neutral component backdrop, never Minecraft terrain or acceptance evidence.',
+          'Flat planar raster map with host-owned published shapes and controlled Polygon/MultiPolygon drafts, including holes. Leaflet and Geoman load only in the browser. onViewChange reports the current planar center and zoom for host-owned share links. The host supplies world identity, a safe same-origin tile URL, localized labels, legal authorization, save/validation workflow and any keyboard coordinate editor. For squaremap, use 512px tiles, native zoom 3 and extra zoom 2; [X,Z] maps to [-Z/8,X/8] in CRS.Simple. Published shapes cannot be edited or cut. Tab reaches localized zoom controls and the map; arrows pan and +/− zoom. Geoman drawing/editing is pointer based; Escape cancels drawing. Supply host-owned coordinate controls for keyboard-only geometry editing. A compass marks north (negative Z); loading and unavailable states cover the map while tile warnings leave boundaries usable. No networking occurs on the server. Width follows the container; --flat-map-height sets surface height with a 22rem minimum, and reduced motion disables zoom animation. Fixture tiles below are a neutral component backdrop, never Minecraft terrain or acceptance evidence.',
       },
     },
   },
@@ -56,6 +56,28 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const ReadOnly: Story = {};
 export const Empty: Story = { args: { shapes: [] } };
+export const Selected: Story = {
+  args: {
+    shapes: [
+      {
+        id: 'fixture',
+        name: 'Selected territory',
+        color: '#46b7a0',
+        geometry: fixture,
+        selected: true,
+      },
+    ],
+  },
+};
+export const Russian: Story = {
+  args: {
+    locale: 'ru',
+    label: 'Плоская карта — пример компонента',
+    loadingLabel: 'Загрузка карты…',
+    errorLabel: 'Не удалось загрузить карту.',
+    tileErrorLabel: 'Поверхность недоступна; границы остаются видимыми.',
+  },
+};
 export const UnavailableTiles: Story = {
   args: { tileUrl: '/unavailable-flat-map-fixture/{z}/{x}/{y}.png' },
 };

@@ -16,6 +16,9 @@ repositories {
 java { toolchain.languageVersion.set(JavaLanguageVersion.of(25)) }
 dependencies {
     api("com.google.code.gson:gson:2.13.2")
+    compileOnly("net.kyori:adventure-api:5.2.0")
+    testImplementation("net.kyori:adventure-api:5.2.0")
+    testImplementation("net.kyori:adventure-text-serializer-plain:5.2.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testImplementation("org.geysermc.mcprotocollib:protocol:26.3")
     testRuntimeOnly("org.slf4j:slf4j-simple:2.0.17")

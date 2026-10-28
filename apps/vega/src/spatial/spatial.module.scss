@@ -53,3 +53,401 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.atlas {
+  width: min(100% - 3rem, 100rem);
+  margin-inline: auto;
+  padding-block: 2.25rem 3rem;
+  min-width: 0;
+}
+.atlasHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-block-end: 1.75rem;
+  h1 {
+    margin: 0.35rem 0 0.5rem;
+    font-size: clamp(1.65rem, 3vw, 2.65rem);
+    line-height: 1.15;
+    letter-spacing: -0.045em;
+  }
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.925rem;
+}
+.atlasWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  align-items: start;
+  overflow: clip;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-large);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-panel);
+}
+.mapStage {
+  min-width: 0;
+  position: relative;
+  --flat-map-height: clamp(30rem, 72vh, 56rem);
+}
+.mapTopbar,
+.mapBottomBar {
+  min-height: 3.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.mapTopbar {
+  border-block-end: 1px solid var(--border-subtle);
+  > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+  }
+}
+.worldDot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--success);
+}
+.mapBottomBar {
+  border-block-start: 1px solid var(--border-subtle);
+}
+.atlasSidebar {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.5rem;
+  border-inline-start: 1px solid var(--border-subtle);
+  a {
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    overflow-wrap: anywhere;
+  }
+}
+.explorerHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  h2 {
+    font-size: 1.3rem;
+    letter-spacing: -0.03em;
+    margin: 0.35rem 0 0;
+  }
+}
+.count {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+}
+.mapDisclosure {
+  border-block-start: 1px solid var(--border-subtle);
+  padding-block-start: 0.85rem;
+  min-width: 0;
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '+';
+    margin-inline-start: auto;
+    font-size: 1rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+  &[open] > summary::after {
+    content: '−';
+  }
+  summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-block-start: 1rem;
+    gap: 0.75rem;
+    > * {
+      min-width: 0;
+    }
+    > div:first-of-type,
+    > button {
+      grid-column: 1 / -1;
+    }
+  }
+}
+.layerOptions {
+  display: grid;
+  gap: 0.7rem;
+  margin-block-start: 1rem;
+  font-size: 0.8rem;
+}
+.territoryList {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 22rem;
+  overflow: auto;
+}
+.territoryItem {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--bg-panel);
+  overflow: clip;
+  &[data-selected='true'] {
+    border-color: var(--territory-color);
+    background: color-mix(in srgb, var(--territory-color) 8%, var(--bg-panel));
+  }
+  > button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0.65rem;
+    text-align: start;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    font: inherit;
+    padding: 0.85rem 0.85rem 0.5rem;
+    &:hover {
+      background: var(--bg-hover);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: -3px;
+    }
+    > span:nth-child(2) {
+      display: grid;
+      flex: 1;
+      min-width: 0;
+      gap: 0.3rem;
+    }
+    strong {
+      font-size: 0.85rem;
+      font-weight: 500;
+      overflow-wrap: anywhere;
+    }
+    small {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+    }
+  }
+  > a {
+    margin: 0 0.85rem 0.75rem 2rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+}
+.territorySwatch {
+  width: 0.45rem;
+  height: 1.9rem;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+  background: var(--territory-color);
+}
+.selection {
+  display: grid;
+  gap: 0.75rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid var(--border-subtle);
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  > a {
+    font-size: 0.75rem;
+  }
+  .panel {
+    font-size: 0.8rem;
+    gap: 0.75rem;
+  }
+  article {
+    border-inline-start: 1px solid var(--border-strong);
+    padding-inline-start: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+  article p {
+    color: var(--text-muted);
+  }
+}
+.catalogEmpty {
+  text-align: center;
+  padding: 2rem 0.5rem;
+  color: var(--text-muted);
+  h3 {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  p {
+    font-size: 0.8rem;
+    line-height: 1.7;
+    margin-block-end: 0;
+  }
+}
+.mapHelp {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  p {
+    margin-block: 1rem 0;
+  }
+  a {
+    margin-block-start: 1rem;
+  }
+}
+.mapEmpty {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  min-height: 25rem;
+  align-content: center;
+  padding: 2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  background: var(--bg-elevated);
+  h2,
+  p {
+    margin: 0;
+  }
+  p {
+    max-width: 36rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  a {
+    color: var(--primary);
+  }
+}
+.coordinateReadout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  button {
+    padding: 0.4rem;
+    min-height: 2rem;
+  }
+}
+.coordinateValue {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  user-select: all;
+}
+.viewport {
+  position: relative;
+  min-width: 0;
+}
+.viewportStatus {
+  position: absolute;
+  z-index: 1000;
+  inset: auto 1rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-medium);
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  box-shadow: var(--shadow-panel);
+  button {
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 65rem) {
+  .atlasWorkspace {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+  }
+  .atlasSidebar {
+    padding: 1rem;
+  }
+  .mapHint {
+    display: none;
+  }
+}
+@media (max-width: 48rem) {
+  .atlas {
+    width: calc(100% - 1.5rem);
+    padding-block: 1.5rem;
+  }
+  .atlasHeader {
+    gap: 1rem;
+    align-items: start;
+    flex-direction: column;
+    margin-block-end: 1.25rem;
+  }
+  .atlasWorkspace {
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: var(--radius-medium);
+  }
+  .mapStage {
+    --flat-map-height: 57svh;
+  }
+  .mapTopbar,
+  .mapBottomBar {
+    padding-inline: 1rem;
+  }
+  .atlasSidebar {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--border-strong);
+    padding: 1.25rem;
+  }
+  .territoryList {
+    max-height: 18rem;
+  }
+  .mapBottomBar > span:last-child {
+    font-size: 0.65rem;
+  }
+}

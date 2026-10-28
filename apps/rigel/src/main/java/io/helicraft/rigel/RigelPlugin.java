@@ -20,8 +20,10 @@ import com.velocitypowered.api.scheduler.ScheduledTask;
 import com.velocitypowered.api.util.GameProfile;
 import io.helicraft.minecraft.AntaresClient;
 import io.helicraft.minecraft.ApiModels;
+import io.helicraft.minecraft.GameUi;
 import java.net.InetSocketAddress;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +36,7 @@ import net.elytrium.limboapi.api.chunk.Dimension;
 import net.elytrium.limboapi.api.event.LoginLimboRegisterEvent;
 import net.elytrium.limboapi.api.player.GameMode;
 import net.elytrium.limboapi.api.player.LimboPlayer;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.title.Title;
@@ -48,8 +51,9 @@ import org.slf4j.Logger;
     dependencies = {@Dependency(id = "limboapi")})
 public final class RigelPlugin {
   private static final Component DENIED =
-      Component.text(
-          "Minecraft sign-in unavailable. Reconnect and confirm your own code on the website. / Вход недоступен. Подключитесь снова и подтвердите свой код на сайте.");
+      GameUi.failure(
+          "Sign-in unavailable / Вход недоступен",
+          "Reconnect and confirm on the website.\nПодключитесь снова и подтвердите вход на сайте.");
   private final Logger logger;
   private final ProxyServer proxy;
   private final Map<InetSocketAddress, Pending> pending = new ConcurrentHashMap<>();
@@ -87,7 +91,15 @@ public final class RigelPlugin {
       throw new IllegalStateException("Compatible LimboAPI is required");
     }
     var world = factory.createVirtualWorld(Dimension.OVERWORLD, 0, 64, 0, 0, 0);
-    world.setBlock(0, 63, 0, factory.createSimpleBlock("minecraft:stone"));
+    for (int x = -5; x <= 5; x++) {
+      for (int z = -5; z <= 5; z++) {
+        String block =
+            Math.abs(x) == 5 || Math.abs(z) == 5
+                ? "minecraft:polished_deepslate"
+                : "minecraft:smooth_quartz";
+        world.setBlock(x, 63, z, factory.createSimpleBlock(block));
+      }
+    }
     lobby =
         factory
             .createLimbo(world)
@@ -125,21 +137,25 @@ public final class RigelPlugin {
             .handle(
                 (challenge, error) -> {
                   if (error != null) {
-                    String message = "Sign-in temporarily unavailable / Вход временно недоступен";
+                    Component message = DENIED;
                     Throwable cause = error.getCause() == null ? error : error.getCause();
                     if (cause instanceof AntaresClient.ApiException rejected) {
                       if (rejected.status() == 404) {
                         message =
-                            "Register on the website / Зарегистрируйтесь на сайте: "
-                                + siteOrigin
-                                + "/register";
+                            GameUi.failure(
+                                "Account not found / Аккаунт не найден",
+                                "Create a website account and use its username.\nСоздайте аккаунт на сайте и используйте его имя.\n\n"
+                                    + siteOrigin
+                                    + "/register");
                       } else if (rejected.status() == 409) {
                         message =
-                            "Another Minecraft connection is active. Disconnect it or wait for expiry / Другое подключение уже активно. Выйдите или дождитесь истечения.";
+                            GameUi.failure(
+                                "Already connected / Подключение уже открыто",
+                                "Close your other game connection, then reconnect.\nЗакройте другое подключение к игре и подключитесь снова.\n\n"
+                                    + "After a crash, wait for the session to expire.\nПосле сбоя дождитесь завершения прежней сессии.");
                       }
                     }
-                    event.setResult(
-                        PreLoginEvent.PreLoginComponentResult.denied(Component.text(message)));
+                    event.setResult(PreLoginEvent.PreLoginComponentResult.denied(message));
                   } else {
                     Pending connection =
                         new Pending(
@@ -260,8 +276,9 @@ public final class RigelPlugin {
                   });
         }
       } else if (connection.auth.expired()) {
-        disconnect(connection);
+        disconnect(connection, AuthMessages.End.EXPIRED);
       } else if (connection.limbo != null && connection.auth.busy.compareAndSet(false, true)) {
+        updateCountdown(connection);
         poll(connection);
       }
     }
@@ -301,6 +318,13 @@ public final class RigelPlugin {
                     .thenAccept(
                         result -> {
                           if (auth.admit(result.admission()) && connection.player.isActive()) {
+                            clearWaitingUi(connection);
+                            connection.player.sendActionBar(
+                                Component.text(
+                                    russian(connection)
+                                        ? "Вход подтверждён · подключаем к миру"
+                                        : "Sign-in confirmed · joining the world",
+                                    GameUi.SUCCESS));
                             connection
                                 .limbo
                                 .getScheduledExecutor()
@@ -314,7 +338,13 @@ public final class RigelPlugin {
                         });
               }
               if (!"WAITING_AUTH".equals(status.challenge().status())) {
-                disconnect(connection);
+                AuthMessages.End reason =
+                    switch (status.challenge().status()) {
+                      case "REJECTED" -> AuthMessages.End.REJECTED;
+                      case "EXPIRED" -> AuthMessages.End.EXPIRED;
+                      default -> AuthMessages.End.CLOSED;
+                    };
+                disconnect(connection, reason);
               }
               return CompletableFuture.completedFuture(null);
             })
@@ -328,8 +358,14 @@ public final class RigelPlugin {
   }
 
   private void disconnect(Pending connection) {
+    disconnect(connection, AuthMessages.End.UNAVAILABLE);
+  }
+
+  private void disconnect(Pending connection, AuthMessages.End reason) {
     if (connection.player != null) {
-      connection.player.disconnect(DENIED);
+      boolean russian = russian(connection);
+      connection.player.disconnect(
+          GameUi.failure(AuthMessages.title(reason, russian), AuthMessages.recovery(russian)));
     }
     release(connection);
   }
@@ -345,6 +381,7 @@ public final class RigelPlugin {
     if (!connection.auth.close()) {
       return CompletableFuture.completedFuture(null);
     }
+    clearWaitingUi(connection);
     pending.remove(connection.inbound.getRemoteAddress(), connection);
     if (connection.auth.admission() != null) {
       return closeSession(connection.auth.admission().session().id()).exceptionally(error -> null);
@@ -383,11 +420,44 @@ public final class RigelPlugin {
     volatile Player player;
     volatile LimboPlayer limbo;
     volatile long nextHeartbeat;
+    volatile BossBar countdown;
+    volatile long initialSeconds;
 
     Pending(InboundConnection inbound, AuthAttempt auth) {
       this.inbound = inbound;
       this.auth = auth;
     }
+  }
+
+  private static boolean russian(Pending connection) {
+    return connection.player != null
+        && connection.player.getEffectiveLocale() != null
+        && "ru".equals(connection.player.getEffectiveLocale().getLanguage());
+  }
+
+  private static void clearWaitingUi(Pending connection) {
+    BossBar countdown = connection.countdown;
+    if (countdown != null && connection.player != null) {
+      connection.player.hideBossBar(countdown);
+      connection.countdown = null;
+    }
+  }
+
+  private static void updateCountdown(Pending connection) {
+    BossBar countdown = connection.countdown;
+    if (countdown == null || connection.auth.closed()) {
+      return;
+    }
+    long seconds =
+        AuthMessages.remainingSeconds(connection.auth.challenge.expiresAt(), Instant.now());
+    countdown
+        .name(
+            Component.text(
+                (russian(connection) ? "Подтвердите вход на сайте · " : "Confirm on the website · ")
+                    + AuthMessages.countdown(seconds),
+                GameUi.TEXT))
+        .progress(Math.clamp((float) seconds / Math.max(1L, connection.initialSeconds), 0f, 1f))
+        .color(seconds <= 20 ? BossBar.Color.RED : BossBar.Color.YELLOW);
   }
 
   private final class LobbySession implements LimboSessionHandler {
@@ -403,20 +473,48 @@ public final class RigelPlugin {
       player.disableFalling();
       var challenge = connection.auth.challenge;
       Player client = player.getProxyPlayer();
+      boolean russian = russian(connection);
       client.showTitle(
           Title.title(
-              Component.text(challenge.serverName()),
-              Component.text("Confirm sign-in / Подтвердите вход")));
+              Component.text(GameUi.shorten(challenge.serverName(), 48), GameUi.ACCENT),
+              Component.text(
+                  russian ? "Откройте ссылку в чате" : "Open the link in chat", GameUi.TEXT),
+              Title.Times.times(
+                  Duration.ofMillis(250), Duration.ofSeconds(4), Duration.ofMillis(400))));
       client.sendMessage(
-          Component.text("Confirm sign-in on the website / Подтвердить вход на сайте")
-              .clickEvent(ClickEvent.openUrl(challenge.confirmationUrl())));
-      client.sendMessage(
-          Component.text("Code / Код: " + challenge.code() + " · 120 seconds / секунд"));
-      client.sendMessage(
-          Component.text(
-              "Open the link and confirm your own sign-in. You can also enter the code on the website. / Откройте ссылку и подтвердите свой вход. Можно также ввести код в кабинете."));
-      client.sendActionBar(
-          Component.text("Waiting for browser confirmation / Ожидание подтверждения в браузере"));
+          GameUi.card(
+              GameUi.heading(russian ? "Подтверждение входа" : "Confirm your sign-in"),
+              GameUi.row(russian ? "Игрок" : "Player", challenge.username()),
+              Component.empty(),
+              GameUi.action(
+                  russian ? "Открыть сайт и подтвердить" : "Open website to confirm",
+                  ClickEvent.openUrl(challenge.confirmationUrl()),
+                  russian
+                      ? "Войдите в свой аккаунт и подтвердите этот вход."
+                      : "Sign into your account and approve this connection."),
+              GameUi.muted(
+                  russian
+                      ? "Ссылка уже содержит код. Мир откроется после вашего решения."
+                      : "The link includes your code. The world opens after your approval."),
+              Component.empty(),
+              GameUi.row("Code / Код", challenge.code())
+                  .clickEvent(ClickEvent.copyToClipboard(challenge.code()))
+                  .hoverEvent(
+                      net.kyori.adventure.text.event.HoverEvent.showText(
+                          Component.text(
+                              russian
+                                  ? "Скопировать код для ручного ввода на сайте"
+                                  : "Copy code for manual entry on the website"))),
+              GameUi.muted(
+                  russian
+                      ? "Не передавайте ссылку или код другим людям."
+                      : "Keep this link and code to yourself.")));
+      connection.initialSeconds =
+          AuthMessages.remainingSeconds(challenge.expiresAt(), Instant.now());
+      connection.countdown =
+          BossBar.bossBar(Component.empty(), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+      updateCountdown(connection);
+      client.showBossBar(connection.countdown);
       logger.info("Rigel auth lobby entered account {}", challenge.accountId());
     }
 

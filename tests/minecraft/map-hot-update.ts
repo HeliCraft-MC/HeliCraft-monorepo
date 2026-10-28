@@ -1,4 +1,4 @@
-// oxlint-disable no-magic-numbers, no-await-in-loop -- Real keyboard workflow changes a saved territorial geometry through Vega and ratifies it using separate disposable browser actors.
+// oxlint-disable no-await-in-loop -- Real keyboard workflow changes a saved territorial geometry through Vega and ratifies it using separate disposable browser actors.
 import { expect } from '@playwright/test';
 import type { Browser } from '@playwright/test';
 import type {
@@ -41,7 +41,11 @@ async function updateTerritoryThroughVega(input: BrowserTerritoryUpdate): Promis
     }
     const page = await editor.newPage();
     await page.goto(`${input.origin}/app/states/${input.stateId}/manage?section=territory&lang=en`);
-    await page.getByRole('button', { name: 'New territory draft', exact: true }).click();
+    const newDraft = page.getByRole('button', { name: 'New territory draft', exact: true });
+    if (!(await newDraft.isVisible())) {
+      await page.getByText('Drafts and new boundaries', { exact: true }).click();
+    }
+    await newDraft.click();
     const coordinateEditor = page.getByText('Coordinates and keyboard editing', { exact: true });
     await coordinateEditor.click();
     await page.getByRole('button', { name: 'Load current coordinates', exact: true }).click();
@@ -49,6 +53,7 @@ async function updateTerritoryThroughVega(input: BrowserTerritoryUpdate): Promis
     expect(await coordinates.inputValue()).toContain('Polygon');
     await coordinates.fill(JSON.stringify(input.geometry));
     await page.getByRole('button', { name: 'Apply coordinates', exact: true }).click();
+    await page.getByRole('button', { name: 'Continue to reasoning', exact: true }).click();
     await page.getByLabel('Change type', { exact: true }).selectOption(input.change);
     await page
       .getByLabel('Reason for this change · English', { exact: true })
@@ -68,13 +73,20 @@ async function updateTerritoryThroughVega(input: BrowserTerritoryUpdate): Promis
     const review = await admin.newPage();
     await review.goto(`${input.origin}/admin/territories?lang=en`);
     await review
-      .getByRole('button', { name: new RegExp(input.stateId.slice(0, 8), 'u') })
+      .locator(`article[data-state-id="${input.stateId}"]`)
+      .getByRole('button', { name: 'Review proposal', exact: true })
       .first()
       .click();
     const reason = `Current Governance, exact ${input.change} geometry and conflicts verified through Vega`;
     await review.getByLabel('Administrative decision reason', { exact: true }).fill(reason);
     await review.getByRole('button', { name: 'Ratify territory', exact: true }).click();
-    await expect(review.getByText(`APPROVE: ${reason}`, { exact: true })).toBeVisible();
+    await review.getByRole('button', { name: 'Confirm ratification', exact: true }).click();
+    await expect(
+      review
+        .getByRole('status')
+        .filter({ hasText: 'Boundaries published' })
+        .getByText(reason, { exact: true }),
+    ).toBeVisible();
     await page.reload();
     await expect(
       page.getByText('Territory ratified and published.', { exact: true }),

@@ -17,6 +17,8 @@
 - **Ссылки входа в Minecraft — 26 октября 2026 года:** [native/браузерная проверка и локальный GeoIP](verification/minecraft-sign-in-2026-10-26_RU.md).
 - **Территории и политическая карта:** [процедура](states/territories_RU.md), [пространственная архитектура](architecture/spatial_RU.md), [текущие проверки](verification/territories-2026-10-25_RU.md).
 
+- **Интерфейсы Minecraft — 28 октября 2026 года:** [карта, территории, подтверждение входа и плагины](verification/minecraft-ui-2026-10-28_RU.md).
+
 ## Карта разделов
 
 | Раздел                                    | Содержание и точки входа                                                                                                                                                                                                                    |

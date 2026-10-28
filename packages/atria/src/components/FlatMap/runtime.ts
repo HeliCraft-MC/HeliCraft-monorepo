@@ -65,10 +65,22 @@ function createFlatMap(
     minZoom: 0,
     maxZoom: initial.maxNativeZoom + initial.extraZoom,
     pmIgnore: false,
+    zoomControl: false,
     zoomAnimation: !globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches,
   });
+  Leaflet.control
+    .zoom({
+      position: 'topleft',
+      zoomInTitle: initial.locale === 'ru' ? 'Приблизить' : 'Zoom in',
+      zoomOutTitle: initial.locale === 'ru' ? 'Отдалить' : 'Zoom out',
+    })
+    .addTo(map);
   map.pm.setLang(initial.locale ?? 'en');
-  map.pm.setGlobalOptions({ allowSelfIntersection: false, snappable: false });
+  map.pm.setGlobalOptions({
+    allowSelfIntersection: false,
+    snappable: false,
+    exitModeOnEscape: true,
+  });
   const tiles = Leaflet.tileLayer(initial.tileUrl, {
     tileSize: 512,
     maxNativeZoom: initial.maxNativeZoom,
@@ -98,6 +110,7 @@ function createFlatMap(
   let shapesKey = '';
   let viewKey = '';
   let mode: FlatMapMode | undefined = undefined;
+  let reconcilingMode = false;
   const changed = (): void => {
     const geometry = readGeometry(draft, props.maxNativeZoom);
     geometryKey = JSON.stringify(geometry);
@@ -115,12 +128,22 @@ function createFlatMap(
     props.onModeChange?.('view');
   });
   map.on('pm:globaldrawmodetoggled', (event) => {
-    if (!event.enabled && props.mode === 'draw') {
+    if (!reconcilingMode && !event.enabled && props.mode === 'draw') {
       props.onModeChange?.('view');
     }
   });
   map.on('pm:globalcutmodetoggled', (event) => {
-    if (!event.enabled && props.mode === 'cut') {
+    if (!reconcilingMode && !event.enabled && props.mode === 'cut') {
+      props.onModeChange?.('view');
+    }
+  });
+  map.on('pm:globaleditmodetoggled', (event) => {
+    if (!reconcilingMode && !event.enabled && props.mode === 'edit') {
+      props.onModeChange?.('view');
+    }
+  });
+  map.on('pm:globalremovalmodetoggled', (event) => {
+    if (!reconcilingMode && !event.enabled && props.mode === 'remove') {
       props.onModeChange?.('view');
     }
   });
@@ -155,25 +178,33 @@ function createFlatMap(
       shapesKey = nextShapes;
     }
     const nextGeometry = JSON.stringify(next.geometry ?? null);
-    if (nextGeometry !== geometryKey) {
-      draft.clearLayers();
-      if (next.geometry) {
-        for (const layer of polygonLayers(next.geometry, next.maxNativeZoom, true)) {
-          addEditable(draft, layer, changed);
+    // Geoman emits disabled events during its own disable/enable reconciliation too.
+    reconcilingMode = true;
+    try {
+      if (nextGeometry !== geometryKey) {
+        draft.clearLayers();
+        if (next.geometry) {
+          for (const layer of polygonLayers(next.geometry, next.maxNativeZoom, true)) {
+            addEditable(draft, layer, changed);
+          }
         }
+        geometryKey = nextGeometry;
+        mode = undefined;
       }
-      geometryKey = nextGeometry;
-      mode = undefined;
-    }
-    if (mode !== (next.mode ?? 'view')) {
-      mode = next.mode ?? 'view';
-      setMode(map, mode);
+      if (mode !== (next.mode ?? 'view')) {
+        mode = next.mode ?? 'view';
+        setMode(map, mode);
+      }
+    } finally {
+      reconcilingMode = false;
     }
   }
   const reportBounds = (): void => {
-    if (disposed || !props.onBounds) {
+    if (disposed) {
       return;
     }
+    const center = map.getCenter();
+    props.onViewChange?.(mapToFlat([center.lat, center.lng], props.maxNativeZoom), map.getZoom());
     const bounds = map.getBounds();
     const [minX, minZ] = mapToFlat([bounds.getNorth(), bounds.getWest()], props.maxNativeZoom);
     const [maxX, maxZ] = mapToFlat([bounds.getSouth(), bounds.getEast()], props.maxNativeZoom);

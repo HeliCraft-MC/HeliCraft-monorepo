@@ -6,6 +6,8 @@ import { uiText } from '../states/text';
 import { PoliticalMap } from './map-view';
 import type { PoliticalMapProps } from './map-view';
 import { usePoliticalViewport } from './use-viewport';
+import { Button } from '@helicraft/atria';
+import styles from './spatial.module.scss';
 
 const EMPTY_TERRITORIES: readonly PublicTerritory[] = [];
 function ViewportMap({
@@ -21,25 +23,30 @@ function ViewportMap({
   const { locale } = useTranslation();
   const viewport = usePoliticalViewport(props.world.id, initial, bounds);
   return (
-    <div>
+    <div className={styles.viewport}>
       <PoliticalMap
         {...props}
         territories={viewport.snapshot?.territories ?? EMPTY_TERRITORIES}
         onBounds={viewport.handleBounds}
       />
       {viewport.pending && (
-        <output>
+        <output className={styles.viewportStatus}>
           {uiText(locale, 'Загрузка границ видимой области…', 'Loading boundaries for this area…')}
         </output>
       )}
       {viewport.failed && (
-        <p role="alert">
-          {uiText(
-            locale,
-            'Не удалось загрузить границы этой области. Измените масштаб или повторите запрос.',
-            'Could not load boundaries for this area. Change the zoom or retry.',
-          )}
-        </p>
+        <div role="alert" className={styles.viewportStatus}>
+          <span>
+            {uiText(
+              locale,
+              'Не удалось обновить границы этой области.',
+              'Could not update boundaries for this area.',
+            )}
+          </span>
+          <Button tone="quiet" onClick={viewport.handleRetry}>
+            {uiText(locale, 'Повторить', 'Retry')}
+          </Button>
+        </div>
       )}
     </div>
   );

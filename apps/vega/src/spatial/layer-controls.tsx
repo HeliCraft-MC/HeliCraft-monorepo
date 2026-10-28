@@ -4,6 +4,8 @@ import { Checkbox, FormField, Select } from '@helicraft/atria';
 import type { PublicTerritorySummary } from '@helicraft/alhena';
 import { useTranslation } from '../i18n';
 import { displayText, uiText } from '../states/text';
+import { Layers } from 'lucide-react';
+import styles from './spatial.module.scss';
 
 interface MapLayers {
   tiles: boolean;
@@ -54,24 +56,32 @@ function MapLayerControls({
           ))}
         </Select>
       </FormField>
-      <Checkbox
-        name="tiles"
-        checked={layers.tiles}
-        onChange={change}
-        label={uiText(locale, 'Поверхность Minecraft', 'Minecraft terrain')}
-      />
-      <Checkbox
-        name="boundaries"
-        checked={layers.boundaries}
-        onChange={change}
-        label={uiText(locale, 'Государственные границы', 'State boundaries')}
-      />
-      <Checkbox
-        name="names"
-        checked={layers.names}
-        onChange={change}
-        label={uiText(locale, 'Названия государств', 'State names')}
-      />
+      <details className={styles.mapDisclosure}>
+        <summary>
+          <Layers size={16} aria-hidden="true" />
+          {uiText(locale, 'Слои карты', 'Map layers')}
+        </summary>
+        <div className={styles.layerOptions}>
+          <Checkbox
+            name="tiles"
+            checked={layers.tiles}
+            onChange={change}
+            label={uiText(locale, 'Поверхность Minecraft', 'Minecraft terrain')}
+          />
+          <Checkbox
+            name="boundaries"
+            checked={layers.boundaries}
+            onChange={change}
+            label={uiText(locale, 'Государственные границы', 'State boundaries')}
+          />
+          <Checkbox
+            name="names"
+            checked={layers.names}
+            onChange={change}
+            label={uiText(locale, 'Названия государств', 'State names')}
+          />
+        </div>
+      </details>
     </>
   );
 }

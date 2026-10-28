@@ -7,7 +7,10 @@ import { uiText } from '../states/text';
 
 const route = getRouteApi('/map');
 function Page(): ReactElement {
-  return <PublicPoliticalMap data={route.useLoaderData()} search={route.useSearch()} />;
+  const search = route.useSearch();
+  return (
+    <PublicPoliticalMap key={JSON.stringify(search)} data={route.useLoaderData()} search={search} />
+  );
 }
 const Route = createFileRoute('/map')({
   validateSearch: mapSearch,

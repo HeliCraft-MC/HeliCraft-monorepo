@@ -235,7 +235,11 @@ try {
     ],
     {
       cwd: paperDir,
-      env: { ANTARES_URL: 'http://localhost:3106', DENEB_SERVICE_TOKEN: denebToken },
+      env: {
+        ANTARES_URL: 'http://localhost:3106',
+        DENEB_SERVICE_TOKEN: denebToken,
+        SITE_ORIGIN: origin,
+      },
     },
   );
   await waitUntil(
@@ -294,7 +298,9 @@ try {
   const cookies = await context.cookies(origin);
   const cookie = cookies.map((item) => `${item.name}=${item.value}`).join('; ');
   await page.goto(`${origin}/app/minecraft?lang=en`);
-  await expect(page.getByRole('heading', { name: 'Game identity', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Minecraft sign-in', exact: true })).toBeVisible();
+  await page.getByText('Account identifier', { exact: true }).click();
+  await expect(page.getByText(registered.id, { exact: true })).toBeVisible();
   // Respect the proxy login cooldown between sequential connections from this test host.
   await Bun.sleep(3100);
   const player = connectMinecraft(name, 25_575);
@@ -340,13 +346,31 @@ try {
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(
-    page.getByRole('heading', { name: 'Are you trying to sign into Minecraft?', exact: true }),
+    page.getByRole('heading', { name: 'Is this you signing in?', exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel('Code from Minecraft', { exact: true })).toHaveCount(0);
   await expect(page.getByText('127.0.0.1', { exact: true })).toBeVisible();
-  await expect(page.getByText(/26\.3.*777/u)).toBeVisible();
+  await expect(page.getByRole('definition').filter({ hasText: /26\.3/u })).toBeVisible();
+  await page.getByText('More connection details', { exact: true }).click();
+  await expect(page.getByText('777', { exact: true })).toBeVisible();
   expect((await gameAccount(cookie)).session).toBeNull();
+  await page.evaluate(() => {
+    globalThis.scrollTo(0, 0);
+  });
   await page.screenshot({ path: path.join(run, 'minecraft-confirmation.png'), fullPage: true });
+  const confirmationViewport = page.viewportSize();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => {
+    globalThis.scrollTo(0, 0);
+  });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({
+    path: path.join(run, 'minecraft-confirmation-mobile.png'),
+    fullPage: true,
+  });
+  if (confirmationViewport !== null) {
+    await page.setViewportSize(confirmationViewport);
+  }
   await page.getByRole('button', { name: 'Confirm Minecraft sign-in', exact: true }).click();
   await expect(page).toHaveURL(`${origin}/app/minecraft`);
   await player.waitFor(
@@ -393,6 +417,7 @@ try {
   );
   expect((await gameAccount(cookie)).events).toHaveLength(2);
   await expect(page.getByText('Offline in Minecraft', { exact: true })).toBeVisible();
+  await page.getByText('Recent private activity', { exact: true }).click();
   await expect(page.getByText(/^Left Minecraft/u)).toBeVisible();
   await waitUntil(
     async () =>
@@ -537,7 +562,11 @@ try {
         ],
         {
           cwd: paperDir,
-          env: { ANTARES_URL: 'http://localhost:3106', DENEB_SERVICE_TOKEN: denebToken },
+          env: {
+            ANTARES_URL: 'http://localhost:3106',
+            DENEB_SERVICE_TOKEN: denebToken,
+            SITE_ORIGIN: origin,
+          },
         },
       );
       await waitUntil(

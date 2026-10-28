@@ -1,19 +1,26 @@
+// oxlint-disable import/max-dependencies -- Administration composes the application queue, named state identities, immutable review and world setup.
 import { useCallback, useState } from 'react';
 import type { MouseEvent, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listTerritorialApplications, listSpatialWorlds } from '@helicraft/alhena';
-import { Alert, Button, LoadingState } from '@helicraft/atria';
+import { Alert, Button, LoadingState, ActionPanel } from '@helicraft/atria';
 import { browserClient, errorMessage } from '../account-api';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { TerritorialAdminReview } from './admin-review';
 import { WorldRegistration } from './world-registration';
-import styles from './spatial.module.scss';
+import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { StateNameById } from '../state-name-by-id';
+import styles from './territory-editor.module.scss';
 
-const SHORT_ID_LENGTH = 8;
 const REFRESH_MS = 5000;
 function SpatialAdministration(): ReactElement {
-  const { locale } = useTranslation();
+  const { locale, text } = useTranslation();
+  const statuses = {
+    REVIEW: uiText(locale, 'Ожидает ратификации', 'Awaiting ratification'),
+    APPROVED: uiText(locale, 'Опубликовано', 'Published'),
+    REJECTED: uiText(locale, 'Отклонено', 'Rejected'),
+  };
   const [selected, setSelected] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ['territory-administration'],
@@ -38,35 +45,50 @@ function SpatialAdministration(): ReactElement {
     query.data?.applications.find((item) => item.id === selected) ?? query.data?.applications[0];
   const world = query.data?.worlds.find((item) => item.id === application?.draft.worldId);
   return (
-    <section className={styles.panel}>
+    <section className={styles.workspace}>
       <h1>{uiText(locale, 'Территории и миры', 'Territories and worlds')}</h1>
-      <WorldRegistration onSaved={refresh} worlds={query.data?.worlds} />
       <h2>{uiText(locale, 'Административная ратификация', 'Administrative ratification')}</h2>
       <p>
         {uiText(
           locale,
-          'Здесь появляются только предложения, завершившие действующую государственную процедуру. Одна ратификация атомарно публикует ревизию, меняет snapshot и сохраняет историю.',
-          'Only proposals that completed their current state procedure appear here. Ratification atomically publishes a revision, advances the snapshot and records history.',
+          'Проверьте предложение, обоснование и решение государства. Ратификация опубликует именно эти границы на официальной карте и в Minecraft.',
+          'Review the proposal, reasoning and state decision. Ratification publishes these exact boundaries on the official map and in Minecraft.',
         )}
       </p>
       {query.isPending && (
         <LoadingState label={uiText(locale, 'Загрузка заявок…', 'Loading applications…')} />
       )}
-      {query.error !== null && <Alert tone="danger">{errorMessage(query.error)}</Alert>}
+      {query.error !== null && <Alert tone="danger">{text(errorMessage(query.error))}</Alert>}
       {query.data?.applications.length === 0 && (
-        <p>{uiText(locale, 'Заявок пока нет.', 'No applications yet.')}</p>
+        <div className={styles.empty}>
+          <CheckCircle2 aria-hidden="true" />
+          <h3>{uiText(locale, 'Новых заявок пока нет', 'No applications yet')}</h3>
+          <p className={styles.muted}>
+            {uiText(
+              locale,
+              'Предложения появятся здесь после завершения государственной процедуры.',
+              'Proposals appear here after completing their state procedure.',
+            )}
+          </p>
+        </div>
       )}
-      <div className={styles.toolbar}>
+      <div className={styles.draftList}>
         {query.data?.applications.map((item) => (
-          <Button
-            key={item.id}
-            value={item.id}
-            onClick={select}
-            tone={item.id === application?.id ? 'primary' : 'quiet'}
-          >
-            {item.draft.stateId.slice(0, SHORT_ID_LENGTH)} · {item.status} ·{' '}
-            {new Date(item.createdAt).toLocaleString(locale)}
-          </Button>
+          <article className={styles.card} key={item.id} data-state-id={item.draft.stateId}>
+            <StateNameById id={item.draft.stateId} color="#859b76" />
+            <p className={styles.muted}>
+              {statuses[item.status]} · {new Date(item.createdAt).toLocaleDateString(locale)}
+            </p>
+            <Button
+              value={item.id}
+              onClick={select}
+              tone={item.id === application?.id ? 'primary' : 'quiet'}
+              aria-pressed={item.id === application?.id}
+            >
+              {uiText(locale, 'Рассмотреть предложение', 'Review proposal')}
+              <ArrowRight aria-hidden="true" />
+            </Button>
+          </article>
         ))}
       </div>
       {application && world && (
@@ -86,6 +108,11 @@ function SpatialAdministration(): ReactElement {
           )}
         </Alert>
       )}
+      <ActionPanel
+        title={uiText(locale, 'Подключённые миры и настройка', 'Connected worlds and setup')}
+      >
+        <WorldRegistration onSaved={refresh} worlds={query.data?.worlds} />
+      </ActionPanel>
     </section>
   );
 }

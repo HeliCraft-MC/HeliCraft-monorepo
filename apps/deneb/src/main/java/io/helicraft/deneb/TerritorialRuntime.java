@@ -1,12 +1,15 @@
 package io.helicraft.deneb;
 
 import io.helicraft.minecraft.AntaresClient;
+import io.helicraft.minecraft.GameUi;
 import io.helicraft.minecraft.SpatialModels;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -23,13 +26,13 @@ import org.bukkit.scheduler.BukkitTask;
 
 /** All Bukkit access and notifications stay on the main thread; I/O belongs to SpatialEngine. */
 final class TerritorialRuntime implements Listener, AutoCloseable {
-  private static final int MAX_TITLE_LENGTH = 256;
   private final JavaPlugin plugin;
   private final SpatialEngine engine;
   private final Function<Player, String> language;
   private final JurisdictionTracker tracker = new JurisdictionTracker();
   private final BukkitTask reconcile;
   private final BukkitTask observe;
+  private final String mapUrl = TerritoryMessages.mapUrl(System.getenv("SITE_ORIGIN"));
 
   private record Position(
       SpatialSnapshot.Jurisdiction jurisdiction, SpatialEngine.View view, boolean known) {}
@@ -123,64 +126,65 @@ final class TerritorialRuntime implements Listener, AutoCloseable {
     tracker.remove(event.getPlayer().getUniqueId());
   }
 
-  private static String name(SpatialSnapshot.Jurisdiction jurisdiction, boolean russian) {
-    return jurisdiction == null
-        ? (russian ? "Независимая территория" : "Wilderness")
-        : jurisdiction.name(russian ? "ru" : "en");
-  }
-
   private void announce(Player player, JurisdictionTracker.Transition transition, boolean stale) {
     boolean russian = "ru".equals(language.apply(player));
-    String title = name(transition.current(), russian);
-    String subtitle =
-        transition.previous() == null
-            ? (russian ? "Вы входите в государство" : "Entering state territory")
-            : (russian ? "Вы покидаете " : "Leaving ") + name(transition.previous(), russian);
-    if (stale) {
-      subtitle = russian ? "Последняя подтверждённая юрисдикция" : "Last verified jurisdiction";
-    }
+    String title = TerritoryMessages.name(transition.current(), russian);
+    String subtitle = TerritoryMessages.subtitle(transition, stale, russian);
     player.showTitle(
         Title.title(
-            Component.text(shorten(title)),
-            Component.text(shorten(subtitle)),
+            Component.text(GameUi.shorten(title, 48), GameUi.ACCENT),
+            Component.text(GameUi.shorten(subtitle, 80), stale ? GameUi.WARNING : GameUi.TEXT),
             Title.Times.times(
                 Duration.ofMillis(150), Duration.ofSeconds(2), Duration.ofMillis(350))));
-  }
-
-  private static String shorten(String value) {
-    int length = value.codePointCount(0, value.length());
-    return length <= MAX_TITLE_LENGTH
-        ? value
-        : value.substring(0, value.offsetByCodePoints(0, MAX_TITLE_LENGTH)) + "…";
   }
 
   void whereami(Player player) {
     Location location = player.getLocation();
     Position position = position(location);
     boolean russian = "ru".equals(language.apply(player));
-    player.sendMessage(
-        Component.text(
-            location.getWorld().getName()
-                + " · "
-                + String.format(
-                    Locale.ROOT,
-                    "X %.2f · Y %.2f · Z %.2f",
-                    location.getX(),
-                    location.getY(),
-                    location.getZ())));
+    String coordinates =
+        String.format(
+            Locale.ROOT,
+            "X %.2f · Y %.2f · Z %.2f",
+            location.getX(),
+            location.getY(),
+            location.getZ());
+    Component locationCard =
+        GameUi.card(
+            GameUi.heading(russian ? "Ваше местоположение" : "Your location"),
+            GameUi.row(russian ? "Мир" : "World", location.getWorld().getName()),
+            Component.text(coordinates, GameUi.TEXT)
+                .clickEvent(ClickEvent.copyToClipboard(coordinates))
+                .hoverEvent(
+                    HoverEvent.showText(
+                        GameUi.muted(russian ? "Скопировать координаты" : "Copy coordinates"))));
     if (!position.known()) {
       player.sendMessage(
-          Component.text(russian ? "Юрисдикция неизвестна" : "Jurisdiction unavailable"));
+          GameUi.card(
+              locationCard,
+              Component.text(
+                  russian ? "Юрисдикция неизвестна" : "Jurisdiction unavailable", GameUi.WARNING),
+              GameUi.muted(
+                  russian
+                      ? "Границы ещё загружаются. Повторите /heli whereami позже."
+                      : "Boundary data is still loading. Try /heli whereami again shortly.")));
       return;
     }
     String prefix =
         position.view() != null && position.view().stale()
             ? (russian ? "Последняя подтверждённая: " : "Last verified: ")
             : "";
-    player.sendMessage(Component.text(prefix + name(position.jurisdiction(), russian)));
+    player.sendMessage(
+        GameUi.card(
+            locationCard,
+            Component.text(
+                prefix + TerritoryMessages.name(position.jurisdiction(), russian), GameUi.ACCENT),
+            GameUi.command(
+                "/heli borders",
+                russian ? "Открыть политическую карту" : "Open the political map")));
     if (position.view() != null && player.hasPermission("helicraft.spatial.debug")) {
       player.sendMessage(
-          Component.text(
+          GameUi.muted(
               "Spatial snapshot "
                   + position.view().snapshot().worldId()
                   + " revision "
@@ -189,12 +193,28 @@ final class TerritorialRuntime implements Listener, AutoCloseable {
   }
 
   void borders(Player player) {
-    whereami(player);
+    boolean russian = "ru".equals(language.apply(player));
+    Component mapAction =
+        mapUrl == null
+            ? GameUi.muted(
+                russian
+                    ? "Откройте раздел «Карта» на сайте сервера."
+                    : "Open Map in the server website navigation.")
+            : GameUi.action(
+                russian ? "Открыть политическую карту" : "Open political map",
+                ClickEvent.openUrl(mapUrl),
+                russian ? "Опубликованные границы государств" : "Published state boundaries");
     player.sendMessage(
-        Component.text(
-            "ru".equals(language.apply(player))
-                ? "Государственные границы видны на политической карте сайта."
-                : "State boundaries are visible on the website's political map."));
+        GameUi.card(
+            GameUi.heading(russian ? "Границы государств" : "State boundaries"),
+            GameUi.muted(
+                russian
+                    ? "На карте показаны опубликованные территории."
+                    : "The map shows published territories."),
+            Component.empty(),
+            mapAction,
+            GameUi.command(
+                "/heli whereami", russian ? "Где я нахожусь сейчас" : "Where am I now")));
   }
 
   @Override

@@ -1,25 +1,80 @@
-import { useCallback, useState } from 'react';
-import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
-import { Alert, Button, FormField, Textarea } from '@helicraft/atria';
+import { useCallback } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { Button } from '@helicraft/atria';
+import {
+  MousePointer2,
+  Pentagon,
+  SquareDashedMousePointer,
+  Scissors,
+  Trash2,
+  Undo2,
+  Redo2,
+} from 'lucide-react';
 import type { FlatGeometry, FlatMapMode } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
-import { geometryInput } from './geometry';
-import styles from './spatial.module.scss';
+import styles from './territory-editor.module.scss';
 
-const JSON_INDENT = 2;
-const modes: readonly { mode: FlatMapMode; ru: string; en: string }[] = [
-  { mode: 'view', ru: 'Навигация', en: 'Navigate' },
-  { mode: 'draw', ru: 'Добавить полигон', en: 'Add polygon' },
-  { mode: 'edit', ru: 'Изменить вершины', en: 'Edit vertices' },
-  { mode: 'cut', ru: 'Вырезать отверстие', en: 'Cut a hole' },
-  { mode: 'remove', ru: 'Удалить полигон', en: 'Remove polygon' },
+const modes: readonly {
+  mode: FlatMapMode;
+  ru: string;
+  en: string;
+  icon: ReactElement;
+  hintRu: string;
+  hintEn: string;
+}[] = [
+  {
+    mode: 'view',
+    ru: 'Навигация',
+    en: 'Navigate',
+    icon: <MousePointer2 aria-hidden="true" />,
+    hintRu:
+      'Перетаскивайте карту. Колесо или +/− меняют масштаб; стрелки перемещают карту с клавиатуры.',
+    hintEn:
+      'Drag to move the map. Use the wheel or +/− to zoom, and arrow keys to navigate with the keyboard.',
+  },
+  {
+    mode: 'draw',
+    ru: 'Добавить полигон',
+    en: 'Add polygon',
+    icon: <Pentagon aria-hidden="true" />,
+    hintRu:
+      'Отметьте вершины границы и нажмите первую точку, чтобы замкнуть контур. Escape отменяет рисование.',
+    hintEn:
+      'Place boundary points, then click the first point to close the shape. Escape cancels drawing.',
+  },
+  {
+    mode: 'edit',
+    ru: 'Изменить вершины',
+    en: 'Edit vertices',
+    icon: <SquareDashedMousePointer aria-hidden="true" />,
+    hintRu:
+      'Перетаскивайте вершины жёлтого контура. Соседние опубликованные границы доступны только для просмотра.',
+    hintEn:
+      'Drag the points of the yellow outline. Published neighboring boundaries are read-only.',
+  },
+  {
+    mode: 'cut',
+    ru: 'Вырезать отверстие',
+    en: 'Cut a hole',
+    icon: <Scissors aria-hidden="true" />,
+    hintRu: 'Нарисуйте замкнутый контур внутри участка. Эта область будет исключена из территории.',
+    hintEn:
+      'Draw a closed shape inside your territory. This area will be excluded from the territory.',
+  },
+  {
+    mode: 'remove',
+    ru: 'Удалить полигон',
+    en: 'Remove polygon',
+    icon: <Trash2 aria-hidden="true" />,
+    hintRu: 'Нажмите часть жёлтой территории, чтобы удалить её. Действие можно отменить.',
+    hintEn: 'Click a yellow territory component to remove it. You can undo this action.',
+  },
 ];
 function GeometryTools({
   mode,
   setMode,
   geometry,
-  onChange,
   undo,
   redo,
   canUndo,
@@ -28,15 +83,12 @@ function GeometryTools({
   mode: FlatMapMode;
   setMode: (mode: FlatMapMode) => void;
   geometry: FlatGeometry | null;
-  onChange: (geometry: FlatGeometry | null) => void;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
 }>): ReactElement {
   const { locale } = useTranslation();
-  const [json, setJson] = useState('');
-  const [error, setError] = useState('');
   const changeMode = useCallback(
     (event: MouseEvent<HTMLButtonElement>): void => {
       const target = modes.find((item) => item.mode === event.currentTarget.value);
@@ -46,31 +98,10 @@ function GeometryTools({
     },
     [setMode],
   );
-  const changeJson = useCallback((event: ChangeEvent<HTMLTextAreaElement>): void => {
-    setJson(event.currentTarget.value);
-  }, []);
-  const load = useCallback((): void => {
-    setJson(JSON.stringify(geometry, null, JSON_INDENT));
-    setError('');
-  }, [geometry]);
-  const apply = useCallback((): void => {
-    try {
-      onChange(geometryInput.parse(JSON.parse(json)));
-      setError('');
-    } catch {
-      setError(
-        uiText(
-          locale,
-          'Проверьте GeoJSON: Polygon/MultiPolygon, замкнутые кольца и конечные координаты [X,Z].',
-          'Check GeoJSON: Polygon/MultiPolygon, closed rings and finite [X,Z] coordinates.',
-        ),
-      );
-    }
-  }, [json, locale, onChange]);
   return (
-    <section className={styles.panel}>
-      <div
-        className={styles.toolbar}
+    <section className={styles.tools}>
+      <fieldset
+        className={styles.toolset}
         aria-label={uiText(locale, 'Инструменты границ', 'Boundary tools')}
       >
         {modes.map((item) => (
@@ -80,55 +111,42 @@ function GeometryTools({
             onClick={changeMode}
             aria-pressed={mode === item.mode}
             tone={mode === item.mode ? 'primary' : 'quiet'}
+            disabled={item.mode !== 'view' && item.mode !== 'draw' && geometry === null}
+            title={uiText(locale, item.ru, item.en)}
+            aria-label={uiText(locale, item.ru, item.en)}
           >
-            {uiText(locale, item.ru, item.en)}
+            {item.icon}
+            <span className={styles.toolLabel}>{uiText(locale, item.ru, item.en)}</span>
           </Button>
         ))}
-        <Button onClick={undo} disabled={!canUndo}>
-          {uiText(locale, 'Отменить', 'Undo')}
+        <Button
+          tone="quiet"
+          onClick={undo}
+          disabled={!canUndo}
+          aria-label={uiText(locale, 'Отменить', 'Undo')}
+          title={uiText(locale, 'Отменить', 'Undo')}
+        >
+          <Undo2 aria-hidden="true" />
+          <span className={styles.toolLabel}>{uiText(locale, 'Отменить', 'Undo')}</span>
         </Button>
-        <Button onClick={redo} disabled={!canRedo}>
-          {uiText(locale, 'Повторить', 'Redo')}
+        <Button
+          tone="quiet"
+          onClick={redo}
+          disabled={!canRedo}
+          aria-label={uiText(locale, 'Повторить', 'Redo')}
+          title={uiText(locale, 'Повторить', 'Redo')}
+        >
+          <Redo2 aria-hidden="true" />
+          <span className={styles.toolLabel}>{uiText(locale, 'Повторить', 'Redo')}</span>
         </Button>
-      </div>
-      <p>
+      </fieldset>
+      <p className={styles.muted} aria-live="polite">
         {uiText(
           locale,
-          'Замкните полигон щелчком по первой вершине. Отверстие рисуется внутри существующего полигона инструментом вырезания. Второй полигон создаёт отдельную часть территории. Escape отменяет рисование; стрелки и +/− перемещают и масштабируют карту.',
-          'Close a polygon by clicking its first vertex. Draw a cut inside an existing polygon to create a hole. Another polygon creates a disconnected territory component. Escape cancels drawing; arrows and +/− pan and zoom the map.',
+          modes.find((item) => item.mode === mode)?.hintRu ?? '',
+          modes.find((item) => item.mode === mode)?.hintEn ?? '',
         )}
       </p>
-      <details>
-        <summary>
-          {uiText(
-            locale,
-            'Координаты и клавиатурное редактирование',
-            'Coordinates and keyboard editing',
-          )}
-        </summary>
-        <p>
-          {uiText(
-            locale,
-            'GeoJSON использует [X,Z]. Первое кольцо — внешняя граница, остальные — отверстия. Проверка PostGIS обязательна перед отправкой.',
-            'GeoJSON uses [X,Z]. The first ring is the exterior; subsequent rings are holes. PostGIS validation is required before submission.',
-          )}
-        </p>
-        <Button onClick={load}>
-          {uiText(locale, 'Загрузить текущие координаты', 'Load current coordinates')}
-        </Button>
-        <FormField label="GeoJSON [X,Z]" htmlFor="territory-coordinates">
-          <Textarea
-            id="territory-coordinates"
-            value={json}
-            onChange={changeJson}
-            className={styles.code}
-          />
-        </FormField>
-        <Button onClick={apply}>
-          {uiText(locale, 'Применить координаты', 'Apply coordinates')}
-        </Button>
-        {error && <Alert tone="danger">{error}</Alert>}
-      </details>
     </section>
   );
 }

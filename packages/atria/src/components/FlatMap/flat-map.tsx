@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { FlatMapProps } from './model';
 import type { FlatMapRuntime } from './runtime';
-import { LoadingState } from '../LoadingState/loading-state';
+import { MapStatus } from './map-status';
 import styles from './flat-map.module.scss';
 import { loadRuntime } from './load-runtime';
 
@@ -41,10 +41,13 @@ function FlatMap(props: FlatMapProps): ReactElement {
   }, []);
   return (
     <div className={styles.frame}>
-      <section ref={container} className={styles.map} aria-label={props.label} />
-      {status === 'loading' && <LoadingState label={props.loadingLabel} />}
-      {status === 'error' && <p role="alert">{props.errorLabel}</p>}
-      {status === 'ready' && tileError && <output>{props.tileErrorLabel}</output>}
+      <section
+        ref={container}
+        className={styles.map}
+        aria-label={props.label}
+        aria-busy={status === 'loading'}
+      />
+      <MapStatus status={status} tileError={tileError} labels={props} />
     </div>
   );
 }

@@ -7,7 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.event.session.DisconnectedEvent;
 import org.geysermc.mcprotocollib.network.event.session.PacketErrorEvent;
@@ -16,6 +17,8 @@ import org.geysermc.mcprotocollib.network.factory.ClientNetworkSessionFactory;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.protocol.MinecraftConstants;
 import org.geysermc.mcprotocollib.protocol.MinecraftProtocol;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.object.Direction;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerAction;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.clientbound.ClientboundCodeOfConductPacket;
 import org.geysermc.mcprotocollib.protocol.packet.configuration.serverbound.ServerboundAcceptCodeOfConductPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundLoginPacket;
@@ -28,6 +31,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.Serverbound
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.ServerboundPlayerLoadedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundMovePlayerPosPacket;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerActionPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundCustomQueryPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.clientbound.ClientboundLoginFinishedPacket;
 import org.geysermc.mcprotocollib.protocol.packet.login.serverbound.ServerboundCustomQueryAnswerPacket;
@@ -45,8 +49,12 @@ public final class NativeProtocolClient {
   }
 
   private static void message(String type, Component value) {
-    emit(type, GsonComponentSerializer.gson().serialize(value));
+    emit(type, visibleText(value));
     links(value);
+  }
+
+  static String visibleText(Component value) {
+    return PlainTextComponentSerializer.plainText().serialize(value);
   }
 
   private static void links(Component value) {
@@ -94,6 +102,9 @@ public final class NativeProtocolClient {
                   Double.parseDouble(position[1]),
                   Double.parseDouble(position[2])));
           session.send(ServerboundClientTickEndPacket.INSTANCE);
+        } else if (line.startsWith("BREAK ")) {
+          session.send(breakBlock(line.substring("BREAK ".length())));
+          session.send(ServerboundClientTickEndPacket.INSTANCE);
         } else if ("END".equals(line)) {
           break;
         }
@@ -101,6 +112,21 @@ public final class NativeProtocolClient {
     } finally {
       session.disconnect(Component.text("Disposable test client closed"));
     }
+  }
+
+  static ServerboundPlayerActionPacket breakBlock(String coordinates) {
+    String[] position = coordinates.split(" ");
+    if (position.length != 3) {
+      throw new IllegalArgumentException("Expected three block coordinates");
+    }
+    return new ServerboundPlayerActionPacket(
+        PlayerAction.START_DIGGING,
+        Vector3i.from(
+            Integer.parseInt(position[0]),
+            Integer.parseInt(position[1]),
+            Integer.parseInt(position[2])),
+        Direction.UP,
+        0);
   }
 
   private static final class EvidenceListener extends SessionAdapter {

@@ -2,6 +2,9 @@ package io.helicraft.deneb;
 
 import io.helicraft.minecraft.AntaresClient;
 import io.helicraft.minecraft.ApiModels;
+import io.helicraft.minecraft.GameUi;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,8 +55,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
           if (connection == null
               || connection.profile == null
               || !connection.admission.session().valid()) {
-            player.sendMessage(
-                Component.text("Profile temporarily unavailable / Профиль временно недоступен"));
+            player.sendMessage(PlayerUi.unavailable("ru".equals(player.locale().getLanguage())));
             return true;
           }
           boolean russian = "ru".equals(verifiedLocale(player));
@@ -62,19 +64,28 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
           } else if (args.length > 0 && "borders".equalsIgnoreCase(args[0])) {
             territories.borders(player);
           } else if (args.length > 0 && "status".equalsIgnoreCase(args[0])) {
-            player.sendMessage(
-                Component.text(
-                    russian ? "Антарес: соединение подтверждено" : "Antares: connection verified"));
+            player.sendMessage(PlayerUi.status(connection.profile, russian));
           } else if (args.length > 0 && "profile".equalsIgnoreCase(args[0])) {
             sendProfile(player, connection);
           } else {
-            player.sendMessage(
-                Component.text(
-                    connection.profile.serverName()
-                        + " · /heli status · /heli profile · /heli whereami · /heli borders"));
+            if (args.length > 0 && !"help".equalsIgnoreCase(args[0])) {
+              player.sendMessage(
+                  GameUi.muted(
+                      russian
+                          ? "Такого действия нет. Выберите его ниже."
+                          : "Unknown action. Choose one below."));
+            }
+            player.sendMessage(PlayerUi.help(connection.profile, russian));
           }
           return true;
         });
+    command.setTabCompleter(
+        (sender, cmd, label, args) ->
+            args.length == 1
+                ? List.of("profile", "whereami", "borders", "status", "help").stream()
+                    .filter(name -> name.startsWith(args[0].toLowerCase(Locale.ROOT)))
+                    .toList()
+                : List.of());
     heartbeat = Bukkit.getScheduler().runTaskTimer(this, this::heartbeat, 200L, 200L);
     getLogger().info("Deneb ready: forwarded UUID admission, /heli and leased Paper presence");
   }
@@ -82,6 +93,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
   private void sendProfile(Player player, Connection connection) {
     UUID accountId = player.getUniqueId();
     boolean russian = "ru".equals(verifiedLocale(player));
+    player.sendActionBar(GameUi.muted(russian ? "Загружаем профиль…" : "Loading profile…"));
     api.post(
             "/api/v1/internal/minecraft/paper/profile",
             new ApiModels.ProfileInput(
@@ -97,21 +109,15 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
                       if (error != null
                           || profile == null
                           || !profile.accountId().equals(accountId)) {
-                        player.sendMessage(
-                            Component.text(
-                                russian
-                                    ? "Профиль временно недоступен"
-                                    : "Profile temporarily unavailable"));
+                        player.sendMessage(PlayerUi.unavailable(russian));
                         return;
                       }
                       connection.profile = profile;
-                      player.sendMessage(Component.text(profile.username() + " · " + accountId));
                       player.sendMessage(
-                          Component.text(
-                              ProfileMessages.citizenship(
-                                  profile,
-                                  ProfileMessages.locale(profile, player.locale().getLanguage())
-                                      .equals("ru"))));
+                          PlayerUi.profile(
+                              profile,
+                              ProfileMessages.locale(profile, player.locale().getLanguage())
+                                  .equals("ru")));
                     }));
   }
 
@@ -127,7 +133,9 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
     if (api == null || event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          Component.text("Minecraft admission unavailable"));
+          GameUi.failure(
+              "Sign-in unavailable / Вход недоступен",
+              "Reconnect through the server address and confirm on the website.\nПодключитесь через адрес сервера и подтвердите вход на сайте."));
       return;
     }
     // This event is explicitly asynchronous. Bound the HTTP wait before any world/playerdata
@@ -154,7 +162,9 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
     } catch (java.util.concurrent.CompletionException | IllegalStateException error) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          Component.text("Minecraft admission rejected / Игровой вход отклонён"));
+          GameUi.failure(
+              "Sign-in rejected / Вход отклонён",
+              "Reconnect and confirm a new sign-in on the website.\nПодключитесь снова и подтвердите новый вход на сайте."));
     }
   }
 
@@ -164,7 +174,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
     UUID accountId = player.getUniqueId();
     Connection connection = connections.get(player.getUniqueId());
     if (connection == null || api == null) {
-      player.kick(Component.text("Minecraft admission unavailable"));
+      player.kick(PlayerUi.disconnected("ru".equals(player.locale().getLanguage())));
       return;
     }
     connection.player = player;
@@ -199,14 +209,12 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
                       if (error != null
                           || profile == null
                           || !profile.accountId().equals(player.getUniqueId())) {
-                        player.kick(Component.text("Antares unavailable / Антарес недоступен"));
+                        player.kick(PlayerUi.disconnected("ru".equals(locale)));
                         return;
                       }
                       connection.profile = profile;
                       boolean russian = ProfileMessages.locale(profile, locale).equals("ru");
-                      player.sendMessage(Component.text(ProfileMessages.welcome(profile, russian)));
-                      player.sendMessage(
-                          Component.text(ProfileMessages.citizenship(profile, russian)));
+                      player.sendMessage(PlayerUi.welcome(profile, russian));
                       getLogger().info("Deneb joined account " + player.getUniqueId());
                     }));
   }
@@ -246,8 +254,7 @@ public final class DenebPlugin extends JavaPlugin implements Listener {
                       if (error != null
                           || result.admission() == null
                           || !result.admission().session().valid()) {
-                        player.kick(
-                            Component.text("Minecraft session expired / Игровая сессия истекла"));
+                        player.kick(PlayerUi.disconnected("ru".equals(verifiedLocale(player))));
                       } else {
                         connection.admission = result.admission();
                       }

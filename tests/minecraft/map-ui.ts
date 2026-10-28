@@ -6,7 +6,11 @@ import { SessionService } from '../../apps/antares/src/modules/sessions/service'
 import { monetaryFixture } from '../../apps/antares/tests/monetary-fixture';
 import { TerritoryGeometrySchema } from '../../apps/antares/src/modules/spatial/contracts';
 import { addTerritorialAuthority } from '../../apps/antares/tests/spatial-fixture';
+import { verifyCopiedCoordinates } from './map-coordinates';
+import { captureMapPage } from './map-screenshot';
 
+const RATIFICATION_REASON =
+  'Verified actual drawn polygon, hole, completed Governance and no conflicts.';
 interface MapUiContext {
   readonly browser: Browser;
   readonly db: Database['db'];
@@ -110,9 +114,12 @@ async function verifyMapUi(context: MapUiContext): Promise<void> {
     await expect(page.getByText('All changes saved.', { exact: true })).toBeVisible({
       timeout: 15_000,
     });
+    await page.getByRole('button', { name: 'Continue to reasoning', exact: true }).click();
     await page.getByLabel('Change type', { exact: true }).selectOption('EXPAND');
+    await page.getByRole('button', { name: 'Back to boundaries', exact: true }).click();
     await page.getByRole('button', { name: 'Reset unsaved changes', exact: true }).focus();
     await page.keyboard.press('Enter');
+    await page.getByRole('button', { name: 'Continue to reasoning', exact: true }).click();
     await expect(page.getByLabel('Change type', { exact: true })).toHaveValue('INITIAL');
 
     await page
@@ -124,6 +131,7 @@ async function verifyMapUi(context: MapUiContext): Promise<void> {
       timeout: 15_000,
     });
     await page.reload();
+    await page.getByRole('button', { name: 'Continue to reasoning', exact: true }).click();
     await expect(page.getByLabel('Reason for this change · English', { exact: true })).toHaveValue(
       'A genuine browser-drawn test territory with a hole, reviewed against real world tiles.',
     );
@@ -133,18 +141,21 @@ async function verifyMapUi(context: MapUiContext): Promise<void> {
     ).toBeEnabled();
     await page.reload();
     await expect(map.locator('path.leaflet-interactive')).toHaveCount(3);
+    await page.getByRole('button', { name: 'Continue to reasoning', exact: true }).click();
     await page.getByRole('button', { name: 'Save and validate', exact: true }).click();
     await expect(
       page.getByRole('button', { name: 'Submit for state decision', exact: true }),
     ).toBeEnabled();
+    await page.getByRole('button', { name: 'Back to boundaries', exact: true }).click();
     await map.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `${context.run}/territory-editor-desktop.png`, fullPage: true });
+    await captureMapPage(page, `${context.run}/territory-editor-desktop.png`);
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= globalThis.innerWidth),
     ).toBe(true);
-    await page.screenshot({ path: `${context.run}/territory-editor-mobile.png`, fullPage: true });
+    await captureMapPage(page, `${context.run}/territory-editor-mobile.png`);
     await page.setViewportSize({ width: 1440, height: 1080 });
+    await page.getByRole('button', { name: 'Continue to reasoning', exact: true }).click();
     await page.getByRole('button', { name: 'Submit for state decision', exact: true }).click();
     await page.getByRole('button', { name: 'Confirm submission', exact: true }).click();
     await expect(
@@ -156,17 +167,20 @@ async function verifyMapUi(context: MapUiContext): Promise<void> {
     });
     await review.goto(`${context.origin}/admin/territories?lang=en`);
     await review
-      .getByRole('button', { name: new RegExp(fixture.stateId.slice(0, 8), 'u') })
+      .locator(`article[data-state-id="${fixture.stateId}"]`)
+      .getByRole('button', { name: 'Review proposal', exact: true })
       .click();
     await review
       .getByLabel('Administrative decision reason', { exact: true })
-      .fill('Verified actual drawn polygon, hole, completed Governance and no conflicts.');
+      .fill(RATIFICATION_REASON);
     await review.getByRole('button', { name: 'Ratify territory', exact: true }).click();
+    await expect(review.getByRole('dialog', { name: 'Publish these boundaries?' })).toBeVisible();
+    await review.getByRole('button', { name: 'Confirm ratification', exact: true }).click();
     await expect(
-      review.getByText(
-        'APPROVE: Verified actual drawn polygon, hole, completed Governance and no conflicts.',
-        { exact: true },
-      ),
+      review
+        .getByRole('status')
+        .filter({ hasText: 'Boundaries published' })
+        .getByText(RATIFICATION_REASON, { exact: true }),
     ).toBeVisible();
     await editor.grantPermissions(['clipboard-read', 'clipboard-write'], {
       origin: context.origin,
@@ -206,11 +220,9 @@ async function verifyMapUi(context: MapUiContext): Promise<void> {
       publicPage.getByRole('heading', { name: 'Boundary history', exact: true }),
     ).toBeVisible();
     await expect(
-      publicPage.getByText(
-        'Ratification: Verified actual drawn polygon, hole, completed Governance and no conflicts.',
-        { exact: true },
-      ),
+      publicPage.getByText(`Ratification: ${RATIFICATION_REASON}`, { exact: true }),
     ).toBeVisible();
+    await publicPage.getByText('Map layers', { exact: true }).click();
     await publicPage.getByLabel('State names', { exact: true }).uncheck();
     await expect(publicPage.locator('.leaflet-tooltip')).toHaveCount(0);
     await publicPage.getByLabel('State names', { exact: true }).check();
@@ -231,30 +243,27 @@ async function verifyMapUi(context: MapUiContext): Promise<void> {
     await expect(
       publicPage.getByRole('button', { name: 'Copy coordinates', exact: true }),
     ).toBeVisible();
-    await publicPage.getByRole('button', { name: 'Copy coordinates', exact: true }).click();
-    await expect(publicPage.getByText('Copied.', { exact: true })).toBeVisible();
-    expect(await publicPage.evaluate(async () => await navigator.clipboard.readText())).toBe(
-      'X -78.00 · Z 4.00',
-    );
-    await publicPage.screenshot({
-      path: `${context.run}/political-map-desktop.png`,
-      fullPage: true,
-    });
+    await verifyCopiedCoordinates(publicPage, [-78, 4], 2 ** (3 - 5));
+    await captureMapPage(publicPage, `${context.run}/political-map-desktop.png`);
     await publicPage.setViewportSize({ width: 390, height: 844 });
     expect(
       await publicPage.evaluate(
         () => document.documentElement.scrollWidth <= globalThis.innerWidth,
       ),
     ).toBe(true);
-    await publicPage.screenshot({
-      path: `${context.run}/political-map-mobile.png`,
-      fullPage: true,
-    });
+    await captureMapPage(publicPage, `${context.run}/political-map-mobile.png`);
     await expect.poll(() => viewportRequests.length).toBeGreaterThan(0);
     const previousViewport = viewportRequests.at(-1);
     await publicMap.focus();
     await publicMap.press('ArrowRight');
     await expect.poll(() => viewportRequests.at(-1)).not.toBe(previousViewport);
+    const sharedView = new URL(
+      (await publicPage
+        .getByRole('link', { name: 'Territory link', exact: true })
+        .getAttribute('href')) ?? '',
+      context.origin,
+    );
+    expect(Number(sharedView.searchParams.get('x'))).not.toBe(-80);
     await publicPage.setViewportSize({ width: 1440, height: 1000 });
     await publicPage.getByRole('link', { name: 'Your account', exact: true }).click();
     await expect(publicPage).toHaveURL(/\/app/u);

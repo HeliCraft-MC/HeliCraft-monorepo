@@ -23,27 +23,33 @@ function MapControls({
         <Select id="map-world" name="world" defaultValue={worldId}>
           {worlds.map((world) => (
             <option key={world.id} value={world.id}>
-              {displayText(world.name, locale)} · {world.dimension}
+              {displayText(world.name, locale)}
             </option>
           ))}
         </Select>
       </FormField>
       <FormField label="X" htmlFor="map-x">
-        <TextField id="map-x" name="x" type="number" defaultValue={search.x} />
-      </FormField>
-      <FormField label="Z" htmlFor="map-z">
-        <TextField id="map-z" name="z" type="number" defaultValue={search.z} />
-      </FormField>
-      <FormField label={uiText(locale, 'Масштаб', 'Zoom')} htmlFor="map-zoom">
         <TextField
-          id="map-zoom"
-          name="zoom"
+          id="map-x"
+          name="x"
           type="number"
-          min={0}
-          max={12}
-          defaultValue={search.zoom}
+          min={-29_999_984}
+          max={29_999_984}
+          defaultValue={search.x}
         />
       </FormField>
+      <FormField label="Z" htmlFor="map-z">
+        <TextField
+          id="map-z"
+          name="z"
+          type="number"
+          min={-29_999_984}
+          max={29_999_984}
+          defaultValue={search.z}
+        />
+      </FormField>
+      <input type="hidden" name="zoom" value={search.zoom} />
+      {search.state !== undefined && <input type="hidden" name="state" value={search.state} />}
       <Button type="submit">{uiText(locale, 'Перейти', 'Go to coordinates')}</Button>
     </form>
   );

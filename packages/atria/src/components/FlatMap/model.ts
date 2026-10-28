@@ -41,6 +41,7 @@ interface FlatMapProps {
   readonly onModeChange?: (mode: FlatMapMode) => void;
   readonly onSelect?: (id: string) => void;
   readonly onBounds?: (bounds: FlatMapBounds) => void;
+  readonly onViewChange?: (center: FlatPoint, zoom: number) => void;
   readonly onPoint?: (point: FlatPoint) => void;
 }
 const DEFAULT_NATIVE_ZOOM = 3;

@@ -4,28 +4,40 @@ import { Alert } from '@helicraft/atria';
 import { useTranslation } from '../i18n';
 import { uiText } from '../states/text';
 import { StateNameById } from '../state-name-by-id';
+import styles from './territory-editor.module.scss';
 
 function TerritoryAnalysis({ analysis }: Readonly<{ analysis: SpatialAnalysis }>): ReactElement {
   const { locale } = useTranslation();
+  const clear = analysis.valid && analysis.conflicts.length === 0;
   return (
-    <section aria-label={uiText(locale, 'Проверка геометрии', 'Geometry validation')}>
-      <p>
-        {uiText(locale, 'Площадь', 'Area')}: {analysis.area.toLocaleString(locale)}{' '}
-        {uiText(locale, 'блоков²', 'blocks²')} · {uiText(locale, 'Вершины', 'Vertices')}:{' '}
-        {analysis.vertices}
-      </p>
-      <p>
-        +{analysis.addedArea.toLocaleString(locale)} / −
-        {analysis.removedArea.toLocaleString(locale)} {uiText(locale, 'блоков²', 'blocks²')}
-      </p>
-      {!analysis.valid && <Alert tone="danger">{analysis.problem}</Alert>}
-      {analysis.conflicts.length > 0 && (
-        <Alert tone="danger">
+    <section
+      className={styles.section}
+      aria-label={uiText(locale, 'Проверка геометрии', 'Geometry validation')}
+    >
+      {clear && (
+        <Alert tone="success">
           {uiText(
             locale,
-            'Конфликт с утверждёнными территориями',
-            'Conflict with ratified territories',
+            'Границы прошли проверку. Пересечений с утверждёнными территориями нет.',
+            'Boundaries passed validation. There are no overlaps with published territories.',
           )}
+        </Alert>
+      )}
+      {!analysis.valid && (
+        <Alert tone="danger">
+          <p>{uiText(locale, 'Границы требуют исправления', 'The boundaries need correction')}</p>
+          <p>{analysis.problem}</p>
+        </Alert>
+      )}
+      {analysis.conflicts.length > 0 && (
+        <Alert tone="danger">
+          <p>
+            {uiText(
+              locale,
+              'Участок пересекает утверждённые территории. Измените границу и повторите проверку.',
+              'The proposal overlaps published territories. Adjust the boundary and validate again.',
+            )}
+          </p>
           <ul>
             {analysis.conflicts.map((conflict) => (
               <li key={conflict.stateId}>
@@ -36,6 +48,26 @@ function TerritoryAnalysis({ analysis }: Readonly<{ analysis: SpatialAnalysis }>
           </ul>
         </Alert>
       )}
+      <dl className={styles.summary}>
+        <div>
+          <dt>{uiText(locale, 'Площадь территории', 'Territory area')}</dt>
+          <dd>
+            {analysis.area.toLocaleString(locale)} {uiText(locale, 'блоков²', 'blocks²')}
+          </dd>
+        </div>
+        <div>
+          <dt>{uiText(locale, 'Добавится', 'Added area')}</dt>
+          <dd>
+            +{analysis.addedArea.toLocaleString(locale)} {uiText(locale, 'блоков²', 'blocks²')}
+          </dd>
+        </div>
+        <div>
+          <dt>{uiText(locale, 'Будет исключено', 'Removed area')}</dt>
+          <dd>
+            −{analysis.removedArea.toLocaleString(locale)} {uiText(locale, 'блоков²', 'blocks²')}
+          </dd>
+        </div>
+      </dl>
       {analysis.warnings.map((warning) => (
         <Alert key={warning}>
           {warning === 'NARROW_OR_COMPLEX_SHAPE'

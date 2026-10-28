@@ -21,3 +21,5 @@ Some reports reference local `run/` logs and screenshots. Those are run artifact
 - [Territories & Political Map V1 — 2026-10-25](territories-2026-10-25.md) — completed automated acceptance, follow-up 2026-10-26; native 26.3, real tiles, legal workflow and hot geometry updates.
 
 - [Minecraft confirmation links — 2026-10-26](minecraft-sign-in-2026-10-26.md) — actual native link → website login → explicit approval, private connection details and optional local GeoIP.
+
+- [Minecraft interfaces — 2026-10-28](minecraft-ui-2026-10-28.md) — public atlas, territorial editor/review, browser confirmation and plugin presentation; real native/browser acceptance.

@@ -207,6 +207,7 @@ async function snapshot(
 async function verifyTiles(
   context: TerritorialRuntimeContext,
   worldId: string,
+  onTilesReady: () => Promise<void>,
 ): Promise<Readonly<{ before: string; after: string; background: string }>> {
   await consoleEvidence(context, 'save-all flush', 'Saved the game');
   await consoleEvidence(
@@ -219,6 +220,7 @@ async function verifyTiles(
   expect(beforeResponse.ok).toBe(true);
   const before = new Uint8Array(await beforeResponse.arrayBuffer());
   await Bun.write(`${context.run}/squaremap-before.png`, before);
+  await onTilesReady();
   await consoleEvidence(
     context,
     'execute in minecraft:overworld run fill 8 300 8 11 300 11 minecraft:gold_block',
@@ -245,6 +247,25 @@ async function verifyTiles(
     'Successfully filled 16 block(s)',
   );
   await consoleEvidence(context, 'save-all flush', 'Saved the game');
+  // Console /fill bypasses Bukkit block events; break a real visible block through the native client.
+  const positions = context.player.positions.length;
+  await context.console(`gamemode creative ${context.username}`);
+  await context.console(`execute in minecraft:overworld run tp ${context.username} 8.5 301 8.5`);
+  await context.player.waitFor(
+    () => context.player.positions.length > positions,
+    'native player within reach of the background-render fixture',
+  );
+  context.player.client.breakBlock(9, 300, 9);
+  const breakLogOffset = (await paperLog(context)).length;
+  await context.waitUntil(async () => {
+    await context.console(
+      'execute in minecraft:overworld if block 9 300 9 minecraft:air run say squaremap-player-break-confirmed',
+    );
+    return (await paperLog(context))
+      .slice(breakLogOffset)
+      .includes('squaremap-player-break-confirmed');
+  }, 'native player actually breaks the visible map fixture');
+  await context.console(`gamemode survival ${context.username}`);
   let background = hashes.after;
   await context.waitUntil(async () => {
     const response = await fetch(tileUrl, { cache: 'no-store' });
@@ -351,13 +372,14 @@ async function verifyTerritoryRuntime(
     'execute in minecraft:overworld run fill -144 300 -16 47 300 15 minecraft:smooth_stone',
     'Successfully filled 6144 block(s)',
   );
-  const tiles = await verifyTiles(context, world.id);
-  await verifyMapUi({
-    browser: context.browser,
-    db: context.db,
-    origin: context.origin,
-    run: context.run,
-    worldId: world.id,
+  const tiles = await verifyTiles(context, world.id, async (): Promise<void> => {
+    await verifyMapUi({
+      browser: context.browser,
+      db: context.db,
+      origin: context.origin,
+      run: context.run,
+      worldId: world.id,
+    });
   });
   const firstSnapshot = await snapshot(context, world.id);
   await context.waitUntil(

@@ -58,8 +58,13 @@ function TerritoryHistory({
             {uiText(locale, 'Ратификация', 'Ratification')}: {revision.ratificationReason}
           </p>
           <p>
-            {uiText(locale, 'Автор', 'Author')}: {revision.createdBy} ·{' '}
-            {uiText(locale, 'Ратифицировал', 'Ratified by')}: {revision.ratifiedBy}
+            <a href={`/players/${revision.createdBy}?lang=${locale}`}>
+              {uiText(locale, 'Автор предложения', 'Proposal author')}
+            </a>{' '}
+            ·{' '}
+            <a href={`/players/${revision.ratifiedBy}?lang=${locale}`}>
+              {uiText(locale, 'Ратифицировал', 'Ratified by')}
+            </a>
           </p>
         </article>
       ))}

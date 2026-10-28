@@ -9,6 +9,7 @@ interface ProtocolConnection {
   readonly client: {
     readonly chat: (command: string) => void;
     readonly move: (x: number, y: number, z: number) => void;
+    readonly breakBlock: (x: number, y: number, z: number) => void;
     readonly end: () => void;
   };
   readonly messages: string[];
@@ -141,6 +142,13 @@ function connectMinecraft(
           throw new Error('Finite movement coordinates required');
         }
         void process.stdin.write(`MOVE ${x} ${y} ${z}\n`);
+        void process.stdin.flush();
+      },
+      breakBlock: (x, y, z) => {
+        if (![x, y, z].every((coordinate) => Number.isSafeInteger(coordinate))) {
+          throw new Error('Integer block coordinates required');
+        }
+        void process.stdin.write(`BREAK ${x} ${y} ${z}\n`);
         void process.stdin.flush();
       },
       end: () => {

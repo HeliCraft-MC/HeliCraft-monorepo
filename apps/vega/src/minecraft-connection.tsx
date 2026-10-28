@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import type { MinecraftConnectionDetails } from '@helicraft/alhena';
 import { useTranslation } from './i18n';
+import { uiText } from './states/text';
+import styles from './minecraft.module.scss';
 
 function MinecraftConnection({
   connection,
@@ -17,30 +19,28 @@ function MinecraftConnection({
   const city = location?.city[locale] ?? location?.city.en ?? location?.city.ru;
   const place = [city, country].filter(Boolean).join(', ');
   return (
-    <dl>
-      <dt>{text('minecraft.ipAddress')}</dt>
-      <dd>
-        <code>{connection.address}</code>
-      </dd>
-      <dt>{text('minecraft.clientPort')}</dt>
-      <dd>{connection.port}</dd>
-      <dt>{text('minecraft.clientVersion')}</dt>
-      <dd>
-        {connection.version} ({text('minecraft.protocol')} {connection.protocol})
-      </dd>
-      <dt>{text('minecraft.location')}</dt>
-      <dd>
-        {connection.addressKind === 'LOCAL'
-          ? text('minecraft.localAddress')
-          : place || text('minecraft.locationUnknown')}
-      </dd>
-      {location?.timeZone !== undefined && location.timeZone !== null ? (
-        <>
-          <dt>{text('minecraft.timeZone')}</dt>
-          <dd>{location.timeZone}</dd>
-        </>
-      ) : null}
-    </dl>
+    <div className={styles.connection}>
+      <dl className={styles.connectionFacts}>
+        <div>
+          <dt>{text('minecraft.ipAddress')}</dt>
+          <dd>
+            <code>{connection.address}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>{text('minecraft.clientVersion')}</dt>
+          <dd>{connection.version}</dd>
+        </div>
+        <div>
+          <dt>{text('minecraft.location')}</dt>
+          <dd>
+            {connection.addressKind === 'LOCAL'
+              ? uiText(locale, 'Локальная сеть или прокси', 'Local network or proxy')
+              : place || uiText(locale, 'Не определено', 'Unavailable')}
+          </dd>
+        </div>
+      </dl>
+    </div>
   );
 }
 export { MinecraftConnection };

@@ -23,6 +23,7 @@ interface PoliticalMapProps {
   readonly onModeChange?: FlatMapProps['onModeChange'];
   readonly onSelect?: FlatMapProps['onSelect'];
   readonly onBounds?: FlatMapProps['onBounds'];
+  readonly onViewChange?: FlatMapProps['onViewChange'];
   readonly onPoint?: FlatMapProps['onPoint'];
 }
 function PoliticalMap(props: PoliticalMapProps): ReactElement {
@@ -71,6 +72,7 @@ function PoliticalMap(props: PoliticalMapProps): ReactElement {
       onSelect={props.onSelect}
       onPoint={props.onPoint}
       onBounds={props.onBounds}
+      onViewChange={props.onViewChange}
     />
   );
 }
